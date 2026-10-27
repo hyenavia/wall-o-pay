@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -148,33 +149,98 @@ class HomeShell extends ConsumerWidget {
       );
     }
 
-    return Scaffold(
-      body: IndexedStack(index: index, children: _pages),
-      floatingActionButton: FloatingActionButton(
-        tooltip: context.tr('Add transaction'),
-        shape: const CircleBorder(),
-        backgroundColor: AppColors.deepForest,
-        foregroundColor: Colors.white,
-        onPressed: () => showTransactionForm(context),
-        child: const Icon(Icons.add, size: 28),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
-        height: 66,
-        padding: EdgeInsets.zero,
-        color: scheme.surface,
-        surfaceTintColor: Colors.transparent,
-        child: Row(
-          children: [
-            item(0, Icons.home_outlined, Icons.home, context.tr('Home')),
-            item(1, Icons.receipt_long_outlined, Icons.receipt_long,
-                context.tr('Transactions')),
-            const SizedBox(width: 64),
-            item(2, Icons.pie_chart_outline, Icons.pie_chart, context.tr('Budget')),
-            item(3, Icons.flag_outlined, Icons.flag, context.tr('Goals')),
+    Future<bool> showExitDialog(BuildContext context) async {
+      final result = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          icon: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.deepForest.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.exit_to_app_rounded,
+              color: AppColors.deepForest,
+              size: 32,
+            ),
+          ),
+          title: Text(
+            ctx.tr('Exit Application'),
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+          content: Text(
+            ctx.tr('Are you sure you want to exit Wall o\' Pay?'),
+            textAlign: TextAlign.center,
+          ),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
+          actions: [
+            OutlinedButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              child: Text(ctx.tr('Cancel')),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.deepForest,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+              ),
+              child: Text(ctx.tr('Exit')),
+            ),
           ],
+        ),
+      );
+      return result ?? false;
+    }
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (index != 0) {
+          notifier.set(0);
+          return;
+        }
+        final shouldExit = await showExitDialog(context);
+        if (shouldExit && context.mounted) {
+          SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
+        body: IndexedStack(index: index, children: _pages),
+        floatingActionButton: FloatingActionButton(
+          tooltip: context.tr('Add transaction'),
+          shape: const CircleBorder(),
+          backgroundColor: AppColors.deepForest,
+          foregroundColor: Colors.white,
+          onPressed: () => showTransactionForm(context),
+          child: const Icon(Icons.add, size: 28),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        bottomNavigationBar: BottomAppBar(
+          shape: const CircularNotchedRectangle(),
+          notchMargin: 8,
+          height: 66,
+          padding: EdgeInsets.zero,
+          color: scheme.surface,
+          surfaceTintColor: Colors.transparent,
+          child: Row(
+            children: [
+              item(0, Icons.home_outlined, Icons.home, context.tr('Home')),
+              item(1, Icons.receipt_long_outlined, Icons.receipt_long,
+                  context.tr('Transactions')),
+              const SizedBox(width: 64),
+              item(2, Icons.pie_chart_outline, Icons.pie_chart, context.tr('Budget')),
+              item(3, Icons.flag_outlined, Icons.flag, context.tr('Goals')),
+            ],
+          ),
         ),
       ),
     );

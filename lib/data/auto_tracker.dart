@@ -268,6 +268,17 @@ class AutoTrackerService {
     }
   }
 
+  /// Buka halaman Info Aplikasi Wall o' Pay di Setelan HP Android
+  /// agar pengguna dapat langsung mengizinkan "Setelan Terbatas" (Restricted Settings).
+  static Future<void> openAppSettings() async {
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    try {
+      await _channel.invokeMethod('openAppSettings');
+    } catch (e) {
+      debugPrint('Error opening app details settings: $e');
+    }
+  }
+
   /// Tarik notifikasi yang ditangkap oleh Android Service di background,
   /// parsing, dan masukkan ke tabel PendingTransactions.
   Future<int> syncPendingFromNative() async {

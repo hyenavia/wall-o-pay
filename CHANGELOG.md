@@ -4,6 +4,18 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2026-10-28
+
+### Added
+- **Exit Confirmation Dialog (`PopScope`):**
+  - Added an elegant modal confirmation alert when pressing the Android back button from the root dashboard.
+  - Automatically navigates back to the Home tab if pressed from child tabs, and prompts for confirmation before exiting the application.
+- **Android 13+ Restricted Settings In-App Guide & Direct Shortcut:**
+  - Added native platform method `openAppSettings` (`Settings.ACTION_APPLICATION_DETAILS_SETTINGS`) to launch Wall o' Pay's App Info settings directly.
+  - Added an interactive in-app guide sheet explaining the 4-step process to unlock restricted notification listener access on Android 13, 14, and 15.
+
+---
+
 ## [1.2.1] - 2026-10-27
 
 ### Added

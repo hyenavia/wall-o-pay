@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
 import '../../core/l10n.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/cloud.dart';
 import '../../data/cloud_backup.dart';
@@ -276,9 +277,19 @@ class SettingsPage extends ConsumerWidget {
                   leading: const Icon(Icons.notifications_active_outlined),
                   title: Text(context.tr('Notification Access Permission')),
                   subtitle: Text(context.tr('Allows Wall o\' Pay to detect bank & e-wallet notifications.')),
-                  trailing: TextButton(
-                    onPressed: () => AutoTrackerService.openNotificationSettings(),
-                    child: Text(context.tr('Open Settings')),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.help_outline, size: 20),
+                        tooltip: context.tr('Android 13+ Setup Guide'),
+                        onPressed: () => _showRestrictedSettingsGuide(context),
+                      ),
+                      TextButton(
+                        onPressed: () => AutoTrackerService.openNotificationSettings(),
+                        child: Text(context.tr('Open Settings')),
+                      ),
+                    ],
                   ),
                 ),
                 const Divider(height: 1),
@@ -481,6 +492,112 @@ class SettingsPage extends ConsumerWidget {
           ),
         );
       },
+    );
+  }
+
+  void _showRestrictedSettingsGuide(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.deepForest.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.security, color: AppColors.deepForest, size: 24),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      ctx.tr('Android 13+ Setup Guide'),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                ctx.tr('If Android shows "Restricted setting", follow these steps:'),
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+              ),
+              const SizedBox(height: 12),
+              _guideStep(ctx, '1. Tap "Open App Info" below.'),
+              _guideStep(ctx, '2. Tap the three dots (⋮) in the top-right corner.'),
+              _guideStep(ctx, '3. Select "Allow restricted settings".'),
+              _guideStep(ctx, '4. Return to Wall o\' Pay and enable notification access.'),
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                icon: const Icon(Icons.open_in_new, size: 18),
+                label: Text(ctx.tr('Open App Info')),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.deepForest,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  AutoTrackerService.openAppSettings();
+                },
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: Text(ctx.tr('Got it')),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  static Widget _guideStep(BuildContext context, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.check_circle_outline, size: 18, color: AppColors.sage),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              context.tr(text),
+              style: const TextStyle(fontSize: 13, height: 1.4),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
