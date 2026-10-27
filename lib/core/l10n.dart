@@ -1,0 +1,287 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+
+/// Bahasa aktif untuk kode di luar widget (format tanggal, pesan hasil aksi).
+/// Diperbarui oleh pengaturan bahasa sebelum UI dibangun ulang.
+class AppLocale {
+  static String code = 'en';
+  static const supported = [Locale('en'), Locale('id')];
+}
+
+/// Terjemahan sederhana: teks Inggris dipakai sebagai kunci, dan bahasa
+/// Indonesia diambil dari peta [_id]. Kunci yang tidak ada tampil apa adanya.
+class AppStrings {
+  AppStrings(this.code);
+
+  final String code;
+
+  static AppStrings of(BuildContext context) =>
+      Localizations.of<AppStrings>(context, AppStrings)!;
+
+  static const LocalizationsDelegate<AppStrings> delegate = _AppStringsDelegate();
+
+  String tr(String key, [Map<String, Object?>? args]) {
+    var text = code == 'id' ? (_id[key] ?? key) : key;
+    if (args != null) {
+      args.forEach((k, v) => text = text.replaceAll('{$k}', '$v'));
+    }
+    return text;
+  }
+}
+
+class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {
+  const _AppStringsDelegate();
+
+  @override
+  bool isSupported(Locale locale) =>
+      locale.languageCode == 'en' || locale.languageCode == 'id';
+
+  @override
+  Future<AppStrings> load(Locale locale) => SynchronousFuture(
+        AppStrings(locale.languageCode == 'id' ? 'id' : 'en'),
+      );
+
+  @override
+  bool shouldReload(covariant LocalizationsDelegate<AppStrings> old) => false;
+}
+
+extension TrContext on BuildContext {
+  /// Terjemahan yang ikut diperbarui otomatis saat bahasa diganti.
+  String tr(String key, [Map<String, Object?>? args]) =>
+      AppStrings.of(this).tr(key, args);
+}
+
+/// Terjemahan tanpa context (untuk service dan pesan hasil aksi).
+String trG(String key, [Map<String, Object?>? args]) =>
+    AppStrings(AppLocale.code).tr(key, args);
+
+const Map<String, String> _id = {
+  '1 day left': '1 hari lagi',
+  '1 month left': '1 bulan lagi',
+  'A little closer\nto your dreams': 'Selangkah lebih dekat\nke impianmu',
+  'A password reset email has been sent.': 'Email pengaturan ulang kata sandi sudah dikirim.',
+  'Access denied. Check your Firestore rules.': 'Akses ditolak. Periksa Rules Firestore.',
+  'Account': 'Akun',
+  'Active Goals': 'Target Aktif',
+  'Add Expense': 'Tambah Pengeluaran',
+  'Add Income': 'Tambah Pemasukan',
+  'Add funds': 'Tambah dana',
+  'Add funds to {name}': 'Tambah dana ke {name}',
+  'Add transaction': 'Tambah transaksi',
+  'All': 'Semua',
+  'Already have an account?': 'Sudah punya akun?',
+  'Amount': 'Nominal',
+  'Amount must be greater than 0.': 'Nominal harus lebih dari 0.',
+  'Another operation is still running.': 'Proses lain masih berjalan.',
+  'Back up to cloud': 'Cadangkan ke cloud',
+  'Backed up 1 item to the cloud.': '1 data berhasil dicadangkan ke cloud.',
+  'Backed up {n} items to the cloud.': '{n} data berhasil dicadangkan ke cloud.',
+  'Backup file (offline)': 'File cadangan (offline)',
+  'Backup file read. Nothing new to add.': 'File cadangan terbaca. Tidak ada data baru untuk ditambahkan.',
+  'Backup file ready to share.': 'File cadangan siap dibagikan.',
+  'Budget': 'Anggaran',
+  'Budget for {name}': 'Anggaran {name}',
+  'Budget period': 'Periode anggaran',
+  'CSV file ready to share.': 'File CSV siap dibagikan.',
+  'Cancel': 'Batal',
+  'Categories': 'Kategori',
+  'Category': 'Kategori',
+  'Category name': 'Nama kategori',
+  'Category name cannot be empty.': 'Nama kategori tidak boleh kosong.',
+  'Change photo': 'Ganti foto',
+  'Choose file': 'Pilih file',
+  'Choose how you manage money: by month or by week.': 'Pilih cara mengatur uangmu: per bulan atau per minggu.',
+  'Cloud backup (online)': 'Cadangan cloud (online)',
+  'Color': 'Warna',
+  'Completed Goals': 'Target Tercapai',
+  'Continue without account': 'Lanjut tanpa akun',
+  'Could not load data: {error}': 'Data tidak bisa dimuat: {error}',
+  'Could not pick a photo: {error}': 'Foto tidak bisa dipilih: {error}',
+  'Create account': 'Buat akun',
+  'Dark': 'Gelap',
+  'Data': 'Data',
+  'Data from the file will be merged into this device. Items changed more recently on this device are kept.': 'Data dari file akan digabungkan ke perangkat ini. Data yang lebih baru di perangkat ini tetap dipertahankan.',
+  'Data from your cloud backup will be merged into this device. Items changed more recently on this device are kept.': 'Data dari cadangan cloud akan digabungkan ke perangkat ini. Data yang lebih baru di perangkat ini tetap dipertahankan.',
+  'Delete': 'Hapus',
+  'Delete category': 'Hapus kategori',
+  'Delete category "{name}"?': 'Hapus kategori "{name}"?',
+  'Delete goal': 'Hapus target',
+  'Delete this transaction?': 'Hapus transaksi ini?',
+  'Delete transaction': 'Hapus transaksi',
+  'Don\'t have an account?': 'Belum punya akun?',
+  'Due today': 'Jatuh tempo hari ini',
+  'Edit transaction': 'Ubah transaksi',
+  'Education': 'Pendidikan',
+  'Email': 'Email',
+  'Email or username': 'Email atau username',
+  'Email/password sign-in is not enabled in Firebase.': 'Login email/password belum diaktifkan di Firebase.',
+  'Enter 0 to remove the budget': 'Isi 0 untuk menghapus anggaran',
+  'Enter a name and a target amount.': 'Isi nama dan nominal target.',
+  'Enter your email or username and password.': 'Isi email atau username dan kata sandi.',
+  'Enter your email or username first, then tap "Forgot password?".': 'Isi email atau username dulu, lalu ketuk "Lupa kata sandi?".',
+  'Entertainment': 'Hiburan',
+  'Existing transactions in this category are kept, but it will no longer appear as a choice.': 'Transaksi lama di kategori ini tetap tersimpan, tetapi kategorinya tidak muncul lagi sebagai pilihan.',
+  'Expense': 'Pengeluaran',
+  'Expense breakdown': 'Rincian pengeluaran',
+  'Expenses already exceed income': 'Pengeluaran sudah melebihi pemasukan',
+  'Export backup file (JSON)': 'Ekspor file cadangan (JSON)',
+  'Export transactions (CSV)': 'Ekspor transaksi (CSV)',
+  'Failed ({code}).': 'Gagal ({code}).',
+  'Failed: {error}': 'Gagal: {error}',
+  'Fill in username, email, and password.': 'Isi username, email, dan kata sandi.',
+  'Firebase is not connected': 'Firebase belum terhubung',
+  'Food & Drinks': 'Makanan & Minuman',
+  'Forgot password?': 'Lupa kata sandi?',
+  'Goal name': 'Nama target',
+  'Goals': 'Target',
+  'Health': 'Kesehatan',
+  'Hide amounts': 'Sembunyikan nominal',
+  'Home': 'Beranda',
+  'Icon': 'Ikon',
+  'Import backup file (JSON)': 'Impor file cadangan (JSON)',
+  'Import backup file?': 'Impor file cadangan?',
+  'Import cancelled.': 'Impor dibatalkan.',
+  'Import failed: {error}': 'Impor gagal: {error}',
+  'Imported 1 item from the backup file.': '1 data diimpor dari file cadangan.',
+  'Imported {n} items from the backup file.': '{n} data diimpor dari file cadangan.',
+  'Income': 'Pemasukan',
+  'Incorrect username/email or password.': 'Username/email atau kata sandi salah.',
+  'Insights': 'Analisis',
+  'Language': 'Bahasa',
+  'Last 6 months': '6 bulan terakhir',
+  'Last 6 weeks': '6 minggu terakhir',
+  'Last backup {date}': 'Cadangan terakhir {date}',
+  'Light': 'Terang',
+  'Log in to continue your financial journey.': 'Masuk untuk melanjutkan perjalanan finansialmu.',
+  'Log out': 'Keluar',
+  'Log out & erase data': 'Keluar & hapus data',
+  'Log out?': 'Keluar dari akun?',
+  'Login': 'Masuk',
+  'Login and sign up need a Firebase project. Run "flutterfire configure" in the project, then restart the app.': 'Masuk dan daftar membutuhkan proyek Firebase. Jalankan "flutterfire configure" di proyek, lalu mulai ulang aplikasi.',
+  'Manage categories': 'Kelola kategori',
+  'Merges a backup file into this device.': 'Menggabungkan file cadangan ke perangkat ini.',
+  'Merges your cloud backup into this device. Newer data wins.': 'Menggabungkan cadangan cloud ke perangkat ini. Data yang lebih baru menang.',
+  'Monthly': 'Bulanan',
+  'Monthly Balance': 'Saldo Bulanan',
+  'Monthly Budget': 'Anggaran Bulanan',
+  'More': 'Lainnya',
+  'New category': 'Kategori baru',
+  'New goal': 'Target baru',
+  'Next period': 'Periode berikutnya',
+  'Nickname': 'Nickname',
+  'No active goals yet.\nCreate one, like an emergency fund.': 'Belum ada target aktif.\nBuat satu, misalnya dana darurat.',
+  'No backup found in the cloud for this account.': 'Tidak ada cadangan di cloud untuk akun ini.',
+  'No budget set yet.': 'Belum ada anggaran.',
+  'No categories yet.': 'Belum ada kategori.',
+  'No cloud backup yet.': 'Belum ada cadangan cloud.',
+  'No expenses in this period.': 'Belum ada pengeluaran di periode ini.',
+  'No internet connection.': 'Tidak ada koneksi internet.',
+  'No matching transactions.': 'Tidak ada transaksi yang cocok.',
+  'No transactions in this period.\nTap + to add your first one.': 'Belum ada transaksi di periode ini.\nKetuk + untuk menambahkan yang pertama.',
+  'No transactions yet. Tap + to add one.': 'Belum ada transaksi. Ketuk + untuk menambahkan.',
+  'Not budgeted yet': 'Belum dianggarkan',
+  'Note (optional)': 'Catatan (opsional)',
+  'Open in Excel or Google Sheets.': 'Buka di Excel atau Google Sheets.',
+  'Other': 'Lainnya',
+  'Other categories': 'Kategori lain',
+  'Over by {amount}': 'Lebih {amount}',
+  'Parents\' allowance': 'Kiriman orang tua',
+  'Part-time job': 'Kerja paruh waktu',
+  'Password': 'Kata sandi',
+  'Password is too weak (at least 6 characters).': 'Kata sandi terlalu lemah (minimal 6 karakter).',
+  'Past target date': 'Lewat tanggal target',
+  'Please choose a category.': 'Pilih kategori dulu.',
+  'Please log in first.': 'Silakan masuk dulu.',
+  'Preferences': 'Preferensi',
+  'Previous period': 'Periode sebelumnya',
+  'Profile': 'Profil',
+  'Profile saved.': 'Profil disimpan.',
+  'Reached on {date}': 'Tercapai pada {date}',
+  'Recent Transactions': 'Transaksi Terbaru',
+  'Remove photo': 'Hapus foto',
+  'Rent & Bills': 'Sewa & Tagihan',
+  'Restore': 'Pulihkan',
+  'Restore from cloud': 'Pulihkan dari cloud',
+  'Restore from cloud?': 'Pulihkan dari cloud?',
+  'Restored 1 item from the cloud.': '1 data dipulihkan dari cloud.',
+  'Restored {n} items from the cloud.': '{n} data dipulihkan dari cloud.',
+  'Run "flutterfire configure" in the project, then restart the app to enable login and cloud backup.': 'Jalankan "flutterfire configure" di proyek, lalu mulai ulang aplikasi untuk mengaktifkan login dan cadangan cloud.',
+  'Safe daily spend': 'Jatah harian aman',
+  'Save': 'Simpan',
+  'Save or share a copy of all your data.': 'Simpan atau bagikan salinan seluruh datamu.',
+  'Scholarship': 'Beasiswa',
+  'Search transaction...': 'Cari transaksi...',
+  'See All': 'Lihat Semua',
+  'Server unreachable.': 'Server tidak terjangkau.',
+  'Set budget': 'Atur anggaran',
+  'Settings': 'Pengaturan',
+  'Shopping': 'Belanja',
+  'Show amounts': 'Tampilkan nominal',
+  'Shown in your greeting on the Home screen.': 'Tampil di sapaan pada layar Beranda.',
+  'Sign Up': 'Daftar',
+  'Sign up to back up your data to the cloud and use it on any device.': 'Daftar untuk mencadangkan datamu ke cloud dan memakainya di perangkat mana pun.',
+  'Small, steady savings add up over time.': 'Tabungan kecil yang rutin akan terkumpul seiring waktu.',
+  'Something went wrong: {error}': 'Terjadi kesalahan: {error}',
+  'Spending by category': 'Pengeluaran per kategori',
+  'System': 'Sistem',
+  'Tap a category below to set a budget.': 'Ketuk kategori di bawah untuk mengatur anggaran.',
+  'Target amount': 'Nominal target',
+  'Target date (optional)': 'Tanggal target (opsional)',
+  'That email address is not valid.': 'Format email tidak valid.',
+  'Theme': 'Tema',
+  'This Month\'s Budget': 'Anggaran Bulan Ini',
+  'This Week\'s Budget': 'Anggaran Minggu Ini',
+  'This device already has everything from your cloud backup.': 'Perangkat ini sudah memiliki semua data dari cadangan cloud.',
+  'This email is already registered. Try logging in.': 'Email sudah terdaftar. Coba masuk.',
+  'This is not a Wall o\' Pay backup file.': 'Ini bukan file cadangan Wall o\' Pay.',
+  'This username is already taken.': 'Username ini sudah dipakai.',
+  'Today, {date}': 'Hari ini, {date}',
+  'Total Budget': 'Total Anggaran',
+  'Transactions': 'Transaksi',
+  'Transport': 'Transportasi',
+  'Uncategorized': 'Tanpa kategori',
+  'Username': 'Username',
+  'Username must be 3-20 characters: letters, numbers, "." or "_".': 'Username harus 3-20 karakter: huruf, angka, "." atau "_".',
+  'Weekly': 'Mingguan',
+  'Weekly Balance': 'Saldo Mingguan',
+  'Weekly Budget': 'Anggaran Mingguan',
+  'Welcome Back': 'Selamat Datang Kembali',
+  'Yesterday, {date}': 'Kemarin, {date}',
+  'Your cloud backup is already up to date.': 'Cadangan cloud-mu sudah yang terbaru.',
+  'Your cloud backup is not deleted. Back up first if you have recent changes, especially before erasing data on this device.': 'Cadangan cloud-mu tidak terhapus. Cadangkan dulu jika ada perubahan terbaru, terutama sebelum menghapus data di perangkat ini.',
+  'Your money, under your control.': 'Uangmu, di bawah kendalimu.',
+  'Your username is used to log in and cannot be changed.': 'Username dipakai untuk masuk dan tidak bisa diubah.',
+  '{amount} spent': '{amount} terpakai',
+  '{amount}/day': '{amount}/hari',
+  '{n} days left': '{n} hari lagi',
+  '{n} months left': '{n} bulan lagi',
+  '{pct}% used': '{pct}% terpakai',
+  '{spent} of {total}': '{spent} dari {total}',
+  'Pending Transactions': 'Transaksi Menunggu Konfirmasi',
+  'Detected Transaction': 'Transaksi Terdeteksi',
+  'Needs your confirmation before recording': 'Perlu konfirmasimu sebelum dicatat',
+  'Review & Confirm': 'Tinjau & Konfirmasi',
+  'Tap to review': 'Ketuk untuk tinjau',
+  'Select a transaction to review, adjust details, and confirm.': 'Pilih transaksi untuk ditinjau, disesuaikan, dan dikonfirmasi.',
+  'Pending Transactions ({count})': 'Transaksi Menunggu ({count})',
+  'Confirm Transaction': 'Konfirmasi Transaksi',
+  'Review details before recording into your balance.': 'Periksa detail sebelum dicatat ke saldo resmi.',
+  'Original Notification': 'Notifikasi Asli',
+  'Original Notification:': 'Notifikasi Asli:',
+  'Confirm & Save': 'Konfirmasi & Simpan',
+  'Discard': 'Abaikan',
+  'Discard Transaction?': 'Abaikan Transaksi Ini?',
+  'This detected transaction will be removed from your pending inbox without affecting your balance.': 'Transaksi terdeteksi ini akan dihapus dari antrean tanpa memengaruhi saldo.',
+  'Transaction confirmed and saved!': 'Transaksi berhasil dikonfirmasi dan dicatat!',
+  'Transaction discarded.': 'Transaksi diabaikan.',
+  'Saving...': 'Menyimpan...',
+  'Auto-Detect Transactions': 'Deteksi Transaksi Otomatis',
+  'Notification Access Permission': 'Izin Akses Notifikasi',
+  'Allows Wall o\' Pay to detect bank & e-wallet notifications.': 'Mengizinkan Wall o\' Pay mendeteksi notifikasi bank & e-wallet.',
+  'Open Settings': 'Buka Pengaturan',
+  'Simulate Bank Notification': 'Simulasikan Notifikasi Bank',
+  'Test detected transaction inbox with sample notifications.': 'Uji coba antrean transaksi dengan contoh notifikasi.',
+  'Simulate Sample Notification': 'Simulasikan Contoh Notifikasi',
+  'Sample notification added! Check your Home dashboard.': 'Contoh notifikasi ditambahkan! Cek Beranda kamu.',
+};
+

@@ -1,0 +1,27 @@
+Ganti logo Wall o' Pay
+======================
+1) Ekstrak zip ini ke FOLDER UTAMA proyek (sejajar dengan pubspec.yaml).
+   Akan menambah assets/images/logo.png, assets/images/logo_foreground.png
+   dan menimpa lib/core/brand.dart.
+
+2) Daftarkan aset di pubspec.yaml (bagian "flutter:"):
+
+   flutter:
+     uses-material-design: true
+     assets:
+       - assets/images/logo.png
+
+3) (Opsional) Ganti ikon aplikasi di layar HP:
+   flutter pub add dev:flutter_launcher_icons
+   lalu tambahkan di pubspec.yaml (sejajar dengan "flutter:"):
+
+   flutter_launcher_icons:
+     android: true
+     ios: false
+     image_path: "assets/images/logo.png"
+     adaptive_icon_background: "#1E4238"
+     adaptive_icon_foreground: "assets/images/logo_foreground.png"
+
+   dart run flutter_launcher_icons
+
+4) flutter pub get, lalu jalankan ulang aplikasi (stop lalu flutter run).

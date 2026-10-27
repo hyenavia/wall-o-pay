@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "704412516628",
+    "project_id": "wall-o-pay",
+    "storage_bucket": "wall-o-pay.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:704412516628:android:79fb20f7e0a176e77d8201",
+        "android_client_info": {
+          "package_name": "com.example.wall_o_pay"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAYP3ZJyv2FXig1KmpaaCWss9t1rp8jqk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

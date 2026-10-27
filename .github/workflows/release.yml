@@ -1,0 +1,115 @@
+name: Auto Release & Build APK
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Extract Version & Changelog
+        id: extract_info
+        run: |
+          python - << 'EOF'
+          import os
+          import re
+
+          # Baca versi dari pubspec.yaml
+          with open("pubspec.yaml", "r", encoding="utf-8") as f:
+              pub = f.read()
+          v_match = re.search(r'version:\s*([0-9]+\.[0-9]+\.[0-9]+)', pub)
+          version = v_match.group(1).strip() if v_match else "1.0.0"
+          tag = f"v{version}"
+
+          # Ekstrak catatan perubahan dari CHANGELOG.md
+          notes = f"Rilis pembaruan versi {version}"
+          if os.path.exists("CHANGELOG.md"):
+              with open("CHANGELOG.md", "r", encoding="utf-8") as f:
+                  cl = f.read()
+              pattern = rf'## \[{re.escape(version)}\][^\n]*\n(.*?)(?=\n---|\n## \[|$)'
+              notes_match = re.search(pattern, cl, re.DOTALL)
+              if notes_match:
+                  notes = notes_match.group(1).strip()
+
+          with open("release_notes.md", "w", encoding="utf-8") as f:
+              f.write(notes)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"version={version}\n")
+              f.write(f"tag={tag}\n")
+          EOF
+
+      - name: Check if Release Already Exists
+        id: check_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.extract_info.outputs.tag }}"
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Release $TAG sudah ada. Melewati proses build & release."
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Release $TAG belum ada. Memulai build APK dan pembuatan rilis..."
+          fi
+
+      - name: Set up Java 17
+        if: steps.check_release.outputs.exists == 'false'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        if: steps.check_release.outputs.exists == 'false'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Install Dependencies
+        if: steps.check_release.outputs.exists == 'false'
+        run: flutter pub get
+
+      - name: Build Release APK
+        if: steps.check_release.outputs.exists == 'false'
+        run: flutter build apk --release
+
+      - name: Create GitHub Release with APK
+        if: steps.check_release.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.extract_info.outputs.tag }}"
+          VERSION="${{ steps.extract_info.outputs.version }}"
+          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+          
+          if [ -f "$APK_PATH" ]; then
+            gh release create "$TAG" \
+              --title "Wall o' Pay $TAG" \
+              --notes-file release_notes.md \
+              --target main \
+              "$APK_PATH#Wall_o_Pay_${TAG}.apk"
+          else
+            gh release create "$TAG" \
+              --title "Wall o' Pay $TAG" \
+              --notes-file release_notes.md \
+              --target main
+          fi
