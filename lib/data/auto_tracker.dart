@@ -279,6 +279,16 @@ class AutoTrackerService {
     }
   }
 
+  /// Buka URL di browser bawaan perangkat (misal tautan unduh APK rilis terbaru).
+  static Future<void> openUrl(String url) async {
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    try {
+      await _channel.invokeMethod('openUrl', {'url': url});
+    } catch (e) {
+      debugPrint('Error opening URL: $e');
+    }
+  }
+
   /// Tarik notifikasi yang ditangkap oleh Android Service di background,
   /// parsing, dan masukkan ke tabel PendingTransactions.
   Future<int> syncPendingFromNative() async {

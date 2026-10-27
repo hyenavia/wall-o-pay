@@ -11,6 +11,7 @@ import 'core/theme.dart';
 import 'data/cloud.dart';
 import 'data/prefs.dart';
 import 'data/providers.dart';
+import 'data/update_checker.dart';
 import 'features/auth/auth_page.dart';
 import 'features/budget/budget_page.dart';
 import 'features/goals/goals_page.dart';
@@ -106,8 +107,15 @@ class AuthGate extends ConsumerWidget {
   }
 }
 
-class HomeShell extends ConsumerWidget {
+class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
+
+  @override
+  ConsumerState<HomeShell> createState() => _HomeShellState();
+}
+
+class _HomeShellState extends ConsumerState<HomeShell> {
+  static bool _checkedUpdateOnce = false;
 
   static const _pages = <Widget>[
     HomePage(),
@@ -117,7 +125,20 @@ class HomeShell extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    if (!_checkedUpdateOnce) {
+      _checkedUpdateOnce = true;
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          UpdateCheckerService.checkAndPromptUpdate(context, silentIfUpToDate: true);
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final index = ref.watch(tabIndexProvider);
     final notifier = ref.read(tabIndexProvider.notifier);

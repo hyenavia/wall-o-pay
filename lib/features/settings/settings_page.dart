@@ -14,6 +14,7 @@ import '../../data/prefs.dart';
 import '../../data/profile.dart';
 import '../../data/providers.dart';
 import '../../data/auto_tracker.dart';
+import '../../data/update_checker.dart';
 import '../categories/categories_page.dart';
 import '../profile/profile_page.dart';
 
@@ -270,30 +271,119 @@ class SettingsPage extends ConsumerWidget {
           ),
           SectionHeader(title: context.tr('Auto-Detect Transactions')),
           AppCard(
-            padding: EdgeInsets.zero,
+            padding: const EdgeInsets.all(16),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ListTile(
-                  leading: const Icon(Icons.notifications_active_outlined),
-                  title: Text(context.tr('Notification Access Permission')),
-                  subtitle: Text(context.tr('Allows Wall o\' Pay to detect bank & e-wallet notifications.')),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.deepForest.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.notifications_active_outlined,
+                        color: AppColors.deepForest,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.tr('Notification Access Permission'),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            context.tr('Allows Wall o\' Pay to detect bank & e-wallet notifications.'),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                // Panduan Android 13/14/15 Box
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.help_outline, size: 20),
-                        tooltip: context.tr('Android 13+ Setup Guide'),
-                        onPressed: () => _showRestrictedSettingsGuide(context),
+                      Row(
+                        children: [
+                          const Icon(Icons.security, size: 16, color: AppColors.deepForest),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              context.tr('Android 13+ Setup Guide (Restricted Setting)'),
+                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                            ),
+                          ),
+                        ],
                       ),
-                      TextButton(
-                        onPressed: () => AutoTrackerService.openNotificationSettings(),
-                        child: Text(context.tr('Open Settings')),
-                      ),
+                      const SizedBox(height: 10),
+                      _guideStep(context, '1. Tap "Open App Info" below.'),
+                      _guideStep(context, '2. Tap the three dots (⋮) in the top-right corner.'),
+                      _guideStep(context, '3. Select "Allow restricted settings".'),
+                      _guideStep(context, '4. Return to Wall o\' Pay and enable notification access.'),
                     ],
                   ),
                 ),
-                const Divider(height: 1),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.settings_outlined, size: 16),
+                        label: Text(
+                          context.tr('Open App Info'),
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () => AutoTrackerService.openAppSettings(),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilledButton.icon(
+                        icon: const Icon(Icons.notifications_outlined, size: 16),
+                        label: Text(
+                          context.tr('Open Notification Access'),
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.deepForest,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () => AutoTrackerService.openNotificationSettings(),
+                      ),
+                    ),
+                  ],
+                ),
+                const Divider(height: 28),
                 ListTile(
+                  contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.science_outlined),
                   title: Text(context.tr('Simulate Bank Notification')),
                   subtitle: Text(context.tr('Test detected transaction inbox with sample notifications.')),
@@ -315,6 +405,25 @@ class SettingsPage extends ConsumerWidget {
               ),
             ),
           ],
+          SectionHeader(title: context.tr('App Version & Updates')),
+          AppCard(
+            padding: EdgeInsets.zero,
+            child: ListTile(
+              leading: const Icon(Icons.system_update_alt_rounded),
+              title: Text(context.tr('Check for Updates')),
+              subtitle: Text('Wall o\' Pay v${UpdateCheckerService.currentVersion} • Latest Release'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(context.tr('Checking for updates...')),
+                    duration: const Duration(seconds: 1),
+                  ),
+                );
+                UpdateCheckerService.checkAndPromptUpdate(context, silentIfUpToDate: false);
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -489,93 +598,6 @@ class SettingsPage extends ConsumerWidget {
                   ),
               ],
             ),
-          ),
-        );
-      },
-    );
-  }
-
-  void _showRestrictedSettingsGuide(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        final theme = Theme.of(ctx);
-        return Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.deepForest.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.security, color: AppColors.deepForest, size: 24),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Text(
-                      ctx.tr('Android 13+ Setup Guide'),
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                ctx.tr('If Android shows "Restricted setting", follow these steps:'),
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-              ),
-              const SizedBox(height: 12),
-              _guideStep(ctx, '1. Tap "Open App Info" below.'),
-              _guideStep(ctx, '2. Tap the three dots (⋮) in the top-right corner.'),
-              _guideStep(ctx, '3. Select "Allow restricted settings".'),
-              _guideStep(ctx, '4. Return to Wall o\' Pay and enable notification access.'),
-              const SizedBox(height: 24),
-              FilledButton.icon(
-                icon: const Icon(Icons.open_in_new, size: 18),
-                label: Text(ctx.tr('Open App Info')),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.deepForest,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-                onPressed: () {
-                  Navigator.of(ctx).pop();
-                  AutoTrackerService.openAppSettings();
-                },
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-                child: Text(ctx.tr('Got it')),
-              ),
-            ],
           ),
         );
       },

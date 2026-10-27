@@ -4,6 +4,27 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 2026-10-28
+
+### Added
+- **In-App Update Checker (`UpdateCheckerService`):**
+  - Integrated automatic release polling via GitHub Releases public API.
+  - Displays a dedicated update dialog showing new version numbers, release notes, and a direct 1-tap "Update Now" button.
+  - Added on-demand "Check for Updates" option in Settings dashboard.
+  - Added background check 2 seconds after application launch.
+- **Enhanced In-App Android 13+ Notification Setup Guide:**
+  - Added an inline setup walkthrough inside the Settings > Auto-Detect Transactions section.
+  - Added direct action buttons for "Open App Info" and "Open Notification Access".
+- **Comprehensive Sideload & Security Installation Guide on Web Landing Page:**
+  - Added visual walkthrough for bypassing Google Play Protect false positives on bank notification permissions.
+  - Added step-by-step instructions for granting restricted settings on Android 13, 14, and 15.
+
+### Fixed
+- **CI Build Runner NDK Download Interruption:**
+  - Pinned `ndkVersion` in `android/app/build.gradle.kts` to LTS version `27.0.12077973` pre-installed on GitHub Actions runners, eliminating 1GB network download failures during APK compilation.
+
+---
+
 ## [1.2.2] - 2026-10-28
 
 ### Added

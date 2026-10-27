@@ -36,6 +36,18 @@ class MainActivity : FlutterActivity() {
                     startActivity(intent)
                     result.success(true)
                 }
+                "openUrl" -> {
+                    val url = call.argument<String>("url")
+                    if (!url.isNullOrEmpty()) {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        startActivity(intent)
+                        result.success(true)
+                    } else {
+                        result.error("INVALID_URL", "URL is null or empty", null)
+                    }
+                }
                 "getPendingNotifications" -> {
                     val prefs = getSharedPreferences(
                         TransactionNotificationListenerService.PREFS_NAME,

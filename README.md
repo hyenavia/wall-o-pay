@@ -12,7 +12,7 @@
 [![Database](https://img.shields.io/badge/Database-Drift%20SQLite-1E4238?logo=sqlite&logoColor=white)](https://drift.simonbinder.eu/)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.2.2-234B3B.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.2.3-234B3B.svg)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://username.github.io/wall_o_pay/) • [📥 Download Latest APK](https://github.com/username/wall_o_pay/releases/latest) • [📋 Changelog](CHANGELOG.md)
 
