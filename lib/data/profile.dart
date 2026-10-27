@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'cloud.dart';
+import 'cloud_sync.dart';
 import 'prefs.dart';
 
 class ProfileState {
@@ -49,6 +50,7 @@ class ProfileController extends Notifier<ProfileState> {
     }
     await p.setInt(_updatedKey(uid), DateTime.now().millisecondsSinceEpoch);
     state = ProfileState(nickname: nick.isEmpty ? null : nick, photo: state.photo);
+    ref.read(autoSyncServiceProvider).schedulePush();
   }
 
   Future<void> setPhoto(Uint8List? bytes) async {
@@ -62,6 +64,7 @@ class ProfileController extends Notifier<ProfileState> {
     }
     await p.setInt(_updatedKey(uid), DateTime.now().millisecondsSinceEpoch);
     state = ProfileState(nickname: state.nickname, photo: bytes);
+    ref.read(autoSyncServiceProvider).schedulePush();
   }
 
   DocumentReference<Map<String, dynamic>> _doc(String uid) => FirebaseFirestore

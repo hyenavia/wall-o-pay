@@ -26,7 +26,12 @@ jobs:
 
       - name: Extract Version & Changelog
         id: extract_info
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          PREV_TAG=$(gh release list --limit 1 --json tagName -q '.[0].tagName' 2>/dev/null || echo "")
+          export PREV_RELEASE_TAG="$PREV_TAG"
+
           python - << 'EOF'
           import os
           import re
@@ -38,15 +43,28 @@ jobs:
           version = v_match.group(1).strip() if v_match else "1.0.0"
           tag = f"v{version}"
 
-          # Ekstrak catatan perubahan dari CHANGELOG.md
-          notes = f"Rilis pembaruan versi {version}"
+          prev_tag = os.environ.get("PREV_RELEASE_TAG", "").strip()
+          prev_version = re.sub(r'^v', '', prev_tag) if prev_tag else ""
+
+          notes = f"Release {tag}"
           if os.path.exists("CHANGELOG.md"):
               with open("CHANGELOG.md", "r", encoding="utf-8") as f:
                   cl = f.read()
-              pattern = rf'## \[{re.escape(version)}\][^\n]*\n(.*?)(?=\n---|\n## \[|$)'
-              notes_match = re.search(pattern, cl, re.DOTALL)
-              if notes_match:
-                  notes = notes_match.group(1).strip()
+
+              start_match = re.search(rf'(## \[{re.escape(version)}\][^\n]*)', cl)
+              if start_match:
+                  start_idx = start_match.start()
+                  # Jika ada rilis sebelumnya di GitHub, ekstrak semua versi hingga tepat sebelum rilis sebelumnya
+                  if prev_version and re.search(rf'\n## \[{re.escape(prev_version)}\]', cl[start_idx:]):
+                      stop_match = re.search(rf'\n(?=## \[{re.escape(prev_version)}\])', cl[start_idx:])
+                      extracted = cl[start_idx : start_idx + stop_match.start()].strip()
+                  else:
+                      # Rilis pertama (atau rilis sebelumnya tidak ada di CHANGELOG): bawa semua riwayat
+                      extracted = cl[start_idx:].strip()
+
+                  extracted = re.sub(r'\n---\s*$', '', extracted).strip()
+                  if extracted:
+                      notes = extracted
 
           with open("release_notes.md", "w", encoding="utf-8") as f:
               f.write(notes)
@@ -106,6 +124,7 @@ jobs:
               --title "Wall o' Pay $TAG" \
               --notes-file release_notes.md \
               --target main \
+              "$APK_PATH#Wall_o_Pay.apk" \
               "$APK_PATH#Wall_o_Pay_${TAG}.apk"
           else
             gh release create "$TAG" \

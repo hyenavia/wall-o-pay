@@ -28,9 +28,9 @@ Setiap kali melakukan modifikasi kode, penambahan fitur, pembaruan UI, atau perb
 Repositori ini dilengkapi GitHub Actions workflow pada `.github/workflows/release.yml`.
 - Setiap kali branch `main` menerima `push` (commit baru):
   1. Workflow akan membaca nomor versi terbaru dari `pubspec.yaml`.
-  2. Mengekstrak catatan perubahan untuk versi tersebut dari `CHANGELOG.md`.
+  2. Mengekstrak seluruh catatan perubahan dari `CHANGELOG.md` sejak rilis GitHub terakhir (menggabungkan semua versi perantara yang belum pernah dirilis).
   3. Memeriksa apakah GitHub Release untuk tag `vX.Y.Z` sudah ada.
-  4. Jika belum ada, GitHub Actions akan melakukan kompilasi APK rilis Flutter (`flutter build apk --release`) dan membuat **GitHub Release** secara otomatis lengkap dengan lampiran file APK dan catatan perubahan (*release notes*).
+  4. Jika belum ada, GitHub Actions akan melakukan kompilasi APK rilis Flutter (`flutter build apk --release`) dan membuat **GitHub Release** secara otomatis lengkap dengan lampiran file APK dan gabungan catatan perubahan (*release notes*).
 
 ---
 

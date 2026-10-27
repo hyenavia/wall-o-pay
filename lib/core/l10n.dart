@@ -283,5 +283,10 @@ const Map<String, String> _id = {
   'Test detected transaction inbox with sample notifications.': 'Uji coba antrean transaksi dengan contoh notifikasi.',
   'Simulate Sample Notification': 'Simulasikan Contoh Notifikasi',
   'Sample notification added! Check your Home dashboard.': 'Contoh notifikasi ditambahkan! Cek Beranda kamu.',
+  'Sync Now': 'Sinkronkan Sekarang',
+  'Real-Time Cloud Sync': 'Sinkronisasi Cloud Real-Time',
+  'Syncs automatically between devices in real-time.': 'Sinkron otomatis antar perangkat secara real-time.',
+  'Active': 'Aktif',
+  'Synced with cloud.': 'Tersinkronisasi dengan cloud.',
 };
 

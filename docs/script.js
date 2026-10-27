@@ -2,7 +2,7 @@
  * Wall o' Pay - Landing Page Interactive Logic (Full English)
  */
 
-const APP_VERSION = "1.1.1";
+const APP_VERSION = "1.2.1";
 
 // Theme Switcher
 function toggleTheme() {
@@ -98,6 +98,34 @@ function setupMobileNav() {
   }
 }
 
+// Fetch latest release tag from GitHub API to keep web badges dynamically up-to-date
+function fetchLatestReleaseVersion() {
+  fetch("https://api.github.com/repos/hyenavia/wall-o-pay/releases/latest")
+    .then(res => {
+      if (!res.ok) throw new Error("GitHub API unavailable or rate-limited");
+      return res.json();
+    })
+    .then(data => {
+      if (data.tag_name) {
+        const tag = data.tag_name;
+        document.querySelectorAll(".app-version-tag").forEach(el => {
+          el.textContent = tag;
+        });
+        const heroDownloadText = document.getElementById("hero-download-text");
+        if (heroDownloadText) {
+          heroDownloadText.textContent = `Download APK (${tag})`;
+        }
+        const specsVersion = document.getElementById("specs-version-val");
+        if (specsVersion) {
+          specsVersion.textContent = `${tag} (Release)`;
+        }
+      }
+    })
+    .catch(() => {
+      // Graceful fallback to baked-in APP_VERSION
+    });
+}
+
 // Init on DOM ready
 document.addEventListener("DOMContentLoaded", () => {
   // Theme init
@@ -111,4 +139,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   setupShowcaseTabs();
   setupMobileNav();
+  fetchLatestReleaseVersion();
 });

@@ -7,6 +7,7 @@ import '../../core/l10n.dart';
 import '../../core/widgets.dart';
 import '../../data/cloud.dart';
 import '../../data/cloud_backup.dart';
+import '../../data/cloud_sync.dart';
 import '../../data/export_service.dart';
 import '../../data/prefs.dart';
 import '../../data/profile.dart';
@@ -144,6 +145,25 @@ class SettingsPage extends ConsumerWidget {
                     )),
                   )
                 else ...[
+                  ListTile(
+                    leading: const Icon(Icons.sync),
+                    title: Text(context.tr('Real-Time Cloud Sync')),
+                    subtitle: Text(context.tr('Syncs automatically between devices in real-time.')),
+                    trailing: const Chip(
+                      label: Text('Active', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green)),
+                      backgroundColor: Color(0x1B4CAF50),
+                      side: BorderSide.none,
+                    ),
+                    enabled: canUseCloud,
+                    onTap: () async {
+                      await ref.read(autoSyncServiceProvider).triggerTwoWaySync();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(context.tr('Synced with cloud.'))),
+                        );
+                      }
+                    },
+                  ),
                   ListTile(
                     leading: const Icon(Icons.cloud_upload_outlined),
                     title: Text(context.tr('Back up to cloud')),
@@ -360,6 +380,7 @@ class SettingsPage extends ConsumerWidget {
 
     final db = ref.read(databaseProvider);
     if (context.mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+    ref.read(autoSyncServiceProvider).stopSync();
     await FirebaseAuth.instance.signOut();
     if (choice == 'wipe') await db.resetAllData();
   }

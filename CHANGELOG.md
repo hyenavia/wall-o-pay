@@ -4,6 +4,32 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-10-27
+
+### Added
+- **Instant Auto-Sync on Network Reconnection (`connectivity_plus`):**
+  - Integrated native network connectivity listener that detects when Wi-Fi or mobile data reconnects.
+  - Automatically triggers instant two-way synchronization the exact moment internet connectivity is restored, without needing user intervention or app restarts.
+  - Added a gentle 60-second periodic background sync safety heartbeat to guarantee consistency across intermittent networks.
+
+---
+
+## [1.2.0] - 2026-10-27
+
+### Added
+- **Automatic Multi-Device Cloud Synchronization (`AutoSyncService`):**
+  - Instant real-time two-way sync between Drift SQLite and Firebase Firestore across all logged-in devices.
+  - Reactive SQLite table update listener that automatically debounces and pushes local transactions, categories, budgets, and savings goals to Firestore.
+  - Real-time Firestore snapshot listeners that instantly stream and apply remote changes directly to Drift database.
+  - Automatic profile synchronization (nickname and photo avatar) across devices.
+  - `RefreshIndicator` (pull-to-refresh) and manual "Sync Now" button on the Home dashboard for instant on-demand sync.
+  - Background auto-sync triggered on application launch and resume (`WidgetsBindingObserver`).
+- **Official Production Keystore & Release Signing:**
+  - Configured dedicated release signing credentials (`release-keystore.jks` & `key.properties`) in Gradle.
+  - Eliminates Google Play Protect untrusted debug certificate blocking during Android installation.
+
+---
+
 ## [1.1.1] - 2026-10-27
 
 ### Fixed

@@ -14,6 +14,8 @@ import '../profile/profile_page.dart';
 import '../settings/settings_page.dart';
 import '../transactions/transaction_form.dart';
 import '../transactions/transaction_tile.dart';
+import '../../data/cloud.dart';
+import '../../data/cloud_sync.dart';
 import '../../data/auto_tracker.dart';
 import 'pending_inbox_card.dart';
 
@@ -31,6 +33,10 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
     WidgetsBinding.instance.addObserver(this);
     Future.microtask(() {
       ref.read(autoTrackerServiceProvider).syncPendingFromNative();
+      final user = ref.read(currentUserProvider);
+      if (user != null) {
+        ref.read(autoSyncServiceProvider).startSync(user.uid);
+      }
     });
   }
 
@@ -44,6 +50,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       ref.read(autoTrackerServiceProvider).syncPendingFromNative();
+      ref.read(autoSyncServiceProvider).triggerTwoWaySync();
     }
   }
 
@@ -99,27 +106,55 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                 ? (isWeekly ? "This Week's Budget" : "This Month's Budget")
                 : (isWeekly ? 'Weekly Budget' : 'Monthly Budget');
 
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-              children: [
-                Row(
-                  children: [
-                    const BrandMark(size: 36),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        "Wall o' Pay",
-                        style: theme.textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w800),
+            return RefreshIndicator(
+              onRefresh: () async {
+                await Future.wait([
+                  ref.read(autoSyncServiceProvider).triggerTwoWaySync(),
+                  ref.read(autoTrackerServiceProvider).syncPendingFromNative(),
+                ]);
+              },
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                children: [
+                  Row(
+                    children: [
+                      const BrandMark(size: 36),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          "Wall o' Pay",
+                          style: theme.textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      tooltip: context.tr('Settings'),
-                      icon: const Icon(Icons.settings_outlined),
-                      onPressed: openSettings,
-                    ),
-                  ],
-                ),
+                      Consumer(
+                        builder: (ctx, r, _) {
+                          final sync = r.watch(syncStateProvider);
+                          if (sync.status == SyncStatus.syncing) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              child: SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            );
+                          }
+                          return IconButton(
+                            tooltip: ctx.tr('Sync Now'),
+                            icon: const Icon(Icons.sync, size: 20),
+                            onPressed: () =>
+                                r.read(autoSyncServiceProvider).triggerTwoWaySync(),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        tooltip: context.tr('Settings'),
+                        icon: const Icon(Icons.settings_outlined),
+                        onPressed: openSettings,
+                      ),
+                    ],
+                  ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -309,8 +344,9 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                     ],
                   ),
               ],
-            );
-          },
+            ),
+          );
+        },
         ),
       ),
     );
