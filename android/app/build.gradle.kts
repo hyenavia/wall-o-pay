@@ -37,10 +37,16 @@ android {
     signingConfigs {
         create("release") {
             val keyFile = keystoreProperties.getProperty("storeFile")
-            if (keyFile != null && file(keyFile).exists()) {
+            val targetFile = if (keyFile != null) {
+                if (file(keyFile).exists()) file(keyFile)
+                else if (rootProject.file(keyFile).exists()) rootProject.file(keyFile)
+                else null
+            } else null
+
+            if (targetFile != null) {
                 keyAlias = keystoreProperties.getProperty("keyAlias")
                 keyPassword = keystoreProperties.getProperty("keyPassword")
-                storeFile = file(keyFile)
+                storeFile = targetFile
                 storePassword = keystoreProperties.getProperty("storePassword")
             }
         }
@@ -49,7 +55,13 @@ android {
     buildTypes {
         release {
             val keyFile = keystoreProperties.getProperty("storeFile")
-            if (keyFile != null && file(keyFile).exists()) {
+            val targetFile = if (keyFile != null) {
+                if (file(keyFile).exists()) file(keyFile)
+                else if (rootProject.file(keyFile).exists()) rootProject.file(keyFile)
+                else null
+            } else null
+
+            if (targetFile != null) {
                 signingConfig = signingConfigs.getByName("release")
             } else {
                 signingConfig = signingConfigs.getByName("debug")
