@@ -754,6 +754,41 @@ section {
 }
 
 /* ==========================================================================
+   Brand Banner Section
+   ========================================================================== */
+
+.banner-section {
+  padding: 1.5rem 0 3.5rem;
+}
+
+.banner-card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: 0 16px 38px rgba(30, 66, 56, 0.08);
+  background: var(--bg-surface);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.banner-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 22px 46px rgba(30, 66, 56, 0.14);
+}
+
+.banner-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+[data-theme="dark"] .banner-card {
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ==========================================================================
    Features Grid
    ========================================================================== */
 

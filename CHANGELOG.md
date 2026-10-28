@@ -11,6 +11,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
   - Added dedicated "Send Feedback" option inside the Settings dashboard (About & Support section).
   - Automatically directs users to localized feedback surveys based on active language setting (Indonesian Form vs. English Form).
   - Added direct link to the English User Feedback survey on the web landing page navigation bar and footer.
+- **Brand Landscape Banner on Web Landing Page:**
+  - Integrated official brand showcase banner with typography "Better Habits Bigger Goals", "Your money, under your control", and "Manage Plan Grow".
+  - Configured high-resolution OpenGraph and Twitter social card banner previews (`og:image`).
 
 ---
 
