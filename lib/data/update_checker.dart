@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../core/l10n.dart';
 import '../core/theme.dart';
-import 'auto_tracker.dart';
 
 class AppUpdateInfo {
   const AppUpdateInfo({
@@ -29,12 +29,24 @@ class AppUpdateInfo {
 
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '1.2.4';
+  static const currentVersion = '1.2.5';
+
+  static const MethodChannel _channel =
+      MethodChannel('com.example.wall_o_pay/notifications');
 
   static const String _latestReleaseApi =
       'https://api.github.com/repos/hyenavia/wall-o-pay/releases/latest';
   static const String _directDownloadUrl =
       'https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk';
+
+  /// Membuka URL di browser atau installer eksternal via native intent.
+  static Future<void> openUrl(String url) async {
+    try {
+      await _channel.invokeMethod('openUrl', {'url': url});
+    } catch (e) {
+      debugPrint('Failed to open URL via native: $e');
+    }
+  }
 
   /// Memeriksa apakah ada pembaruan rilis terbaru di GitHub.
   static Future<AppUpdateInfo?> checkForUpdate() async {
@@ -239,7 +251,7 @@ class UpdateCheckerService {
               ),
               onPressed: () {
                 Navigator.of(ctx).pop();
-                AutoTrackerService.openUrl(info.downloadUrl);
+                openUrl(info.downloadUrl);
               },
             ),
           ],

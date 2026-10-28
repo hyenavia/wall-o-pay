@@ -4,6 +4,16 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.5] - 2026-10-28
+
+### Changed
+- **Streamlined Release for General Public Accessibility:**
+  - Temporarily disabled background notification listener service (`TransactionNotificationListenerService`) to prevent Google Play Protect false-positive fraud warnings and bypass Android 13+ restricted settings.
+  - Simplified in-app Settings dashboard by removing the Auto-Detect Transactions and manual simulation configuration cards.
+  - Streamlined website download installation guide to a straightforward, frictionless 4-step sideload process.
+
+---
+
 ## [1.2.4] - 2026-10-28
 
 ### Fixed
