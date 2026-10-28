@@ -279,23 +279,41 @@ class SettingsPage extends ConsumerWidget {
               ),
             ),
           ],
-          SectionHeader(title: context.tr('App Version & Updates')),
+          SectionHeader(title: context.tr('About & Support')),
           AppCard(
             padding: EdgeInsets.zero,
-            child: ListTile(
-              leading: const Icon(Icons.system_update_alt_rounded),
-              title: Text(context.tr('Check for Updates')),
-              subtitle: Text('Wall o\' Pay v${UpdateCheckerService.currentVersion} • Latest Release'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(context.tr('Checking for updates...')),
-                    duration: const Duration(seconds: 1),
-                  ),
-                );
-                UpdateCheckerService.checkAndPromptUpdate(context, silentIfUpToDate: false);
-              },
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.system_update_alt_rounded),
+                  title: Text(context.tr('Check for Updates')),
+                  subtitle: Text('Wall o\' Pay v${UpdateCheckerService.currentVersion} • Latest Release'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(context.tr('Checking for updates...')),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
+                    UpdateCheckerService.checkAndPromptUpdate(context, silentIfUpToDate: false);
+                  },
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.feedback_outlined),
+                  title: Text(context.tr('Send Feedback')),
+                  subtitle: Text(context.tr('Help us improve with your suggestions & bug reports.')),
+                  trailing: const Icon(Icons.open_in_new_rounded, size: 18),
+                  onTap: () {
+                    final isIndonesian = prefs.localeCode == 'id';
+                    final url = isIndonesian
+                        ? 'https://forms.gle/jzhTG5HmxA96xCsX8'
+                        : 'https://forms.gle/W5MNr8eeZcmiiPbp9';
+                    UpdateCheckerService.openUrl(url);
+                  },
+                ),
+              ],
             ),
           ),
         ],
