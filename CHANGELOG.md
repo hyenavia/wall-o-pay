@@ -4,6 +4,17 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2026-10-29
+
+### Added
+- **Custom Nominal Budgeting Mode for Savings & Living Pillars:**
+  - Added "Custom Nominal" mode toggle in the Budget dialog, allowing users to specify exact fixed savings amounts (e.g. Rp 100.000 out of Rp 600.000) alongside standard 50/30/20.
+  - Dynamically calculates adaptive pillar percentages and interactive 3-color ratio preview bars based on actual allocations.
+  - Added a convenient "Split remaining 70/30" quick action to automatically distribute remaining funds between Needs and Wants.
+  - Added live allocation feedback indicator displaying remaining unallocated amounts.
+
+---
+
 ## [1.3.1] - 2026-10-29
 
 ### Added

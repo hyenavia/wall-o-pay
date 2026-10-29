@@ -90,7 +90,7 @@ class BudgetPage extends ConsumerWidget {
                             context,
                             ref,
                             period.key,
-                            breakdown.totalBudget,
+                            breakdown,
                           ),
                         ),
                       ],
@@ -154,7 +154,7 @@ class BudgetPage extends ConsumerWidget {
                               child: Row(
                                 children: [
                                   Expanded(
-                                    flex: 50,
+                                    flex: breakdown.needsPercentage > 0 ? breakdown.needsPercentage : 50,
                                     child: Container(
                                       height: 6,
                                       color: BudgetBucket.needs.color,
@@ -162,7 +162,7 @@ class BudgetPage extends ConsumerWidget {
                                   ),
                                   const SizedBox(width: 2),
                                   Expanded(
-                                    flex: 30,
+                                    flex: breakdown.wantsPercentage > 0 ? breakdown.wantsPercentage : 30,
                                     child: Container(
                                       height: 6,
                                       color: BudgetBucket.wants.color,
@@ -170,7 +170,7 @@ class BudgetPage extends ConsumerWidget {
                                   ),
                                   const SizedBox(width: 2),
                                   Expanded(
-                                    flex: 20,
+                                    flex: breakdown.savingsPercentage > 0 ? breakdown.savingsPercentage : 20,
                                     child: Container(
                                       height: 6,
                                       color: BudgetBucket.savings.color,
@@ -183,11 +183,11 @@ class BudgetPage extends ConsumerWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                _ratioLegend(BudgetBucket.needs.color, '50% ${context.tr('Needs')}',
+                                _ratioLegend(BudgetBucket.needs.color, '${breakdown.needsPercentage}% ${context.tr('Needs')}',
                                     rupiah(breakdown.needsBudget)),
-                                _ratioLegend(BudgetBucket.wants.color, '30% ${context.tr('Wants')}',
+                                _ratioLegend(BudgetBucket.wants.color, '${breakdown.wantsPercentage}% ${context.tr('Wants')}',
                                     rupiah(breakdown.wantsBudget)),
-                                _ratioLegend(BudgetBucket.savings.color, '20% ${context.tr('Savings')}',
+                                _ratioLegend(BudgetBucket.savings.color, '${breakdown.savingsPercentage}% ${context.tr('Savings')}',
                                     rupiah(breakdown.savingsBudget)),
                               ],
                             ),
@@ -213,7 +213,7 @@ class BudgetPage extends ConsumerWidget {
                           context,
                           ref,
                           period.key,
-                          0,
+                          breakdown,
                         ),
                       ),
                     ],
@@ -227,6 +227,7 @@ class BudgetPage extends ConsumerWidget {
               // ===============================================================
               _PillarCard(
                 bucket: BudgetBucket.needs,
+                percentage: breakdown.needsPercentage,
                 allocated: breakdown.needsBudget,
                 spent: breakdown.needsSpent,
                 ratio: breakdown.needsRatio,
@@ -249,6 +250,7 @@ class BudgetPage extends ConsumerWidget {
               // ===============================================================
               _PillarCard(
                 bucket: BudgetBucket.wants,
+                percentage: breakdown.wantsPercentage,
                 allocated: breakdown.wantsBudget,
                 spent: breakdown.wantsSpent,
                 ratio: breakdown.wantsRatio,
@@ -271,6 +273,7 @@ class BudgetPage extends ConsumerWidget {
               // ===============================================================
               _PillarCard(
                 bucket: BudgetBucket.savings,
+                percentage: breakdown.savingsPercentage,
                 allocated: breakdown.savingsBudget,
                 spent: breakdown.savingsSpent,
                 ratio: breakdown.savingsRatio,
@@ -346,27 +349,52 @@ class BudgetPage extends ConsumerWidget {
     );
   }
 
-  /// Dialog memasukkan total anggaran bulanan/mingguan
+  /// Dialog memasukkan total anggaran dengan pilihan Mode Standar 50/30/20 atau Kustom Nominal
   Future<void> _showTotalBudgetDialog(
     BuildContext context,
     WidgetRef ref,
     String periodKey,
-    int currentAmount,
+    Budget503020Breakdown currentBreakdown,
   ) async {
-    final controller = TextEditingController(
-      text: currentAmount > 0 ? currentAmount.toString() : '',
-    );
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    int mode = currentBreakdown.isCustom ? 1 : 0; // 0 = Standar 50/30/20, 1 = Kustom Nominal
+
+    final totalCtrl = TextEditingController(
+      text: currentBreakdown.totalBudget > 0 ? currentBreakdown.totalBudget.toString() : '',
+    );
+    final savingsCtrl = TextEditingController(
+      text: currentBreakdown.savingsBudget > 0 ? currentBreakdown.savingsBudget.toString() : '',
+    );
+    final needsCtrl = TextEditingController(
+      text: currentBreakdown.needsBudget > 0 ? currentBreakdown.needsBudget.toString() : '',
+    );
+    final wantsCtrl = TextEditingController(
+      text: currentBreakdown.wantsBudget > 0 ? currentBreakdown.wantsBudget.toString() : '',
+    );
+
+    int parse(TextEditingController c) =>
+        int.tryParse(c.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
 
     await showDialog<void>(
       context: context,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setState) {
-            final val = int.tryParse(controller.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-            final nBudget = (val * 0.5).round();
-            final wBudget = (val * 0.3).round();
-            final sBudget = val > 0 ? (val - nBudget - wBudget) : 0;
+            final totalVal = parse(totalCtrl);
+            final savingsVal = parse(savingsCtrl);
+            final needsVal = parse(needsCtrl);
+            final wantsVal = parse(wantsCtrl);
+
+            // Alokasi standar
+            final stdNeeds = (totalVal * 0.50).round();
+            final stdWants = (totalVal * 0.30).round();
+            final stdSavings = totalVal > 0 ? (totalVal - stdNeeds - stdWants) : 0;
+
+            // Kustom: hitung sisa yang belum teralokasi
+            final allocatedCustom = needsVal + wantsVal + savingsVal;
+            final remainingToAllocate = totalVal - allocatedCustom;
 
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -394,65 +422,218 @@ class BudgetPage extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      context.tr(
-                          'Enter your total budget to automatically split via 50/30/20 rule.'),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
-                      ),
+                    // Mode Toggle: Standar 50/30/20 vs Kustom Nominal
+                    SegmentedButton<int>(
+                      segments: [
+                        ButtonSegment(
+                          value: 0,
+                          label: Text(context.tr('Standard (50/30/20)'), style: const TextStyle(fontSize: 11)),
+                          icon: const Icon(Icons.pie_chart_outline, size: 16),
+                        ),
+                        ButtonSegment(
+                          value: 1,
+                          label: Text(context.tr('Custom Nominal'), style: const TextStyle(fontSize: 11)),
+                          icon: const Icon(Icons.tune_rounded, size: 16),
+                        ),
+                      ],
+                      selected: {mode},
+                      onSelectionChanged: (s) {
+                        setState(() {
+                          mode = s.first;
+                          if (mode == 1 && totalVal > 0) {
+                            if (savingsVal == 0) savingsCtrl.text = stdSavings.toString();
+                            if (needsVal == 0) needsCtrl.text = stdNeeds.toString();
+                            if (wantsVal == 0) wantsCtrl.text = stdWants.toString();
+                          }
+                        });
+                      },
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
+
+                    // Input Total Anggaran
+                    Text(
+                      context.tr('Total Budget'),
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                    ),
+                    const SizedBox(height: 6),
                     TextField(
-                      controller: controller,
+                      controller: totalCtrl,
                       keyboardType: TextInputType.number,
-                      autofocus: true,
+                      autofocus: totalVal == 0,
                       decoration: InputDecoration(
                         prefixText: 'Rp ',
                         hintText: '0',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                         filled: true,
-                        fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                        fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
                       ),
-                      onChanged: (_) => setState(() {}),
+                      onChanged: (_) {
+                        setState(() {
+                          if (mode == 0) {
+                            // otomatis terupdate dari totalVal
+                          }
+                        });
+                      },
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      context.tr('Budget Split Preview:'),
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+
+                    if (mode == 0) ...[
+                      // Pratinjau Standar 50/30/20
+                      Text(
+                        context.tr('Budget Split Preview:'),
+                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: scheme.outlineVariant.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            _previewRow(
+                              BudgetBucket.needs.color,
+                              context.tr('Needs (50%)'),
+                              rupiah(stdNeeds),
+                            ),
+                            const Divider(height: 12),
+                            _previewRow(
+                              BudgetBucket.wants.color,
+                              context.tr('Wants (30%)'),
+                              rupiah(stdWants),
+                            ),
+                            const Divider(height: 12),
+                            _previewRow(
+                              BudgetBucket.savings.color,
+                              context.tr('Savings & Goals (20%)'),
+                              rupiah(stdSavings),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Column(
-                        children: [
-                          _previewRow(
-                            BudgetBucket.needs.color,
-                            context.tr('Needs (50%)'),
-                            rupiah(nBudget),
-                          ),
-                          const Divider(height: 12),
-                          _previewRow(
-                            BudgetBucket.wants.color,
-                            context.tr('Wants (30%)'),
-                            rupiah(wBudget),
-                          ),
-                          const Divider(height: 12),
-                          _previewRow(
-                            BudgetBucket.savings.color,
-                            context.tr('Savings & Goals (20%)'),
-                            rupiah(sBudget),
-                          ),
-                        ],
+                    ] else ...[
+                      // Input Kustom Nominal (Tabungan, Kebutuhan, Keinginan)
+                      Text(
+                        context.tr('Savings Allocation'),
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: BudgetBucket.savings.color),
                       ),
-                    ),
+                      const SizedBox(height: 4),
+                      TextField(
+                        controller: savingsCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          prefixText: 'Rp ',
+                          hintText: '100000',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          filled: true,
+                          fillColor: BudgetBucket.savings.color.withValues(alpha: 0.08),
+                        ),
+                        onChanged: (_) => setState(() {}),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Shortcut tombol bagi sisa 70/30
+                      if (totalVal > savingsVal)
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+                            icon: const Icon(Icons.auto_awesome, size: 14),
+                            label: Text(
+                              context.tr('Split remaining 70/30'),
+                              style: const TextStyle(fontSize: 11),
+                            ),
+                            onPressed: () {
+                              final rem = totalVal - savingsVal;
+                              final n = (rem * 0.70).round();
+                              final w = rem - n;
+                              setState(() {
+                                needsCtrl.text = n.toString();
+                                wantsCtrl.text = w.toString();
+                              });
+                            },
+                          ),
+                        ),
+
+                      Text(
+                        context.tr('Needs Allocation'),
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: BudgetBucket.needs.color),
+                      ),
+                      const SizedBox(height: 4),
+                      TextField(
+                        controller: needsCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          prefixText: 'Rp ',
+                          hintText: '350000',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          filled: true,
+                          fillColor: BudgetBucket.needs.color.withValues(alpha: 0.08),
+                        ),
+                        onChanged: (_) => setState(() {}),
+                      ),
+                      const SizedBox(height: 12),
+
+                      Text(
+                        context.tr('Wants Allocation'),
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: BudgetBucket.wants.color),
+                      ),
+                      const SizedBox(height: 4),
+                      TextField(
+                        controller: wantsCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          prefixText: 'Rp ',
+                          hintText: '150000',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          filled: true,
+                          fillColor: BudgetBucket.wants.color.withValues(alpha: 0.08),
+                        ),
+                        onChanged: (_) => setState(() {}),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Status Alokasi Kustom
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: remainingToAllocate == 0
+                              ? AppColors.deepForest.withValues(alpha: 0.1)
+                              : Colors.amber.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              remainingToAllocate == 0
+                                  ? Icons.check_circle_outline
+                                  : Icons.info_outline,
+                              size: 16,
+                              color: remainingToAllocate == 0 ? AppColors.deepForest : Colors.amber[800],
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                remainingToAllocate == 0
+                                    ? context.tr('All funds allocated')
+                                    : context.tr('Remaining to allocate: {amount}', {
+                                        'amount': rupiah(remainingToAllocate),
+                                      }),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: remainingToAllocate == 0 ? AppColors.deepForest : Colors.amber[900],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -468,7 +649,17 @@ class BudgetPage extends ConsumerWidget {
                   ),
                   onPressed: () async {
                     Navigator.pop(ctx);
-                    await ref.read(budgetRuleProvider.notifier).setTotalBudget(periodKey, val);
+                    if (mode == 0) {
+                      await ref.read(budgetRuleProvider.notifier).setTotalBudget(periodKey, totalVal);
+                    } else {
+                      await ref.read(budgetRuleProvider.notifier).setCustomAllocations(
+                            periodKey,
+                            total: totalVal,
+                            needs: needsVal,
+                            wants: wantsVal,
+                            savings: savingsVal,
+                          );
+                    }
                   },
                   child: Text(context.tr('Save')),
                 ),
@@ -696,6 +887,7 @@ class BudgetPage extends ConsumerWidget {
 class _PillarCard extends StatelessWidget {
   const _PillarCard({
     required this.bucket,
+    required this.percentage,
     required this.allocated,
     required this.spent,
     required this.ratio,
@@ -707,6 +899,7 @@ class _PillarCard extends StatelessWidget {
   });
 
   final BudgetBucket bucket;
+  final int percentage;
   final int allocated;
   final int spent;
   final double ratio;
@@ -750,7 +943,7 @@ class _PillarCard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            bucket.label(context),
+                            bucket.label(context, percentage),
                             style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
                           ),
                           const SizedBox(height: 2),
