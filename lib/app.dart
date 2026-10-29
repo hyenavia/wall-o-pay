@@ -131,7 +131,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       _checkedUpdateOnce = true;
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
-          UpdateCheckerService.checkAndPromptUpdate(context, silentIfUpToDate: true);
+          UpdateCheckerService.checkAndPromptUpdate(context, ref: ref, silentIfUpToDate: true);
         }
       });
     }

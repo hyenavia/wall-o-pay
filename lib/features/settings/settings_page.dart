@@ -31,6 +31,7 @@ class SettingsPage extends ConsumerWidget {
     final name = ref.watch(displayNameProvider);
     final username = ref.watch(usernameProvider);
     final canUseCloud = ready && user != null && !backup.working;
+    final updateInfo = ref.watch(availableUpdateProvider);
 
     final lastText = backup.lastBackup == null
         ? context.tr('No cloud backup yet.')
@@ -286,17 +287,51 @@ class SettingsPage extends ConsumerWidget {
               children: [
                 ListTile(
                   leading: const Icon(Icons.system_update_alt_rounded),
-                  title: Text(context.tr('Check for Updates')),
-                  subtitle: Text('Wall o\' Pay v${UpdateCheckerService.currentVersion} • Latest Release'),
+                  title: Row(
+                    children: [
+                      Text(context.tr('Check for Updates')),
+                      if (updateInfo != null) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE65100),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            context.tr('NEW'),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  subtitle: Text(
+                    updateInfo != null
+                        ? 'v${UpdateCheckerService.currentVersion} ➔ v${updateInfo.latestVersion} (${context.tr('Update Available!')})'
+                        : 'Wall o\' Pay v${UpdateCheckerService.currentVersion} • Latest Release',
+                    style: TextStyle(
+                      color: updateInfo != null ? const Color(0xFFE65100) : null,
+                      fontWeight: updateInfo != null ? FontWeight.w700 : null,
+                    ),
+                  ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(context.tr('Checking for updates...')),
-                        duration: const Duration(seconds: 1),
-                      ),
-                    );
-                    UpdateCheckerService.checkAndPromptUpdate(context, silentIfUpToDate: false);
+                    if (updateInfo != null) {
+                      UpdateCheckerService.showUpdateDialog(context, updateInfo);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(context.tr('Checking for updates...')),
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+                      UpdateCheckerService.checkAndPromptUpdate(context, ref: ref, silentIfUpToDate: false);
+                    }
                   },
                 ),
                 const Divider(height: 1),

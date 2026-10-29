@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/brand.dart';
 import '../../core/format.dart';
+import '../../core/theme.dart';
 import '../../core/l10n.dart';
 import '../../core/period.dart';
 import '../../core/widgets.dart';
@@ -19,6 +20,7 @@ import '../../data/cloud_sync.dart';
 import '../../data/auto_tracker.dart';
 import 'pending_inbox_card.dart';
 import '../../data/budget_rule.dart';
+import '../../data/update_checker.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -67,6 +69,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
     final spent = ref.watch(spentByCategoryProvider);
     final name = ref.watch(displayNameProvider);
     final muted = scheme.onSurface.withValues(alpha: 0.65);
+    final updateInfo = ref.watch(availableUpdateProvider);
 
     void openProfile() => Navigator.push(
           context,
@@ -116,6 +119,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                 await Future.wait([
                   ref.read(autoSyncServiceProvider).triggerTwoWaySync(),
                   ref.read(autoTrackerServiceProvider).syncPendingFromNative(),
+                  UpdateCheckerService.checkAndNotify(ref),
                 ]);
               },
               child: ListView(
@@ -197,6 +201,14 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                   expense: expense,
                 ),
                 const SizedBox(height: 14),
+                if (updateInfo != null) ...[
+                  _UpdateBannerCard(
+                    info: updateInfo,
+                    onDismiss: () => ref.read(availableUpdateProvider.notifier).dismiss(),
+                    onUpdate: () => UpdateCheckerService.showUpdateDialog(context, updateInfo),
+                  ),
+                  const SizedBox(height: 14),
+                ],
                 const PendingInboxCard(),
                 AppCard(
                   child: Column(
@@ -522,6 +534,158 @@ class _QuickAction extends StatelessWidget {
                 style: Theme.of(context).textTheme.labelSmall,
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _UpdateBannerCard extends StatelessWidget {
+  const _UpdateBannerCard({
+    required this.info,
+    required this.onDismiss,
+    required this.onUpdate,
+  });
+
+  final AppUpdateInfo info;
+  final VoidCallback onDismiss;
+  final VoidCallback onUpdate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            AppColors.deepForest,
+            Color(0xFF2C5A47),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.deepForest.withValues(alpha: 0.28),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onUpdate,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.rocket_launch_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              context.tr('Update Available (v{version})!', {
+                                'version': info.latestVersion,
+                              }),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: onDismiss,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.close_rounded,
+                                color: Colors.white70,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        context.tr(
+                            'A new version of Wall o\' Pay is ready with performance improvements and updates.'),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          height: 1.35,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Text(
+                            'v${info.currentVersion} ➔ v${info.latestVersion}',
+                            style: const TextStyle(
+                              color: Color(0xFF6EE7B7),
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  context.tr('Update Now'),
+                                  style: const TextStyle(
+                                    color: AppColors.deepForest,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                const Icon(
+                                  Icons.arrow_forward_rounded,
+                                  color: AppColors.deepForest,
+                                  size: 13,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

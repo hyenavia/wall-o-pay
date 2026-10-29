@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/l10n.dart';
 import '../core/theme.dart';
@@ -27,9 +28,21 @@ class AppUpdateInfo {
   final bool hasUpdate;
 }
 
+class AvailableUpdateNotifier extends Notifier<AppUpdateInfo?> {
+  @override
+  AppUpdateInfo? build() => null;
+
+  void setUpdate(AppUpdateInfo? info) => state = info;
+  void dismiss() => state = null;
+}
+
+/// Provider reaktif untuk notifikasi pembaruan aplikasi di seluruh halaman.
+final availableUpdateProvider =
+    NotifierProvider<AvailableUpdateNotifier, AppUpdateInfo?>(AvailableUpdateNotifier.new);
+
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '1.3.0';
+  static const currentVersion = '1.3.1';
 
   static const MethodChannel _channel =
       MethodChannel('com.example.wall_o_pay/notifications');
@@ -46,6 +59,15 @@ class UpdateCheckerService {
     } catch (e) {
       debugPrint('Failed to open URL via native: $e');
     }
+  }
+
+  /// Memeriksa pembaruan di latar belakang dan memperbarui state notifikasi reaktif.
+  static Future<AppUpdateInfo?> checkAndNotify(WidgetRef ref) async {
+    final info = await checkForUpdate();
+    if (info != null && info.hasUpdate) {
+      ref.read(availableUpdateProvider.notifier).setUpdate(info);
+    }
+    return info;
   }
 
   /// Memeriksa apakah ada pembaruan rilis terbaru di GitHub.
@@ -126,9 +148,13 @@ class UpdateCheckerService {
   /// Memeriksa update dan langsung memunculkan dialog/snackbar.
   static Future<void> checkAndPromptUpdate(
     BuildContext context, {
+    WidgetRef? ref,
     bool silentIfUpToDate = false,
   }) async {
     final info = await checkForUpdate();
+    if (info != null && info.hasUpdate && ref != null) {
+      ref.read(availableUpdateProvider.notifier).setUpdate(info);
+    }
     if (!context.mounted) return;
 
     if (info != null && info.hasUpdate) {

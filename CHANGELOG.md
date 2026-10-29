@@ -4,6 +4,17 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-10-29
+
+### Added
+- **Proactive In-App "Update Available" Notification System:**
+  - Added real-time `availableUpdateProvider` tracking whenever a newer release is published on GitHub.
+  - Introduced an interactive In-App Notification Banner on the Home dashboard with direct "Update Now" action and session dismissal.
+  - Added a distinctive "NEW" indicator badge on the Settings page next to "Check for Updates" when an update is detected.
+  - Automatically checks for updates in the background on app startup and on Home dashboard pull-to-refresh.
+
+---
+
 ## [1.3.0] - 2026-10-29
 
 ### Added
