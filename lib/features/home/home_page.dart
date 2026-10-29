@@ -18,6 +18,7 @@ import '../../data/cloud.dart';
 import '../../data/cloud_sync.dart';
 import '../../data/auto_tracker.dart';
 import 'pending_inbox_card.dart';
+import '../../data/budget_rule.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -92,9 +93,13 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                 .fold<int>(0, (s, t) => s + t.amount);
             final balance = income - expense;
 
-            final totalBudget = budgets.values.fold<int>(0, (a, b) => a + b);
-            final budgetSpent =
-                budgets.keys.fold<int>(0, (a, id) => a + (spent[id] ?? 0));
+            final budgetPool = ref.watch(currentTotalBudgetPoolProvider);
+            final totalBudget = budgetPool > 0
+                ? budgetPool
+                : budgets.values.fold<int>(0, (a, b) => a + b);
+            final budgetSpent = budgetPool > 0
+                ? expense
+                : budgets.keys.fold<int>(0, (a, id) => a + (spent[id] ?? 0));
             final ratio = totalBudget == 0 ? 0.0 : budgetSpent / totalBudget;
 
             final daysLeft = period.daysLeft;

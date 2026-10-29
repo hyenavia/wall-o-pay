@@ -4,6 +4,20 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-10-29
+
+### Added
+- **50/30/20 Budgeting Rule Architecture:**
+  - Implemented the gold-standard 50/30/20 financial allocation framework in the Budget tab.
+  - Users can input their overall budget/income for the active period, which automatically splits into 50% Needs, 30% Wants, and 20% Savings.
+  - Added smart default categorization mapping expense categories to respective pillars.
+  - Added flexible category management allowing users to reassign any category to Needs, Wants, or Savings with a single tap.
+  - Supported optional micro-budget limits for individual categories within their macro bucket pool.
+  - Added visual 3-pillar progress cards with real-time spending calculations and direct linkage from the Savings bucket to active Savings Goals.
+  - Synchronized Home dashboard budget summary to seamlessly reflect the active 50/30/20 budget pool.
+
+---
+
 ## [1.2.6] - 2026-10-28
 
 ### Added
