@@ -122,7 +122,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                 await Future.wait([
                   ref.read(autoSyncServiceProvider).triggerTwoWaySync(),
                   ref.read(autoTrackerServiceProvider).syncPendingFromNative(),
-                  UpdateCheckerService.checkAndNotify(ref),
+                  UpdateCheckerService.checkAndNotify(ref, context: context),
                 ]);
               },
               child: ListView(

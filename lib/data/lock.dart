@@ -22,6 +22,7 @@ class Lock {
   static final instance = Lock._();
 
   final state = ValueNotifier<AppLockState>(const AppLockState());
+  final isLocked = ValueNotifier<bool>(false);
   SharedPreferences? _p;
 
   Future<void> load() async {
@@ -45,10 +46,14 @@ class Lock {
   void _emit() {
     final p = _p;
     if (p == null) return;
+    final enabled = p.getString('lock.hash') != null;
     state.value = AppLockState(
-      enabled: p.getString('lock.hash') != null,
+      enabled: enabled,
       delayMin: p.getInt('lock.delay') ?? 1,
     );
+    if (!enabled) {
+      isLocked.value = false;
+    }
   }
 
   String _hash(String pin, String salt) =>

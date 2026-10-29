@@ -116,7 +116,6 @@ class HomeShell extends ConsumerStatefulWidget {
 }
 
 class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserver {
-  static bool _checkedUpdateOnce = false;
 
   static const _pages = <Widget>[
     HomePage(),
@@ -129,19 +128,16 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (!_checkedUpdateOnce) {
-      _checkedUpdateOnce = true;
-      Future.delayed(const Duration(seconds: 2), () async {
-        if (!mounted) return;
-        await UpdateCheckerService.checkAndNotify(ref);
-      });
-    }
+    Future.delayed(const Duration(milliseconds: 1500), () async {
+      if (!mounted) return;
+      await UpdateCheckerService.checkAndNotify(ref, context: context);
+    });
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      UpdateCheckerService.checkAndNotify(ref);
+      UpdateCheckerService.checkAndNotify(ref, context: context);
     }
   }
 

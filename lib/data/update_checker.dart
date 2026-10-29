@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/l10n.dart';
 import '../core/theme.dart';
+import 'lock.dart';
 
 class AppUpdateInfo {
   const AppUpdateInfo({
@@ -42,7 +43,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '1.5.0';
+  static const currentVersion = '1.5.1';
 
   static const MethodChannel _channel =
       MethodChannel('com.example.wall_o_pay/notifications');
@@ -61,11 +62,36 @@ class UpdateCheckerService {
     }
   }
 
-  /// Memeriksa pembaruan di latar belakang dan memperbarui state banner notifikasi di dalam aplikasi.
-  static Future<AppUpdateInfo?> checkAndNotify(WidgetRef ref) async {
+  static String? _promptedVersion;
+  static bool _isShowingDialog = false;
+
+  /// Memeriksa pembaruan dan otomatis memunculkan pop-up dialog ke pengguna jika ada rilis baru.
+  static Future<AppUpdateInfo?> checkAndNotify(
+    WidgetRef ref, {
+    BuildContext? context,
+  }) async {
     final info = await checkForUpdate();
     if (info != null && info.hasUpdate) {
       ref.read(availableUpdateProvider.notifier).setUpdate(info);
+
+      if (context != null && _promptedVersion != info.latestVersion && !_isShowingDialog) {
+        // Jika aplikasi sedang terkunci dengan PIN, tunggu sampai pengguna selesai membuka kunci
+        if (Lock.instance.isLocked.value) {
+          void listener() {
+            if (!Lock.instance.isLocked.value) {
+              Lock.instance.isLocked.removeListener(listener);
+              if (context.mounted && _promptedVersion != info.latestVersion && !_isShowingDialog) {
+                _promptedVersion = info.latestVersion;
+                showUpdateDialog(context, info);
+              }
+            }
+          }
+          Lock.instance.isLocked.addListener(listener);
+        } else if (context.mounted) {
+          _promptedVersion = info.latestVersion;
+          showUpdateDialog(context, info);
+        }
+      }
     }
     return info;
   }
@@ -175,7 +201,9 @@ class UpdateCheckerService {
 
   /// Menampilkan dialog pembaruan aplikasi modern.
   static void showUpdateDialog(BuildContext context, AppUpdateInfo info) {
-    showDialog(
+    if (_isShowingDialog) return;
+    _isShowingDialog = true;
+    showDialog<void>(
       context: context,
       barrierDismissible: true,
       builder: (ctx) {
@@ -283,6 +311,8 @@ class UpdateCheckerService {
           ],
         );
       },
-    );
+    ).then((_) {
+      _isShowingDialog = false;
+    });
   }
 }

@@ -4,6 +4,16 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-10-29
+
+### Fixed
+- **Automatic In-App Update Pop-Up Dialog:**
+  - Resolved an issue where update detection only updated the background state and dashboard card banner without displaying the automatic update pop-up dialog.
+  - Added smart automatic pop-up prompt upon detecting new releases on startup and resume, with anti-spam session tracking (`_promptedVersion` and `_isShowingDialog`).
+  - Added awareness of App PIN Lock so the update dialog waits gracefully until the user unlocks the screen before popping up on the dashboard.
+
+---
+
 ## [1.5.0] - 2026-10-29
 
 ### Added

@@ -24,6 +24,7 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    Lock.instance.isLocked.value = locked;
     WidgetsBinding.instance.addObserver(this);
     Lock.instance.state.addListener(_onLockStateChanged);
   }
@@ -37,6 +38,7 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
 
   void _onLockStateChanged() {
     if (!Lock.instance.state.value.enabled && locked) {
+      Lock.instance.isLocked.value = false;
       setState(() => locked = false);
     }
   }
@@ -56,6 +58,7 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
           try {
             Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
           } catch (_) {}
+          Lock.instance.isLocked.value = true;
           setState(() => locked = true);
         }
       }
@@ -70,7 +73,10 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
         if (locked)
           Positioned.fill(
             child: LockScreen(
-              onUnlock: () => setState(() => locked = false),
+              onUnlock: () {
+                Lock.instance.isLocked.value = false;
+                setState(() => locked = false);
+              },
             ),
           ),
       ],
