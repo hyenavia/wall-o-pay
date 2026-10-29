@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
 import 'core/l10n.dart';
 import 'data/cloud.dart';
+import 'data/lock.dart';
 import 'data/prefs.dart';
 import 'firebase_options.dart';
 
@@ -21,6 +22,9 @@ Future<void> main() async {
   AppLocale.code = prefs.getString('pref_locale') == 'id' ? 'id' : 'en';
 
   // Firebase dipakai untuk login dan backup cloud.
+  // Muat status kunci PIN aplikasi (offline-first & sync cloud).
+  await Lock.instance.load();
+
   var firebaseReady = false;
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);

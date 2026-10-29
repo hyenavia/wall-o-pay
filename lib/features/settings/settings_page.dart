@@ -16,6 +16,8 @@ import '../../data/providers.dart';
 import '../../data/update_checker.dart';
 import '../categories/categories_page.dart';
 import '../profile/profile_page.dart';
+import '../../data/lock.dart';
+import '../security/security_page.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -170,6 +172,34 @@ class SettingsPage extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
+          SectionHeader(title: context.tr('Security')),
+          ValueListenableBuilder<AppLockState>(
+            valueListenable: Lock.instance.state,
+            builder: (context, lockState, _) {
+              final timeoutLabel = switch (lockState.delayMin) {
+                0 => context.tr('Immediately'),
+                5 => context.tr('5 minutes'),
+                _ => context.tr('1 minute'),
+              };
+              return AppCard(
+                padding: EdgeInsets.zero,
+                child: ListTile(
+                  leading: const Icon(Icons.lock_outline_rounded),
+                  title: Text(context.tr('App PIN Lock')),
+                  subtitle: Text(
+                    lockState.enabled
+                        ? context.tr('Active • Timeout: {time}', {'time': timeoutLabel})
+                        : context.tr('Protect your financial data with a 6-digit PIN.'),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(builder: (_) => const SecurityPage()),
+                  ),
+                ),
+              );
+            },
           ),
           SectionHeader(title: context.tr('Cloud backup (online)')),
           AppCard(
@@ -482,6 +512,7 @@ class SettingsPage extends ConsumerWidget {
     if (context.mounted) Navigator.of(context).popUntil((r) => r.isFirst);
     ref.read(autoSyncServiceProvider).stopSync();
     await FirebaseAuth.instance.signOut();
+    await Lock.instance.clearLocal();
     if (choice == 'wipe') await db.resetAllData();
   }
 }

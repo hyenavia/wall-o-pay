@@ -4,6 +4,21 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-10-29
+
+### Added
+- **Multi-Device App PIN Lock Security (inspired by Lunera):**
+  - Integrated a dedicated 6-digit PIN security lock with salted SHA-256 cryptographic hashing (`crypto`).
+  - **Offline-First with Cloud Sync:** PIN configuration is stored securely locally in SharedPreferences and seamlessly synchronizes with Cloud Firestore (`users/{uid}/meta/security`) so users never lose their PIN across devices.
+  - **Adaptive Auto-Lock Timeout:** Configurable background timeout (Immediately with 3s grace period, 1 minute, or 5 minutes). Automatically locks the application and returns to root safely when returning from the background.
+  - **Full-Featured Security UI:**
+    - Custom interactive numeric `PinPad` with circular keypads, tactile feedback, and 6 glowing dot indicators.
+    - Premium dark forest themed `LockScreen` with brand logo and 5-attempt anti-brute-force rate limiting (30s cooldown).
+    - Safe "Forgot PIN?" recovery flow allowing account sign-out to reset access.
+    - Dedicated `SecurityPage` accessible from Settings with quick toggle, auto-lock timeout selector, and "Change PIN" workflow.
+
+---
+
 ## [1.4.2] - 2026-10-29
 
 ### Fixed
