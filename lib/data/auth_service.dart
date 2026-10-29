@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+
+import 'cloud_sync.dart';
 
 class AuthFailure implements Exception {
   const AuthFailure(this.code);
@@ -68,5 +71,51 @@ class AuthService {
   Future<void> sendPasswordReset(String identifier) async {
     final email = await _resolveEmail(identifier);
     await _auth.sendPasswordResetEmail(email: email);
+  }
+
+  /// Menghapus akun pengguna secara permanen dari Firebase Authentication,
+  /// menghapus pemetaan username di Firestore, dan menghapus seluruh koleksi data cloud.
+  Future<void> deleteAccount({String? password}) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+    final uid = user.uid;
+
+    // 1. Re-autentikasi jika password diisi
+    if (password != null && password.isNotEmpty && user.email != null) {
+      try {
+        final cred = EmailAuthProvider.credential(
+          email: user.email!,
+          password: password,
+        );
+        await user.reauthenticateWithCredential(cred);
+      } catch (e) {
+        debugPrint('[AuthService] Re-authentication failed before delete: $e');
+        rethrow;
+      }
+    }
+
+    // 2. Hapus seluruh data pengguna dari Cloud Firestore
+    await AutoSyncService.wipeCloudUserData(uid);
+
+    // 3. Hapus pemetaan username di Firestore
+    try {
+      final snap = await _fs.collection('usernames').where('uid', isEqualTo: uid).get();
+      for (final doc in snap.docs) {
+        await doc.reference.delete();
+      }
+    } catch (e) {
+      debugPrint('[AuthService] Error deleting username mapping: $e');
+    }
+
+    // 4. Hapus dokumen root pengguna di 'users/{uid}'
+    try {
+      await _fs.collection('users').doc(uid).delete();
+    } catch (e) {
+      debugPrint('[AuthService] Error deleting user root doc: $e');
+    }
+
+    // 5. Hapus akun pengguna di Firebase Authentication
+    await user.delete();
+    debugPrint('[AuthService] Successfully deleted user account: $uid');
   }
 }

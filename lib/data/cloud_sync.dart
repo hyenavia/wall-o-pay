@@ -66,13 +66,16 @@ class AutoSyncService {
     _currentUid = uid;
     debugPrint('[AutoSync] Starting sync session for user: $uid');
 
-    // Cek apakah terjadi pergantian akun pengguna pada perangkat ini
+    // Cek apakah terjadi pergantian akun atau sesi baru pada perangkat ini
     try {
       final prefs = _ref.read(sharedPreferencesProvider);
       final lastUid = prefs.getString('current_sync_user_id');
-      if (lastUid != null && lastUid != uid) {
-        debugPrint('[AutoSync] Account switch detected ($lastUid -> $uid). Resetting local data...');
-        await _db.resetAllData();
+      if (lastUid != uid) {
+        debugPrint('[AutoSync] Account switch or new session ($lastUid -> $uid). Preparing local data...');
+        if (lastUid != null) {
+          await _db.resetAllData();
+        }
+        _ref.read(appPrefsProvider.notifier).loadForUser(uid);
         _ref.read(budgetRuleProvider.notifier).loadForUser(uid);
         await Lock.instance.syncWithCloud(uid);
       }
@@ -166,6 +169,25 @@ class AutoSyncService {
     });
     _subscriptions.add(budgetSub);
 
+    // 3c. Dengarkan snapshot personalisasi pengguna (tema, bahasa, periode, hari gajian)
+    final prefSub = root
+        .collection('meta')
+        .doc('preferences')
+        .snapshots()
+        .listen((snap) async {
+      if (snap.metadata.hasPendingWrites) return;
+      if (snap.exists) {
+        try {
+          await _ref.read(appPrefsProvider.notifier).restoreFromCloud(uid);
+        } catch (e) {
+          debugPrint('[AutoSync] Error restoring preferences snapshot: $e');
+        }
+      }
+    }, onError: (err) {
+      debugPrint('[AutoSync] Preferences snapshot error: $err');
+    });
+    _subscriptions.add(prefSub);
+
     // 4. Dengarkan perubahan konektivitas jaringan (deteksi internet kembali aktif)
     final connSub = Connectivity().onConnectivityChanged.listen((results) {
       final hasConnection = results.any((r) => r != ConnectivityResult.none);
@@ -238,6 +260,12 @@ class AutoSyncService {
         debugPrint('[AutoSync] Warning restoring budgetConfig: $e');
       }
 
+      try {
+        await _ref.read(appPrefsProvider.notifier).restoreFromCloud(uid);
+      } catch (e) {
+        debugPrint('[AutoSync] Warning restoring preferences: $e');
+      }
+
       for (final t in _db.syncTables) {
         try {
           final snap = await root.collection(t.name).get().timeout(_timeout);
@@ -265,6 +293,12 @@ class AutoSyncService {
         await _ref.read(budgetRuleProvider.notifier).uploadToCloud(uid);
       } catch (e) {
         debugPrint('[AutoSync] Warning uploading budgetConfig: $e');
+      }
+
+      try {
+        await _ref.read(appPrefsProvider.notifier).uploadToCloud(uid);
+      } catch (e) {
+        debugPrint('[AutoSync] Warning uploading preferences: $e');
       }
 
       for (final t in _db.syncTables) {
@@ -339,12 +373,33 @@ class AutoSyncService {
         }
       }
 
-      final metaDocs = ['profile', 'security', 'budgetConfig'];
+      final metaDocs = ['profile', 'security', 'budgetConfig', 'preferences'];
       for (final m in metaDocs) {
         try {
           await root.collection('meta').doc(m).delete();
         } catch (_) {}
       }
+
+      // Hapus pemetaan username di Firestore
+      try {
+        final usernameSnap = await FirebaseFirestore.instance
+            .collection('usernames')
+            .where('uid', isEqualTo: uid)
+            .get();
+        for (final doc in usernameSnap.docs) {
+          await doc.reference.delete();
+        }
+      } catch (e) {
+        debugPrint('[AutoSync] Error wiping username mapping: $e');
+      }
+
+      // Hapus dokumen root pengguna
+      try {
+        await root.delete();
+      } catch (e) {
+        debugPrint('[AutoSync] Error wiping root user doc: $e');
+      }
+
       debugPrint('[AutoSync] Successfully wiped all cloud data for user: $uid');
     } catch (e) {
       debugPrint('[AutoSync] Error wiping cloud data: $e');
@@ -356,6 +411,8 @@ class AutoSyncService {
     try {
       final root = FirebaseFirestore.instance.collection('users').doc(uid);
       await _ref.read(profileProvider.notifier).uploadToCloud(uid);
+      await _ref.read(appPrefsProvider.notifier).uploadToCloud(uid);
+      await _ref.read(budgetRuleProvider.notifier).uploadToCloud(uid);
 
       for (final t in _db.syncTables) {
         final col = root.collection(t.name);

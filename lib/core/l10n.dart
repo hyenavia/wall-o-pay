@@ -444,5 +444,16 @@ const Map<String, String> _id = {
   'Delete this recurring rule?': 'Hapus aturan tagihan rutin ini?',
   'Next: {date}': 'Berikutnya: {date}',
   'Start: {date}': 'Mulai: {date}',
+  'Delete Account & Data': 'Hapus Akun & Data',
+  'Permanently delete your account and all data.': 'Hapus akun secara permanen beserta seluruh data.',
+  'Delete Account Permanently?': 'Hapus Akun Permanen?',
+  'Warning: This action is permanent and cannot be undone. Your user account, all transactions, budgets, wallets, and settings will be permanently erased from the cloud and this device.': 'Peringatan: Tindakan ini permanen dan tidak dapat dibatalkan. Akun pengguna, semua transaksi, anggaran, dompet, dan pengaturanmu akan dihapus selamanya dari cloud dan perangkat ini.',
+  'Enter Password to Confirm': 'Masukkan Kata Sandi untuk Konfirmasi',
+  'Delete Permanently': 'Hapus Permanen',
+  'Password is required to delete account.': 'Kata sandi diperlukan untuk menghapus akun.',
+  'Deleting account and wiping data...': 'Menghapus akun dan membersihkan data...',
+  'Account and all data successfully deleted.': 'Akun dan seluruh data berhasil dihapus permanen.',
+  'Incorrect password. Account was not deleted.': 'Kata sandi salah. Akun tidak dihapus.',
+  'Your financial data is safely stored in the cloud. You can log back in on this or another device anytime.': 'Data keuanganmu tersimpan aman di cloud. Kamu bisa masuk kembali di perangkat ini atau perangkat lain kapan saja.',
 };
 

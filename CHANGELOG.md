@@ -4,6 +4,19 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.2] - 2026-10-30
+
+### Fixed
+- **Multi-Device Personalization & Cross-Device Budget Synchronization:**
+  - Resolved cross-device budget mismatch where Device B failed to display budgets created on Device A because period settings (`periodType` and `firstDayOfWeek`) were only stored locally, resulting in conflicting period calculation keys.
+  - Added full Cloud Firestore two-way synchronization and real-time listeners for user personalization (`users/{uid}/meta/preferences`), syncing Theme Mode, Language, Period Mode (Monthly vs Weekly), and Custom Payday / First Day of Week across all devices.
+- **True Account & Cloud Data Deletion:**
+  - Resolved issue where "Log out & erase data" previously only signed out without deleting the authentication account or username reservation.
+  - Implemented `AuthService.deleteAccount()`, which permanently deletes the Firebase Authentication user account (`user.delete()`), releases username reservations in `usernames/{username}`, and deletes all user documents in Firestore `users/{uid}`.
+  - Separated Settings into clear actions: a clean **Log Out** (preserves cloud data) and a dedicated **Delete Account & Data** (permanently erases account and data with password verification).
+
+---
+
 ## [1.6.1] - 2026-10-29
 
 ### Fixed

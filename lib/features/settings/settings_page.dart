@@ -7,6 +7,7 @@ import '../../core/l10n.dart';
 import '../../core/period.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import '../../data/auth_service.dart';
 import '../../data/cloud.dart';
 import '../../data/cloud_backup.dart';
 import '../../data/cloud_sync.dart';
@@ -383,11 +384,25 @@ class SettingsPage extends ConsumerWidget {
             SectionHeader(title: context.tr('Account')),
             AppCard(
               padding: EdgeInsets.zero,
-              child: ListTile(
-                leading: const Icon(Icons.logout),
-                title: Text(context.tr('Log out')),
-                subtitle: Text(user.email ?? ''),
-                onTap: () => _signOut(context, ref),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.logout),
+                    title: Text(context.tr('Log out')),
+                    subtitle: Text(user.email ?? ''),
+                    onTap: () => _signOut(context, ref),
+                  ),
+                  const Divider(height: 1, indent: 56),
+                  ListTile(
+                    leading: const Icon(Icons.person_remove_outlined, color: AppColors.expense),
+                    title: Text(
+                      context.tr('Delete Account & Data'),
+                      style: const TextStyle(color: AppColors.expense, fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(context.tr('Permanently delete your account and all data.')),
+                    onTap: () => _deleteAccount(context, ref),
+                  ),
+                ],
               ),
             ),
           ],
@@ -524,46 +539,32 @@ class SettingsPage extends ConsumerWidget {
   }
 
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
-    final choice = await showDialog<String>(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(context.tr('Log out?')),
         content: Text(context.tr(
-          'Choose "Log out" to keep your data safe in the cloud and switch accounts on this device. Choose "Log out & erase data" to permanently delete all data from this device AND the cloud.',
+          'Your financial data is safely stored in the cloud. You can log back in on this or another device anytime.',
         )),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
+            onPressed: () => Navigator.pop(ctx, false),
             child: Text(context.tr('Cancel')),
           ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: AppColors.expense),
-            onPressed: () => Navigator.pop(ctx, 'wipe'),
-            child: Text(context.tr('Log out & erase data')),
-          ),
           FilledButton(
-            onPressed: () => Navigator.pop(ctx, 'keep'),
+            onPressed: () => Navigator.pop(ctx, true),
             child: Text(context.tr('Log out')),
           ),
         ],
       ),
     );
-    if (choice == null) return;
+    if (confirmed != true) return;
 
     final db = ref.read(databaseProvider);
-    final user = ref.read(currentUserProvider);
     if (context.mounted) Navigator.of(context).popUntil((r) => r.isFirst);
     ref.read(autoSyncServiceProvider).stopSync();
 
-    if (choice == 'wipe' && user != null) {
-      // 1. Hapus seluruh data di Firestore untuk pengguna ini
-      await AutoSyncService.wipeCloudUserData(user.uid);
-      // 2. Bersihkan budget config & PIN pengguna ini
-      await ref.read(budgetRuleProvider.notifier).clearLocal(user.uid);
-      await Lock.instance.clearLocal(user.uid);
-    }
-
-    // Selalu bersihkan database lokal perangkat agar tidak bocor ke akun berikutnya
+    // Reset database lokal perangkat agar tidak bocor ke akun berikutnya
     await db.resetAllData();
     await ref.read(budgetRuleProvider.notifier).clearLocal();
     await Lock.instance.loadForUser(null);
@@ -572,5 +573,152 @@ class SettingsPage extends ConsumerWidget {
     await prefs.remove('current_sync_user_id');
 
     await FirebaseAuth.instance.signOut();
+  }
+
+  Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
+    final passwordController = TextEditingController();
+    var hasPasswordAuth = false;
+    final user = ref.read(currentUserProvider);
+    if (user != null) {
+      for (final info in user.providerData) {
+        if (info.providerId == 'password') hasPasswordAuth = true;
+      }
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          context.tr('Delete Account Permanently?'),
+          style: const TextStyle(color: AppColors.expense, fontWeight: FontWeight.bold),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(context.tr(
+                'Warning: This action is permanent and cannot be undone. Your user account, all transactions, budgets, wallets, and settings will be permanently erased from the cloud and this device.',
+              )),
+              if (hasPasswordAuth) ...[
+                const SizedBox(height: 16),
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: context.tr('Enter Password to Confirm'),
+                    hintText: context.tr('Password'),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    prefixIcon: const Icon(Icons.lock_outline),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(context.tr('Cancel')),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.expense),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(context.tr('Delete Permanently')),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) {
+      passwordController.dispose();
+      return;
+    }
+
+    final password = passwordController.text.trim();
+    passwordController.dispose();
+
+    if (hasPasswordAuth && password.isEmpty) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.expense,
+            content: Text(context.tr('Password is required to delete account.')),
+          ),
+        );
+      }
+      return;
+    }
+
+    final db = ref.read(databaseProvider);
+    final userUid = user?.uid;
+
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => Center(
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(context.tr('Deleting account and wiping data...')),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    try {
+      ref.read(autoSyncServiceProvider).stopSync();
+      await AuthService().deleteAccount(password: password.isNotEmpty ? password : null);
+
+      if (userUid != null) {
+        await ref.read(budgetRuleProvider.notifier).clearLocal(userUid);
+        await Lock.instance.clearLocal(userUid);
+      }
+      await db.resetAllData();
+      await ref.read(budgetRuleProvider.notifier).clearLocal();
+      await Lock.instance.loadForUser(null);
+
+      final prefs = ref.read(sharedPreferencesProvider);
+      await prefs.remove('current_sync_user_id');
+
+      if (context.mounted) {
+        Navigator.of(context).popUntil((r) => r.isFirst);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.income,
+            content: Text(context.tr('Account and all data successfully deleted.')),
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // dismiss loading
+        final errorMsg = e.code == 'wrong-password' || e.code == 'invalid-credential'
+            ? context.tr('Incorrect password. Account was not deleted.')
+            : e.message ?? e.code;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(backgroundColor: AppColors.expense, content: Text(errorMsg)),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // dismiss loading
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.expense,
+            content: Text(context.tr('Error: {error}', {'error': e})),
+          ),
+        );
+      }
+    }
   }
 }
