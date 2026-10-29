@@ -139,6 +139,8 @@ const Map<String, String> _id = {
   'Update Available (v{version})!': 'Pembaruan Tersedia (v{version})!',
   'A new version of Wall o\' Pay is ready with performance improvements and updates.': 'Versi baru Wall o\' Pay siap diunduh dengan berbagai peningkatan dan perbaikan.',
   'NEW': 'BARU',
+  'A new version of Wall o\' Pay is ready. Tap to download APK.': 'Versi baru Wall o\' Pay telah rilis. Ketuk untuk download APK.',
+  'Download APK': 'Unduh APK',
   'A new version of Wall o\' Pay is ready with the latest improvements:': 'Versi baru Wall o\' Pay telah tersedia dengan pembaruan terkini:',
   'Tap below to download and install the new APK.': 'Ketuk tombol di bawah untuk mengunduh dan memasang APK baru.',
   'Later': 'Nanti',

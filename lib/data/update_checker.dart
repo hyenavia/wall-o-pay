@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/l10n.dart';
 import '../core/theme.dart';
@@ -42,7 +43,9 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '1.3.2';
+  static const currentVersion = '1.3.3';
+
+  static const String _prefLastNotifiedKey = 'pref_last_notified_update_version';
 
   static const MethodChannel _channel =
       MethodChannel('com.example.wall_o_pay/notifications');
@@ -51,6 +54,48 @@ class UpdateCheckerService {
       'https://api.github.com/repos/hyenavia/wall-o-pay/releases/latest';
   static const String _directDownloadUrl =
       'https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk';
+
+  /// Meminta izin notifikasi sistem Android (Android 13+).
+  static Future<bool> requestNotificationPermission() async {
+    try {
+      final granted = await _channel.invokeMethod<bool>('requestNotificationPermission');
+      return granted ?? false;
+    } catch (e) {
+      debugPrint('Failed to request notification permission: $e');
+      return false;
+    }
+  }
+
+  /// Memeriksa apakah notifikasi sistem diizinkan.
+  static Future<bool> areNotificationsEnabled() async {
+    try {
+      final enabled = await _channel.invokeMethod<bool>('areNotificationsEnabled');
+      return enabled ?? true;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  /// Menampilkan notifikasi sistem Android di bilah status / heads-up notification.
+  static Future<bool> postSystemNotification({
+    required String title,
+    required String body,
+    required String downloadUrl,
+    String actionText = 'Download APK',
+  }) async {
+    try {
+      final result = await _channel.invokeMethod<bool>('postUpdateNotification', {
+        'title': title,
+        'body': body,
+        'downloadUrl': downloadUrl,
+        'actionText': actionText,
+      });
+      return result ?? false;
+    } catch (e) {
+      debugPrint('Failed to post system notification: $e');
+      return false;
+    }
+  }
 
   /// Membuka URL di browser atau installer eksternal via native intent.
   static Future<void> openUrl(String url) async {
@@ -61,11 +106,42 @@ class UpdateCheckerService {
     }
   }
 
-  /// Memeriksa pembaruan di latar belakang dan memperbarui state notifikasi reaktif.
-  static Future<AppUpdateInfo?> checkAndNotify(WidgetRef ref) async {
+  /// Memeriksa pembaruan di latar belakang, memicu notifikasi sistem bilah status HP,
+  /// dan memperbarui state banner notifikasi di dalam aplikasi.
+  static Future<AppUpdateInfo?> checkAndNotify(
+    WidgetRef ref, {
+    bool forceSystemNotification = false,
+  }) async {
     final info = await checkForUpdate();
     if (info != null && info.hasUpdate) {
       ref.read(availableUpdateProvider.notifier).setUpdate(info);
+
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final lastNotified = prefs.getString(_prefLastNotifiedKey);
+
+        if (forceSystemNotification || lastNotified != info.latestVersion) {
+          final isId = AppLocale.code == 'id';
+          final title = isId
+              ? '🚀 Pembaruan Tersedia! (v${info.latestVersion})'
+              : '🚀 Update Available! (v${info.latestVersion})';
+          final body = isId
+              ? 'Versi baru Wall o\' Pay telah rilis. Ketuk untuk download APK.'
+              : 'A new version of Wall o\' Pay is ready. Tap to download APK.';
+          final action = isId ? 'Unduh APK' : 'Download APK';
+
+          await postSystemNotification(
+            title: title,
+            body: body,
+            downloadUrl: info.downloadUrl,
+            actionText: action,
+          );
+
+          await prefs.setString(_prefLastNotifiedKey, info.latestVersion);
+        }
+      } catch (e) {
+        debugPrint('Error managing system notification persistence: $e');
+      }
     }
     return info;
   }
@@ -153,7 +229,7 @@ class UpdateCheckerService {
   }) async {
     final info = await checkForUpdate();
     if (info != null && info.hasUpdate && ref != null) {
-      ref.read(availableUpdateProvider.notifier).setUpdate(info);
+      await checkAndNotify(ref, forceSystemNotification: true);
     }
     if (!context.mounted) return;
 

@@ -114,7 +114,7 @@ class HomeShell extends ConsumerStatefulWidget {
   ConsumerState<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState extends ConsumerState<HomeShell> {
+class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserver {
   static bool _checkedUpdateOnce = false;
 
   static const _pages = <Widget>[
@@ -127,14 +127,29 @@ class _HomeShellState extends ConsumerState<HomeShell> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (!_checkedUpdateOnce) {
       _checkedUpdateOnce = true;
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          UpdateCheckerService.checkAndPromptUpdate(context, ref: ref, silentIfUpToDate: true);
-        }
+      Future.delayed(const Duration(seconds: 2), () async {
+        if (!mounted) return;
+        await UpdateCheckerService.requestNotificationPermission();
+        if (!mounted) return;
+        await UpdateCheckerService.checkAndNotify(ref);
       });
     }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      UpdateCheckerService.checkAndNotify(ref);
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override

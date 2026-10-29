@@ -4,6 +4,16 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.3] - 2026-10-29
+
+### Added
+- **Android System Status Bar & Heads-Up Notification for App Updates:**
+  - Added native Android notification channel (`wall_o_pay_updates`) with high importance to trigger real-time heads-up banners and status bar notifications outside the app.
+  - Integrated one-tap direct download action directly from the system notification shade.
+  - Added seamless background lifecycle checking and smart notification anti-spam persistence to prevent repeated alerts for the same release.
+
+---
+
 ## [1.3.2] - 2026-10-29
 
 ### Added
