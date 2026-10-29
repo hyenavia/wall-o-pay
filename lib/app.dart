@@ -132,8 +132,6 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       _checkedUpdateOnce = true;
       Future.delayed(const Duration(seconds: 2), () async {
         if (!mounted) return;
-        await UpdateCheckerService.requestNotificationPermission();
-        if (!mounted) return;
         await UpdateCheckerService.checkAndNotify(ref);
       });
     }
