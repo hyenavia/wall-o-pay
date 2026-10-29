@@ -4,6 +4,16 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2026-10-29
+
+### Fixed
+- **App Startup White Screen Freeze:**
+  - Resolved an issue where `Lock.instance.load()` accessed `FirebaseAuth.instance` before `Firebase.initializeApp()` was completed, throwing an uncaught startup exception and preventing `runApp()` from executing.
+  - Reordered initialization in `main.dart` so Firebase initializes first, and added defensive fallback handling in `Lock.instance` so it safely defaults to offline guest mode if Firebase is unavailable.
+  - Ensured `ShareService` runs post-frame callbacks so shared intent pop-ups never conflict with Flutter's initial widget layout.
+
+---
+
 ## [1.6.0] - 2026-10-29
 
 ### Added

@@ -21,16 +21,20 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   AppLocale.code = prefs.getString('pref_locale') == 'id' ? 'id' : 'en';
 
-  // Firebase dipakai untuk login dan backup cloud.
-  // Muat status kunci PIN aplikasi (offline-first & sync cloud).
-  await Lock.instance.load();
-
+  // Firebase diinisialisasi terlebih dahulu sebelum layanan yang mengandalkan auth
   var firebaseReady = false;
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     firebaseReady = true;
   } catch (e) {
     debugPrint('Firebase is not available: $e');
+  }
+
+  // Muat status kunci PIN aplikasi (offline-first & sync cloud).
+  try {
+    await Lock.instance.load();
+  } catch (e) {
+    debugPrint('Error loading lock state: $e');
   }
 
   runApp(

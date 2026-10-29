@@ -26,7 +26,14 @@ class Lock {
   SharedPreferences? _p;
   String? _activeUid;
 
-  String get _currentUid => _activeUid ?? FirebaseAuth.instance.currentUser?.uid ?? 'guest';
+  String get _currentUid {
+    if (_activeUid != null) return _activeUid!;
+    try {
+      return FirebaseAuth.instance.currentUser?.uid ?? 'guest';
+    } catch (_) {
+      return 'guest';
+    }
+  }
 
   String _k(String key, [String? uid]) {
     final u = uid ?? _currentUid;
@@ -35,7 +42,11 @@ class Lock {
 
   Future<void> load() async {
     _p = await SharedPreferences.getInstance();
-    _activeUid = FirebaseAuth.instance.currentUser?.uid;
+    try {
+      _activeUid = FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      _activeUid = null;
+    }
     _migrateLegacyIfNeeded(_activeUid);
     _emit();
     try {

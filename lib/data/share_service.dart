@@ -26,8 +26,12 @@ class ShareService {
       }
     });
 
-    // Check on startup
-    checkSharedData(context);
+    // Check on startup after initial frame is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        checkSharedData(context);
+      }
+    });
 
     // If locked, listen until user unlocks to process queued share
     Lock.instance.isLocked.addListener(() {
@@ -88,11 +92,16 @@ class ShareService {
       validImagePath = imagePath;
     }
 
-    showTransactionForm(
-      context,
-      initialAmount: parsedAmount,
-      initialNote: note.trim(),
-      initialReceiptPath: validImagePath,
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.mounted) {
+        showTransactionForm(
+          context,
+          initialAmount: parsedAmount,
+          initialNote: note.trim(),
+          initialReceiptPath: validImagePath,
+        );
+      }
+    });
   }
 }
+
