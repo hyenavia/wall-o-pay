@@ -4,6 +4,21 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2026-10-29
+
+### Fixed
+- **Wallet Balance Synchronization & Adjustment:**
+  - Resolved balance inflation where editing a wallet's balance erroneously added the new initial amount to existing net transactions instead of matching the user's intended current balance.
+  - Added "Adjust Balance" dialog with dual modes: **Current Balance** (automatically computes initial balance so the wallet immediately reflects the exact real-world amount) and **Initial Balance** (sets the starting balance before transactions).
+  - Fixed missing text label (`: `) in the wallet details bottom sheet to prominently display the active current balance and transaction net flow.
+
+### Changed
+- **Unified Total Net Worth Display on Dashboard Hero Card:**
+  - Synchronized the main dashboard card to prominently display **Total Balance (All Accounts)** matching the sum of all individual wallets and accounts (`Rekening Utama`, `Bank Digital`, `E-Wallet`, `Tunai`).
+  - Added a dedicated period cashflow indicator pill on the hero card (`Weekly Flow` / `Monthly Flow`) displaying net surplus/deficit (`+Rp X` / `-Rp X`) alongside income and expense breakdowns.
+
+---
+
 ## [1.4.1] - 2026-10-29
 
 ### Changed

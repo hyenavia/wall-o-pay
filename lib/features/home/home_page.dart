@@ -97,6 +97,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                 .where((t) => t.type == TxType.expense)
                 .fold<int>(0, (s, t) => s + t.amount);
             final balance = income - expense;
+            final totalBalance = ref.watch(totalCurrentBalanceProvider);
 
             final budgetPool = ref.watch(currentTotalBudgetPoolProvider);
             final totalBudget = budgetPool > 0
@@ -197,8 +198,9 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                 const Center(child: PeriodSwitcher(compact: true)),
                 const SizedBox(height: 8),
                 _BalanceCard(
-                  title: context.tr(isWeekly ? 'Weekly Balance' : 'Monthly Balance'),
-                  balance: balance,
+                  totalBalance: totalBalance,
+                  periodFlow: balance,
+                  periodLabel: context.tr(isWeekly ? 'Weekly Flow' : 'Monthly Flow'),
                   income: income,
                   expense: expense,
                 ),
@@ -376,14 +378,16 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
 
 class _BalanceCard extends StatefulWidget {
   const _BalanceCard({
-    required this.title,
-    required this.balance,
+    required this.totalBalance,
+    required this.periodFlow,
+    required this.periodLabel,
     required this.income,
     required this.expense,
   });
 
-  final String title;
-  final int balance;
+  final int totalBalance;
+  final int periodFlow;
+  final String periodLabel;
   final int income;
   final int expense;
 
@@ -399,6 +403,8 @@ class _BalanceCardState extends State<_BalanceCard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isSurplus = widget.periodFlow >= 0;
+
     return HeroCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -406,9 +412,28 @@ class _BalanceCardState extends State<_BalanceCard> {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  widget.title,
-                  style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
+                child: Row(
+                  children: [
+                    Text(
+                      context.tr('Total Balance'),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        context.tr('All Accounts'),
+                        style: const TextStyle(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               IconButton(
@@ -420,14 +445,46 @@ class _BalanceCardState extends State<_BalanceCard> {
               ),
             ],
           ),
+          const SizedBox(height: 2),
           Text(
-            _money(widget.balance),
+            _money(widget.totalBalance),
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800,
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isSurplus ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                  size: 15,
+                  color: isSurplus ? const Color(0xFF6EE7B7) : const Color(0xFFFCA5A5),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  ': ',
+                  style: const TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  _hidden ? '••••••' : '',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: isSurplus ? const Color(0xFF6EE7B7) : const Color(0xFFFCA5A5),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -825,6 +882,7 @@ class _WalletsSection extends ConsumerWidget {
         final theme = Theme.of(ctx);
         final scheme = theme.colorScheme;
         final wColor = Color(wallet.colorValue);
+        final netTx = currentBalance - wallet.initialBalance;
 
         return Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
@@ -851,12 +909,13 @@ class _WalletsSection extends ConsumerWidget {
                           ctx.tr(wallet.name),
                           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                         ),
+                        const SizedBox(height: 2),
                         Text(
-                          ': ',
+                          rupiah(currentBalance),
                           style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: currentBalance < 0 ? AppColors.expense : AppColors.deepForest,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: currentBalance < 0 ? AppColors.expense : scheme.primary,
                           ),
                         ),
                       ],
@@ -864,7 +923,7 @@ class _WalletsSection extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -872,13 +931,32 @@ class _WalletsSection extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
                   children: [
-                    Text(ctx.tr('Initial Balance:'), style: const TextStyle(fontSize: 13)),
-                    Text(
-                      rupiah(wallet.initialBalance),
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(ctx.tr('Initial Balance:'), style: const TextStyle(fontSize: 13)),
+                        Text(
+                          rupiah(wallet.initialBalance),
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+                    const Divider(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(ctx.tr('Net Transactions:'), style: const TextStyle(fontSize: 13)),
+                        Text(
+                          '',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: netTx >= 0 ? AppColors.income : AppColors.expense,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -888,11 +966,11 @@ class _WalletsSection extends ConsumerWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      icon: const Icon(Icons.edit_outlined, size: 18),
-                      label: Text(ctx.tr('Set Initial Balance')),
+                      icon: const Icon(Icons.tune_rounded, size: 18),
+                      label: Text(ctx.tr('Adjust Balance')),
                       onPressed: () {
                         Navigator.pop(ctx);
-                        _showEditInitialBalanceDialog(context, ref, wallet);
+                        _showAdjustBalanceDialog(context, ref, wallet, currentBalance);
                       },
                     ),
                   ),
@@ -917,50 +995,184 @@ class _WalletsSection extends ConsumerWidget {
     );
   }
 
-  void _showEditInitialBalanceDialog(BuildContext context, WidgetRef ref, Wallet wallet) {
-    final controller = TextEditingController(text: formatThousands(wallet.initialBalance));
-
+  void _showAdjustBalanceDialog(
+    BuildContext context,
+    WidgetRef ref,
+    Wallet wallet,
+    int currentBalance,
+  ) {
     showDialog<void>(
       context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text(ctx.tr('Set Initial Balance')),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                ctx.tr('Enter the starting balance for {name}:', {'name': ctx.tr(wallet.name)}),
-                style: const TextStyle(fontSize: 13),
+      builder: (ctx) => _AdjustBalanceDialog(
+        wallet: wallet,
+        currentBalance: currentBalance,
+        ref: ref,
+      ),
+    );
+  }
+}
+
+class _AdjustBalanceDialog extends StatefulWidget {
+  const _AdjustBalanceDialog({
+    required this.wallet,
+    required this.currentBalance,
+    required this.ref,
+  });
+
+  final Wallet wallet;
+  final int currentBalance;
+  final WidgetRef ref;
+
+  @override
+  State<_AdjustBalanceDialog> createState() => _AdjustBalanceDialogState();
+}
+
+class _AdjustBalanceDialogState extends State<_AdjustBalanceDialog> {
+  int _mode = 0; // 0: Saldo Saat Ini, 1: Saldo Awal
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: formatThousands(widget.currentBalance),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _switchMode(int mode) {
+    if (_mode == mode) return;
+    setState(() {
+      _mode = mode;
+      _controller.text = formatThousands(
+        mode == 0 ? widget.currentBalance : widget.wallet.initialBalance,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final wName = context.tr(widget.wallet.name);
+
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: Text(context.tr('Adjust Balance')),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                inputFormatters: amountFormatters(),
-                decoration: appInput(ctx, label: ctx.tr('Initial Balance'), prefixText: 'Rp '),
-                autofocus: true,
+              padding: const EdgeInsets.all(4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () => _switchMode(0),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: _mode == 0 ? scheme.primary : Colors.transparent,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          context.tr('Current Balance'),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: _mode == 0 ? scheme.onPrimary : scheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(10),
+                      onTap: () => _switchMode(1),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: _mode == 1 ? scheme.primary : Colors.transparent,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          context.tr('Initial Balance'),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: _mode == 1 ? scheme.onPrimary : scheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(ctx.tr('Cancel')),
             ),
-            FilledButton(
-              style: FilledButton.styleFrom(backgroundColor: AppColors.deepForest),
-              onPressed: () async {
-                final amount = parseAmount(controller.text);
-                await ref.read(databaseProvider).updateWalletInitialBalance(wallet.id, amount);
-                if (ctx.mounted) Navigator.pop(ctx);
-              },
-              child: Text(ctx.tr('Save')),
+            const SizedBox(height: 14),
+            Text(
+              _mode == 0
+                  ? context.tr(
+                      'Set the actual current balance for {name}. The system will adjust the starting balance automatically so the total matches instantly.',
+                      {'name': wName},
+                    )
+                  : context.tr(
+                      'Set the original starting balance for {name} before any transactions took place.',
+                      {'name': wName},
+                    ),
+              style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant, height: 1.35),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: _controller,
+              keyboardType: TextInputType.number,
+              inputFormatters: amountFormatters(),
+              decoration: appInput(
+                context,
+                label: _mode == 0 ? context.tr('Current Balance') : context.tr('Initial Balance'),
+                prefixText: 'Rp ',
+              ),
+              autofocus: true,
             ),
           ],
-        );
-      },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.tr('Cancel')),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(backgroundColor: AppColors.deepForest),
+          onPressed: () async {
+            final amount = parseAmount(_controller.text);
+            if (_mode == 0) {
+              final netTx = widget.currentBalance - widget.wallet.initialBalance;
+              final newInitial = amount - netTx;
+              await widget.ref.read(databaseProvider).updateWalletInitialBalance(widget.wallet.id, newInitial);
+            } else {
+              await widget.ref.read(databaseProvider).updateWalletInitialBalance(widget.wallet.id, amount);
+            }
+            if (context.mounted) Navigator.pop(context);
+          },
+          child: Text(context.tr('Save')),
+        ),
+      ],
     );
   }
 }
