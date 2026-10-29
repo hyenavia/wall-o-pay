@@ -9,6 +9,7 @@ import '../../core/period.dart';
 import '../../core/theme.dart';
 import '../../data/app_database.dart';
 import '../../data/tables.dart' show TxType;
+import 'insight_engine.dart';
 
 class _Slice {
   const _Slice(this.label, this.color, this.value);
@@ -192,6 +193,150 @@ class _Dot extends StatelessWidget {
         ),
         const SizedBox(width: 6),
         Text(label, style: Theme.of(context).textTheme.bodySmall),
+      ],
+    );
+  }
+}
+
+/// Grafik batang pengeluaran harian atau mingguan untuk periode terpilih.
+class PeriodExpenseBarChart extends StatefulWidget {
+  const PeriodExpenseBarChart({
+    super.key,
+    required this.points,
+    required this.totalExpense,
+  });
+
+  final List<ChartPoint> points;
+  final int totalExpense;
+
+  @override
+  State<PeriodExpenseBarChart> createState() => _PeriodExpenseBarChartState();
+}
+
+class _PeriodExpenseBarChartState extends State<PeriodExpenseBarChart> {
+  int? _touchedIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final maxAmount = widget.points.fold<int>(0, (m, p) => math.max(m, p.amount));
+    final maxY = maxAmount == 0 ? 10000.0 : (maxAmount * 1.25).toDouble();
+
+    const hidden = AxisTitles(sideTitles: SideTitles(showTitles: false));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          height: 180,
+          child: BarChart(
+            BarChartData(
+              alignment: BarChartAlignment.spaceAround,
+              maxY: maxY,
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: false,
+                horizontalInterval: maxY > 0 ? maxY / 3 : 1,
+                getDrawingHorizontalLine: (value) => FlLine(
+                  color: scheme.outlineVariant.withValues(alpha: 0.3),
+                  strokeWidth: 1,
+                  dashArray: [4, 4],
+                ),
+              ),
+              borderData: FlBorderData(show: false),
+              barTouchData: BarTouchData(
+                enabled: true,
+                touchCallback: (event, response) {
+                  setState(() {
+                    if (event is FlTapUpEvent || event is FlPanEndEvent) {
+                      _touchedIndex = null;
+                    } else if (response != null && response.spot != null) {
+                      _touchedIndex = response.spot!.touchedBarGroupIndex;
+                    }
+                  });
+                },
+                touchTooltipData: BarTouchTooltipData(
+                  getTooltipColor: (group) => AppColors.ink,
+                  tooltipPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                    final p = widget.points[group.x.toInt()];
+                    return BarTooltipItem(
+                      '${p.fullLabel}\n',
+                      const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      children: [
+                        TextSpan(
+                          text: rupiah(rod.toY.toInt()),
+                          style: const TextStyle(
+                            color: AppColors.sage,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              titlesData: FlTitlesData(
+                leftTitles: hidden,
+                topTitles: hidden,
+                rightTitles: hidden,
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 28,
+                    getTitlesWidget: (value, meta) {
+                      final idx = value.toInt();
+                      if (idx < 0 || idx >= widget.points.length) {
+                        return const SizedBox.shrink();
+                      }
+                      final isSelected = _touchedIndex == idx;
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          widget.points[idx].label,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: isSelected ? scheme.primary : scheme.onSurface.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              barGroups: [
+                for (int i = 0; i < widget.points.length; i++)
+                  BarChartGroupData(
+                    x: i,
+                    barRods: [
+                      BarChartRodData(
+                        toY: widget.points[i].amount.toDouble(),
+                        color: _touchedIndex == i
+                            ? AppColors.deepForest
+                            : (widget.points[i].amount > 0
+                                ? AppColors.sage
+                                : scheme.outlineVariant.withValues(alpha: 0.5)),
+                        width: widget.points.length > 7 ? 14 : 20,
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                        backDrawRodData: BackgroundBarChartRodData(
+                          show: true,
+                          toY: maxY,
+                          color: scheme.outlineVariant.withValues(alpha: 0.15),
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

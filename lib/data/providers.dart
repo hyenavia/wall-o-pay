@@ -67,6 +67,14 @@ final transactionsProvider = StreamProvider<List<TransactionEntry>>((ref) {
       .watchTransactionsBetween(period.start, period.end);
 });
 
+/// Transaksi periode sebelumnya (untuk perbandingan periode di tab Insight).
+final previousPeriodTransactionsProvider = StreamProvider<List<TransactionEntry>>((ref) {
+  final period = ref.watch(selectedPeriodProvider).shift(-1);
+  return ref
+      .watch(databaseProvider)
+      .watchTransactionsBetween(period.start, period.end);
+});
+
 /// Transaksi 6 periode terakhir (berakhir di periode terpilih), untuk grafik tren.
 final trendTransactionsProvider = StreamProvider<List<TransactionEntry>>((ref) {
   final period = ref.watch(selectedPeriodProvider);

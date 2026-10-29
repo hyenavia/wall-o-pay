@@ -4,6 +4,27 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-10-30
+
+### Added
+- **New Financial Insight Tab:**
+  - Replaced the low-usage standalone "Target" tab in the bottom navigation bar with a dedicated, comprehensive **Insight** tab. (Savings goals remain fully managed under the Budget tab's "Savings & Goals" bucket for 100% backward compatibility and zero data loss).
+  - Designed in Wall o' Pay's signature dark aesthetic, Deep Forest green hero cards, bright typography, and minimalist financial charts.
+  - **Period Financial Summary (Income, Expense, Net Difference):**
+    - High-contrast HeroCard presenting total income, total expenditure, and net surplus or deficit alongside savings rate percentage.
+  - **Period-over-Period Spending Comparison:**
+    - Dynamic comparison comparing current spending vs previous period (week or month), highlighting percentage changes, delta amounts saved or increased, and contextual encouragement.
+  - **Interactive Expense Trend Chart:**
+    - Custom minimalist bar chart (`fl_chart`) with touch tooltips and background guide rods, displaying daily spend distributions in weekly mode and weekly intervals in monthly mode, accompanied by run-rate averages.
+  - **Top Spending Categories Breakdown:**
+    - Ranked leaderboard of highest expenditure categories with category badges, amounts, transaction frequencies, share percentages, and period-over-period shift indicators.
+  - **Smart Financial Insights Engine:**
+    - Deterministic analytic generator computing real-time actionable findings: category spend surges/drops, single largest transactions, peak spending days, and cashflow health assessments.
+  - **Low-Data Friendly State:**
+    - Informative onboarding card when fewer than 3 expense transactions exist, inviting users to record transactions rather than rendering empty or broken charts.
+
+---
+
 ## [1.6.2] - 2026-10-30
 
 ### Fixed

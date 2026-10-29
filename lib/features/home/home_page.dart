@@ -12,7 +12,7 @@ import '../../core/widgets.dart';
 import '../../data/profile.dart';
 import '../../data/providers.dart';
 import '../../data/tables.dart' show TxType;
-import '../insights/insights_page.dart';
+
 import '../profile/profile_page.dart';
 import '../settings/settings_page.dart';
 import '../transactions/transaction_form.dart';
@@ -324,11 +324,8 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                     ),
                     _QuickAction(
                       icon: Icons.insights_outlined,
-                      label: context.tr('Insights'),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(builder: (_) => const InsightsPage()),
-                      ),
+                      label: context.tr('Insight'),
+                      onTap: () => ref.read(tabIndexProvider.notifier).set(3),
                     ),
                     _QuickAction(
                       icon: Icons.more_horiz,

@@ -16,7 +16,7 @@ import 'data/recurring_service.dart';
 import 'data/share_service.dart';
 import 'features/auth/auth_page.dart';
 import 'features/budget/budget_page.dart';
-import 'features/goals/goals_page.dart';
+import 'features/insights/insights_page.dart';
 import 'features/home/home_page.dart';
 import 'features/security/lock_screen.dart';
 import 'features/transactions/transaction_form.dart';
@@ -123,7 +123,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     HomePage(),
     TransactionsPage(),
     BudgetPage(),
-    GoalsPage(),
+    InsightsPage(),
   ];
 
   @override
@@ -275,7 +275,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
                   context.tr('Transactions')),
               const SizedBox(width: 64),
               item(2, Icons.pie_chart_outline, Icons.pie_chart, context.tr('Budget')),
-              item(3, Icons.flag_outlined, Icons.flag, context.tr('Goals')),
+              item(3, Icons.insights_outlined, Icons.insights, context.tr('Insight')),
             ],
           ),
         ),

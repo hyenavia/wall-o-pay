@@ -2,7 +2,7 @@
  * Wall o' Pay - Landing Page Interactive Logic (Full English)
  */
 
-const APP_VERSION = "1.6.2";
+const APP_VERSION = "1.7.0";
 
 // Theme Switcher
 function toggleTheme() {
