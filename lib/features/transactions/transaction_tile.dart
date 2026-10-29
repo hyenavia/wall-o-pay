@@ -15,11 +15,15 @@ class TransactionTile extends StatelessWidget {
     required this.entry,
     required this.category,
     required this.trailingNote,
+    this.wallet,
+    this.toWallet,
     this.onTap,
   });
 
   final TransactionEntry entry;
   final Category? category;
+  final Wallet? wallet;
+  final Wallet? toWallet;
   final String trailingNote;
   final VoidCallback? onTap;
 
@@ -27,13 +31,27 @@ class TransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isIncome = entry.type == TxType.income;
+    final isTransfer = entry.type == TxType.transfer;
+
     final catName = categoryName(context, category);
-    final color = Color(category?.colorValue ?? 0xFF607D8B);
-    final title = entry.note.isEmpty ? catName : entry.note;
-    final subtitle =
-        entry.note.isEmpty
-            ? context.tr(isIncome ? 'Income' : 'Expense')
-            : catName;
+    final color = isTransfer
+        ? const Color(0xFF00897B)
+        : Color(category?.colorValue ?? 0xFF607D8B);
+
+    final title = isTransfer
+        ? (entry.note.isNotEmpty ? entry.note : context.tr('Transfer Funds'))
+        : (entry.note.isEmpty ? catName : entry.note);
+
+    String subtitle;
+    if (isTransfer) {
+      final fromName = wallet != null ? context.tr(wallet!.name) : context.tr('Rekening Utama');
+      final toName = toWallet != null ? context.tr(toWallet!.name) : context.tr('Bank Digital');
+      subtitle = '$fromName ➔ $toName';
+    } else {
+      final wName = wallet != null ? ' • ${context.tr(wallet!.name)}' : '';
+      subtitle = (entry.note.isEmpty ? context.tr(isIncome ? 'Income' : 'Expense') : catName) + wName;
+    }
+
     final muted = theme.colorScheme.onSurface.withValues(alpha: 0.55);
 
     return InkWell(
@@ -42,7 +60,10 @@ class TransactionTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           children: [
-            CategoryBadge(icon: iconFor(category?.icon ?? 'more'), color: color),
+            CategoryBadge(
+              icon: isTransfer ? Icons.swap_horiz_rounded : iconFor(category?.icon ?? 'more'),
+              color: color,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -52,8 +73,7 @@ class TransactionTile extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyLarge
-                        ?.copyWith(fontWeight: FontWeight.w700),
+                    style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -70,10 +90,14 @@ class TransactionTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${isIncome ? '+' : '-'}${rupiah(entry.amount)}',
+                  isTransfer
+                      ? '⇄ ${rupiah(entry.amount)}'
+                      : '${isIncome ? '+' : '-'}${rupiah(entry.amount)}',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: isIncome ? AppColors.income : AppColors.expense,
+                    color: isTransfer
+                        ? const Color(0xFF00897B)
+                        : (isIncome ? AppColors.income : AppColors.expense),
                   ),
                 ),
                 const SizedBox(height: 2),

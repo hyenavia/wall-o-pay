@@ -25,6 +25,9 @@ const Map<String, IconData> categoryIcons = {
   'work': Icons.work,
   'payments': Icons.payments,
   'savings': Icons.savings,
+  'account_balance': Icons.account_balance,
+  'account_balance_wallet': Icons.account_balance_wallet,
+  'swap_horiz': Icons.swap_horiz,
   'more': Icons.more_horiz,
 };
 

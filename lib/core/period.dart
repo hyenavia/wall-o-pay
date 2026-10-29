@@ -11,16 +11,21 @@ int _daysBetween(DateTime a, DateTime b) => DateTime.utc(b.year, b.month, b.day)
 String _two(int n) => n.toString().padLeft(2, '0');
 
 /// Satu periode pengelolaan keuangan: satu bulan kalender atau satu minggu
-/// (Senin sampai Minggu).
+/// (bisa dimulai dari Senin, Rabu, dll sesuai preferensi pengguna).
 class Period {
   const Period(this.type, this.start);
 
   final PeriodType type;
   final DateTime start;
 
-  factory Period.containing(PeriodType type, DateTime d) {
+  factory Period.containing(
+    PeriodType type,
+    DateTime d, {
+    int firstDayOfWeek = DateTime.monday,
+  }) {
     if (type == PeriodType.monthly) return Period(type, DateTime(d.year, d.month));
-    return Period(type, DateTime(d.year, d.month, d.day - (d.weekday - 1)));
+    final diff = ((d.weekday - firstDayOfWeek) % 7 + 7) % 7;
+    return Period(type, DateTime(d.year, d.month, d.day - diff));
   }
 
   /// Batas akhir (tidak termasuk).

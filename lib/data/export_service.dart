@@ -29,7 +29,7 @@ class ExportService {
     for (final t in rows) {
       buf.writeln([
         df.format(t.date),
-        t.type == TxType.income ? 'Income' : 'Expense',
+        t.type == TxType.income ? 'Income' : (t.type == TxType.transfer ? 'Transfer' : 'Expense'),
         _csv(names[t.categoryId] ?? ''),
         t.amount,
         _csv(t.note),

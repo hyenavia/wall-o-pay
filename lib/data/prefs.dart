@@ -15,17 +15,25 @@ class AppPrefs {
     required this.themeMode,
     required this.localeCode,
     required this.periodType,
+    this.firstDayOfWeek = DateTime.monday,
   });
 
   final ThemeMode themeMode;
   final String localeCode; // 'en' (default) atau 'id'
   final PeriodType periodType;
+  final int firstDayOfWeek; // 1 (Monday) sampai 7 (Sunday)
 
-  AppPrefs copyWith({ThemeMode? themeMode, String? localeCode, PeriodType? periodType}) {
+  AppPrefs copyWith({
+    ThemeMode? themeMode,
+    String? localeCode,
+    PeriodType? periodType,
+    int? firstDayOfWeek,
+  }) {
     return AppPrefs(
       themeMode: themeMode ?? this.themeMode,
       localeCode: localeCode ?? this.localeCode,
       periodType: periodType ?? this.periodType,
+      firstDayOfWeek: firstDayOfWeek ?? this.firstDayOfWeek,
     );
   }
 }
@@ -35,6 +43,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
   static const _kTheme = 'pref_theme';
   static const _kLocale = 'pref_locale';
   static const _kPeriod = 'pref_period';
+  static const _kFirstDayOfWeek = 'pref_first_day_of_week';
 
   @override
   AppPrefs build() {
@@ -48,8 +57,15 @@ class AppPrefsController extends Notifier<AppPrefs> {
     final period = p.getString(_kPeriod) == 'weekly'
         ? PeriodType.weekly
         : PeriodType.monthly;
+    final firstDay = p.getInt(_kFirstDayOfWeek) ?? DateTime.monday;
+
     AppLocale.code = locale;
-    return AppPrefs(themeMode: theme, localeCode: locale, periodType: period);
+    return AppPrefs(
+      themeMode: theme,
+      localeCode: locale,
+      periodType: period,
+      firstDayOfWeek: firstDay,
+    );
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
@@ -67,6 +83,11 @@ class AppPrefsController extends Notifier<AppPrefs> {
   Future<void> setPeriodType(PeriodType type) async {
     state = state.copyWith(periodType: type);
     await ref.read(sharedPreferencesProvider).setString(_kPeriod, type.name);
+  }
+
+  Future<void> setFirstDayOfWeek(int day) async {
+    state = state.copyWith(firstDayOfWeek: day);
+    await ref.read(sharedPreferencesProvider).setInt(_kFirstDayOfWeek, day);
   }
 }
 

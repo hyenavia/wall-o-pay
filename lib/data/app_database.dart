@@ -26,6 +26,17 @@ const _incomeSeed = <(String, String, String, int, String)>[
   ('cat-inc-other', 'Other', 'payments', 0xFF607D8B, 'Lainnya'),
 ];
 
+const _transferSeed = <(String, String, String, int, String)>[
+  ('cat-tra-transfer', 'Transfer', 'swap_horiz', 0xFF00897B, 'Transfer'),
+];
+
+const _walletSeed = <(String, String, String, int, String, int)>[
+  ('wallet-main', 'Rekening Utama', 'bank', 0, 'account_balance', 0xFF1E4238),
+  ('wallet-digital', 'Bank Digital', 'digital', 0, 'smartphone', 0xFF00897B),
+  ('wallet-ewallet', 'E-Wallet', 'ewallet', 0, 'account_balance_wallet', 0xFFEF6C00),
+  ('wallet-cash', 'Tunai', 'cash', 0, 'payments', 0xFF558B2F),
+];
+
 /// Jejak waktu "kosong" untuk data bawaan: perubahan apa pun dari pengguna
 /// akan selalu dianggap lebih baru saat sinkronisasi.
 final DateTime _epoch = DateTime.fromMillisecondsSinceEpoch(0);
@@ -47,23 +58,45 @@ class SyncTable {
   final Future<bool> Function(Map<String, dynamic> json) applyRemote;
 }
 
-@DriftDatabase(tables: [Categories, Transactions, Budgets, SavingsGoals, PendingTransactions])
+@DriftDatabase(tables: [Categories, Wallets, Transactions, Budgets, SavingsGoals, PendingTransactions])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'wall_o_pay'));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async {
           await m.createAll();
           await _seedCategories();
+          await _seedWallets();
         },
         onUpgrade: (m, from, to) async {
           if (from < 2) await _remapDefaultCategoryIds();
           if (from < 3) await _renameDefaultCategories();
           if (from < 4) await m.createTable(pendingTransactions);
+          if (from < 5) {
+            await m.createTable(wallets);
+            await _seedWallets();
+            await m.addColumn(transactions, transactions.walletId);
+            await m.addColumn(transactions, transactions.toWalletId);
+            await customStatement("UPDATE transactions SET wallet_id = 'wallet-main' WHERE wallet_id IS NULL");
+            final existingTransfer = await (select(categories)..where((c) => c.id.equals('cat-tra-transfer'))).getSingleOrNull();
+            if (existingTransfer == null) {
+              await into(categories).insert(
+                CategoriesCompanion.insert(
+                  id: const Value('cat-tra-transfer'),
+                  name: 'Transfer',
+                  type: TxType.transfer,
+                  icon: const Value('swap_horiz'),
+                  colorValue: const Value(0xFF00897B),
+                  createdAt: Value(_epoch),
+                  updatedAt: Value(_epoch),
+                ),
+              );
+            }
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
@@ -75,6 +108,25 @@ class AppDatabase extends _$AppDatabase {
       b.insertAll(categories, [
         for (final s in _expenseSeed) _seedRow(s, TxType.expense),
         for (final s in _incomeSeed) _seedRow(s, TxType.income),
+        for (final s in _transferSeed) _seedRow(s, TxType.transfer),
+      ]);
+    });
+  }
+
+  Future<void> _seedWallets() async {
+    await batch((b) {
+      b.insertAll(wallets, [
+        for (final s in _walletSeed)
+          WalletsCompanion.insert(
+            id: Value(s.$1),
+            name: s.$2,
+            type: Value(s.$3),
+            initialBalance: Value(s.$4),
+            icon: Value(s.$5),
+            colorValue: Value(s.$6),
+            createdAt: Value(_epoch),
+            updatedAt: Value(_epoch),
+          ),
       ]);
     });
   }
@@ -164,33 +216,36 @@ class AppDatabase extends _$AppDatabase {
 
   /// Termasuk yang sudah dihapus (supaya transaksi lama tetap punya nama).
   Stream<List<Category>> watchAllCategories() {
-    return (select(categories)..orderBy([(c) => OrderingTerm.asc(c.name)]))
-        .watch();
+    return (select(categories)..orderBy([(c) => OrderingTerm.asc(c.name)])).watch();
   }
 
   Future<void> addCategory({
     required String name,
     required TxType type,
-    required String icon,
-    required int colorValue,
+    String icon = 'more',
+    int colorValue = 0xFF607D8B,
   }) async {
     await into(categories).insert(CategoriesCompanion.insert(
       name: name,
       type: type,
       icon: Value(icon),
       colorValue: Value(colorValue),
+      createdAt: Value(DateTime.now()),
+      updatedAt: Value(DateTime.now()),
     ));
   }
 
   Future<void> updateCategory(
     String id, {
     required String name,
+    TxType? type,
     required String icon,
     required int colorValue,
   }) async {
     await (update(categories)..where((c) => c.id.equals(id))).write(
       CategoriesCompanion(
         name: Value(name),
+        type: type == null ? const Value.absent() : Value(type),
         icon: Value(icon),
         colorValue: Value(colorValue),
         updatedAt: Value(DateTime.now()),
@@ -218,7 +273,111 @@ class AppDatabase extends _$AppDatabase {
     return result;
   }
 
+  // ---------- Dompet & Rekening (Wallets) ----------
+
+  Stream<List<Wallet>> watchWallets() {
+    return (select(wallets)
+          ..where((w) => w.deletedAt.isNull())
+          ..orderBy([(w) => OrderingTerm.asc(w.createdAt)]))
+        .watch();
+  }
+
+  Future<List<Wallet>> getAllWallets() {
+    return (select(wallets)
+          ..where((w) => w.deletedAt.isNull())
+          ..orderBy([(w) => OrderingTerm.asc(w.createdAt)]))
+        .get();
+  }
+
+  Future<void> updateWalletInitialBalance(String id, int initialBalance) async {
+    await (update(wallets)..where((w) => w.id.equals(id))).write(
+      WalletsCompanion(
+        initialBalance: Value(initialBalance),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> updateWallet(
+    String id, {
+    String? name,
+    String? type,
+    String? icon,
+    int? colorValue,
+    int? initialBalance,
+  }) async {
+    await (update(wallets)..where((w) => w.id.equals(id))).write(
+      WalletsCompanion(
+        name: name == null ? const Value.absent() : Value(name),
+        type: type == null ? const Value.absent() : Value(type),
+        icon: icon == null ? const Value.absent() : Value(icon),
+        colorValue: colorValue == null ? const Value.absent() : Value(colorValue),
+        initialBalance: initialBalance == null ? const Value.absent() : Value(initialBalance),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> addWallet({
+    required String name,
+    required String type,
+    int initialBalance = 0,
+    String icon = 'account_balance',
+    int colorValue = 0xFF1E4238,
+  }) async {
+    await into(wallets).insert(
+      WalletsCompanion.insert(
+        name: name,
+        type: Value(type),
+        initialBalance: Value(initialBalance),
+        icon: Value(icon),
+        colorValue: Value(colorValue),
+        createdAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> deleteWallet(String id) async {
+    await (update(wallets)..where((w) => w.id.equals(id))).write(
+      WalletsCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> transferBetweenWallets({
+    required int amount,
+    required String fromWalletId,
+    required String toWalletId,
+    required DateTime date,
+    String note = '',
+  }) async {
+    await into(transactions).insert(
+      TransactionsCompanion.insert(
+        amount: amount,
+        type: TxType.transfer,
+        categoryId: 'cat-tra-transfer',
+        date: date,
+        note: Value(note),
+        walletId: Value(fromWalletId),
+        toWalletId: Value(toWalletId),
+      ),
+    );
+  }
+
   // ---------- Transaksi ----------
+
+  Stream<List<TransactionEntry>> watchAllTransactions() {
+    return (select(transactions)
+          ..where((t) => t.deletedAt.isNull())
+          ..orderBy([
+            (t) => OrderingTerm.desc(t.date),
+            (t) => OrderingTerm.desc(t.createdAt),
+          ]))
+        .watch();
+  }
 
   Stream<List<TransactionEntry>> watchTransactionsBetween(
     DateTime start,
@@ -249,6 +408,8 @@ class AppDatabase extends _$AppDatabase {
     required String categoryId,
     required DateTime date,
     String note = '',
+    String? walletId,
+    String? toWalletId,
   }) async {
     await into(transactions).insert(TransactionsCompanion.insert(
       amount: amount,
@@ -256,6 +417,8 @@ class AppDatabase extends _$AppDatabase {
       categoryId: categoryId,
       date: date,
       note: Value(note),
+      walletId: Value(walletId ?? 'wallet-main'),
+      toWalletId: Value(toWalletId),
     ));
   }
 
@@ -266,6 +429,8 @@ class AppDatabase extends _$AppDatabase {
     required String categoryId,
     required DateTime date,
     String note = '',
+    String? walletId,
+    String? toWalletId,
   }) async {
     await (update(transactions)..where((t) => t.id.equals(id))).write(
       TransactionsCompanion(
@@ -274,6 +439,8 @@ class AppDatabase extends _$AppDatabase {
         categoryId: Value(categoryId),
         date: Value(date),
         note: Value(note),
+        walletId: Value(walletId ?? 'wallet-main'),
+        toWalletId: Value(toWalletId),
         updatedAt: Value(DateTime.now()),
       ),
     );
@@ -298,20 +465,22 @@ class AppDatabase extends _$AppDatabase {
   }
 
   /// Atur anggaran kategori untuk satu bulan. Nominal 0 menghapus anggaran.
-  Future<void> setBudget(String categoryId, String monthKey, int amount) async {
+  Future<void> setBudget(
+    String categoryId,
+    String monthKey,
+    int amount,
+  ) async {
     final existing = await (select(budgets)
           ..where((b) =>
-              b.deletedAt.isNull() &
-              b.categoryId.equals(categoryId) &
-              b.monthKey.equals(monthKey)))
+              b.categoryId.equals(categoryId) & b.monthKey.equals(monthKey)))
         .getSingleOrNull();
 
     if (existing == null) {
       if (amount <= 0) return;
       await into(budgets).insert(BudgetsCompanion.insert(
         categoryId: categoryId,
-        amount: amount,
         monthKey: monthKey,
+        amount: amount,
       ));
       return;
     }
@@ -329,7 +498,7 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  // ---------- Target tabungan ----------
+  // ---------- Target Tabungan ----------
 
   Stream<List<SavingsGoal>> watchSavingsGoals() {
     return (select(savingsGoals)
@@ -361,6 +530,24 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Future<void> updateSavingsGoal(
+    String id, {
+    required String name,
+    required int targetAmount,
+    required int currentAmount,
+    DateTime? targetDate,
+  }) async {
+    await (update(savingsGoals)..where((g) => g.id.equals(id))).write(
+      SavingsGoalsCompanion(
+        name: Value(name),
+        targetAmount: Value(targetAmount),
+        currentAmount: Value(currentAmount),
+        targetDate: Value(targetDate),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   Future<void> deleteSavingsGoal(String id) async {
     await (update(savingsGoals)..where((g) => g.id.equals(id))).write(
       SavingsGoalsCompanion(
@@ -370,13 +557,26 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  // ---------- Ekspor dan backup ----------
+  // ---------- Laporan & Cadangan ----------
 
   Future<List<Category>> allCategories() => select(categories).get();
 
   Future<List<TransactionEntry>> allActiveTransactions() {
     return (select(transactions)
           ..where((t) => t.deletedAt.isNull())
+          ..orderBy([(t) => OrderingTerm.desc(t.date)]))
+        .get();
+  }
+
+  Future<List<TransactionEntry>> getTransactionsBetween(
+    DateTime start,
+    DateTime end,
+  ) {
+    return (select(transactions)
+          ..where((t) =>
+              t.deletedAt.isNull() &
+              t.date.isBiggerOrEqualValue(start) &
+              t.date.isSmallerThanValue(end))
           ..orderBy([(t) => OrderingTerm.desc(t.date)]))
         .get();
   }
@@ -389,6 +589,8 @@ class AppDatabase extends _$AppDatabase {
       'exportedAt': DateTime.now().toIso8601String(),
       'categories':
           (await select(categories).get()).map((r) => r.toJson()).toList(),
+      'wallets':
+          (await select(wallets).get()).map((r) => r.toJson()).toList(),
       'transactions':
           (await select(transactions).get()).map((r) => r.toJson()).toList(),
       'budgets': (await select(budgets).get()).map((r) => r.toJson()).toList(),
@@ -423,13 +625,15 @@ class AppDatabase extends _$AppDatabase {
       await delete(budgets).go();
       await delete(savingsGoals).go();
       await delete(categories).go();
+      await delete(wallets).go();
       await _seedCategories();
+      await _seedWallets();
     });
   }
 
   // ---------- Sinkronisasi cloud ----------
 
-  /// Urutan penting: kategori lebih dulu karena dipakai tabel lain.
+  /// Urutan penting: kategori & dompet lebih dulu karena dipakai transaksi.
   List<SyncTable> get syncTables => [
         SyncTable(
           name: 'categories',
@@ -447,6 +651,25 @@ class AppDatabase extends _$AppDatabase {
               return false;
             }
             await into(categories).insertOnConflictUpdate(remote);
+            return true;
+          },
+        ),
+        SyncTable(
+          name: 'wallets',
+          changed: (since) async => (await (select(wallets)
+                    ..where((r) => r.updatedAt.isBiggerThanValue(since)))
+                  .get())
+              .map((r) => r.toJson())
+              .toList(),
+          applyRemote: (json) async {
+            final remote = Wallet.fromJson(json);
+            final local = await (select(wallets)
+                  ..where((r) => r.id.equals(remote.id)))
+                .getSingleOrNull();
+            if (local != null && !remote.updatedAt.isAfter(local.updatedAt)) {
+              return false;
+            }
+            await into(wallets).insertOnConflictUpdate(remote);
             return true;
           },
         ),

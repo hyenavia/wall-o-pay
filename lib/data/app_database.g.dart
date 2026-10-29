@@ -513,6 +513,557 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   }
 }
 
+class $WalletsTable extends Wallets with TableInfo<$WalletsTable, Wallet> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WalletsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: () => newId(),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 50,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('bank'),
+  );
+  static const VerificationMeta _initialBalanceMeta = const VerificationMeta(
+    'initialBalance',
+  );
+  @override
+  late final GeneratedColumn<int> initialBalance = GeneratedColumn<int>(
+    'initial_balance',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _iconMeta = const VerificationMeta('icon');
+  @override
+  late final GeneratedColumn<String> icon = GeneratedColumn<String>(
+    'icon',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('account_balance'),
+  );
+  static const VerificationMeta _colorValueMeta = const VerificationMeta(
+    'colorValue',
+  );
+  @override
+  late final GeneratedColumn<int> colorValue = GeneratedColumn<int>(
+    'color_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0xFF1E4238),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    name,
+    type,
+    initialBalance,
+    icon,
+    colorValue,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'wallets';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Wallet> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    }
+    if (data.containsKey('initial_balance')) {
+      context.handle(
+        _initialBalanceMeta,
+        initialBalance.isAcceptableOrUnknown(
+          data['initial_balance']!,
+          _initialBalanceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('icon')) {
+      context.handle(
+        _iconMeta,
+        icon.isAcceptableOrUnknown(data['icon']!, _iconMeta),
+      );
+    }
+    if (data.containsKey('color_value')) {
+      context.handle(
+        _colorValueMeta,
+        colorValue.isAcceptableOrUnknown(data['color_value']!, _colorValueMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Wallet map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Wallet(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      initialBalance: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}initial_balance'],
+      )!,
+      icon: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon'],
+      )!,
+      colorValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}color_value'],
+      )!,
+    );
+  }
+
+  @override
+  $WalletsTable createAlias(String alias) {
+    return $WalletsTable(attachedDatabase, alias);
+  }
+}
+
+class Wallet extends DataClass implements Insertable<Wallet> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String name;
+  final String type;
+  final int initialBalance;
+  final String icon;
+  final int colorValue;
+  const Wallet({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.name,
+    required this.type,
+    required this.initialBalance,
+    required this.icon,
+    required this.colorValue,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['name'] = Variable<String>(name);
+    map['type'] = Variable<String>(type);
+    map['initial_balance'] = Variable<int>(initialBalance);
+    map['icon'] = Variable<String>(icon);
+    map['color_value'] = Variable<int>(colorValue);
+    return map;
+  }
+
+  WalletsCompanion toCompanion(bool nullToAbsent) {
+    return WalletsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      name: Value(name),
+      type: Value(type),
+      initialBalance: Value(initialBalance),
+      icon: Value(icon),
+      colorValue: Value(colorValue),
+    );
+  }
+
+  factory Wallet.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Wallet(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      name: serializer.fromJson<String>(json['name']),
+      type: serializer.fromJson<String>(json['type']),
+      initialBalance: serializer.fromJson<int>(json['initialBalance']),
+      icon: serializer.fromJson<String>(json['icon']),
+      colorValue: serializer.fromJson<int>(json['colorValue']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'name': serializer.toJson<String>(name),
+      'type': serializer.toJson<String>(type),
+      'initialBalance': serializer.toJson<int>(initialBalance),
+      'icon': serializer.toJson<String>(icon),
+      'colorValue': serializer.toJson<int>(colorValue),
+    };
+  }
+
+  Wallet copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? name,
+    String? type,
+    int? initialBalance,
+    String? icon,
+    int? colorValue,
+  }) => Wallet(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    name: name ?? this.name,
+    type: type ?? this.type,
+    initialBalance: initialBalance ?? this.initialBalance,
+    icon: icon ?? this.icon,
+    colorValue: colorValue ?? this.colorValue,
+  );
+  Wallet copyWithCompanion(WalletsCompanion data) {
+    return Wallet(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      name: data.name.present ? data.name.value : this.name,
+      type: data.type.present ? data.type.value : this.type,
+      initialBalance: data.initialBalance.present
+          ? data.initialBalance.value
+          : this.initialBalance,
+      icon: data.icon.present ? data.icon.value : this.icon,
+      colorValue: data.colorValue.present
+          ? data.colorValue.value
+          : this.colorValue,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Wallet(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('initialBalance: $initialBalance, ')
+          ..write('icon: $icon, ')
+          ..write('colorValue: $colorValue')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    name,
+    type,
+    initialBalance,
+    icon,
+    colorValue,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Wallet &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.name == this.name &&
+          other.type == this.type &&
+          other.initialBalance == this.initialBalance &&
+          other.icon == this.icon &&
+          other.colorValue == this.colorValue);
+}
+
+class WalletsCompanion extends UpdateCompanion<Wallet> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> name;
+  final Value<String> type;
+  final Value<int> initialBalance;
+  final Value<String> icon;
+  final Value<int> colorValue;
+  final Value<int> rowid;
+  const WalletsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.name = const Value.absent(),
+    this.type = const Value.absent(),
+    this.initialBalance = const Value.absent(),
+    this.icon = const Value.absent(),
+    this.colorValue = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  WalletsCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String name,
+    this.type = const Value.absent(),
+    this.initialBalance = const Value.absent(),
+    this.icon = const Value.absent(),
+    this.colorValue = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<Wallet> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? name,
+    Expression<String>? type,
+    Expression<int>? initialBalance,
+    Expression<String>? icon,
+    Expression<int>? colorValue,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (name != null) 'name': name,
+      if (type != null) 'type': type,
+      if (initialBalance != null) 'initial_balance': initialBalance,
+      if (icon != null) 'icon': icon,
+      if (colorValue != null) 'color_value': colorValue,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  WalletsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? name,
+    Value<String>? type,
+    Value<int>? initialBalance,
+    Value<String>? icon,
+    Value<int>? colorValue,
+    Value<int>? rowid,
+  }) {
+    return WalletsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      initialBalance: initialBalance ?? this.initialBalance,
+      icon: icon ?? this.icon,
+      colorValue: colorValue ?? this.colorValue,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (initialBalance.present) {
+      map['initial_balance'] = Variable<int>(initialBalance.value);
+    }
+    if (icon.present) {
+      map['icon'] = Variable<String>(icon.value);
+    }
+    if (colorValue.present) {
+      map['color_value'] = Variable<int>(colorValue.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WalletsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('initialBalance: $initialBalance, ')
+          ..write('icon: $icon, ')
+          ..write('colorValue: $colorValue, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $TransactionsTable extends Transactions
     with TableInfo<$TransactionsTable, TransactionEntry> {
   @override
@@ -615,6 +1166,34 @@ class $TransactionsTable extends Transactions
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _walletIdMeta = const VerificationMeta(
+    'walletId',
+  );
+  @override
+  late final GeneratedColumn<String> walletId = GeneratedColumn<String>(
+    'wallet_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES wallets (id)',
+    ),
+  );
+  static const VerificationMeta _toWalletIdMeta = const VerificationMeta(
+    'toWalletId',
+  );
+  @override
+  late final GeneratedColumn<String> toWalletId = GeneratedColumn<String>(
+    'to_wallet_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES wallets (id)',
+    ),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -626,6 +1205,8 @@ class $TransactionsTable extends Transactions
     categoryId,
     note,
     date,
+    walletId,
+    toWalletId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -690,6 +1271,21 @@ class $TransactionsTable extends Transactions
     } else if (isInserting) {
       context.missing(_dateMeta);
     }
+    if (data.containsKey('wallet_id')) {
+      context.handle(
+        _walletIdMeta,
+        walletId.isAcceptableOrUnknown(data['wallet_id']!, _walletIdMeta),
+      );
+    }
+    if (data.containsKey('to_wallet_id')) {
+      context.handle(
+        _toWalletIdMeta,
+        toWalletId.isAcceptableOrUnknown(
+          data['to_wallet_id']!,
+          _toWalletIdMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -737,6 +1333,14 @@ class $TransactionsTable extends Transactions
         DriftSqlType.dateTime,
         data['${effectivePrefix}date'],
       )!,
+      walletId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}wallet_id'],
+      ),
+      toWalletId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}to_wallet_id'],
+      ),
     );
   }
 
@@ -760,6 +1364,8 @@ class TransactionEntry extends DataClass
   final String categoryId;
   final String note;
   final DateTime date;
+  final String? walletId;
+  final String? toWalletId;
   const TransactionEntry({
     required this.id,
     required this.createdAt,
@@ -770,6 +1376,8 @@ class TransactionEntry extends DataClass
     required this.categoryId,
     required this.note,
     required this.date,
+    this.walletId,
+    this.toWalletId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -789,6 +1397,12 @@ class TransactionEntry extends DataClass
     map['category_id'] = Variable<String>(categoryId);
     map['note'] = Variable<String>(note);
     map['date'] = Variable<DateTime>(date);
+    if (!nullToAbsent || walletId != null) {
+      map['wallet_id'] = Variable<String>(walletId);
+    }
+    if (!nullToAbsent || toWalletId != null) {
+      map['to_wallet_id'] = Variable<String>(toWalletId);
+    }
     return map;
   }
 
@@ -805,6 +1419,12 @@ class TransactionEntry extends DataClass
       categoryId: Value(categoryId),
       note: Value(note),
       date: Value(date),
+      walletId: walletId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(walletId),
+      toWalletId: toWalletId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(toWalletId),
     );
   }
 
@@ -825,6 +1445,8 @@ class TransactionEntry extends DataClass
       categoryId: serializer.fromJson<String>(json['categoryId']),
       note: serializer.fromJson<String>(json['note']),
       date: serializer.fromJson<DateTime>(json['date']),
+      walletId: serializer.fromJson<String?>(json['walletId']),
+      toWalletId: serializer.fromJson<String?>(json['toWalletId']),
     );
   }
   @override
@@ -842,6 +1464,8 @@ class TransactionEntry extends DataClass
       'categoryId': serializer.toJson<String>(categoryId),
       'note': serializer.toJson<String>(note),
       'date': serializer.toJson<DateTime>(date),
+      'walletId': serializer.toJson<String?>(walletId),
+      'toWalletId': serializer.toJson<String?>(toWalletId),
     };
   }
 
@@ -855,6 +1479,8 @@ class TransactionEntry extends DataClass
     String? categoryId,
     String? note,
     DateTime? date,
+    Value<String?> walletId = const Value.absent(),
+    Value<String?> toWalletId = const Value.absent(),
   }) => TransactionEntry(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -865,6 +1491,8 @@ class TransactionEntry extends DataClass
     categoryId: categoryId ?? this.categoryId,
     note: note ?? this.note,
     date: date ?? this.date,
+    walletId: walletId.present ? walletId.value : this.walletId,
+    toWalletId: toWalletId.present ? toWalletId.value : this.toWalletId,
   );
   TransactionEntry copyWithCompanion(TransactionsCompanion data) {
     return TransactionEntry(
@@ -879,6 +1507,10 @@ class TransactionEntry extends DataClass
           : this.categoryId,
       note: data.note.present ? data.note.value : this.note,
       date: data.date.present ? data.date.value : this.date,
+      walletId: data.walletId.present ? data.walletId.value : this.walletId,
+      toWalletId: data.toWalletId.present
+          ? data.toWalletId.value
+          : this.toWalletId,
     );
   }
 
@@ -893,7 +1525,9 @@ class TransactionEntry extends DataClass
           ..write('type: $type, ')
           ..write('categoryId: $categoryId, ')
           ..write('note: $note, ')
-          ..write('date: $date')
+          ..write('date: $date, ')
+          ..write('walletId: $walletId, ')
+          ..write('toWalletId: $toWalletId')
           ..write(')'))
         .toString();
   }
@@ -909,6 +1543,8 @@ class TransactionEntry extends DataClass
     categoryId,
     note,
     date,
+    walletId,
+    toWalletId,
   );
   @override
   bool operator ==(Object other) =>
@@ -922,7 +1558,9 @@ class TransactionEntry extends DataClass
           other.type == this.type &&
           other.categoryId == this.categoryId &&
           other.note == this.note &&
-          other.date == this.date);
+          other.date == this.date &&
+          other.walletId == this.walletId &&
+          other.toWalletId == this.toWalletId);
 }
 
 class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
@@ -935,6 +1573,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
   final Value<String> categoryId;
   final Value<String> note;
   final Value<DateTime> date;
+  final Value<String?> walletId;
+  final Value<String?> toWalletId;
   final Value<int> rowid;
   const TransactionsCompanion({
     this.id = const Value.absent(),
@@ -946,6 +1586,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
     this.categoryId = const Value.absent(),
     this.note = const Value.absent(),
     this.date = const Value.absent(),
+    this.walletId = const Value.absent(),
+    this.toWalletId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TransactionsCompanion.insert({
@@ -958,6 +1600,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
     required String categoryId,
     this.note = const Value.absent(),
     required DateTime date,
+    this.walletId = const Value.absent(),
+    this.toWalletId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : amount = Value(amount),
        type = Value(type),
@@ -973,6 +1617,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
     Expression<String>? categoryId,
     Expression<String>? note,
     Expression<DateTime>? date,
+    Expression<String>? walletId,
+    Expression<String>? toWalletId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -985,6 +1631,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
       if (categoryId != null) 'category_id': categoryId,
       if (note != null) 'note': note,
       if (date != null) 'date': date,
+      if (walletId != null) 'wallet_id': walletId,
+      if (toWalletId != null) 'to_wallet_id': toWalletId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -999,6 +1647,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
     Value<String>? categoryId,
     Value<String>? note,
     Value<DateTime>? date,
+    Value<String?>? walletId,
+    Value<String?>? toWalletId,
     Value<int>? rowid,
   }) {
     return TransactionsCompanion(
@@ -1011,6 +1661,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
       categoryId: categoryId ?? this.categoryId,
       note: note ?? this.note,
       date: date ?? this.date,
+      walletId: walletId ?? this.walletId,
+      toWalletId: toWalletId ?? this.toWalletId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1047,6 +1699,12 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
     if (date.present) {
       map['date'] = Variable<DateTime>(date.value);
     }
+    if (walletId.present) {
+      map['wallet_id'] = Variable<String>(walletId.value);
+    }
+    if (toWalletId.present) {
+      map['to_wallet_id'] = Variable<String>(toWalletId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1065,6 +1723,8 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
           ..write('categoryId: $categoryId, ')
           ..write('note: $note, ')
           ..write('date: $date, ')
+          ..write('walletId: $walletId, ')
+          ..write('toWalletId: $toWalletId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2628,6 +3288,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CategoriesTable categories = $CategoriesTable(this);
+  late final $WalletsTable wallets = $WalletsTable(this);
   late final $TransactionsTable transactions = $TransactionsTable(this);
   late final $BudgetsTable budgets = $BudgetsTable(this);
   late final $SavingsGoalsTable savingsGoals = $SavingsGoalsTable(this);
@@ -2639,6 +3300,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     categories,
+    wallets,
     transactions,
     budgets,
     savingsGoals,
@@ -3099,6 +3761,481 @@ typedef $$CategoriesTableProcessedTableManager =
       Category,
       PrefetchHooks Function({bool transactionsRefs, bool budgetsRefs})
     >;
+typedef $$WalletsTableCreateCompanionBuilder = WalletsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  required String name,
+  Value<String> type,
+  Value<int> initialBalance,
+  Value<String> icon,
+  Value<int> colorValue,
+  Value<int> rowid,
+});
+typedef $$WalletsTableUpdateCompanionBuilder = WalletsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> name,
+  Value<String> type,
+  Value<int> initialBalance,
+  Value<String> icon,
+  Value<int> colorValue,
+  Value<int> rowid,
+});
+
+final class $$WalletsTableReferences
+    extends BaseReferences<_$AppDatabase, $WalletsTable, Wallet> {
+  $$WalletsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$TransactionsTable, List<TransactionEntry>>
+  _walletTransactionsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.transactions,
+    aliasName: 'wallets__id__transactions__wallet_id',
+  );
+
+  $$TransactionsTableProcessedTableManager get walletTransactions {
+    final manager = $$TransactionsTableTableManager(
+      $_db,
+      $_db.transactions,
+    ).filter((f) => f.walletId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_walletTransactionsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+
+  static MultiTypedResultKey<$TransactionsTable, List<TransactionEntry>>
+  _incomingTransfersTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.transactions,
+    aliasName: 'wallets__id__transactions__to_wallet_id',
+  );
+
+  $$TransactionsTableProcessedTableManager get incomingTransfers {
+    final manager = $$TransactionsTableTableManager(
+      $_db,
+      $_db.transactions,
+    ).filter((f) => f.toWalletId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_incomingTransfersTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$WalletsTableFilterComposer
+    extends Composer<_$AppDatabase, $WalletsTable> {
+  $$WalletsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get initialBalance => $composableBuilder(
+    column: $table.initialBalance,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> walletTransactions(
+    Expression<bool> Function($$TransactionsTableFilterComposer f) f,
+  ) {
+    final $$TransactionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.walletId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionsTableFilterComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> incomingTransfers(
+    Expression<bool> Function($$TransactionsTableFilterComposer f) f,
+  ) {
+    final $$TransactionsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.toWalletId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionsTableFilterComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$WalletsTableOrderingComposer
+    extends Composer<_$AppDatabase, $WalletsTable> {
+  $$WalletsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get initialBalance => $composableBuilder(
+    column: $table.initialBalance,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$WalletsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $WalletsTable> {
+  $$WalletsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<int> get initialBalance => $composableBuilder(
+    column: $table.initialBalance,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get icon =>
+      $composableBuilder(column: $table.icon, builder: (column) => column);
+
+  GeneratedColumn<int> get colorValue => $composableBuilder(
+    column: $table.colorValue,
+    builder: (column) => column,
+  );
+
+  Expression<T> walletTransactions<T extends Object>(
+    Expression<T> Function($$TransactionsTableAnnotationComposer a) f,
+  ) {
+    final $$TransactionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.walletId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<T> incomingTransfers<T extends Object>(
+    Expression<T> Function($$TransactionsTableAnnotationComposer a) f,
+  ) {
+    final $$TransactionsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.transactions,
+      getReferencedColumn: (t) => t.toWalletId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TransactionsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.transactions,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$WalletsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $WalletsTable,
+          Wallet,
+          $$WalletsTableFilterComposer,
+          $$WalletsTableOrderingComposer,
+          $$WalletsTableAnnotationComposer,
+          $$WalletsTableCreateCompanionBuilder,
+          $$WalletsTableUpdateCompanionBuilder,
+          (Wallet, $$WalletsTableReferences),
+          Wallet,
+          PrefetchHooks Function({
+            bool walletTransactions,
+            bool incomingTransfers,
+          })
+        > {
+  $$WalletsTableTableManager(_$AppDatabase db, $WalletsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$WalletsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$WalletsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$WalletsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<int> initialBalance = const Value.absent(),
+                Value<String> icon = const Value.absent(),
+                Value<int> colorValue = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => WalletsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                name: name,
+                type: type,
+                initialBalance: initialBalance,
+                icon: icon,
+                colorValue: colorValue,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String name,
+                Value<String> type = const Value.absent(),
+                Value<int> initialBalance = const Value.absent(),
+                Value<String> icon = const Value.absent(),
+                Value<int> colorValue = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => WalletsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                name: name,
+                type: type,
+                initialBalance: initialBalance,
+                icon: icon,
+                colorValue: colorValue,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$WalletsTable, Wallet>(table),
+                  $$WalletsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback:
+              ({walletTransactions = false, incomingTransfers = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (walletTransactions) db.transactions,
+                    if (incomingTransfers) db.transactions,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (walletTransactions)
+                        await $_getPrefetchedDataByColumns<
+                          Wallet,
+                          $WalletsTable,
+                          TransactionEntry,
+                          $TransactionsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$WalletsTableReferences
+                              ._walletTransactionsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$WalletsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).walletTransactions,
+                          currentColumn: 'id',
+                          referencedColumn: 'wallet_id',
+                          typedResults: items,
+                        ),
+                      if (incomingTransfers)
+                        await $_getPrefetchedDataByColumns<
+                          Wallet,
+                          $WalletsTable,
+                          TransactionEntry,
+                          $TransactionsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$WalletsTableReferences
+                              ._incomingTransfersTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$WalletsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).incomingTransfers,
+                          currentColumn: 'id',
+                          referencedColumn: 'to_wallet_id',
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$WalletsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $WalletsTable,
+      Wallet,
+      $$WalletsTableFilterComposer,
+      $$WalletsTableOrderingComposer,
+      $$WalletsTableAnnotationComposer,
+      $$WalletsTableCreateCompanionBuilder,
+      $$WalletsTableUpdateCompanionBuilder,
+      (Wallet, $$WalletsTableReferences),
+      Wallet,
+      PrefetchHooks Function({bool walletTransactions, bool incomingTransfers})
+    >;
 typedef $$TransactionsTableCreateCompanionBuilder =
     TransactionsCompanion Function({
       Value<String> id,
@@ -3110,6 +4247,8 @@ typedef $$TransactionsTableCreateCompanionBuilder =
       required String categoryId,
       Value<String> note,
       required DateTime date,
+      Value<String?> walletId,
+      Value<String?> toWalletId,
       Value<int> rowid,
     });
 typedef $$TransactionsTableUpdateCompanionBuilder =
@@ -3123,6 +4262,8 @@ typedef $$TransactionsTableUpdateCompanionBuilder =
       Value<String> categoryId,
       Value<String> note,
       Value<DateTime> date,
+      Value<String?> walletId,
+      Value<String?> toWalletId,
       Value<int> rowid,
     });
 
@@ -3142,6 +4283,40 @@ final class $$TransactionsTableReferences
       $_db.categories,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_categoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $WalletsTable _walletIdTable(_$AppDatabase db) =>
+      db.wallets.createAlias('transactions__wallet_id__wallets__id');
+
+  $$WalletsTableProcessedTableManager? get walletId {
+    final $_column = $_itemColumn<String>('wallet_id');
+    if ($_column == null) return null;
+    final manager = $$WalletsTableTableManager(
+      $_db,
+      $_db.wallets,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_walletIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $WalletsTable _toWalletIdTable(_$AppDatabase db) =>
+      db.wallets.createAlias('transactions__to_wallet_id__wallets__id');
+
+  $$WalletsTableProcessedTableManager? get toWalletId {
+    final $_column = $_itemColumn<String>('to_wallet_id');
+    if ($_column == null) return null;
+    final manager = $$WalletsTableTableManager(
+      $_db,
+      $_db.wallets,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_toWalletIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -3213,6 +4388,52 @@ class $$TransactionsTableFilterComposer
           }) => $$CategoriesTableFilterComposer(
             $db: $db,
             $table: $db.categories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$WalletsTableFilterComposer get walletId {
+    final $$WalletsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.walletId,
+      referencedTable: $db.wallets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WalletsTableFilterComposer(
+            $db: $db,
+            $table: $db.wallets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$WalletsTableFilterComposer get toWalletId {
+    final $$WalletsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.toWalletId,
+      referencedTable: $db.wallets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WalletsTableFilterComposer(
+            $db: $db,
+            $table: $db.wallets,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -3294,6 +4515,52 @@ class $$TransactionsTableOrderingComposer
     );
     return composer;
   }
+
+  $$WalletsTableOrderingComposer get walletId {
+    final $$WalletsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.walletId,
+      referencedTable: $db.wallets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WalletsTableOrderingComposer(
+            $db: $db,
+            $table: $db.wallets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$WalletsTableOrderingComposer get toWalletId {
+    final $$WalletsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.toWalletId,
+      referencedTable: $db.wallets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WalletsTableOrderingComposer(
+            $db: $db,
+            $table: $db.wallets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$TransactionsTableAnnotationComposer
@@ -3351,6 +4618,52 @@ class $$TransactionsTableAnnotationComposer
     );
     return composer;
   }
+
+  $$WalletsTableAnnotationComposer get walletId {
+    final $$WalletsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.walletId,
+      referencedTable: $db.wallets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WalletsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.wallets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$WalletsTableAnnotationComposer get toWalletId {
+    final $$WalletsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.toWalletId,
+      referencedTable: $db.wallets,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WalletsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.wallets,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$TransactionsTableTableManager
@@ -3366,7 +4679,11 @@ class $$TransactionsTableTableManager
           $$TransactionsTableUpdateCompanionBuilder,
           (TransactionEntry, $$TransactionsTableReferences),
           TransactionEntry,
-          PrefetchHooks Function({bool categoryId})
+          PrefetchHooks Function({
+            bool categoryId,
+            bool walletId,
+            bool toWalletId,
+          })
         > {
   $$TransactionsTableTableManager(_$AppDatabase db, $TransactionsTable table)
     : super(
@@ -3390,6 +4707,8 @@ class $$TransactionsTableTableManager
                 Value<String> categoryId = const Value.absent(),
                 Value<String> note = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
+                Value<String?> walletId = const Value.absent(),
+                Value<String?> toWalletId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsCompanion(
                 id: id,
@@ -3401,6 +4720,8 @@ class $$TransactionsTableTableManager
                 categoryId: categoryId,
                 note: note,
                 date: date,
+                walletId: walletId,
+                toWalletId: toWalletId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3414,6 +4735,8 @@ class $$TransactionsTableTableManager
                 required String categoryId,
                 Value<String> note = const Value.absent(),
                 required DateTime date,
+                Value<String?> walletId = const Value.absent(),
+                Value<String?> toWalletId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsCompanion.insert(
                 id: id,
@@ -3425,6 +4748,8 @@ class $$TransactionsTableTableManager
                 categoryId: categoryId,
                 note: note,
                 date: date,
+                walletId: walletId,
+                toWalletId: toWalletId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -3435,45 +4760,68 @@ class $$TransactionsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({categoryId = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (categoryId) {
-                      state = state.withJoin(
-                        currentTable: table,
-                        currentColumn: table.categoryId,
-                        referencedTable: $$TransactionsTableReferences
-                            ._categoryIdTable(db),
-                        referencedColumn: $$TransactionsTableReferences
-                            ._categoryIdTable(db)
-                            .id,
-                      ) as T;
-                    }
+          prefetchHooksCallback:
+              ({categoryId = false, walletId = false, toWalletId = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (categoryId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.categoryId,
+                            referencedTable: $$TransactionsTableReferences
+                                ._categoryIdTable(db),
+                            referencedColumn: $$TransactionsTableReferences
+                                ._categoryIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (walletId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.walletId,
+                            referencedTable: $$TransactionsTableReferences
+                                ._walletIdTable(db),
+                            referencedColumn: $$TransactionsTableReferences
+                                ._walletIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (toWalletId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.toWalletId,
+                            referencedTable: $$TransactionsTableReferences
+                                ._toWalletIdTable(db),
+                            referencedColumn: $$TransactionsTableReferences
+                                ._toWalletIdTable(db)
+                                .id,
+                          ) as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -3490,7 +4838,7 @@ typedef $$TransactionsTableProcessedTableManager =
       $$TransactionsTableUpdateCompanionBuilder,
       (TransactionEntry, $$TransactionsTableReferences),
       TransactionEntry,
-      PrefetchHooks Function({bool categoryId})
+      PrefetchHooks Function({bool categoryId, bool walletId, bool toWalletId})
     >;
 typedef $$BudgetsTableCreateCompanionBuilder = BudgetsCompanion Function({
   Value<String> id,
@@ -4429,6 +5777,8 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$CategoriesTableTableManager get categories =>
       $$CategoriesTableTableManager(_db, _db.categories);
+  $$WalletsTableTableManager get wallets =>
+      $$WalletsTableTableManager(_db, _db.wallets);
   $$TransactionsTableTableManager get transactions =>
       $$TransactionsTableTableManager(_db, _db.transactions);
   $$BudgetsTableTableManager get budgets =>

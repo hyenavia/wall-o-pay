@@ -21,8 +21,12 @@ class SelectedAnchor extends Notifier<DateTime> {
   }
 
   void step(int n) {
-    final type = ref.read(appPrefsProvider).periodType;
-    state = Period.containing(type, state).shift(n).start;
+    final prefs = ref.read(appPrefsProvider);
+    state = Period.containing(
+      prefs.periodType,
+      state,
+      firstDayOfWeek: prefs.firstDayOfWeek,
+    ).shift(n).start;
   }
 }
 
@@ -32,8 +36,9 @@ final selectedAnchorProvider =
 /// Periode yang sedang dilihat (satu bulan atau satu minggu).
 final selectedPeriodProvider = Provider<Period>((ref) {
   final type = ref.watch(appPrefsProvider.select((p) => p.periodType));
+  final firstDay = ref.watch(appPrefsProvider.select((p) => p.firstDayOfWeek));
   final anchor = ref.watch(selectedAnchorProvider);
-  return Period.containing(type, anchor);
+  return Period.containing(type, anchor, firstDayOfWeek: firstDay);
 });
 
 /// Tab aktif di navigasi bawah (0 Home, 1 Transactions, 2 Budget, 3 Goals).
@@ -120,4 +125,55 @@ final spentByCategoryProvider = Provider<Map<String, int>>((ref) {
 final pendingTransactionsProvider = StreamProvider<List<PendingTransaction>>((ref) {
   return ref.watch(databaseProvider).watchPendingTransactions();
 });
+
+/// Daftar dompet/rekening aktif.
+final walletsProvider = StreamProvider<List<Wallet>>((ref) {
+  return ref.watch(databaseProvider).watchWallets();
+});
+
+/// Map id dompet -> Wallet.
+final walletMapProvider = Provider<Map<String, Wallet>>((ref) {
+  return ref.watch(walletsProvider).maybeWhen(
+        data: (list) => {for (final w in list) w.id: w},
+        orElse: () => const <String, Wallet>{},
+      );
+});
+
+/// Seluruh transaksi aktif (sepanjang waktu) untuk menghitung saldo dompet secara akurat.
+final allTransactionsProvider = StreamProvider<List<TransactionEntry>>((ref) {
+  return ref.watch(databaseProvider).watchAllTransactions();
+});
+
+/// Map id dompet -> saldo saat ini (initialBalance + income - expense + transfer_in - transfer_out).
+final walletBalancesProvider = Provider<Map<String, int>>((ref) {
+  final wallets = ref.watch(walletsProvider).value ?? const [];
+  final txs = ref.watch(allTransactionsProvider).value ?? const [];
+
+  final balances = <String, int>{
+    for (final w in wallets) w.id: w.initialBalance,
+  };
+
+  for (final t in txs) {
+    final walletId = t.walletId ?? 'wallet-main';
+    if (t.type == TxType.income) {
+      balances[walletId] = (balances[walletId] ?? 0) + t.amount;
+    } else if (t.type == TxType.expense) {
+      balances[walletId] = (balances[walletId] ?? 0) - t.amount;
+    } else if (t.type == TxType.transfer) {
+      balances[walletId] = (balances[walletId] ?? 0) - t.amount;
+      if (t.toWalletId != null) {
+        balances[t.toWalletId!] = (balances[t.toWalletId!] ?? 0) + t.amount;
+      }
+    }
+  }
+
+  return balances;
+});
+
+/// Total saldo dari seluruh dompet/rekening yang dimiliki.
+final totalCurrentBalanceProvider = Provider<int>((ref) {
+  final balances = ref.watch(walletBalancesProvider);
+  return balances.values.fold<int>(0, (sum, val) => sum + val);
+});
+
 

@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
-enum TxType { income, expense }
+enum TxType { income, expense, transfer }
 
 /// ID unik (UUID) supaya aman disinkronkan antar perangkat nanti.
 String newId() => const Uuid().v4();
@@ -24,6 +24,18 @@ class Categories extends Table with SyncColumns {
   Set<Column> get primaryKey => {id};
 }
 
+@DataClassName('Wallet')
+class Wallets extends Table with SyncColumns {
+  TextColumn get name => text().withLength(min: 1, max: 50)();
+  TextColumn get type => text().withDefault(const Constant('bank'))(); // 'bank', 'digital', 'ewallet', 'cash'
+  IntColumn get initialBalance => integer().withDefault(const Constant(0))();
+  TextColumn get icon => text().withDefault(const Constant('account_balance'))();
+  IntColumn get colorValue => integer().withDefault(const Constant(0xFF1E4238))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DataClassName('TransactionEntry')
 class Transactions extends Table with SyncColumns {
   IntColumn get amount => integer()();
@@ -31,6 +43,10 @@ class Transactions extends Table with SyncColumns {
   TextColumn get categoryId => text().references(Categories, #id)();
   TextColumn get note => text().withDefault(const Constant(''))();
   DateTimeColumn get date => dateTime()();
+  @ReferenceName('walletTransactions')
+  TextColumn get walletId => text().nullable().references(Wallets, #id)();
+  @ReferenceName('incomingTransfers')
+  TextColumn get toWalletId => text().nullable().references(Wallets, #id)();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -72,4 +88,3 @@ class PendingTransactions extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
-

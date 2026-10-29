@@ -25,6 +25,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   Widget build(BuildContext context) {
     final txAsync = ref.watch(transactionsProvider);
     final cats = ref.watch(categoryMapProvider);
+    final wallets = ref.watch(walletMapProvider);
 
     return Scaffold(
       appBar: pageAppBar(context, title: Text(context.tr('Transactions'))),
@@ -62,22 +63,26 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 ),
               ),
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  for (final f in <(String, TxType?)>[
-                    (context.tr('All'), null),
-                    (context.tr('Income'), TxType.income),
-                    (context.tr('Expense'), TxType.expense),
-                  ])
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: AppChip(
-                        label: f.$1,
-                        selected: _filter == f.$2,
-                        onSelected: () => setState(() => _filter = f.$2),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    for (final f in <(String, TxType?)>[
+                      (context.tr('All'), null),
+                      (context.tr('Expense'), TxType.expense),
+                      (context.tr('Income'), TxType.income),
+                      (context.tr('Transfer'), TxType.transfer),
+                    ])
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: AppChip(
+                          label: f.$1,
+                          selected: _filter == f.$2,
+                          onSelected: () => setState(() => _filter = f.$2),
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
               if (txs.isEmpty)
                 Padding(
@@ -116,6 +121,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                         TransactionTile(
                           entry: t,
                           category: cats[t.categoryId],
+                          wallet: t.walletId != null ? wallets[t.walletId!] : null,
+                          toWallet: t.toWalletId != null ? wallets[t.toWalletId!] : null,
                           trailingNote: timeLabel(t.createdAt),
                           onTap: () => showTransactionForm(context, entry: t),
                         ),

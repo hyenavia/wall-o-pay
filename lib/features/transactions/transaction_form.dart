@@ -39,6 +39,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
   late final TextEditingController _amount;
   late final TextEditingController _note;
   String? _categoryId;
+  String? _walletId;
+  String? _toWalletId;
   late DateTime _date;
   String? _error;
   Map<String, int> _usage = const {};
@@ -51,6 +53,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     _amount = TextEditingController(text: e == null ? '' : formatThousands(e.amount));
     _note = TextEditingController(text: e?.note ?? '');
     _categoryId = e?.categoryId;
+    _walletId = e?.walletId ?? 'wallet-main';
+    _toWalletId = e?.toWalletId ?? 'wallet-digital';
     _date = e?.date ?? DateTime.now();
     ref.read(databaseProvider).categoryUsageCounts().then((u) {
       if (mounted) setState(() => _usage = u);
@@ -80,31 +84,69 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       setState(() => _error = context.tr('Amount must be greater than 0.'));
       return;
     }
-    if (_categoryId == null) {
-      setState(() => _error = context.tr('Please choose a category.'));
-      return;
-    }
+
     final db = ref.read(databaseProvider);
     final day = DateTime(_date.year, _date.month, _date.day);
     final e = widget.entry;
-    if (e == null) {
-      await db.addTransaction(
-        amount: amount,
-        type: _type,
-        categoryId: _categoryId!,
-        date: day,
-        note: _note.text.trim(),
-      );
+
+    if (_type == TxType.transfer) {
+      if (_walletId == null || _toWalletId == null) {
+        setState(() => _error = context.tr('Please choose source and destination wallets.'));
+        return;
+      }
+      if (_walletId == _toWalletId) {
+        setState(() => _error = context.tr('Source and destination wallets must be different.'));
+        return;
+      }
+
+      if (e == null) {
+        await db.transferBetweenWallets(
+          amount: amount,
+          fromWalletId: _walletId!,
+          toWalletId: _toWalletId!,
+          date: day,
+          note: _note.text.trim(),
+        );
+      } else {
+        await db.updateTransaction(
+          e.id,
+          amount: amount,
+          type: TxType.transfer,
+          categoryId: 'cat-tra-transfer',
+          date: day,
+          note: _note.text.trim(),
+          walletId: _walletId,
+          toWalletId: _toWalletId,
+        );
+      }
     } else {
-      await db.updateTransaction(
-        e.id,
-        amount: amount,
-        type: _type,
-        categoryId: _categoryId!,
-        date: day,
-        note: _note.text.trim(),
-      );
+      if (_categoryId == null) {
+        setState(() => _error = context.tr('Please choose a category.'));
+        return;
+      }
+
+      if (e == null) {
+        await db.addTransaction(
+          amount: amount,
+          type: _type,
+          categoryId: _categoryId!,
+          date: day,
+          note: _note.text.trim(),
+          walletId: _walletId ?? 'wallet-main',
+        );
+      } else {
+        await db.updateTransaction(
+          e.id,
+          amount: amount,
+          type: _type,
+          categoryId: _categoryId!,
+          date: day,
+          note: _note.text.trim(),
+          walletId: _walletId ?? 'wallet-main',
+        );
+      }
     }
+
     if (mounted) Navigator.pop(context);
   }
 
@@ -133,6 +175,10 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final wallets = ref.watch(walletsProvider).maybeWhen(
+          data: (list) => list,
+          orElse: () => const <Wallet>[],
+        );
     final cats = ref.watch(categoriesProvider).maybeWhen(
           data: (list) => list.where((c) => c.type == _type).toList(),
           orElse: () => <Category>[],
@@ -158,13 +204,24 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
             const SizedBox(height: 16),
             SegmentedButton<TxType>(
               segments: [
-                ButtonSegment(value: TxType.expense, label: Text(context.tr('Expense'))),
-                ButtonSegment(value: TxType.income, label: Text(context.tr('Income'))),
+                ButtonSegment(
+                  value: TxType.expense,
+                  label: Text(context.tr('Expense')),
+                ),
+                ButtonSegment(
+                  value: TxType.income,
+                  label: Text(context.tr('Income')),
+                ),
+                ButtonSegment(
+                  value: TxType.transfer,
+                  label: Text(context.tr('Transfer')),
+                ),
               ],
               selected: {_type},
               onSelectionChanged: (s) => setState(() {
                 _type = s.first;
                 _categoryId = null;
+                _error = null;
               }),
             ),
             const SizedBox(height: 16),
@@ -176,22 +233,80 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
               decoration: appInput(context, label: context.tr('Amount'), prefixText: 'Rp '),
             ),
             const SizedBox(height: 16),
-            Text(context.tr('Category'), style: theme.textTheme.labelLarge),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final c in cats)
-                  AppChip(
-                    icon: iconFor(c.icon),
-                    label: context.tr(c.name),
-                    selected: _categoryId == c.id,
-                    onSelected: () => setState(() => _categoryId = c.id),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 12),
+
+            // Pilihan Dompet (Wallet Selection)
+            if (_type == TxType.transfer) ...[
+              Text(context.tr('From Wallet / Account'), style: theme.textTheme.labelLarge),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final w in wallets)
+                    AppChip(
+                      icon: iconFor(w.icon),
+                      label: context.tr(w.name),
+                      selected: _walletId == w.id,
+                      onSelected: () => setState(() => _walletId = w.id),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(context.tr('To Wallet / Account'), style: theme.textTheme.labelLarge),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final w in wallets)
+                    AppChip(
+                      icon: iconFor(w.icon),
+                      label: context.tr(w.name),
+                      selected: _toWalletId == w.id,
+                      onSelected: () => setState(() => _toWalletId = w.id),
+                    ),
+                ],
+              ),
+            ] else ...[
+              Text(
+                _type == TxType.expense
+                    ? context.tr('Pay from (Wallet / Account)')
+                    : context.tr('Deposit to (Wallet / Account)'),
+                style: theme.textTheme.labelLarge,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final w in wallets)
+                    AppChip(
+                      icon: iconFor(w.icon),
+                      label: context.tr(w.name),
+                      selected: (_walletId ?? 'wallet-main') == w.id,
+                      onSelected: () => setState(() => _walletId = w.id),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(context.tr('Category'), style: theme.textTheme.labelLarge),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final c in cats)
+                    AppChip(
+                      icon: iconFor(c.icon),
+                      label: context.tr(c.name),
+                      selected: _categoryId == c.id,
+                      onSelected: () => setState(() => _categoryId = c.id),
+                    ),
+                ],
+              ),
+            ],
+
+            const SizedBox(height: 14),
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.calendar_today_outlined),
@@ -209,7 +324,22 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
               Text(_error!, style: const TextStyle(color: AppColors.expense)),
             ],
             const SizedBox(height: 20),
-            FilledButton(onPressed: _save, child: Text(context.tr('Save'))),
+            FilledButton(
+              onPressed: _save,
+              style: FilledButton.styleFrom(
+                backgroundColor: _type == TxType.transfer
+                    ? const Color(0xFF00897B)
+                    : (_type == TxType.income ? AppColors.income : AppColors.expense),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              child: Text(
+                _type == TxType.transfer
+                    ? context.tr('Transfer Funds')
+                    : context.tr('Save'),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
             if (isEdit)
               TextButton.icon(
                 onPressed: _delete,

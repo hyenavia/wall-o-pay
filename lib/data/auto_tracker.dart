@@ -367,6 +367,18 @@ class AutoTrackerService {
     }
   }
 
+  /// Prediksi id dompet berdasarkan paket aplikasi perbankan/e-wallet.
+  static String suggestWalletId(String sourceApp) {
+    final lower = sourceApp.toLowerCase();
+    if (lower.contains('jago') || lower.contains('seabank') || lower.contains('blu')) {
+      return 'wallet-digital';
+    }
+    if (lower.contains('gojek') || lower.contains('dana') || lower.contains('ovo') || lower.contains('shopee')) {
+      return 'wallet-ewallet';
+    }
+    return 'wallet-main';
+  }
+
   /// Konfirmasi transaksi pending dan masukkan ke buku transaksi utama.
   Future<void> confirmPending({
     required PendingTransaction pending,
@@ -375,7 +387,9 @@ class AutoTrackerService {
     required TxType type,
     required String note,
     required DateTime date,
+    String? walletId,
   }) async {
+    final targetWalletId = walletId ?? suggestWalletId(pending.sourceApp);
     await _db.into(_db.transactions).insert(
       TransactionsCompanion.insert(
         amount: amount,
@@ -383,6 +397,7 @@ class AutoTrackerService {
         categoryId: categoryId,
         note: Value(note),
         date: date,
+        walletId: Value(targetWalletId),
       ),
     );
     await _db.deletePendingTransaction(pending.id);

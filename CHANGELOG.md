@@ -4,6 +4,21 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-10-29
+
+### Added
+- **Multi-Wallet & Multi-Account Architecture (Kantong & Rekening):**
+  - Added dedicated Drift SQLite table (`Wallets`) seeded with default accounts: Rekening Utama, Bank Digital, E-Wallet, and Tunai (Cash).
+  - Integrated interactive Wallets slider on Home dashboard displaying live balances per account alongside initial balance configuration.
+  - Added source fund / wallet selector in Transaction Form for both Expenses and Incomes.
+  - Introduced seamless Wallet-to-Wallet Fund Transfers (`TxType.transfer`) that accurately update account balances without counting against living budget quotas.
+  - Enhanced transaction history with transfer directional flow indicators (`Source ➔ Destination`) and account filtering.
+- **Customizable Weekly Calculation Start Day:**
+  - Added preference in Settings allowing users to choose their weekly period starting day (Monday through Sunday, e.g. Wednesday for users with midweek allowances).
+  - Dynamically recalculates weekly periods, budget resets, cashflow analysis, and days remaining according to the selected start day.
+
+---
+
 ## [1.3.3] - 2026-10-29
 
 ### Added

@@ -43,7 +43,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '1.3.3';
+  static const currentVersion = '1.4.0';
 
   static const String _prefLastNotifiedKey = 'pref_last_notified_update_version';
 

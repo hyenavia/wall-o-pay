@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
 import '../../core/l10n.dart';
+import '../../core/period.dart';
 import '../../core/widgets.dart';
 import '../../data/cloud.dart';
 import '../../data/cloud_backup.dart';
@@ -85,6 +86,45 @@ class SettingsPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 10),
                 const SizedBox(width: double.infinity, child: PeriodTypeToggle()),
+                if (prefs.periodType == PeriodType.weekly) ...[
+                  const SizedBox(height: 14),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(context.tr('Weekly Start Day'), style: theme.textTheme.labelMedium),
+                            Text(
+                              context.tr('Week starts on {day}', {
+                                'day': _getDayName(context, prefs.firstDayOfWeek),
+                              }),
+                              style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                            ),
+                          ],
+                        ),
+                      ),
+                      DropdownButton<int>(
+                        value: prefs.firstDayOfWeek,
+                        underline: const SizedBox(),
+                        borderRadius: BorderRadius.circular(12),
+                        items: [
+                          DropdownMenuItem(value: DateTime.monday, child: Text(context.tr('Monday'))),
+                          DropdownMenuItem(value: DateTime.tuesday, child: Text(context.tr('Tuesday'))),
+                          DropdownMenuItem(value: DateTime.wednesday, child: Text(context.tr('Wednesday'))),
+                          DropdownMenuItem(value: DateTime.thursday, child: Text(context.tr('Thursday'))),
+                          DropdownMenuItem(value: DateTime.friday, child: Text(context.tr('Friday'))),
+                          DropdownMenuItem(value: DateTime.saturday, child: Text(context.tr('Saturday'))),
+                          DropdownMenuItem(value: DateTime.sunday, child: Text(context.tr('Sunday'))),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) prefsCtl.setFirstDayOfWeek(val);
+                        },
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 20),
                 Text(context.tr('Theme'), style: theme.textTheme.labelLarge),
                 const SizedBox(height: 10),
@@ -397,6 +437,19 @@ class SettingsPage extends ConsumerWidget {
       ),
     );
     return ok == true;
+  }
+
+  String _getDayName(BuildContext context, int day) {
+    return switch (day) {
+      DateTime.monday => context.tr('Monday'),
+      DateTime.tuesday => context.tr('Tuesday'),
+      DateTime.wednesday => context.tr('Wednesday'),
+      DateTime.thursday => context.tr('Thursday'),
+      DateTime.friday => context.tr('Friday'),
+      DateTime.saturday => context.tr('Saturday'),
+      DateTime.sunday => context.tr('Sunday'),
+      _ => context.tr('Monday'),
+    };
   }
 
   Future<void> _signOut(BuildContext context, WidgetRef ref) async {
