@@ -15,8 +15,8 @@ class AppLockState {
 }
 
 /// Kunci aplikasi dengan PIN 6 digit.
-/// Disimpan di perangkat (offline-first) dan otomatis tersinkronkan dengan akun di Cloud Firestore
-/// sehingga pengguna tidak perlu mengatur ulang PIN di perangkat baru.
+/// Disimpan di perangkat per-akun (offline-first) dan otomatis tersinkronkan dengan akun di Cloud Firestore
+/// sehingga pengguna tidak perlu mengatur ulang PIN di perangkat baru, dan saat ganti akun tidak saling tertimpa.
 class Lock {
   Lock._();
   static final instance = Lock._();
@@ -24,32 +24,68 @@ class Lock {
   final state = ValueNotifier<AppLockState>(const AppLockState());
   final isLocked = ValueNotifier<bool>(false);
   SharedPreferences? _p;
+  String? _activeUid;
+
+  String get _currentUid => _activeUid ?? FirebaseAuth.instance.currentUser?.uid ?? 'guest';
+
+  String _k(String key, [String? uid]) {
+    final u = uid ?? _currentUid;
+    return 'lock.$key.$u';
+  }
 
   Future<void> load() async {
     _p = await SharedPreferences.getInstance();
+    _activeUid = FirebaseAuth.instance.currentUser?.uid;
+    _migrateLegacyIfNeeded(_activeUid);
     _emit();
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        syncWithCloud(user.uid);
+      if (_activeUid != null) {
+        syncWithCloud(_activeUid!);
       }
       FirebaseAuth.instance.authStateChanges().listen((u) {
-        if (u != null) {
-          syncWithCloud(u.uid);
-        }
+        loadForUser(u?.uid);
       });
     } catch (e) {
       debugPrint('Firebase not available for lock sync: $e');
     }
   }
 
+  Future<void> loadForUser(String? uid) async {
+    _activeUid = uid;
+    _migrateLegacyIfNeeded(uid);
+    _emit();
+    if (uid != null) {
+      await syncWithCloud(uid);
+    }
+  }
+
+  void _migrateLegacyIfNeeded(String? uid) {
+    final p = _p;
+    if (p == null || uid == null) return;
+    final scopedHash = p.getString(_k('hash', uid));
+    final legacyHash = p.getString('lock.hash');
+    if (scopedHash == null && legacyHash != null) {
+      p.setString(_k('hash', uid), legacyHash);
+      final legacySalt = p.getString('lock.salt');
+      if (legacySalt != null) p.setString(_k('salt', uid), legacySalt);
+      final legacyDelay = p.getInt('lock.delay');
+      if (legacyDelay != null) p.setInt(_k('delay', uid), legacyDelay);
+      final legacyAt = p.getInt('lock.updatedAt');
+      if (legacyAt != null) p.setInt(_k('updatedAt', uid), legacyAt);
+      p.remove('lock.hash');
+      p.remove('lock.salt');
+      p.remove('lock.delay');
+      p.remove('lock.updatedAt');
+    }
+  }
+
   void _emit() {
     final p = _p;
     if (p == null) return;
-    final enabled = p.getString('lock.hash') != null;
+    final enabled = p.getString(_k('hash')) != null;
     state.value = AppLockState(
       enabled: enabled,
-      delayMin: p.getInt('lock.delay') ?? 1,
+      delayMin: p.getInt(_k('delay')) ?? 1,
     );
     if (!enabled) {
       isLocked.value = false;
@@ -78,18 +114,19 @@ class Lock {
     );
     final hash = _hash(pin, salt);
     final now = DateTime.now().millisecondsSinceEpoch;
-    await _p!.setString('lock.salt', salt);
-    await _p!.setString('lock.hash', hash);
-    await _p!.setInt('lock.updatedAt', now);
+    final uid = _currentUid;
+    await _p!.setString(_k('salt', uid), salt);
+    await _p!.setString(_k('hash', uid), hash);
+    await _p!.setInt(_k('updatedAt', uid), now);
     _emit();
 
     try {
-      final uid = FirebaseAuth.instance.currentUser?.uid;
-      if (uid != null) {
-        await _doc(uid)?.set({
+      final userUid = FirebaseAuth.instance.currentUser?.uid;
+      if (userUid != null) {
+        await _doc(userUid)?.set({
           'hash': hash,
           'salt': salt,
-          'delay': _p!.getInt('lock.delay') ?? 1,
+          'delay': _p!.getInt(_k('delay', userUid)) ?? 1,
           'updatedAt': now,
         });
       }
@@ -100,27 +137,27 @@ class Lock {
 
   /// Verifikasi PIN yang diketik.
   bool verify(String pin) {
-    final salt = _p?.getString('lock.salt');
-    final h = _p?.getString('lock.hash');
+    final salt = _p?.getString(_k('salt'));
+    final h = _p?.getString(_k('hash'));
     return salt != null && h != null && _hash(pin, salt) == h;
   }
 
   /// Nonaktifkan penguncian PIN.
   Future<void> disable() async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    for (final k in const ['lock.salt', 'lock.hash']) {
-      await _p?.remove(k);
-    }
-    await _p?.setInt('lock.updatedAt', now);
+    final uid = _currentUid;
+    await _p?.remove(_k('salt', uid));
+    await _p?.remove(_k('hash', uid));
+    await _p?.setInt(_k('updatedAt', uid), now);
     _emit();
 
     try {
-      final uid = FirebaseAuth.instance.currentUser?.uid;
-      if (uid != null) {
-        await _doc(uid)?.set({
+      final userUid = FirebaseAuth.instance.currentUser?.uid;
+      if (userUid != null) {
+        await _doc(userUid)?.set({
           'hash': null,
           'salt': null,
-          'delay': _p!.getInt('lock.delay') ?? 1,
+          'delay': _p!.getInt(_k('delay', userUid)) ?? 1,
           'updatedAt': now,
         });
       }
@@ -132,16 +169,17 @@ class Lock {
   /// Ubah jeda waktu penguncian otomatis (menit).
   Future<void> setDelay(int minutes) async {
     final now = DateTime.now().millisecondsSinceEpoch;
-    await _p?.setInt('lock.delay', minutes);
-    await _p?.setInt('lock.updatedAt', now);
+    final uid = _currentUid;
+    await _p?.setInt(_k('delay', uid), minutes);
+    await _p?.setInt(_k('updatedAt', uid), now);
     _emit();
 
     try {
-      final uid = FirebaseAuth.instance.currentUser?.uid;
-      if (uid != null) {
-        await _doc(uid)?.set({
-          'hash': _p?.getString('lock.hash'),
-          'salt': _p?.getString('lock.salt'),
+      final userUid = FirebaseAuth.instance.currentUser?.uid;
+      if (userUid != null) {
+        await _doc(userUid)?.set({
+          'hash': _p?.getString(_k('hash', userUid)),
+          'salt': _p?.getString(_k('salt', userUid)),
           'delay': minutes,
           'updatedAt': now,
         }, SetOptions(merge: true));
@@ -160,15 +198,15 @@ class Lock {
       final snap = await doc.get().timeout(const Duration(seconds: 15));
       final data = snap.data();
       if (data == null) {
-        final localHash = _p?.getString('lock.hash');
-        final localSalt = _p?.getString('lock.salt');
+        final localHash = _p?.getString(_k('hash', uid));
+        final localSalt = _p?.getString(_k('salt', uid));
         if (localHash != null && localSalt != null) {
-          final now = _p?.getInt('lock.updatedAt') ??
+          final now = _p?.getInt(_k('updatedAt', uid)) ??
               DateTime.now().millisecondsSinceEpoch;
           await doc.set({
             'hash': localHash,
             'salt': localSalt,
-            'delay': _p?.getInt('lock.delay') ?? 1,
+            'delay': _p?.getInt(_k('delay', uid)) ?? 1,
             'updatedAt': now,
           });
         }
@@ -176,7 +214,7 @@ class Lock {
       }
 
       final remoteAt = (data['updatedAt'] as num?)?.toInt() ?? 0;
-      final localAt = _p?.getInt('lock.updatedAt') ?? 0;
+      final localAt = _p?.getInt(_k('updatedAt', uid)) ?? 0;
 
       if (remoteAt >= localAt) {
         final remoteHash = data['hash'] as String?;
@@ -184,23 +222,25 @@ class Lock {
         final remoteDelay = (data['delay'] as num?)?.toInt() ?? 1;
 
         if (remoteHash != null && remoteSalt != null) {
-          await _p?.setString('lock.hash', remoteHash);
-          await _p?.setString('lock.salt', remoteSalt);
-          await _p?.setInt('lock.delay', remoteDelay);
+          await _p?.setString(_k('hash', uid), remoteHash);
+          await _p?.setString(_k('salt', uid), remoteSalt);
+          await _p?.setInt(_k('delay', uid), remoteDelay);
         } else {
-          await _p?.remove('lock.hash');
-          await _p?.remove('lock.salt');
-          await _p?.setInt('lock.delay', remoteDelay);
+          await _p?.remove(_k('hash', uid));
+          await _p?.remove(_k('salt', uid));
+          await _p?.setInt(_k('delay', uid), remoteDelay);
         }
-        await _p?.setInt('lock.updatedAt', remoteAt);
-        _emit();
+        await _p?.setInt(_k('updatedAt', uid), remoteAt);
+        if (_activeUid == uid) {
+          _emit();
+        }
       } else {
-        final localHash = _p?.getString('lock.hash');
-        final localSalt = _p?.getString('lock.salt');
+        final localHash = _p?.getString(_k('hash', uid));
+        final localSalt = _p?.getString(_k('salt', uid));
         await doc.set({
           'hash': localHash,
           'salt': localSalt,
-          'delay': _p?.getInt('lock.delay') ?? 1,
+          'delay': _p?.getInt(_k('delay', uid)) ?? 1,
           'updatedAt': localAt,
         });
       }
@@ -209,17 +249,15 @@ class Lock {
     }
   }
 
-  /// Bersihkan data PIN lokal saat keluar akun.
-  Future<void> clearLocal() async {
-    for (final k in const [
-      'lock.salt',
-      'lock.hash',
-      'lock.delay',
-      'lock.updatedAt'
-    ]) {
-      await _p?.remove(k);
+  /// Bersihkan data PIN lokal pengguna tertentu saat wipe data.
+  Future<void> clearLocal([String? uid]) async {
+    final targetUid = uid ?? _currentUid;
+    await _p?.remove(_k('salt', targetUid));
+    await _p?.remove(_k('hash', targetUid));
+    await _p?.remove(_k('delay', targetUid));
+    await _p?.remove(_k('updatedAt', targetUid));
+    if (_activeUid == targetUid) {
+      _emit();
     }
-    _emit();
   }
 }
-

@@ -8,6 +8,8 @@ import 'app_database.dart';
 import 'prefs.dart';
 import 'providers.dart';
 import 'tables.dart' show TxType;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 /// Tiga pilar utama dalam metode penganggaran emas 50/30/20 (atau kustom nominal).
 enum BudgetBucket {
@@ -142,12 +144,30 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
   static const _kCategoryBuckets = 'pref_budget_category_buckets';
   static const _kCustomAllocations = 'pref_budget_custom_allocations';
 
+  String? _uid() {
+    try {
+      return FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _key(String base, [String? explicitUid]) {
+    final u = explicitUid ?? _uid();
+    return u != null ? '${base}_$u' : base;
+  }
+
   @override
   BudgetRuleState build() {
+    return _loadFromPrefs(_uid());
+  }
+
+  BudgetRuleState _loadFromPrefs(String? uid) {
     final prefs = ref.watch(sharedPreferencesProvider);
 
-    // Muat data total budget pools
-    final poolsRaw = prefs.getString(_kTotalPools);
+    // Muat data total budget pools (coba scoped key dulu, jika kosong coba fallback)
+    final poolsRaw = prefs.getString(_key(_kTotalPools, uid)) ??
+        (uid != null ? null : prefs.getString(_kTotalPools));
     final pools = <String, int>{};
     if (poolsRaw != null && poolsRaw.isNotEmpty) {
       try {
@@ -161,7 +181,8 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
     }
 
     // Muat data kategori kelompok
-    final bucketsRaw = prefs.getString(_kCategoryBuckets);
+    final bucketsRaw = prefs.getString(_key(_kCategoryBuckets, uid)) ??
+        (uid != null ? null : prefs.getString(_kCategoryBuckets));
     final buckets = <String, BudgetBucket>{};
     if (bucketsRaw != null && bucketsRaw.isNotEmpty) {
       try {
@@ -177,7 +198,8 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
     }
 
     // Muat data alokasi nominal kustom
-    final customRaw = prefs.getString(_kCustomAllocations);
+    final customRaw = prefs.getString(_key(_kCustomAllocations, uid)) ??
+        (uid != null ? null : prefs.getString(_kCustomAllocations));
     final customAlloc = <String, Map<String, int>>{};
     if (customRaw != null && customRaw.isNotEmpty) {
       try {
@@ -203,6 +225,105 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
     );
   }
 
+  /// Muat ulang konfigurasi anggaran untuk pengguna tertentu (dipanggil saat ganti akun).
+  void loadForUser(String? uid) {
+    state = _loadFromPrefs(uid);
+  }
+
+  /// Bersihkan data anggaran lokal saat logout.
+  Future<void> clearLocal([String? uid]) async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.remove(_key(_kTotalPools, uid));
+    await prefs.remove(_key(_kCategoryBuckets, uid));
+    await prefs.remove(_key(_kCustomAllocations, uid));
+    state = const BudgetRuleState(
+      totalPools: {},
+      categoryBuckets: {},
+      customAllocations: {},
+    );
+  }
+
+  /// Sinkronkan dan pulihkan data anggaran dari Cloud Firestore.
+  Future<void> restoreFromCloud(String uid) async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('meta')
+          .doc('budgetConfig')
+          .get()
+          .timeout(const Duration(seconds: 15));
+
+      if (!doc.exists) return;
+      final data = doc.data();
+      if (data == null) return;
+
+      final pools = <String, int>{};
+      if (data['totalPools'] is Map) {
+        for (final e in (data['totalPools'] as Map).entries) {
+          if (e.value is num) pools[e.key.toString()] = (e.value as num).toInt();
+        }
+      }
+
+      final buckets = <String, BudgetBucket>{};
+      if (data['categoryBuckets'] is Map) {
+        for (final e in (data['categoryBuckets'] as Map).entries) {
+          final bucket = BudgetBucket.values.firstWhere(
+            (b) => b.name == e.value,
+            orElse: () => BudgetBucket.wants,
+          );
+          buckets[e.key.toString()] = bucket;
+        }
+      }
+
+      final customAlloc = <String, Map<String, int>>{};
+      if (data['customAllocations'] is Map) {
+        for (final e in (data['customAllocations'] as Map).entries) {
+          if (e.value is Map) {
+            final inner = <String, int>{};
+            for (final sub in (e.value as Map).entries) {
+              if (sub.value is num) inner[sub.key.toString()] = (sub.value as num).toInt();
+            }
+            customAlloc[e.key.toString()] = inner;
+          }
+        }
+      }
+
+      state = BudgetRuleState(
+        totalPools: pools,
+        categoryBuckets: buckets,
+        customAllocations: customAlloc,
+      );
+
+      final prefs = ref.read(sharedPreferencesProvider);
+      await prefs.setString(_key(_kTotalPools, uid), jsonEncode(pools));
+      await prefs.setString(_key(_kCategoryBuckets, uid), jsonEncode(buckets.map((k, v) => MapEntry(k, v.name))));
+      await prefs.setString(_key(_kCustomAllocations, uid), jsonEncode(customAlloc));
+    } catch (e) {
+      debugPrint('[BudgetRule] Error restoring from cloud: $e');
+    }
+  }
+
+  /// Unggah konfigurasi anggaran saat ini ke Cloud Firestore.
+  Future<void> uploadToCloud(String uid) async {
+    try {
+      final encodableBuckets = state.categoryBuckets.map((k, v) => MapEntry(k, v.name));
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('meta')
+          .doc('budgetConfig')
+          .set({
+        'totalPools': state.totalPools,
+        'categoryBuckets': encodableBuckets,
+        'customAllocations': state.customAllocations,
+        'updatedAt': DateTime.now().millisecondsSinceEpoch,
+      }, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('[BudgetRule] Error uploading to cloud: $e');
+    }
+  }
+
   Future<void> setTotalBudget(String periodKey, int amount) async {
     final updated = Map<String, int>.from(state.totalPools);
     final updatedCustom = Map<String, Map<String, int>>.from(state.customAllocations);
@@ -212,14 +333,18 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
       updatedCustom.remove(periodKey);
     } else {
       updated[periodKey] = amount;
-      // Jika sebelumnya ada alokasi kustom yang totalnya berbeda, reset ke standar proporsional
       updatedCustom.remove(periodKey);
     }
     state = state.copyWith(totalPools: updated, customAllocations: updatedCustom);
 
     final prefs = ref.read(sharedPreferencesProvider);
-    await prefs.setString(_kTotalPools, jsonEncode(updated));
-    await prefs.setString(_kCustomAllocations, jsonEncode(updatedCustom));
+    final uid = _uid();
+    await prefs.setString(_key(_kTotalPools, uid), jsonEncode(updated));
+    await prefs.setString(_key(_kCustomAllocations, uid), jsonEncode(updatedCustom));
+
+    if (uid != null) {
+      uploadToCloud(uid);
+    }
   }
 
   Future<void> setCustomAllocations(
@@ -242,8 +367,13 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
     state = state.copyWith(totalPools: updated, customAllocations: updatedCustom);
 
     final prefs = ref.read(sharedPreferencesProvider);
-    await prefs.setString(_kTotalPools, jsonEncode(updated));
-    await prefs.setString(_kCustomAllocations, jsonEncode(updatedCustom));
+    final uid = _uid();
+    await prefs.setString(_key(_kTotalPools, uid), jsonEncode(updated));
+    await prefs.setString(_key(_kCustomAllocations, uid), jsonEncode(updatedCustom));
+
+    if (uid != null) {
+      uploadToCloud(uid);
+    }
   }
 
   Future<void> setCategoryBucket(String categoryId, BudgetBucket bucket) async {
@@ -252,8 +382,13 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
     state = state.copyWith(categoryBuckets: updated);
 
     final prefs = ref.read(sharedPreferencesProvider);
+    final uid = _uid();
     final encodable = updated.map((k, v) => MapEntry(k, v.name));
-    await prefs.setString(_kCategoryBuckets, jsonEncode(encodable));
+    await prefs.setString(_key(_kCategoryBuckets, uid), jsonEncode(encodable));
+
+    if (uid != null) {
+      uploadToCloud(uid);
+    }
   }
 }
 

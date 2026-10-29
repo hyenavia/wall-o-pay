@@ -101,9 +101,18 @@ class TransactionTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  trailingNote,
-                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (entry.receiptPath != null) ...[
+                      Icon(Icons.receipt_long_outlined, size: 12, color: muted),
+                      const SizedBox(width: 3),
+                    ],
+                    Text(
+                      trailingNote,
+                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                    ),
+                  ],
                 ),
               ],
             ),

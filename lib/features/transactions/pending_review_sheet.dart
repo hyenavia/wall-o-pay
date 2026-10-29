@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,6 +40,7 @@ class _PendingReviewSheetState extends ConsumerState<PendingReviewSheet> {
   late TxType _type;
   late DateTime _date;
   String? _selectedCategoryId;
+  String? _walletId;
   bool _showRawText = false;
   bool _saving = false;
 
@@ -50,6 +52,36 @@ class _PendingReviewSheetState extends ConsumerState<PendingReviewSheet> {
     _type = widget.pending.type;
     _date = widget.pending.date;
     _selectedCategoryId = widget.pending.suggestedCategory;
+    _walletId = AutoTrackerService.suggestWalletId(widget.pending.sourceApp);
+  }
+
+  void _showReceiptPreview(BuildContext context, String path) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: InteractiveViewer(
+                child: Image.file(
+                  File(path),
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            IconButton.filled(
+              icon: const Icon(Icons.close, color: Colors.white),
+              style: IconButton.styleFrom(backgroundColor: Colors.black54),
+              onPressed: () => Navigator.pop(ctx),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -107,6 +139,8 @@ class _PendingReviewSheetState extends ConsumerState<PendingReviewSheet> {
         type: _type,
         note: _noteController.text.trim(),
         date: _date,
+        walletId: _walletId,
+        receiptPath: widget.pending.receiptPath,
       );
 
       if (mounted) {
@@ -165,6 +199,10 @@ class _PendingReviewSheetState extends ConsumerState<PendingReviewSheet> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final catsAsync = ref.watch(categoriesProvider);
+    final wallets = ref.watch(walletsProvider).maybeWhen(
+          data: (w) => w,
+          orElse: () => const <Wallet>[],
+        );
 
     return SafeArea(
       top: false,
@@ -211,27 +249,38 @@ class _PendingReviewSheetState extends ConsumerState<PendingReviewSheet> {
                 // Header with Source Badge
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.sage.withValues(alpha: 0.25),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.notifications_active_outlined, size: 16, color: AppColors.deepForest),
-                          const SizedBox(width: 5),
-                          Text(
-                            widget.pending.sourceApp,
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.deepForest,
+                    Builder(builder: (context) {
+                      final isRecur = widget.pending.sourceApp.toLowerCase() == 'recurring';
+                      final isReceipt = widget.pending.sourceApp.toLowerCase().contains('receipt') || widget.pending.sourceApp.toLowerCase().contains('struk');
+                      final badgeIcon = isRecur
+                          ? Icons.repeat
+                          : (isReceipt ? Icons.receipt_long : Icons.notifications_active_outlined);
+                      final badgeLabel = isRecur
+                          ? context.tr('Scheduled Recurring')
+                          : (isReceipt ? context.tr('Shared Receipt') : widget.pending.sourceApp);
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.sage.withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(badgeIcon, size: 16, color: AppColors.deepForest),
+                            const SizedBox(width: 5),
+                            Text(
+                              badgeLabel,
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.deepForest,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
+                          ],
+                        ),
+                      );
+                    }),
                     const Spacer(),
                     IconButton(
                       icon: const Icon(Icons.close),
@@ -342,6 +391,77 @@ class _PendingReviewSheetState extends ConsumerState<PendingReviewSheet> {
                   ),
                 ),
                 const SizedBox(height: 14),
+
+                // Receipt Attachment Preview (if any)
+                if (widget.pending.receiptPath != null && File(widget.pending.receiptPath!).existsSync()) ...[
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.deepForest.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => _showReceiptPreview(context, widget.pending.receiptPath!),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.file(
+                              File(widget.pending.receiptPath!),
+                              width: 56,
+                              height: 56,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.tr('Receipt Attached'),
+                                style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                              ),
+                              GestureDetector(
+                                onTap: () => _showReceiptPreview(context, widget.pending.receiptPath!),
+                                child: Text(
+                                  context.tr('Tap to preview'),
+                                  style: theme.textTheme.bodySmall?.copyWith(color: AppColors.deepForest),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                // Wallet Dropdown
+                if (wallets.isNotEmpty) ...[
+                  DropdownButtonFormField<String>(
+                    initialValue: wallets.any((w) => w.id == _walletId) ? _walletId : wallets.firstOrNull?.id,
+                    decoration: InputDecoration(
+                      labelText: _type == TxType.expense
+                          ? context.tr('Pay from (Wallet / Account)')
+                          : context.tr('Deposit to (Wallet / Account)'),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      prefixIcon: const Icon(Icons.account_balance_wallet_outlined),
+                    ),
+                    items: [
+                      for (final w in wallets)
+                        DropdownMenuItem(
+                          value: w.id,
+                          child: Text(context.tr(w.name)),
+                        ),
+                    ],
+                    onChanged: (id) => setState(() => _walletId = id),
+                  ),
+                  const SizedBox(height: 14),
+                ],
 
                 // Category Dropdown
                 DropdownButtonFormField<String>(

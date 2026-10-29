@@ -388,6 +388,7 @@ class AutoTrackerService {
     required String note,
     required DateTime date,
     String? walletId,
+    String? receiptPath,
   }) async {
     final targetWalletId = walletId ?? suggestWalletId(pending.sourceApp);
     await _db.into(_db.transactions).insert(
@@ -398,6 +399,7 @@ class AutoTrackerService {
         note: Value(note),
         date: date,
         walletId: Value(targetWalletId),
+        receiptPath: Value(receiptPath ?? pending.receiptPath),
       ),
     );
     await _db.deletePendingTransaction(pending.id);

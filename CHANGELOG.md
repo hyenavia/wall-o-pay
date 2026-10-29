@@ -4,6 +4,29 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-10-29
+
+### Added
+- **Recurring Transactions & Subscriptions:**
+  - Automated recurring rule engine (`RecurringService`) supporting Daily, Weekly, and Monthly cycles.
+  - Review-first confirmation flow: Due recurring rules generate into the pending transaction inbox with a distinct "Scheduled Recurring" badge, allowing users to review, adjust, or discard transactions before any wallet balances are affected.
+  - Dedicated "Recurring & Subscriptions" management screen (`RecurringPage`) in Settings with schedule status toggles and rule deletion.
+- **Receipt Attachment & External App Sharing:**
+  - Native Android `ACTION_SEND` intent receiver to accept shared receipts (images and text) directly from m-banking apps (BCA, Livin' Mandiri, BRImo, BNI), e-wallets (GoPay, OVO, DANA, ShopeePay), and gallery receipts.
+  - In-app receipt attachment in `TransactionForm` via Camera or Gallery with full-screen lightbox preview and remove capability.
+  - Automatic parsing of amounts and notes from shared text using `TransactionParser`.
+  - Visual receipt indicator on transaction lists (`TransactionTile`) and receipt preview within `PendingReviewSheet`.
+
+### Fixed
+- **Multi-Account Data Isolation & Cloud Wipe:**
+  - Resolved cross-account data contamination by resetting the local SQLite database when switching accounts, ensuring separate accounts on the same device never see or overwrite each other's data.
+  - Fixed "Log out & erase data" to completely erase remote Firestore collections under `users/{uid}`, preventing deleted cloud data from re-syncing.
+  - Scoped App PIN lock credentials per account UID in local storage to prevent PIN erasure or corruption when switching accounts.
+  - Added real-time two-way synchronization and user scoping for budget allocations, buckets, and custom total pools (`meta/budgetConfig`).
+  - Streamlined Cloud Sync settings with a transparent real-time status card and manual sync trigger.
+
+---
+
 ## [1.5.1] - 2026-10-29
 
 ### Fixed

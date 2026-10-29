@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../core/format.dart';
 import '../../core/icons.dart';
@@ -15,20 +18,43 @@ Future<void> showTransactionForm(
   BuildContext context, {
   TransactionEntry? entry,
   TxType? initialType,
+  int? initialAmount,
+  String? initialNote,
+  String? initialReceiptPath,
+  String? initialWalletId,
 }) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    builder: (_) => TransactionForm(entry: entry, initialType: initialType),
+    builder: (_) => TransactionForm(
+      entry: entry,
+      initialType: initialType,
+      initialAmount: initialAmount,
+      initialNote: initialNote,
+      initialReceiptPath: initialReceiptPath,
+      initialWalletId: initialWalletId,
+    ),
   );
 }
 
 class TransactionForm extends ConsumerStatefulWidget {
-  const TransactionForm({super.key, this.entry, this.initialType});
+  const TransactionForm({
+    super.key,
+    this.entry,
+    this.initialType,
+    this.initialAmount,
+    this.initialNote,
+    this.initialReceiptPath,
+    this.initialWalletId,
+  });
 
   final TransactionEntry? entry;
   final TxType? initialType;
+  final int? initialAmount;
+  final String? initialNote;
+  final String? initialReceiptPath;
+  final String? initialWalletId;
 
   @override
   ConsumerState<TransactionForm> createState() => _TransactionFormState();
@@ -42,6 +68,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
   String? _walletId;
   String? _toWalletId;
   late DateTime _date;
+  String? _receiptPath;
   String? _error;
   Map<String, int> _usage = const {};
 
@@ -50,12 +77,20 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     super.initState();
     final e = widget.entry;
     _type = e?.type ?? widget.initialType ?? TxType.expense;
-    _amount = TextEditingController(text: e == null ? '' : formatThousands(e.amount));
-    _note = TextEditingController(text: e?.note ?? '');
+    _amount = TextEditingController(
+      text: e != null
+          ? formatThousands(e.amount)
+          : (widget.initialAmount != null && widget.initialAmount! > 0
+              ? formatThousands(widget.initialAmount!)
+              : ''),
+    );
+    _note = TextEditingController(text: e?.note ?? widget.initialNote ?? '');
     _categoryId = e?.categoryId;
-    _walletId = e?.walletId ?? 'wallet-main';
+    _walletId = e?.walletId ?? widget.initialWalletId ?? 'wallet-main';
     _toWalletId = e?.toWalletId ?? 'wallet-digital';
     _date = e?.date ?? DateTime.now();
+    _receiptPath = e?.receiptPath ?? widget.initialReceiptPath;
+
     ref.read(databaseProvider).categoryUsageCounts().then((u) {
       if (mounted) setState(() => _usage = u);
     });
@@ -76,6 +111,52 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       lastDate: DateTime(2100),
     );
     if (picked != null) setState(() => _date = picked);
+  }
+
+  Future<void> _pickReceipt(ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: source,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+      if (picked != null) {
+        setState(() => _receiptPath = picked.path);
+      }
+    } catch (e) {
+      debugPrint('Error picking receipt image: $e');
+    }
+  }
+
+  void _showReceiptPreview(BuildContext context, String path) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: Stack(
+          alignment: Alignment.topRight,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: InteractiveViewer(
+                child: Image.file(
+                  File(path),
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            IconButton.filled(
+              icon: const Icon(Icons.close, color: Colors.white),
+              style: IconButton.styleFrom(backgroundColor: Colors.black54),
+              onPressed: () => Navigator.pop(ctx),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _save() async {
@@ -106,6 +187,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           toWalletId: _toWalletId!,
           date: day,
           note: _note.text.trim(),
+          receiptPath: _receiptPath,
         );
       } else {
         await db.updateTransaction(
@@ -117,6 +199,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           note: _note.text.trim(),
           walletId: _walletId,
           toWalletId: _toWalletId,
+          receiptPath: _receiptPath,
+          clearReceipt: _receiptPath == null,
         );
       }
     } else {
@@ -133,6 +217,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           date: day,
           note: _note.text.trim(),
           walletId: _walletId ?? 'wallet-main',
+          receiptPath: _receiptPath,
         );
       } else {
         await db.updateTransaction(
@@ -143,6 +228,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           date: day,
           note: _note.text.trim(),
           walletId: _walletId ?? 'wallet-main',
+          receiptPath: _receiptPath,
+          clearReceipt: _receiptPath == null,
         );
       }
     }
@@ -175,6 +262,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final wallets = ref.watch(walletsProvider).maybeWhen(
           data: (list) => list,
           orElse: () => const <Wallet>[],
@@ -319,6 +407,90 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
               textCapitalization: TextCapitalization.sentences,
               decoration: appInput(context, label: context.tr('Note (optional)')),
             ),
+            const SizedBox(height: 16),
+
+            // Lampiran Struk / Receipt Attachment
+            Text(context.tr('Receipt / Struk (Optional)'), style: theme.textTheme.labelLarge),
+            const SizedBox(height: 8),
+            if (_receiptPath != null && File(_receiptPath!).existsSync()) ...[
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.deepForest.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => _showReceiptPreview(context, _receiptPath!),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.file(
+                          File(_receiptPath!),
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.tr('Receipt Attached'),
+                            style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                          ),
+                          GestureDetector(
+                            onTap: () => _showReceiptPreview(context, _receiptPath!),
+                            child: Text(
+                              context.tr('Tap to preview'),
+                              style: theme.textTheme.bodySmall?.copyWith(color: AppColors.deepForest),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: AppColors.expense),
+                      tooltip: context.tr('Remove receipt'),
+                      onPressed: () => setState(() => _receiptPath = null),
+                    ),
+                  ],
+                ),
+              ),
+            ] else ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () => _pickReceipt(ImageSource.camera),
+                      icon: const Icon(Icons.camera_alt_outlined, size: 20),
+                      label: Text(context.tr('Camera')),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () => _pickReceipt(ImageSource.gallery),
+                      icon: const Icon(Icons.photo_library_outlined, size: 20),
+                      label: Text(context.tr('Gallery')),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
             if (_error != null) ...[
               const SizedBox(height: 12),
               Text(_error!, style: const TextStyle(color: AppColors.expense)),

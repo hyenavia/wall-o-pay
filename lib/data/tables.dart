@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 enum TxType { income, expense, transfer }
+enum RecurFrequency { daily, weekly, monthly }
 
 /// ID unik (UUID) supaya aman disinkronkan antar perangkat nanti.
 String newId() => const Uuid().v4();
@@ -47,6 +48,7 @@ class Transactions extends Table with SyncColumns {
   TextColumn get walletId => text().nullable().references(Wallets, #id)();
   @ReferenceName('incomingTransfers')
   TextColumn get toWalletId => text().nullable().references(Wallets, #id)();
+  TextColumn get receiptPath => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -84,6 +86,31 @@ class PendingTransactions extends Table {
   TextColumn get note => text().withDefault(const Constant(''))();
   DateTimeColumn get date => dateTime()();
   DateTimeColumn get createdAt => dateTime().clientDefault(() => DateTime.now())();
+  TextColumn get receiptPath => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+
+@DataClassName('RecurringRule')
+class RecurringRules extends Table with SyncColumns {
+  TextColumn get title => text().withLength(min: 1, max: 100)();
+  IntColumn get amount => integer()();
+  TextColumn get type => textEnum<TxType>()();
+  TextColumn get categoryId => text().references(Categories, #id)();
+  @ReferenceName('recurringSourceWallets')
+  TextColumn get walletId => text().nullable().references(Wallets, #id)();
+  @ReferenceName('recurringDestWallets')
+  TextColumn get toWalletId => text().nullable().references(Wallets, #id)();
+  TextColumn get frequency => textEnum<RecurFrequency>()();
+  IntColumn get dayOfWeek => integer().nullable()();
+  IntColumn get dayOfMonth => integer().nullable()();
+  DateTimeColumn get startDate => dateTime()();
+  DateTimeColumn get nextDueDate => dateTime()();
+  DateTimeColumn get lastGeneratedDate => dateTime().nullable()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  TextColumn get note => text().withDefault(const Constant(''))();
 
   @override
   Set<Column> get primaryKey => {id};

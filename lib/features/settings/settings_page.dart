@@ -5,10 +5,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/format.dart';
 import '../../core/l10n.dart';
 import '../../core/period.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/cloud.dart';
 import '../../data/cloud_backup.dart';
 import '../../data/cloud_sync.dart';
+import '../../data/budget_rule.dart';
+import '../recurring/recurring_page.dart';
 import '../../data/export_service.dart';
 import '../../data/prefs.dart';
 import '../../data/profile.dart';
@@ -201,14 +204,19 @@ class SettingsPage extends ConsumerWidget {
               );
             },
           ),
-          SectionHeader(title: context.tr('Cloud backup (online)')),
+          SectionHeader(title: context.tr('Cloud Sync & Storage')),
           AppCard(
-            padding: EdgeInsets.zero,
+            padding: const EdgeInsets.all(16),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (backup.working) const LinearProgressIndicator(minHeight: 3),
+                if (backup.working) ...[
+                  const LinearProgressIndicator(minHeight: 3),
+                  const SizedBox(height: 12),
+                ],
                 if (!ready)
                   ListTile(
+                    contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.cloud_off_outlined),
                     title: Text(context.tr('Firebase is not connected')),
                     subtitle: Text(context.tr(
@@ -216,58 +224,80 @@ class SettingsPage extends ConsumerWidget {
                     )),
                   )
                 else ...[
-                  ListTile(
-                    leading: const Icon(Icons.sync),
-                    title: Text(context.tr('Real-Time Cloud Sync')),
-                    subtitle: Text(context.tr('Syncs automatically between devices in real-time.')),
-                    trailing: const Chip(
-                      label: Text('Active', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.green)),
-                      backgroundColor: Color(0x1B4CAF50),
-                      side: BorderSide.none,
-                    ),
-                    enabled: canUseCloud,
-                    onTap: () async {
-                      await ref.read(autoSyncServiceProvider).triggerTwoWaySync();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(context.tr('Synced with cloud.'))),
-                        );
-                      }
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.cloud_upload_outlined),
-                    title: Text(context.tr('Back up to cloud')),
-                    subtitle: Text(lastText),
-                    enabled: canUseCloud,
-                    onTap: () => _runAction(
-                      context,
-                      () => ref.read(cloudBackupProvider.notifier).backup(),
-                    ),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.cloud_download_outlined),
-                    title: Text(context.tr('Restore from cloud')),
-                    subtitle: Text(context.tr(
-                      'Merges your cloud backup into this device. Newer data wins.',
-                    )),
-                    enabled: canUseCloud,
-                    onTap: () async {
-                      final ok = await _confirm(
-                        context,
-                        title: context.tr('Restore from cloud?'),
-                        message: context.tr(
-                          'Data from your cloud backup will be merged into this device. Items changed more recently on this device are kept.',
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0x1B4CAF50),
+                          shape: BoxShape.circle,
                         ),
-                        action: context.tr('Restore'),
-                      );
-                      if (ok && context.mounted) {
-                        await _runAction(
-                          context,
-                          () => ref.read(cloudBackupProvider.notifier).restore(),
-                        );
-                      }
-                    },
+                        child: const Icon(Icons.cloud_done_rounded, color: Colors.green, size: 24),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  context.tr('Real-Time Cloud Sync'),
+                                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0x1B4CAF50),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    context.tr('Active'),
+                                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.green),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              context.tr('All transactions, wallets, budgets, and goals are automatically saved to the cloud.'),
+                              style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          lastText,
+                          style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                        ),
+                      ),
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        ),
+                        icon: const Icon(Icons.sync_rounded, size: 16),
+                        label: Text(context.tr('Sync Now')),
+                        onPressed: canUseCloud
+                            ? () async {
+                                await ref.read(autoSyncServiceProvider).triggerTwoWaySync();
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(context.tr('Synced with cloud.'))),
+                                  );
+                                }
+                              }
+                            : null,
+                      ),
+                    ],
                   ),
                 ],
               ],
@@ -317,6 +347,17 @@ class SettingsPage extends ConsumerWidget {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
+                ListTile(
+                  leading: const Icon(Icons.repeat_rounded),
+                  title: Text(context.tr('Recurring & Subscriptions')),
+                  subtitle: Text(context.tr('Manage routine expenses, incomes & transfers.')),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(builder: (_) => const RecurringPage()),
+                  ),
+                ),
+                const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.category_outlined),
                   title: Text(context.tr('Manage categories')),
@@ -488,7 +529,7 @@ class SettingsPage extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         title: Text(context.tr('Log out?')),
         content: Text(context.tr(
-          'Your cloud backup is not deleted. Back up first if you have recent changes, especially before erasing data on this device.',
+          'Choose "Log out" to keep your data safe in the cloud and switch accounts on this device. Choose "Log out & erase data" to permanently delete all data from this device AND the cloud.',
         )),
         actions: [
           TextButton(
@@ -496,6 +537,7 @@ class SettingsPage extends ConsumerWidget {
             child: Text(context.tr('Cancel')),
           ),
           TextButton(
+            style: TextButton.styleFrom(foregroundColor: AppColors.expense),
             onPressed: () => Navigator.pop(ctx, 'wipe'),
             child: Text(context.tr('Log out & erase data')),
           ),
@@ -509,10 +551,26 @@ class SettingsPage extends ConsumerWidget {
     if (choice == null) return;
 
     final db = ref.read(databaseProvider);
+    final user = ref.read(currentUserProvider);
     if (context.mounted) Navigator.of(context).popUntil((r) => r.isFirst);
     ref.read(autoSyncServiceProvider).stopSync();
+
+    if (choice == 'wipe' && user != null) {
+      // 1. Hapus seluruh data di Firestore untuk pengguna ini
+      await AutoSyncService.wipeCloudUserData(user.uid);
+      // 2. Bersihkan budget config & PIN pengguna ini
+      await ref.read(budgetRuleProvider.notifier).clearLocal(user.uid);
+      await Lock.instance.clearLocal(user.uid);
+    }
+
+    // Selalu bersihkan database lokal perangkat agar tidak bocor ke akun berikutnya
+    await db.resetAllData();
+    await ref.read(budgetRuleProvider.notifier).clearLocal();
+    await Lock.instance.loadForUser(null);
+
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.remove('current_sync_user_id');
+
     await FirebaseAuth.instance.signOut();
-    await Lock.instance.clearLocal();
-    if (choice == 'wipe') await db.resetAllData();
   }
 }

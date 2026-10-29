@@ -58,12 +58,12 @@ class SyncTable {
   final Future<bool> Function(Map<String, dynamic> json) applyRemote;
 }
 
-@DriftDatabase(tables: [Categories, Wallets, Transactions, Budgets, SavingsGoals, PendingTransactions])
+@DriftDatabase(tables: [Categories, Wallets, Transactions, Budgets, SavingsGoals, PendingTransactions, RecurringRules])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'wall_o_pay'));
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -76,6 +76,11 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) await _remapDefaultCategoryIds();
           if (from < 3) await _renameDefaultCategories();
           if (from < 4) await m.createTable(pendingTransactions);
+          if (from < 6) {
+            await m.addColumn(transactions, transactions.receiptPath);
+            await m.addColumn(pendingTransactions, pendingTransactions.receiptPath);
+            await m.createTable(recurringRules);
+          }
           if (from < 5) {
             await m.createTable(wallets);
             await _seedWallets();
@@ -353,6 +358,7 @@ class AppDatabase extends _$AppDatabase {
     required String toWalletId,
     required DateTime date,
     String note = '',
+    String? receiptPath,
   }) async {
     await into(transactions).insert(
       TransactionsCompanion.insert(
@@ -363,6 +369,7 @@ class AppDatabase extends _$AppDatabase {
         note: Value(note),
         walletId: Value(fromWalletId),
         toWalletId: Value(toWalletId),
+        receiptPath: Value(receiptPath),
       ),
     );
   }
@@ -410,6 +417,7 @@ class AppDatabase extends _$AppDatabase {
     String note = '',
     String? walletId,
     String? toWalletId,
+    String? receiptPath,
   }) async {
     await into(transactions).insert(TransactionsCompanion.insert(
       amount: amount,
@@ -419,6 +427,7 @@ class AppDatabase extends _$AppDatabase {
       note: Value(note),
       walletId: Value(walletId ?? 'wallet-main'),
       toWalletId: Value(toWalletId),
+      receiptPath: Value(receiptPath),
     ));
   }
 
@@ -431,6 +440,8 @@ class AppDatabase extends _$AppDatabase {
     String note = '',
     String? walletId,
     String? toWalletId,
+    String? receiptPath,
+    bool clearReceipt = false,
   }) async {
     await (update(transactions)..where((t) => t.id.equals(id))).write(
       TransactionsCompanion(
@@ -441,6 +452,9 @@ class AppDatabase extends _$AppDatabase {
         note: Value(note),
         walletId: Value(walletId ?? 'wallet-main'),
         toWalletId: Value(toWalletId),
+        receiptPath: clearReceipt
+            ? const Value(null)
+            : (receiptPath != null ? Value(receiptPath) : const Value.absent()),
         updatedAt: Value(DateTime.now()),
       ),
     );
@@ -624,8 +638,10 @@ class AppDatabase extends _$AppDatabase {
       await delete(transactions).go();
       await delete(budgets).go();
       await delete(savingsGoals).go();
+      await delete(recurringRules).go();
       await delete(categories).go();
       await delete(wallets).go();
+      await delete(pendingTransactions).go();
       await _seedCategories();
       await _seedWallets();
     });
@@ -730,6 +746,25 @@ class AppDatabase extends _$AppDatabase {
             return true;
           },
         ),
+        SyncTable(
+          name: 'recurringRules',
+          changed: (since) async => (await (select(recurringRules)
+                    ..where((r) => r.updatedAt.isBiggerThanValue(since)))
+                  .get())
+              .map((r) => r.toJson())
+              .toList(),
+          applyRemote: (json) async {
+            final remote = RecurringRule.fromJson(json);
+            final local = await (select(recurringRules)
+                  ..where((r) => r.id.equals(remote.id)))
+                .getSingleOrNull();
+            if (local != null && !remote.updatedAt.isAfter(local.updatedAt)) {
+              return false;
+            }
+            await into(recurringRules).insertOnConflictUpdate(remote);
+            return true;
+          },
+        ),
       ];
 
   // ---------------------------------------------------------------------------
@@ -750,4 +785,86 @@ class AppDatabase extends _$AppDatabase {
 
   Future<int> clearAllPendingTransactions() =>
       delete(pendingTransactions).go();
+
+  // ---------------------------------------------------------------------------
+  // Recurring Rules (Transaksi Berulang)
+  // ---------------------------------------------------------------------------
+
+  Stream<List<RecurringRule>> watchRecurringRules() =>
+      (select(recurringRules)
+            ..where((r) => r.deletedAt.isNull())
+            ..orderBy([(r) => OrderingTerm.desc(r.createdAt)]))
+          .watch();
+
+  Future<List<RecurringRule>> getDueRecurringRules(DateTime now) =>
+      (select(recurringRules)
+            ..where((r) =>
+                r.deletedAt.isNull() &
+                r.isActive.equals(true) &
+                r.nextDueDate.isSmallerOrEqualValue(now)))
+          .get();
+
+  Future<void> addRecurringRule({
+    required String title,
+    required int amount,
+    required TxType type,
+    required String categoryId,
+    String? walletId,
+    String? toWalletId,
+    required RecurFrequency frequency,
+    int? dayOfWeek,
+    int? dayOfMonth,
+    required DateTime startDate,
+    required DateTime nextDueDate,
+    String note = '',
+  }) async {
+    await into(recurringRules).insert(
+      RecurringRulesCompanion.insert(
+        title: title,
+        amount: amount,
+        type: type,
+        categoryId: categoryId,
+        walletId: Value(walletId ?? 'wallet-main'),
+        toWalletId: Value(toWalletId),
+        frequency: frequency,
+        dayOfWeek: Value(dayOfWeek),
+        dayOfMonth: Value(dayOfMonth),
+        startDate: startDate,
+        nextDueDate: nextDueDate,
+        note: Value(note),
+      ),
+    );
+  }
+
+  Future<void> updateRecurringNextDueDate(
+    String id,
+    DateTime nextDue,
+    DateTime lastGenerated,
+  ) async {
+    await (update(recurringRules)..where((r) => r.id.equals(id))).write(
+      RecurringRulesCompanion(
+        nextDueDate: Value(nextDue),
+        lastGeneratedDate: Value(lastGenerated),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> toggleRecurringRule(String id, bool active) async {
+    await (update(recurringRules)..where((r) => r.id.equals(id))).write(
+      RecurringRulesCompanion(
+        isActive: Value(active),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> deleteRecurringRule(String id) async {
+    await (update(recurringRules)..where((r) => r.id.equals(id))).write(
+      RecurringRulesCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
 }

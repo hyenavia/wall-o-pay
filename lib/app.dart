@@ -12,6 +12,8 @@ import 'data/cloud.dart';
 import 'data/prefs.dart';
 import 'data/providers.dart';
 import 'data/update_checker.dart';
+import 'data/recurring_service.dart';
+import 'data/share_service.dart';
 import 'features/auth/auth_page.dart';
 import 'features/budget/budget_page.dart';
 import 'features/goals/goals_page.dart';
@@ -128,6 +130,8 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    ShareService.initialize(context, ref);
+    RecurringService.checkAndGenerateDue(ref.read(databaseProvider));
     Future.delayed(const Duration(milliseconds: 1500), () async {
       if (!mounted) return;
       await UpdateCheckerService.checkAndNotify(ref, context: context);
@@ -138,6 +142,8 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       UpdateCheckerService.checkAndNotify(ref, context: context);
+      RecurringService.checkAndGenerateDue(ref.read(databaseProvider));
+      ShareService.checkSharedData(context);
     }
   }
 

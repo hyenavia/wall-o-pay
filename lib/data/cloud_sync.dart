@@ -9,6 +9,10 @@ import 'app_database.dart';
 import 'cloud_backup.dart';
 import 'profile.dart';
 import 'providers.dart';
+import 'budget_rule.dart';
+import 'lock.dart';
+import 'prefs.dart';
+import 'recurring_service.dart';
 
 /// Status sinkronisasi real-time otomatis.
 enum SyncStatus { idle, syncing, synced, error }
@@ -55,22 +59,40 @@ class AutoSyncService {
   static const _timeout = Duration(seconds: 20);
 
   /// Memulai sinkronisasi otomatis untuk user yang sedang aktif.
-  void startSync(String uid) {
+  void startSync(String uid) async {
     if (_currentUid == uid && _subscriptions.isNotEmpty) return;
     stopSync();
 
     _currentUid = uid;
     debugPrint('[AutoSync] Starting sync session for user: $uid');
 
+    // Cek apakah terjadi pergantian akun pengguna pada perangkat ini
+    try {
+      final prefs = _ref.read(sharedPreferencesProvider);
+      final lastUid = prefs.getString('current_sync_user_id');
+      if (lastUid != null && lastUid != uid) {
+        debugPrint('[AutoSync] Account switch detected ($lastUid -> $uid). Resetting local data...');
+        await _db.resetAllData();
+        _ref.read(budgetRuleProvider.notifier).loadForUser(uid);
+        await Lock.instance.syncWithCloud(uid);
+      }
+      await prefs.setString('current_sync_user_id', uid);
+    } catch (e) {
+      debugPrint('[AutoSync] Error during account switch check: $e');
+    }
+
     // 1. Dengarkan perubahan tabel lokal Drift untuk auto-push ke cloud
     final localSub = _db.tableUpdates().listen((updates) {
       if (_isApplyingRemote) return;
       final syncTableNames = {
         'categories',
+        'wallets',
         'transactions',
         'budgets',
         'savings_goals',
         'savingsGoals',
+        'recurring_rules',
+        'recurringRules',
       };
       final hasSyncTable = updates.any((u) => syncTableNames.contains(u.table));
       if (hasSyncTable) {
@@ -124,6 +146,25 @@ class AutoSyncService {
       debugPrint('[AutoSync] Profile snapshot error: $err');
     });
     _subscriptions.add(profileSub);
+
+    // 3b. Dengarkan snapshot konfigurasi anggaran
+    final budgetSub = root
+        .collection('meta')
+        .doc('budgetConfig')
+        .snapshots()
+        .listen((snap) async {
+      if (snap.metadata.hasPendingWrites) return;
+      if (snap.exists) {
+        try {
+          await _ref.read(budgetRuleProvider.notifier).restoreFromCloud(uid);
+        } catch (e) {
+          debugPrint('[AutoSync] Error restoring budgetConfig snapshot: $e');
+        }
+      }
+    }, onError: (err) {
+      debugPrint('[AutoSync] BudgetConfig snapshot error: $err');
+    });
+    _subscriptions.add(budgetSub);
 
     // 4. Dengarkan perubahan konektivitas jaringan (deteksi internet kembali aktif)
     final connSub = Connectivity().onConnectivityChanged.listen((results) {
@@ -191,6 +232,12 @@ class AutoSyncService {
         debugPrint('[AutoSync] Warning restoring profile: $e');
       }
 
+      try {
+        await _ref.read(budgetRuleProvider.notifier).restoreFromCloud(uid);
+      } catch (e) {
+        debugPrint('[AutoSync] Warning restoring budgetConfig: $e');
+      }
+
       for (final t in _db.syncTables) {
         try {
           final snap = await root.collection(t.name).get().timeout(_timeout);
@@ -212,6 +259,12 @@ class AutoSyncService {
         await _ref.read(profileProvider.notifier).uploadToCloud(uid);
       } catch (e) {
         debugPrint('[AutoSync] Warning uploading profile: $e');
+      }
+
+      try {
+        await _ref.read(budgetRuleProvider.notifier).uploadToCloud(uid);
+      } catch (e) {
+        debugPrint('[AutoSync] Warning uploading budgetConfig: $e');
       }
 
       for (final t in _db.syncTables) {
@@ -243,6 +296,9 @@ class AutoSyncService {
         }
       }
 
+      // Periksa transaksi berulang yang jatuh tempo
+      await RecurringService.checkAndGenerateDue(_db);
+
       final now = DateTime.now();
       await CloudBackupService.saveLastBackup(uid, now);
       _ref.read(syncStateProvider.notifier).update(SyncState(
@@ -263,6 +319,38 @@ class AutoSyncService {
   }
 
   /// Hanya mengunggah data lokal yang berubah ke cloud.
+  /// Menghapus seluruh data pengguna dari Cloud Firestore (dipanggil saat 'Keluar & hapus data').
+  static Future<void> wipeCloudUserData(String uid) async {
+    try {
+      final root = FirebaseFirestore.instance.collection('users').doc(uid);
+      final collections = [
+        'categories',
+        'wallets',
+        'transactions',
+        'budgets',
+        'savingsGoals',
+        'recurringRules',
+      ];
+
+      for (final colName in collections) {
+        final snap = await root.collection(colName).get();
+        for (final doc in snap.docs) {
+          await doc.reference.delete();
+        }
+      }
+
+      final metaDocs = ['profile', 'security', 'budgetConfig'];
+      for (final m in metaDocs) {
+        try {
+          await root.collection('meta').doc(m).delete();
+        } catch (_) {}
+      }
+      debugPrint('[AutoSync] Successfully wiped all cloud data for user: $uid');
+    } catch (e) {
+      debugPrint('[AutoSync] Error wiping cloud data: $e');
+    }
+  }
+
   Future<void> _pushLocalOnly(String uid) async {
     if (_isSyncing) return;
     try {
@@ -293,6 +381,9 @@ class AutoSyncService {
           }
         }
       }
+      // Periksa transaksi berulang yang jatuh tempo
+      await RecurringService.checkAndGenerateDue(_db);
+
       final now = DateTime.now();
       await CloudBackupService.saveLastBackup(uid, now);
       _ref.read(syncStateProvider.notifier).update(SyncState(
