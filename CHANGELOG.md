@@ -4,6 +4,22 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.3] - 2026-10-30
+
+### Fixed
+- **Permanent Account Deletion & Complete Cloud/Local Data Wipe:**
+  - Resolved issue where deleting an account failed to release the username reservation or erase financial data from Firestore and local storage.
+  - Implemented direct document deletion by ID for `usernames/{username}` across multiple fallback sources (known username, `user.displayName`, root user document, and index query), guaranteeing that deleted usernames can immediately be registered again.
+  - Enhanced `AutoSyncService.wipeCloudUserData()` with batched deletion (`WriteBatch`), 15s timeouts, and snake_case + camelCase collection coverage across all subcollections (`categories`, `wallets`, `transactions`, `budgets`, `savingsGoals`, `recurringRules`, `debts`, `txTemplates`, `pendingTransactions`, `meta`).
+  - Added `ProfileController.clearLocal()` to erase cached profile nicknames and avatars from SharedPreferences upon logout or account deletion.
+  - Re-ordered the account deletion flow to ensure cloud and local wiping succeed while still fully authenticated before invoking `user.delete()`.
+- **Wallet & Account Multi-Language Localization:**
+  - Resolved issue where Wallets & Accounts balance cards showed Indonesian names ("Rekening Utama", "Bank Digital", "Tunai") even when English was selected.
+  - Standardized default wallet seeds to English keys (`Main Account`, `Digital Bank`, `Cash`, `E-Wallet`) and added an automatic SQLite self-healing update in `beforeOpen`.
+  - Added dynamic bi-directional English-to-Indonesian and Indonesian-to-English translation mapping in `AppStrings.tr()` for default wallet names so both new and existing local databases render seamlessly in English or Indonesian.
+
+---
+
 ## [1.8.2] - 2026-10-30
 
 ### Fixed

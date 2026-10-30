@@ -700,9 +700,10 @@ class SettingsPage extends ConsumerWidget {
         debugPrint('[SettingsPage] Error resetting local db on logout: $e');
       }
       try {
+        await ref.read(profileProvider.notifier).clearLocal();
         await ref.read(budgetRuleProvider.notifier).clearLocal();
       } catch (e) {
-        debugPrint('[SettingsPage] Error clearing local budget rule: $e');
+        debugPrint('[SettingsPage] Error clearing local caches: $e');
       }
       try {
         await Lock.instance.loadForUser(null);
@@ -809,6 +810,7 @@ class SettingsPage extends ConsumerWidget {
 
     final db = ref.read(databaseProvider);
     final userUid = user?.uid;
+    final username = ref.read(usernameProvider);
 
     if (context.mounted) {
       showDialog(
@@ -834,13 +836,22 @@ class SettingsPage extends ConsumerWidget {
 
     try {
       ref.read(autoSyncServiceProvider).stopSync();
-      await AuthService().deleteAccount(password: password.isNotEmpty ? password : null);
+      await AuthService().deleteAccount(
+        password: password.isNotEmpty ? password : null,
+        username: username,
+      );
 
       if (userUid != null) {
+        await ref.read(profileProvider.notifier).clearLocal(userUid);
         await ref.read(budgetRuleProvider.notifier).clearLocal(userUid);
         await Lock.instance.clearLocal(userUid);
       }
-      await db.resetAllData();
+      try {
+        await db.resetAllData();
+      } catch (e) {
+        debugPrint('[SettingsPage] Error resetting local db on delete: $e');
+      }
+      await ref.read(profileProvider.notifier).clearLocal();
       await ref.read(budgetRuleProvider.notifier).clearLocal();
       await Lock.instance.loadForUser(null);
 
@@ -848,7 +859,7 @@ class SettingsPage extends ConsumerWidget {
       await prefs.remove('current_sync_user_id');
 
       if (context.mounted) {
-        Navigator.of(context).popUntil((r) => r.isFirst);
+        Navigator.of(context, rootNavigator: true).popUntil((r) => r.isFirst);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: AppColors.income,

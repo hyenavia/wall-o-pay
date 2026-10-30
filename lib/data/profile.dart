@@ -103,6 +103,18 @@ class ProfileController extends Notifier<ProfileState> {
       photo: photo == null ? null : base64Decode(photo),
     );
   }
+
+  /// Bersihkan data profil lokal saat logout atau hapus akun.
+  Future<void> clearLocal([String? uid]) async {
+    final effectiveUid = uid ?? _uid;
+    final p = ref.read(sharedPreferencesProvider);
+    if (effectiveUid != null) {
+      await p.remove(_nickKey(effectiveUid));
+      await p.remove(_photoKey(effectiveUid));
+      await p.remove(_updatedKey(effectiveUid));
+    }
+    state = const ProfileState();
+  }
 }
 
 final profileProvider =

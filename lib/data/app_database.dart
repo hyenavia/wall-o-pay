@@ -32,10 +32,10 @@ const _transferSeed = <(String, String, String, int, String)>[
 ];
 
 const _walletSeed = <(String, String, String, int, String, int)>[
-  ('wallet-main', 'Rekening Utama', 'bank', 0, 'account_balance', 0xFF1E4238),
-  ('wallet-digital', 'Bank Digital', 'digital', 0, 'smartphone', 0xFF00897B),
+  ('wallet-main', 'Main Account', 'bank', 0, 'account_balance', 0xFF1E4238),
+  ('wallet-digital', 'Digital Bank', 'digital', 0, 'smartphone', 0xFF00897B),
   ('wallet-ewallet', 'E-Wallet', 'ewallet', 0, 'account_balance_wallet', 0xFFEF6C00),
-  ('wallet-cash', 'Tunai', 'cash', 0, 'payments', 0xFF558B2F),
+  ('wallet-cash', 'Cash', 'cash', 0, 'payments', 0xFF558B2F),
 ];
 
 /// Jejak waktu "kosong" untuk data bawaan: perubahan apa pun dari pengguna
@@ -114,6 +114,10 @@ class AppDatabase extends _$AppDatabase {
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
+          // Update default wallet names to multi-language English identifiers if still using legacy Indonesian names
+          await customStatement("UPDATE wallets SET name = 'Main Account' WHERE id = 'wallet-main' AND name = 'Rekening Utama'");
+          await customStatement("UPDATE wallets SET name = 'Digital Bank' WHERE id = 'wallet-digital' AND name = 'Bank Digital'");
+          await customStatement("UPDATE wallets SET name = 'Cash' WHERE id = 'wallet-cash' AND name = 'Tunai'");
           // Self-healing: pastikan tabel debts dan tx_templates selalu tersedia
           await customStatement('''
             CREATE TABLE IF NOT EXISTS debts (

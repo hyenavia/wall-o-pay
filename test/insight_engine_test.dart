@@ -110,5 +110,25 @@ void main() {
       expect(trG('Positive Cashflow & Savings'), 'Cashflow Positif & Tabungan');
       expect(trG('Daily Expense Chart'), 'Grafik Pengeluaran Harian');
     });
+
+    test('Wallet localization converts both Indonesian and English keys correctly', () {
+      AppLocale.code = 'en';
+      expect(trG('Rekening Utama'), 'Main Account');
+      expect(trG('Bank Digital'), 'Digital Bank');
+      expect(trG('Tunai'), 'Cash');
+      expect(trG('Main Account'), 'Main Account');
+      expect(trG('Digital Bank'), 'Digital Bank');
+      expect(trG('Cash'), 'Cash');
+      expect(trG('E-Wallet'), 'E-Wallet');
+
+      AppLocale.code = 'id';
+      expect(trG('Rekening Utama'), 'Rekening Utama');
+      expect(trG('Bank Digital'), 'Bank Digital');
+      expect(trG('Tunai'), 'Tunai');
+      expect(trG('Main Account'), 'Rekening Utama');
+      expect(trG('Digital Bank'), 'Bank Digital');
+      expect(trG('Cash'), 'Tunai');
+      expect(trG('E-Wallet'), 'E-Wallet');
+    });
   });
 }

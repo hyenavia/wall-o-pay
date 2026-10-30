@@ -60,6 +60,10 @@ class AuthService {
         'email': user.email ?? email.trim(),
         'username': name,
       });
+      await _fs.collection('users').doc(user.uid).set({
+        'username': name,
+        'email': user.email ?? email.trim(),
+      }, SetOptions(merge: true));
       await user.updateDisplayName(name);
     } catch (_) {
       // Username keduluan dipakai orang lain: batalkan akun yang baru dibuat.
@@ -73,9 +77,60 @@ class AuthService {
     await _auth.sendPasswordResetEmail(email: email);
   }
 
+  /// Hapus seluruh data Firestore dan pemetaan username pengguna saat user masih terotentikasi.
+  Future<void> wipeCloudDataAndUsernames(String uid, {String? knownUsername}) async {
+    final usernamesToDelete = <String>{};
+    if (knownUsername != null && knownUsername.trim().isNotEmpty) {
+      usernamesToDelete.add(knownUsername.trim().toLowerCase());
+    }
+
+    final user = _auth.currentUser;
+    final displayName = user?.displayName?.trim().toLowerCase();
+    if (displayName != null && displayName.isNotEmpty) {
+      usernamesToDelete.add(displayName);
+    }
+
+    try {
+      final userDoc = await _fs.collection('users').doc(uid).get().timeout(const Duration(seconds: 10));
+      final uName = userDoc.data()?['username'] as String?;
+      if (uName != null && uName.trim().isNotEmpty) {
+        usernamesToDelete.add(uName.trim().toLowerCase());
+      }
+    } catch (_) {}
+
+    try {
+      final snap = await _fs.collection('usernames').where('uid', isEqualTo: uid).get().timeout(const Duration(seconds: 10));
+      for (final doc in snap.docs) {
+        usernamesToDelete.add(doc.id.toLowerCase());
+      }
+    } catch (e) {
+      debugPrint('[AuthService] Query usernames failed: $e');
+    }
+
+    // Hapus seluruh dokumen username berdasarkan doc id langsung
+    for (final name in usernamesToDelete) {
+      try {
+        await _usernameDoc(name).delete().timeout(const Duration(seconds: 10));
+        debugPrint('[AuthService] Successfully deleted username reservation: $name');
+      } catch (e) {
+        debugPrint('[AuthService] Error deleting username doc $name: $e');
+      }
+    }
+
+    // Hapus seluruh koleksi data keuangan
+    await AutoSyncService.wipeCloudUserData(uid);
+
+    // Hapus dokumen root pengguna
+    try {
+      await _fs.collection('users').doc(uid).delete().timeout(const Duration(seconds: 10));
+    } catch (e) {
+      debugPrint('[AuthService] Error deleting user root doc: $e');
+    }
+  }
+
   /// Menghapus akun pengguna secara permanen dari Firebase Authentication,
   /// menghapus pemetaan username di Firestore, dan menghapus seluruh koleksi data cloud.
-  Future<void> deleteAccount({String? password}) async {
+  Future<void> deleteAccount({String? password, String? username}) async {
     final user = _auth.currentUser;
     if (user == null) return;
     final uid = user.uid;
@@ -94,27 +149,10 @@ class AuthService {
       }
     }
 
-    // 2. Hapus seluruh data pengguna dari Cloud Firestore
-    await AutoSyncService.wipeCloudUserData(uid);
+    // 2. Hapus seluruh data cloud dan pemetaan username selagi masih terotentikasi
+    await wipeCloudDataAndUsernames(uid, knownUsername: username);
 
-    // 3. Hapus pemetaan username di Firestore
-    try {
-      final snap = await _fs.collection('usernames').where('uid', isEqualTo: uid).get();
-      for (final doc in snap.docs) {
-        await doc.reference.delete();
-      }
-    } catch (e) {
-      debugPrint('[AuthService] Error deleting username mapping: $e');
-    }
-
-    // 4. Hapus dokumen root pengguna di 'users/{uid}'
-    try {
-      await _fs.collection('users').doc(uid).delete();
-    } catch (e) {
-      debugPrint('[AuthService] Error deleting user root doc: $e');
-    }
-
-    // 5. Hapus akun pengguna di Firebase Authentication
+    // 3. Hapus akun pengguna di Firebase Authentication
     await user.delete();
     debugPrint('[AuthService] Successfully deleted user account: $uid');
   }

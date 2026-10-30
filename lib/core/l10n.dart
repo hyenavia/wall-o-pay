@@ -23,7 +23,9 @@ class AppStrings {
   static const LocalizationsDelegate<AppStrings> delegate = _AppStringsDelegate();
 
   String tr(String key, [Map<String, Object?>? args]) {
-    var text = code == 'id' ? (_id[key] ?? idExtra[key] ?? key) : key;
+    var text = code == 'id'
+        ? (_id[key] ?? idExtra[key] ?? key)
+        : (_en[key] ?? key);
     if (args != null) {
       args.forEach((k, v) => text = text.replaceAll('{$k}', '$v'));
     }
@@ -57,7 +59,27 @@ extension TrContext on BuildContext {
 String trG(String key, [Map<String, Object?>? args]) =>
     AppStrings(AppLocale.code).tr(key, args);
 
+const Map<String, String> _en = {
+  'Rekening Utama': 'Main Account',
+  'Bank Digital': 'Digital Bank',
+  'Tunai': 'Cash',
+  'E-Wallet': 'E-Wallet',
+  'Makanan': 'Food & Drinks',
+  'Makan & minum': 'Food & Drinks',
+  'Transportasi': 'Transport',
+  'Kos & tagihan': 'Rent & Bills',
+  'Kuliah': 'Education',
+  'Belanja': 'Shopping',
+  'Hiburan': 'Entertainment',
+  'Kesehatan': 'Health',
+  'Lainnya': 'Other',
+  'Transfer': 'Transfer',
+};
+
 const Map<String, String> _id = {
+  'Main Account': 'Rekening Utama',
+  'Digital Bank': 'Bank Digital',
+  'Cash': 'Tunai',
   '1 day left': '1 hari lagi',
   '1 month left': '1 bulan lagi',
   'A little closer\nto your dreams': 'Selangkah lebih dekat\nke impianmu',

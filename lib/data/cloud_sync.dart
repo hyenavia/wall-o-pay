@@ -366,31 +366,49 @@ class AutoSyncService {
         'transactions',
         'budgets',
         'savingsGoals',
+        'savings_goals',
         'recurringRules',
+        'recurring_rules',
         'debts',
         'txTemplates',
+        'tx_templates',
+        'pendingTransactions',
       ];
 
       for (final colName in collections) {
-        final snap = await root.collection(colName).get();
-        for (final doc in snap.docs) {
-          await doc.reference.delete();
+        try {
+          final snap = await root.collection(colName).get().timeout(const Duration(seconds: 15));
+          if (snap.docs.isEmpty) continue;
+          for (var i = 0; i < snap.docs.length; i += 400) {
+            final batch = FirebaseFirestore.instance.batch();
+            for (final doc in snap.docs.skip(i).take(400)) {
+              batch.delete(doc.reference);
+            }
+            await batch.commit();
+          }
+        } catch (e) {
+          debugPrint('[AutoSync] Error wiping collection $colName: $e');
         }
       }
 
       final metaDocs = ['profile', 'security', 'budgetConfig', 'preferences'];
+      final metaBatch = FirebaseFirestore.instance.batch();
       for (final m in metaDocs) {
-        try {
-          await root.collection('meta').doc(m).delete();
-        } catch (_) {}
+        metaBatch.delete(root.collection('meta').doc(m));
+      }
+      try {
+        await metaBatch.commit();
+      } catch (e) {
+        debugPrint('[AutoSync] Error wiping meta docs: $e');
       }
 
-      // Hapus pemetaan username di Firestore
+      // Hapus pemetaan username di Firestore jika masih ada
       try {
         final usernameSnap = await FirebaseFirestore.instance
             .collection('usernames')
             .where('uid', isEqualTo: uid)
-            .get();
+            .get()
+            .timeout(const Duration(seconds: 10));
         for (final doc in usernameSnap.docs) {
           await doc.reference.delete();
         }
@@ -400,7 +418,7 @@ class AutoSyncService {
 
       // Hapus dokumen root pengguna
       try {
-        await root.delete();
+        await root.delete().timeout(const Duration(seconds: 10));
       } catch (e) {
         debugPrint('[AutoSync] Error wiping root user doc: $e');
       }

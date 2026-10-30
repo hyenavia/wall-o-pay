@@ -44,8 +44,8 @@ class TransactionTile extends StatelessWidget {
 
     String subtitle;
     if (isTransfer) {
-      final fromName = wallet != null ? context.tr(wallet!.name) : context.tr('Rekening Utama');
-      final toName = toWallet != null ? context.tr(toWallet!.name) : context.tr('Bank Digital');
+      final fromName = wallet != null ? context.tr(wallet!.name) : context.tr('Main Account');
+      final toName = toWallet != null ? context.tr(toWallet!.name) : context.tr('Digital Bank');
       subtitle = '$fromName ➔ $toName';
     } else {
       final wName = wallet != null ? ' • ${context.tr(wallet!.name)}' : '';
