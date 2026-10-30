@@ -4,19 +4,6 @@
 
 const APP_VERSION = "1.8.7";
 
-// Theme Switcher
-function toggleTheme() {
-  const current = document.documentElement.getAttribute("data-theme");
-  const next = current === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", next);
-  
-  const themeBtn = document.getElementById("theme-btn");
-  if (themeBtn) {
-    themeBtn.textContent = next === "dark" ? "☀️" : "🌙";
-  }
-  localStorage.setItem("wall_o_pay_theme", next);
-}
-
 // Showcase Tabs Data (Full English)
 const showcaseData = {
   beranda: {
@@ -128,14 +115,11 @@ function fetchLatestReleaseVersion() {
 
 // Init on DOM ready
 document.addEventListener("DOMContentLoaded", () => {
-  // Theme init
-  const savedTheme = localStorage.getItem("wall_o_pay_theme") || "light";
-  document.documentElement.setAttribute("data-theme", savedTheme);
-  const themeBtn = document.getElementById("theme-btn");
-  if (themeBtn) {
-    themeBtn.textContent = savedTheme === "dark" ? "☀️" : "🌙";
-    themeBtn.addEventListener("click", toggleTheme);
-  }
+  // Enforce Wall o' Pay signature theme & clear any legacy theme preference
+  try {
+    localStorage.removeItem("wall_o_pay_theme");
+  } catch (_) {}
+  document.documentElement.setAttribute("data-theme", "signature");
 
   setupShowcaseTabs();
   setupMobileNav();
