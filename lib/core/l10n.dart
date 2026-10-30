@@ -307,6 +307,8 @@ const Map<String, String> _id = {
   'Log out': 'Keluar',
   'Log out & erase data': 'Keluar & hapus data',
   'Log out?': 'Keluar dari akun?',
+  'Logging out...': 'Sedang keluar...',
+  'Log out failed: {error}': 'Gagal keluar: {error}',
   'Login': 'Masuk',
   'Login and sign up need a Firebase project. Run "flutterfire configure" in the project, then restart the app.': 'Masuk dan daftar membutuhkan proyek Firebase. Jalankan "flutterfire configure" di proyek, lalu mulai ulang aplikasi.',
   'Manage categories': 'Kelola kategori',

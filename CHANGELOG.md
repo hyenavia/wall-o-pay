@@ -4,6 +4,20 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.2] - 2026-10-30
+
+### Fixed
+- **Authentication & Sign Out Execution Pipeline:**
+  - Resolved issue where pressing "Log out" failed to sign out the user. The previous implementation executed `Navigator.popUntil((r) => r.isFirst)` prematurely and threw an unhandled `SqliteException` during `resetAllData()`, aborting before `FirebaseAuth.instance.signOut()` was ever reached.
+  - Refactored `_signOut()` in `SettingsPage` to show a non-dismissible loading indicator (`Logging out...`), perform database reset and cache clearing safely inside defensive `try ... catch` blocks, and pop back to `AuthGate` only after `FirebaseAuth.instance.signOut()` completes.
+- **SQLite Database Migration & Self-Healing:**
+  - Fixed missing Drift table creation in `onUpgrade` for `debts` and `tx_templates` introduced in v1.8.0.
+  - Bumped database schema version to 8 with automated migration for existing installations.
+  - Added self-healing `CREATE TABLE IF NOT EXISTS` checks in `beforeOpen` for `debts` and `tx_templates` to ensure zero database crashes across all update pathways.
+  - Wrapped `delete(debts)` and `delete(txTemplates)` in `resetAllData()` defensively.
+
+---
+
 ## [1.8.1] - 2026-10-30
 
 ### Fixed

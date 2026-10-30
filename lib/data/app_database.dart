@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 import 'tables.dart';
 
@@ -63,7 +64,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'wall_o_pay'));
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -102,9 +103,48 @@ class AppDatabase extends _$AppDatabase {
               );
             }
           }
+          if (from < 8) {
+            try {
+              await m.createTable(debts);
+            } catch (_) {}
+            try {
+              await m.createTable(txTemplates);
+            } catch (_) {}
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
+          // Self-healing: pastikan tabel debts dan tx_templates selalu tersedia
+          await customStatement('''
+            CREATE TABLE IF NOT EXISTS debts (
+              id TEXT NOT NULL PRIMARY KEY,
+              created_at INTEGER NOT NULL,
+              updated_at INTEGER NOT NULL,
+              deleted_at INTEGER,
+              person TEXT NOT NULL,
+              direction TEXT NOT NULL,
+              amount INTEGER NOT NULL,
+              paid_amount INTEGER NOT NULL DEFAULT 0,
+              note TEXT NOT NULL DEFAULT '',
+              due_date INTEGER,
+              date INTEGER NOT NULL
+            );
+          ''');
+          await customStatement('''
+            CREATE TABLE IF NOT EXISTS tx_templates (
+              id TEXT NOT NULL PRIMARY KEY,
+              created_at INTEGER NOT NULL,
+              updated_at INTEGER NOT NULL,
+              deleted_at INTEGER,
+              name TEXT NOT NULL,
+              type TEXT NOT NULL,
+              amount INTEGER NOT NULL,
+              category_id TEXT NOT NULL,
+              wallet_id TEXT,
+              need_want TEXT,
+              note TEXT NOT NULL DEFAULT ''
+            );
+          ''');
         },
       );
 
@@ -653,8 +693,16 @@ class AppDatabase extends _$AppDatabase {
       await delete(budgets).go();
       await delete(savingsGoals).go();
       await delete(recurringRules).go();
-      await delete(debts).go();
-      await delete(txTemplates).go();
+      try {
+        await delete(debts).go();
+      } catch (e) {
+        debugPrint('[AppDatabase] Warning resetting debts: $e');
+      }
+      try {
+        await delete(txTemplates).go();
+      } catch (e) {
+        debugPrint('[AppDatabase] Warning resetting txTemplates: $e');
+      }
       await delete(categories).go();
       await delete(wallets).go();
       await delete(pendingTransactions).go();

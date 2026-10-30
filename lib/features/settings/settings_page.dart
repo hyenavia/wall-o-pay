@@ -667,19 +667,69 @@ class SettingsPage extends ConsumerWidget {
     );
     if (confirmed != true) return;
 
-    final db = ref.read(databaseProvider);
-    if (context.mounted) Navigator.of(context).popUntil((r) => r.isFirst);
-    ref.read(autoSyncServiceProvider).stopSync();
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => Center(
+          child: Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(context.tr('Logging out...')),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
-    // Reset database lokal perangkat agar tidak bocor ke akun berikutnya
-    await db.resetAllData();
-    await ref.read(budgetRuleProvider.notifier).clearLocal();
-    await Lock.instance.loadForUser(null);
+    try {
+      ref.read(autoSyncServiceProvider).stopSync();
+      final db = ref.read(databaseProvider);
 
-    final prefs = ref.read(sharedPreferencesProvider);
-    await prefs.remove('current_sync_user_id');
+      // Reset database lokal perangkat agar tidak bocor ke akun berikutnya
+      try {
+        await db.resetAllData();
+      } catch (e) {
+        debugPrint('[SettingsPage] Error resetting local db on logout: $e');
+      }
+      try {
+        await ref.read(budgetRuleProvider.notifier).clearLocal();
+      } catch (e) {
+        debugPrint('[SettingsPage] Error clearing local budget rule: $e');
+      }
+      try {
+        await Lock.instance.loadForUser(null);
+      } catch (e) {
+        debugPrint('[SettingsPage] Error resetting lock: $e');
+      }
 
-    await FirebaseAuth.instance.signOut();
+      final prefs = ref.read(sharedPreferencesProvider);
+      await prefs.remove('current_sync_user_id');
+
+      await FirebaseAuth.instance.signOut();
+
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).popUntil((r) => r.isFirst);
+      }
+    } catch (e) {
+      debugPrint('[SettingsPage] Sign out failed: $e');
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.expense,
+            content: Text(context.tr('Log out failed: {error}', {'error': e})),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
