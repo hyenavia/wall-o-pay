@@ -143,6 +143,7 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
   static const _kTotalPools = 'pref_budget_total_pools';
   static const _kCategoryBuckets = 'pref_budget_category_buckets';
   static const _kCustomAllocations = 'pref_budget_custom_allocations';
+  static const _kUpdated = 'pref_budget_updated_at';
 
   String? _uid() {
     try {
@@ -236,6 +237,7 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
     await prefs.remove(_key(_kTotalPools, uid));
     await prefs.remove(_key(_kCategoryBuckets, uid));
     await prefs.remove(_key(_kCustomAllocations, uid));
+    await prefs.remove(_key(_kUpdated, uid));
     state = const BudgetRuleState(
       totalPools: {},
       categoryBuckets: {},
@@ -246,6 +248,16 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
   /// Terapkan data konfigurasi anggaran dari cloud secara langsung (baik dari get maupun snapshot).
   void applyRemoteData(Map<String, dynamic> data, [String? uid]) {
     final effectiveUid = uid ?? _uid();
+    final prefs = ref.read(sharedPreferencesProvider);
+    final remoteAt = (data['updatedAt'] as num?)?.toInt() ?? 0;
+    final localAt = prefs.getInt(_key(_kUpdated, effectiveUid)) ?? 0;
+
+    // Jika data lokal lebih baru daripada remote, jangan timpa perubahan pengguna!
+    if (remoteAt < localAt) {
+      debugPrint('[BudgetRule] Local data is newer ($localAt > $remoteAt). Skipping remote apply.');
+      return;
+    }
+
     final pools = <String, int>{};
     if (data['totalPools'] is Map) {
       for (final e in (data['totalPools'] as Map).entries) {
@@ -283,10 +295,10 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
       customAllocations: customAlloc,
     );
 
-    final prefs = ref.read(sharedPreferencesProvider);
     prefs.setString(_key(_kTotalPools, effectiveUid), jsonEncode(pools));
     prefs.setString(_key(_kCategoryBuckets, effectiveUid), jsonEncode(buckets.map((k, v) => MapEntry(k, v.name))));
     prefs.setString(_key(_kCustomAllocations, effectiveUid), jsonEncode(customAlloc));
+    prefs.setInt(_key(_kUpdated, effectiveUid), remoteAt);
   }
 
   /// Sinkronkan dan pulihkan data anggaran dari Cloud Firestore.
@@ -313,6 +325,7 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
   /// Unggah konfigurasi anggaran saat ini ke Cloud Firestore.
   Future<void> uploadToCloud(String uid) async {
     try {
+      final now = DateTime.now().millisecondsSinceEpoch;
       final encodableBuckets = state.categoryBuckets.map((k, v) => MapEntry(k, v.name));
       await FirebaseFirestore.instance
           .collection('users')
@@ -323,8 +336,11 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
         'totalPools': state.totalPools,
         'categoryBuckets': encodableBuckets,
         'customAllocations': state.customAllocations,
-        'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      }, SetOptions(merge: true));
+        'updatedAt': now,
+      });
+
+      final prefs = ref.read(sharedPreferencesProvider);
+      await prefs.setInt(_key(_kUpdated, uid), now);
     } catch (e) {
       debugPrint('[BudgetRule] Error uploading to cloud: $e');
     }
@@ -335,7 +351,7 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
     final updatedCustom = Map<String, Map<String, int>>.from(state.customAllocations);
 
     if (amount <= 0) {
-      updated.remove(periodKey);
+      updated[periodKey] = 0;
       updatedCustom.remove(periodKey);
     } else {
       updated[periodKey] = amount;
@@ -345,8 +361,10 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
 
     final prefs = ref.read(sharedPreferencesProvider);
     final uid = _uid();
+    final now = DateTime.now().millisecondsSinceEpoch;
     await prefs.setString(_key(_kTotalPools, uid), jsonEncode(updated));
     await prefs.setString(_key(_kCustomAllocations, uid), jsonEncode(updatedCustom));
+    await prefs.setInt(_key(_kUpdated, uid), now);
 
     if (uid != null) {
       uploadToCloud(uid);
@@ -374,8 +392,10 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
 
     final prefs = ref.read(sharedPreferencesProvider);
     final uid = _uid();
+    final now = DateTime.now().millisecondsSinceEpoch;
     await prefs.setString(_key(_kTotalPools, uid), jsonEncode(updated));
     await prefs.setString(_key(_kCustomAllocations, uid), jsonEncode(updatedCustom));
+    await prefs.setInt(_key(_kUpdated, uid), now);
 
     if (uid != null) {
       uploadToCloud(uid);
@@ -389,8 +409,10 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
 
     final prefs = ref.read(sharedPreferencesProvider);
     final uid = _uid();
+    final now = DateTime.now().millisecondsSinceEpoch;
     final encodable = updated.map((k, v) => MapEntry(k, v.name));
     await prefs.setString(_key(_kCategoryBuckets, uid), jsonEncode(encodable));
+    await prefs.setInt(_key(_kUpdated, uid), now);
 
     if (uid != null) {
       uploadToCloud(uid);

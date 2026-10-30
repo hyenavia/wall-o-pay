@@ -4,6 +4,17 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.6] - 2026-10-30
+
+### Fixed
+- **Budget Zeroing & Cloud Sync Reversion Prevention:**
+  - Resolved issue where setting the total budget to 0 on the Budget page reverted back to the previous amount (e.g. Rp 1.000.000) upon triggering "Sync Cloud" or "Send to Cloud".
+  - Replaced Firestore document map merge (`SetOptions(merge: true)`) in `uploadToCloud` with clean document replacement, preventing deleted or zeroed period budget keys from lingering in Firestore.
+  - Implemented local `_kUpdated` timestamp tracking in `BudgetRuleNotifier` and conflict resolution in `applyRemoteData` so older cloud snapshots never overwrite fresh local user budget changes.
+  - Explicitly stored zero amounts (`0`) for zeroed period keys across state, SharedPreferences, and Firestore.
+
+---
+
 ## [1.8.5] - 2026-10-30
 
 ### Added

@@ -41,10 +41,22 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.8.5',
+      version: '1.8.6',
       dateEn: 'October 30, 2026',
       dateId: '30 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Fixed budget zeroing reversion during cloud sync by preventing stale Firestore merge overwrites and adding timestamp conflict resolution.',
+          textId: 'Memperbaiki anggaran bernilai 0 yang kembali ke nominal lama saat sinkronisasi cloud dengan mencegah merge usang pada Firestore dan menambahkan pelacakan timestamp.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.8.5',
+      dateEn: 'October 30, 2026',
+      dateId: '30 Oktober 2026',
       changes: [
         ChangeItem(
           type: ChangeType.added,
