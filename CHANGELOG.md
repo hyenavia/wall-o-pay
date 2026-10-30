@@ -4,6 +4,17 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.4] - 2026-10-30
+
+### Fixed
+- **CI Build Pipeline & Maven Central Rate-Limiting:**
+  - Resolved `HTTP 429 Too Many Requests` error from Maven Central (`repo.maven.apache.org`) on GitHub Actions Ubuntu runners during Gradle dependency resolution (`dev.flutter.flutter-plugin-loader` & Kotlin BOM).
+  - Configured Google Cloud's official high-performance Maven Central mirror (`https://maven-central.storage-download.googleapis.com/maven2/`) with primary priority in `android/settings.gradle.kts` and `android/build.gradle.kts`.
+  - Integrated `gradle/actions/setup-gradle@v4` into `.github/workflows/release.yml` for automated caching of Gradle wrappers and dependency artifacts.
+  - Added an automated retry loop (up to 3 attempts with 15s backoff) for the release APK compilation step in CI to guard against transient network glitches.
+
+---
+
 ## [1.8.3] - 2026-10-30
 
 ### Fixed

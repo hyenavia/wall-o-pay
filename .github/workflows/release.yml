@@ -101,6 +101,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Gradle
+        if: steps.check_release.outputs.exists == 'false'
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Set up Flutter
         if: steps.check_release.outputs.exists == 'false'
         uses: subosito/flutter-action@v2
@@ -114,7 +118,19 @@ jobs:
 
       - name: Build Release APK
         if: steps.check_release.outputs.exists == 'false'
-        run: flutter build apk --release
+        run: |
+          for i in 1 2 3; do
+            echo "Attempt $i to build release APK..."
+            flutter build apk --release && break || {
+              if [ $i -lt 3 ]; then
+                echo "Build attempt $i failed. Retrying in 15 seconds..."
+                sleep 15
+              else
+                echo "All build attempts failed."
+                exit 1
+              fi
+            }
+          done
 
       - name: Create GitHub Release with APK
         if: steps.check_release.outputs.exists == 'false'
