@@ -4,6 +4,21 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.5] - 2026-10-30
+
+### Added
+- **Manual Cloud Sync Operations (Send to Cloud & Fetch from Cloud):**
+  - Added dedicated manual action buttons in Settings under *Cloud Sync & Storage*:
+    - **Send to Cloud (Upload)**: Forces an immediate push of all local SQLite records (wallets, categories, transactions, budgets, savings goals, recurring rules, debts, templates, user profile, budget configuration, and preferences) to Firebase Firestore with an item count confirmation toast.
+    - **Fetch from Cloud (Download)**: Pulls all remote records from Firestore into the local device database.
+    - **Sync Now (Two-Way)**: Executes complete bidirectional synchronization.
+  - Enhanced real-time sync status indicator with active, syncing, and error state chips alongside last-synced timestamp display.
+- **In-App Version Changelog & Release Notes Viewer:**
+  - Added an interactive Version Changelog sheet in Settings (*About & Updates*) displaying recent release highlights, patch notes, and version history.
+  - Designed with full offline availability, categorized change badges (`ADDED`, `CHANGED`, `FIXED`), and complete bilingual (English/Indonesian) support matching app design tokens.
+
+---
+
 ## [1.8.4] - 2026-10-30
 
 ### Fixed

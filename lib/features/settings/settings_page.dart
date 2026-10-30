@@ -16,6 +16,7 @@ import '../../data/feature_prefs.dart';
 import '../../data/notifications.dart';
 import '../debts/debts_page.dart';
 import 'report_dialog.dart';
+import 'app_changelog.dart';
 import '../recurring/recurring_page.dart';
 import '../../data/export_service.dart';
 import '../../data/prefs.dart';
@@ -37,18 +38,21 @@ class SettingsPage extends ConsumerWidget {
     final ready = ref.watch(firebaseReadyProvider);
     final user = ref.watch(currentUserProvider);
     final backup = ref.watch(cloudBackupProvider);
+    final sync = ref.watch(syncStateProvider);
+    final isSyncing = backup.working || sync.status == SyncStatus.syncing;
     final prefs = ref.watch(appPrefsProvider);
     final prefsCtl = ref.read(appPrefsProvider.notifier);
     final features = ref.watch(featurePrefsProvider);
     final featuresCtl = ref.read(featurePrefsProvider.notifier);
     final name = ref.watch(displayNameProvider);
     final username = ref.watch(usernameProvider);
-    final canUseCloud = ready && user != null && !backup.working;
+    final canUseCloud = ready && user != null && !isSyncing;
     final updateInfo = ref.watch(availableUpdateProvider);
 
-    final lastText = backup.lastBackup == null
+    final lastSyncTime = sync.lastSynced ?? backup.lastBackup;
+    final lastText = lastSyncTime == null
         ? context.tr('No cloud backup yet.')
-        : context.tr('Last backup {date}', {'date': dateTimeLabel(backup.lastBackup!)});
+        : context.tr('Last backup {date}', {'date': dateTimeLabel(lastSyncTime)});
 
     return Scaffold(
       appBar: pageAppBar(context, title: Text(context.tr('Settings'))),
@@ -318,7 +322,7 @@ class SettingsPage extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (backup.working) ...[
+                if (isSyncing) ...[
                   const LinearProgressIndicator(minHeight: 3),
                   const SizedBox(height: 12),
                 ],
@@ -337,10 +341,22 @@ class SettingsPage extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0x1B4CAF50),
+                          color: sync.status == SyncStatus.error
+                              ? const Color(0x1BFF5722)
+                              : const Color(0x1B4CAF50),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.cloud_done_rounded, color: Colors.green, size: 24),
+                        child: Icon(
+                          sync.status == SyncStatus.syncing
+                              ? Icons.sync_rounded
+                              : (sync.status == SyncStatus.error
+                                  ? Icons.sync_problem_rounded
+                                  : Icons.cloud_done_rounded),
+                          color: sync.status == SyncStatus.error
+                              ? Colors.deepOrange
+                              : Colors.green,
+                          size: 24,
+                        ),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -351,25 +367,41 @@ class SettingsPage extends ConsumerWidget {
                               children: [
                                 Text(
                                   context.tr('Real-Time Cloud Sync'),
-                                  style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                                  style: theme.textTheme.titleSmall
+                                      ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(width: 8),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: const Color(0x1B4CAF50),
+                                    color: sync.status == SyncStatus.error
+                                        ? const Color(0x1BFF5722)
+                                        : const Color(0x1B4CAF50),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
-                                    context.tr('Active'),
-                                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.green),
+                                    sync.status == SyncStatus.syncing
+                                        ? context.tr('Syncing in progress...')
+                                        : (sync.status == SyncStatus.error
+                                            ? 'Error'
+                                            : context.tr('Active')),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: sync.status == SyncStatus.error
+                                          ? Colors.deepOrange
+                                          : Colors.green,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              context.tr('All transactions, wallets, budgets, and goals are automatically saved to the cloud.'),
+                              context.tr(
+                                'Automatic background sync keeps your data safe across devices.',
+                              ),
                               style: theme.textTheme.bodySmall?.copyWith(color: muted),
                             ),
                           ],
@@ -377,35 +409,60 @@ class SettingsPage extends ConsumerWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 12),
+                  Text(
+                    lastText,
+                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                  ),
                   const Divider(height: 24),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
-                        child: Text(
-                          lastText,
-                          style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          icon: const Icon(Icons.cloud_upload_outlined, size: 16),
+                          label: Text(context.tr('Send to Cloud')),
+                          onPressed: canUseCloud ? () => _handleManualUpload(context, ref) : null,
                         ),
                       ),
-                      FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          icon: const Icon(Icons.cloud_download_outlined, size: 16),
+                          label: Text(context.tr('Fetch from Cloud')),
+                          onPressed: canUseCloud ? () => _handleManualRestore(context, ref) : null,
                         ),
-                        icon: const Icon(Icons.sync_rounded, size: 16),
-                        label: Text(context.tr('Sync Now')),
-                        onPressed: canUseCloud
-                            ? () async {
-                                await ref.read(autoSyncServiceProvider).triggerTwoWaySync();
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(context.tr('Synced with cloud.'))),
-                                  );
-                                }
-                              }
-                            : null,
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      icon: const Icon(Icons.sync_rounded, size: 16),
+                      label: Text(context.tr('Sync Now (Two-Way)')),
+                      onPressed: canUseCloud ? () => _handleTwoWaySync(context, ref) : null,
+                    ),
                   ),
                 ],
               ],
@@ -569,6 +626,19 @@ class SettingsPage extends ConsumerWidget {
                 ),
                 const Divider(height: 1),
                 ListTile(
+                  leading: const Icon(Icons.history_edu_rounded),
+                  title: Text(context.tr('Version Changelog')),
+                  subtitle: Text(
+                    context.tr(
+                      'See what\'s new in v{version} and past releases',
+                      {'version': UpdateCheckerService.currentVersion},
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => showAppChangelogSheet(context),
+                ),
+                const Divider(height: 1),
+                ListTile(
                   leading: const Icon(Icons.feedback_outlined),
                   title: Text(context.tr('Send Feedback')),
                   subtitle: Text(context.tr('Help us improve with your suggestions & bug reports.')),
@@ -587,6 +657,117 @@ class SettingsPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _handleManualUpload(BuildContext context, WidgetRef ref) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.tr('Sending data to cloud...')),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    try {
+      final count = await ref.read(autoSyncServiceProvider).pushAllLocalToCloud();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.cloud_done_rounded, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.tr(
+                      'Successfully sent {count} items to the cloud.',
+                      {'count': count},
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF1E4238),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.tr('Failed to send data: {error}', {'error': e.toString()}),
+            ),
+            backgroundColor: Colors.red.shade800,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleManualRestore(BuildContext context, WidgetRef ref) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(context.tr('Fetching data from cloud...')),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    try {
+      final count = await ref.read(autoSyncServiceProvider).pullAllRemoteToLocal();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.cloud_done_rounded, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.tr(
+                      'Successfully restored {count} items from the cloud.',
+                      {'count': count},
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFF1E4238),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.tr('Failed to fetch data: {error}', {'error': e.toString()}),
+            ),
+            backgroundColor: Colors.red.shade800,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleTwoWaySync(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(autoSyncServiceProvider).triggerTwoWaySync();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.tr('Synced with cloud.')),
+            backgroundColor: const Color(0xFF1E4238),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.tr('Sync failed: {error}', {'error': e.toString()})),
+            backgroundColor: Colors.red.shade800,
+          ),
+        );
+      }
+    }
   }
 
   /// Menjalankan aksi lalu menampilkan pesan hasilnya.

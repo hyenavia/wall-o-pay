@@ -39,14 +39,17 @@ class AvailableUpdateNotifier extends Notifier<AppUpdateInfo?> {
 
 /// Provider reaktif untuk notifikasi pembaruan aplikasi di seluruh halaman.
 final availableUpdateProvider =
-    NotifierProvider<AvailableUpdateNotifier, AppUpdateInfo?>(AvailableUpdateNotifier.new);
+    NotifierProvider<AvailableUpdateNotifier, AppUpdateInfo?>(
+      AvailableUpdateNotifier.new,
+    );
 
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '1.8.4';
+  static const currentVersion = '1.8.5';
 
-  static const MethodChannel _channel =
-      MethodChannel('com.example.wall_o_pay/notifications');
+  static const MethodChannel _channel = MethodChannel(
+    'com.example.wall_o_pay/notifications',
+  );
 
   static const String _latestReleaseApi =
       'https://api.github.com/repos/hyenavia/wall-o-pay/releases/latest';
@@ -74,18 +77,23 @@ class UpdateCheckerService {
     if (info != null && info.hasUpdate) {
       ref.read(availableUpdateProvider.notifier).setUpdate(info);
 
-      if (context != null && _promptedVersion != info.latestVersion && !_isShowingDialog) {
+      if (context != null &&
+          _promptedVersion != info.latestVersion &&
+          !_isShowingDialog) {
         // Jika aplikasi sedang terkunci dengan PIN, tunggu sampai pengguna selesai membuka kunci
         if (Lock.instance.isLocked.value) {
           void listener() {
             if (!Lock.instance.isLocked.value) {
               Lock.instance.isLocked.removeListener(listener);
-              if (context.mounted && _promptedVersion != info.latestVersion && !_isShowingDialog) {
+              if (context.mounted &&
+                  _promptedVersion != info.latestVersion &&
+                  !_isShowingDialog) {
                 _promptedVersion = info.latestVersion;
                 showUpdateDialog(context, info);
               }
             }
           }
+
           Lock.instance.isLocked.addListener(listener);
         } else if (context.mounted) {
           _promptedVersion = info.latestVersion;
@@ -117,7 +125,8 @@ class UpdateCheckerService {
       final data = jsonDecode(body) as Map<String, dynamic>;
       final rawTag = (data['tag_name'] as String? ?? '').trim();
       final cleanTag = rawTag.startsWith('v') ? rawTag.substring(1) : rawTag;
-      final releaseName = (data['name'] as String? ?? 'Wall o\' Pay $rawTag').trim();
+      final releaseName = (data['name'] as String? ?? 'Wall o\' Pay $rawTag')
+          .trim();
       final releaseNotes = (data['body'] as String? ?? '').trim();
       final releasePageUrl = (data['html_url'] as String? ?? '').trim();
 
@@ -209,7 +218,9 @@ class UpdateCheckerService {
       builder: (ctx) {
         final theme = Theme.of(ctx);
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
           title: Row(
             children: [
@@ -232,14 +243,19 @@ class UpdateCheckerService {
                   children: [
                     Text(
                       ctx.tr('Update Available!'),
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'v${info.currentVersion} ➔ v${info.latestVersion}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.6,
+                        ),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -253,7 +269,9 @@ class UpdateCheckerService {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                ctx.tr('A new version of Wall o\' Pay is ready with the latest improvements:'),
+                ctx.tr(
+                  'A new version of Wall o\' Pay is ready with the latest improvements:',
+                ),
                 style: const TextStyle(fontSize: 13, height: 1.4),
               ),
               const SizedBox(height: 12),
@@ -262,10 +280,14 @@ class UpdateCheckerService {
                   constraints: const BoxConstraints(maxHeight: 180),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.4,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                      color: theme.colorScheme.outlineVariant.withValues(
+                        alpha: 0.5,
+                      ),
                     ),
                   ),
                   child: SingleChildScrollView(
@@ -274,7 +296,9 @@ class UpdateCheckerService {
                       style: TextStyle(
                         fontSize: 12,
                         height: 1.4,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.85,
+                        ),
                       ),
                     ),
                   ),
@@ -301,7 +325,9 @@ class UpdateCheckerService {
               label: Text(ctx.tr('Update Now')),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.deepForest,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               onPressed: () {
                 Navigator.of(ctx).pop();

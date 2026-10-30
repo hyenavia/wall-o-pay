@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app_database.dart';
+import '../core/l10n.dart';
+import 'cloud.dart';
 import 'cloud_backup.dart';
 import 'profile.dart';
 import 'providers.dart';
@@ -239,8 +241,9 @@ class AutoSyncService {
 
   /// Melakukan sinkronisasi dua arah penuh (Pull Remote lalu Push Local).
   Future<void> triggerTwoWaySync() async {
-    final uid = _currentUid;
+    final uid = _currentUid ?? _ref.read(currentUserProvider)?.uid;
     if (uid == null || _isSyncing) return;
+    _currentUid ??= uid;
 
     _isSyncing = true;
     _ref.read(syncStateProvider.notifier).update(
@@ -355,7 +358,133 @@ class AutoSyncService {
     }
   }
 
-  /// Hanya mengunggah data lokal yang berubah ke cloud.
+  /// Mengunggah paksa seluruh data lokal (profil, preferensi, anggaran, dan seluruh tabel SQLite) ke cloud Firestore.
+  /// Mengembalikan jumlah baris data yang berhasil diunggah.
+  Future<int> pushAllLocalToCloud() async {
+    final uid = _currentUid ?? _ref.read(currentUserProvider)?.uid;
+    if (uid == null) {
+      throw Exception(trG('Please log in first.'));
+    }
+    _currentUid ??= uid;
+    if (_isSyncing) {
+      throw Exception(trG('Another operation is still running.'));
+    }
+
+    _isSyncing = true;
+    _ref.read(syncStateProvider.notifier).update(
+          _ref.read(syncStateProvider).copyWith(status: SyncStatus.syncing),
+        );
+
+    try {
+      final root = FirebaseFirestore.instance.collection('users').doc(uid);
+      var totalUploaded = 0;
+
+      // 1. Profil, anggaran, dan preferensi
+      await _ref.read(profileProvider.notifier).uploadToCloud(uid);
+      await _ref.read(budgetRuleProvider.notifier).uploadToCloud(uid);
+      await _ref.read(appPrefsProvider.notifier).uploadToCloud(uid);
+      totalUploaded += 3;
+
+      // 2. Seluruh tabel Drift SQLite
+      for (final t in _db.syncTables) {
+        final col = root.collection(t.name);
+        final rows = await t.changed(DateTime.fromMillisecondsSinceEpoch(0));
+        if (rows.isNotEmpty) {
+          for (var i = 0; i < rows.length; i += 400) {
+            final batch = FirebaseFirestore.instance.batch();
+            for (final r in rows.skip(i).take(400)) {
+              batch.set(col.doc(r['id'] as String), r);
+            }
+            await batch.commit().timeout(_timeout);
+          }
+          totalUploaded += rows.length;
+        }
+      }
+
+      await RecurringService.checkAndGenerateDue(_db);
+
+      final now = DateTime.now();
+      await CloudBackupService.saveLastBackup(uid, now);
+      _ref.read(syncStateProvider.notifier).update(SyncState(
+            status: SyncStatus.synced,
+            lastSynced: now,
+          ));
+      return totalUploaded;
+    } catch (e) {
+      debugPrint('[AutoSync] Error during pushAllLocalToCloud: $e');
+      _ref.read(syncStateProvider.notifier).update(
+            _ref.read(syncStateProvider).copyWith(
+                  status: SyncStatus.error,
+                  errorMessage: e.toString(),
+                ),
+          );
+      rethrow;
+    } finally {
+      _isSyncing = false;
+    }
+  }
+
+  /// Menarik paksa seluruh data dari Firestore ke database lokal.
+  /// Mengembalikan jumlah baris yang berhasil diterapkan ke database lokal.
+  Future<int> pullAllRemoteToLocal() async {
+    final uid = _currentUid ?? _ref.read(currentUserProvider)?.uid;
+    if (uid == null) {
+      throw Exception(trG('Please log in first.'));
+    }
+    _currentUid ??= uid;
+    if (_isSyncing) {
+      throw Exception(trG('Another operation is still running.'));
+    }
+
+    _isSyncing = true;
+    _ref.read(syncStateProvider.notifier).update(
+          _ref.read(syncStateProvider).copyWith(status: SyncStatus.syncing),
+        );
+
+    try {
+      final root = FirebaseFirestore.instance.collection('users').doc(uid);
+      var totalRestored = 0;
+
+      await _ref.read(profileProvider.notifier).restoreFromCloud(uid);
+      await _ref.read(budgetRuleProvider.notifier).restoreFromCloud(uid);
+      await _ref.read(appPrefsProvider.notifier).restoreFromCloud(uid);
+
+      for (final t in _db.syncTables) {
+        final snap = await root.collection(t.name).get().timeout(_timeout);
+        _isApplyingRemote = true;
+        try {
+          for (final doc in snap.docs) {
+            final applied = await t.applyRemote(doc.data());
+            if (applied) totalRestored++;
+          }
+        } finally {
+          _isApplyingRemote = false;
+        }
+      }
+
+      await RecurringService.checkAndGenerateDue(_db);
+
+      final now = DateTime.now();
+      await CloudBackupService.saveLastBackup(uid, now);
+      _ref.read(syncStateProvider.notifier).update(SyncState(
+            status: SyncStatus.synced,
+            lastSynced: now,
+          ));
+      return totalRestored;
+    } catch (e) {
+      debugPrint('[AutoSync] Error during pullAllRemoteToLocal: $e');
+      _ref.read(syncStateProvider.notifier).update(
+            _ref.read(syncStateProvider).copyWith(
+                  status: SyncStatus.error,
+                  errorMessage: e.toString(),
+                ),
+          );
+      rethrow;
+    } finally {
+      _isSyncing = false;
+    }
+  }
+
   /// Menghapus seluruh data pengguna dari Cloud Firestore (dipanggil saat 'Keluar & hapus data').
   static Future<void> wipeCloudUserData(String uid) async {
     try {
