@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'l10n_extra.dart';
+
 /// Bahasa aktif untuk kode di luar widget (format tanggal, pesan hasil aksi).
 /// Diperbarui oleh pengaturan bahasa sebelum UI dibangun ulang.
 class AppLocale {
@@ -21,7 +23,7 @@ class AppStrings {
   static const LocalizationsDelegate<AppStrings> delegate = _AppStringsDelegate();
 
   String tr(String key, [Map<String, Object?>? args]) {
-    var text = code == 'id' ? (_id[key] ?? key) : key;
+    var text = code == 'id' ? (_id[key] ?? idExtra[key] ?? key) : key;
     if (args != null) {
       args.forEach((k, v) => text = text.replaceAll('{$k}', '$v'));
     }

@@ -15,6 +15,7 @@ import '../../data/tables.dart' show TxType;
 
 import '../profile/profile_page.dart';
 import '../settings/settings_page.dart';
+import '../more/more_page.dart';
 import '../transactions/transaction_form.dart';
 import '../transactions/transaction_tile.dart';
 import '../../data/cloud.dart';
@@ -330,7 +331,10 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                     _QuickAction(
                       icon: Icons.more_horiz,
                       label: context.tr('More'),
-                      onTap: openSettings,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(builder: (_) => const MorePage()),
+                      ),
                     ),
                   ],
                 ),

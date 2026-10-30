@@ -4,6 +4,41 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-10-30
+
+### Added
+- **Debts & Bill Splitting Module (`DebtsPage`):**
+  - Track money lent to and borrowed from contacts with due dates, notes, and remaining balance tracking.
+  - Record partial or full debt repayments with automatic optional sync to transaction history.
+  - Interactive Bill Splitting calculator to divide restaurant, travel, or group expenses fairly with automatic debt item generation.
+- **Exportable PDF Financial Statement Reports (`ReportService` & `ReportDialog`):**
+  - Generate and share comprehensive, beautifully formatted PDF financial reports for any custom date range or calendar month.
+  - Detailed reporting includes net cashflow summary, category spending breakdown, wallet balances, and full transaction tables.
+- **Local Push Notifications & Automated Budget Alerts (`NotificationService`):**
+  - Integrated local notification engine using `flutter_local_notifications` and `timezone`.
+  - Configurable daily reminder nudge at a user-selected time to record daily spending.
+  - Real-time budget threshold warnings when a category exceeds 80% and 100% of its budgeted allowance.
+- **Quick Transaction Templates:**
+  - Save frequently logged transactions as quick templates with one tap from the transaction sheet.
+  - Single-click quick action chips at the top of the transaction form to instantaneously pre-fill recurring expenses.
+- **Need vs. Want Tracking & Insight Integration:**
+  - Added optional Need/Want classification to all expense entries.
+  - Enhanced the Insight tab with a dedicated "Needs vs. Wants" visual distribution bar and automated smart spending health recommendations.
+- **Transactions Date Range Filter:**
+  - Added custom date range filtering on the Transactions page alongside the existing search query filter.
+- **More Hub Navigation (`MorePage`):**
+  - Centralized Quick Hub accessible directly from the Home screen quick actions, linking Transfers, Debts & Splits, Recurring, Insight, PDF Reports, and Settings.
+- **Budget Rollover Support:**
+  - Preference setting to automatically carry over leftover unspent budget from previous periods into the current active period.
+- **Interactive First-Launch Onboarding (`OnboardingGate` & `OnboardingPage`):**
+  - Intuitive initial walkthrough allowing new users to set initial cash balances and configure primary preferences.
+
+### Changed
+- Upgraded Drift SQLite schema to version 7 with support for `Debts`, `TxTemplates`, and transaction `needWant` attributes.
+- Enabled Android core library desugaring for notification scheduling across all Android API levels.
+
+---
+
 ## [1.7.0] - 2026-10-30
 
 ### Added

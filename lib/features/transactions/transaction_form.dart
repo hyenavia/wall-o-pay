@@ -11,7 +11,11 @@ import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/app_database.dart';
 import '../../data/providers.dart';
-import '../../data/tables.dart' show TxType;
+import '../../data/prefs.dart';
+import '../../data/feature_prefs.dart';
+import '../../data/feature_providers.dart';
+import '../../data/notifications.dart';
+import '../../data/tables.dart' show NeedWant, TxType;
 
 /// Buka form tambah transaksi, atau ubah jika [entry] diisi.
 Future<void> showTransactionForm(
@@ -69,6 +73,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
   String? _toWalletId;
   late DateTime _date;
   String? _receiptPath;
+  NeedWant? _needWant;
   String? _error;
   Map<String, int> _usage = const {};
 
@@ -90,6 +95,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     _toWalletId = e?.toWalletId ?? 'wallet-digital';
     _date = e?.date ?? DateTime.now();
     _receiptPath = e?.receiptPath ?? widget.initialReceiptPath;
+    _needWant = e?.needWant;
 
     ref.read(databaseProvider).categoryUsageCounts().then((u) {
       if (mounted) setState(() => _usage = u);
@@ -157,6 +163,67 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
         ),
       ),
     );
+  }
+
+
+  void _applyTemplate(TxTemplate t) {
+    setState(() {
+      _type = t.type;
+      _amount.text = formatThousands(t.amount);
+      _note.text = t.note;
+      _categoryId = t.categoryId;
+      _walletId = t.walletId ?? _walletId;
+      _needWant = t.needWant;
+      _error = null;
+    });
+  }
+
+  Future<void> _saveAsTemplate() async {
+    final amount = parseAmount(_amount.text);
+    if (amount <= 0 || _categoryId == null) {
+      setState(() => _error = context.tr('Fill in the amount and category first.'));
+      return;
+    }
+    final controller = TextEditingController(
+      text: _note.text.trim().isEmpty ? '' : _note.text.trim(),
+    );
+    final name = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.tr('Save as template')),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: appInput(context, label: context.tr('Template name')),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(context.tr('Cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+            child: Text(context.tr('Save')),
+          ),
+        ],
+      ),
+    );
+    if (name == null || name.isEmpty) return;
+    await ref.read(databaseProvider).addTemplate(
+          name: name,
+          type: _type,
+          amount: amount,
+          categoryId: _categoryId!,
+          walletId: _walletId,
+          needWant: _type == TxType.expense ? _needWant : null,
+          note: _note.text.trim(),
+        );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.tr('Template saved.'))),
+      );
+    }
   }
 
   Future<void> _save() async {
@@ -234,6 +301,22 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       }
     }
 
+    if (_type == TxType.expense && _categoryId != null && ref.read(featurePrefsProvider).budgetAlerts) {
+      final cats = ref.read(categoriesProvider).maybeWhen(
+            data: (list) => list,
+            orElse: () => const <Category>[],
+          );
+      final cat = cats.where((c) => c.id == _categoryId).firstOrNull;
+      await checkBudgetAfterExpense(
+        db: db,
+        prefs: ref.read(sharedPreferencesProvider),
+        periodType: ref.read(appPrefsProvider).periodType,
+        categoryId: _categoryId!,
+        categoryName: cat?.name ?? 'Uncategorized',
+        date: day,
+      );
+    }
+
     if (mounted) Navigator.pop(context);
   }
 
@@ -277,6 +360,10 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       });
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final isEdit = widget.entry != null;
+    final templates = ref.watch(templatesProvider).maybeWhen(
+          data: (list) => list,
+          orElse: () => const <TxTemplate>[],
+        );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + bottomInset),
@@ -290,6 +377,26 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
               style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 16),
+            if (widget.entry == null && templates.isNotEmpty) ...[
+              SizedBox(
+                height: 38,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    for (final t in templates)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ActionChip(
+                          avatar: const Icon(Icons.flash_on, size: 16),
+                          label: Text(t.name),
+                          onPressed: () => _applyTemplate(t),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             SegmentedButton<TxType>(
               segments: [
                 ButtonSegment(
@@ -321,6 +428,34 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
               decoration: appInput(context, label: context.tr('Amount'), prefixText: 'Rp '),
             ),
             const SizedBox(height: 16),
+
+
+            if (_type == TxType.expense) ...[
+              Text(context.tr('Need or want?'), style: theme.textTheme.labelLarge),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<NeedWant>(
+                  emptySelectionAllowed: true,
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment(
+                      value: NeedWant.need,
+                      icon: const Icon(Icons.check_circle_outline, size: 16),
+                      label: Text(context.tr('Need')),
+                    ),
+                    ButtonSegment(
+                      value: NeedWant.want,
+                      icon: const Icon(Icons.favorite_border, size: 16),
+                      label: Text(context.tr('Want')),
+                    ),
+                  ],
+                  selected: _needWant == null ? {} : {_needWant!},
+                  onSelectionChanged: (s) => setState(() => _needWant = s.isEmpty ? null : s.first),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
 
             // Pilihan Dompet (Wallet Selection)
             if (_type == TxType.transfer) ...[
@@ -496,6 +631,15 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
               Text(_error!, style: const TextStyle(color: AppColors.expense)),
             ],
             const SizedBox(height: 20),
+            if (!isEdit && _type != TxType.transfer)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: OutlinedButton.icon(
+                  onPressed: _saveAsTemplate,
+                  icon: const Icon(Icons.bolt, size: 18),
+                  label: Text(context.tr('Save as template')),
+                ),
+              ),
             FilledButton(
               onPressed: _save,
               style: FilledButton.styleFrom(

@@ -6,7 +6,7 @@ import '../../core/l10n.dart';
 import '../../core/period.dart';
 import '../../core/theme.dart';
 import '../../data/app_database.dart';
-import '../../data/tables.dart' show TxType;
+import '../../data/tables.dart' show NeedWant, TxType;
 
 class InsightSummary {
   const InsightSummary({
@@ -429,6 +429,42 @@ class InsightEngine {
       ));
     }
 
+    // 6. Needs vs Wants Insight (jika ada transaksi yang ditandai)
+    int needTotal = 0;
+    int wantTotal = 0;
+    for (final t in expTxs) {
+      if (t.needWant == NeedWant.need) needTotal += t.amount;
+      if (t.needWant == NeedWant.want) wantTotal += t.amount;
+    }
+    if (needTotal + wantTotal > 0) {
+      final totalTagged = needTotal + wantTotal;
+      final wantPct = ((wantTotal / totalTagged) * 100).round();
+      if (wantPct > 40) {
+        insights.add(SmartInsightItem(
+          title: context.tr('Porsi Keinginan (Wants) Cukup Tinggi'),
+          description: context.tr(
+            '{pct}% pengeluaran yang ditandai dialokasikan untuk pos keinginan ({amount}). Coba evaluasi pos belanja non-esensial untuk menambah tabungan.',
+            {'pct': '$wantPct', 'amount': rupiah(wantTotal)},
+          ),
+          icon: Icons.favorite_border,
+          accentColor: const Color(0xFFEF9A9A),
+          badge: '$wantPct% Keinginan',
+        ));
+      } else {
+        insights.add(SmartInsightItem(
+          title: context.tr('Alokasi Kebutuhan Seimbang'),
+          description: context.tr(
+            '{pct}% pengeluaran dialokasikan untuk kebutuhan pokok ({amount}). Pola belanja esensialmu terjaga dengan baik!',
+            {'pct': '${100 - wantPct}', 'amount': rupiah(needTotal)},
+          ),
+          icon: Icons.check_circle_outline,
+          accentColor: AppColors.sage,
+          badge: '${100 - wantPct}% Kebutuhan',
+        ));
+      }
+    }
+
     return insights;
   }
 }
+

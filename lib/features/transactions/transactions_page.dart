@@ -5,6 +5,7 @@ import '../../core/format.dart';
 import '../../core/l10n.dart';
 import '../../core/widgets.dart';
 import '../../data/app_database.dart';
+import '../../data/feature_providers.dart';
 import '../../data/providers.dart';
 import '../../data/tables.dart' show TxType;
 import 'transaction_form.dart';
@@ -20,15 +21,42 @@ class TransactionsPage extends ConsumerStatefulWidget {
 class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   String _query = '';
   TxType? _filter;
+  DateTimeRange? _range;
+
+  Future<void> _pickRange() async {
+    final now = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(now.year + 1, 12, 31),
+      initialDateRange: _range,
+    );
+    if (picked != null) setState(() => _range = picked);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final txAsync = ref.watch(transactionsProvider);
+    final txAsync = _range == null
+        ? ref.watch(transactionsProvider)
+        : ref.watch(rangeTransactionsProvider(_range!));
     final cats = ref.watch(categoryMapProvider);
     final wallets = ref.watch(walletMapProvider);
 
     return Scaffold(
-      appBar: pageAppBar(context, title: Text(context.tr('Transactions'))),
+      appBar: pageAppBar(
+        context,
+        title: Text(context.tr('Transactions')),
+        actions: [
+          IconButton(
+            tooltip: context.tr('Filter by date range'),
+            icon: Icon(
+              Icons.date_range,
+              color: _range == null ? null : Theme.of(context).colorScheme.primary,
+            ),
+            onPressed: _pickRange,
+          ),
+        ],
+      ),
       body: txAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
@@ -52,7 +80,16 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
             children: [
-              const Center(child: PeriodSwitcher()),
+              if (_range == null)
+                const Center(child: PeriodSwitcher())
+              else
+                Center(
+                  child: InputChip(
+                    avatar: const Icon(Icons.date_range, size: 18),
+                    label: Text('${shortDate(_range!.start)} - ${shortDate(_range!.end)}'),
+                    onDeleted: () => setState(() => _range = null),
+                  ),
+                ),
               const SizedBox(height: 4),
               TextField(
                 onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),

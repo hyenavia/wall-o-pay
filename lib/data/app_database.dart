@@ -58,12 +58,12 @@ class SyncTable {
   final Future<bool> Function(Map<String, dynamic> json) applyRemote;
 }
 
-@DriftDatabase(tables: [Categories, Wallets, Transactions, Budgets, SavingsGoals, PendingTransactions, RecurringRules])
+@DriftDatabase(tables: [Categories, Wallets, Transactions, Budgets, SavingsGoals, PendingTransactions, RecurringRules, Debts, TxTemplates])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'wall_o_pay'));
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -866,5 +866,135 @@ class AppDatabase extends _$AppDatabase {
         updatedAt: Value(DateTime.now()),
       ),
     );
+  }
+
+  // ---------- Utang-piutang dan patungan ----------
+
+  Stream<List<Debt>> watchDebts() {
+    return (select(debts)
+          ..where((d) => d.deletedAt.isNull())
+          ..orderBy([(d) => OrderingTerm.desc(d.createdAt)]))
+        .watch();
+  }
+
+  Future<void> addDebt({
+    required String person,
+    required DebtDirection direction,
+    required int amount,
+    DateTime? dueDate,
+    String note = '',
+  }) async {
+    await into(debts).insert(DebtsCompanion.insert(
+      person: person,
+      direction: direction,
+      amount: amount,
+      date: DateTime.now(),
+      dueDate: Value(dueDate),
+      note: Value(note),
+    ));
+  }
+
+  /// Catat pembayaran sebagian atau pelunasan (tidak melebihi total utang).
+  Future<void> addDebtPayment(String id, int amount) async {
+    final d = await (select(debts)..where((x) => x.id.equals(id))).getSingle();
+    final paid = (d.paidAmount + amount).clamp(0, d.amount).toInt();
+    await (update(debts)..where((x) => x.id.equals(id))).write(
+      DebtsCompanion(
+        paidAmount: Value(paid),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> deleteDebt(String id) async {
+    await (update(debts)..where((x) => x.id.equals(id))).write(
+      DebtsCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  // ---------- Template transaksi ----------
+
+  Stream<List<TxTemplate>> watchTemplates() {
+    return (select(txTemplates)
+          ..where((t) => t.deletedAt.isNull())
+          ..orderBy([(t) => OrderingTerm.asc(t.name)]))
+        .watch();
+  }
+
+  Future<void> addTemplate({
+    required String name,
+    required TxType type,
+    required int amount,
+    required String categoryId,
+    String? walletId,
+    NeedWant? needWant,
+    String note = '',
+  }) async {
+    await into(txTemplates).insert(TxTemplatesCompanion.insert(
+      name: name,
+      type: type,
+      amount: amount,
+      categoryId: categoryId,
+      walletId: Value(walletId),
+      needWant: Value(needWant),
+      note: Value(note),
+    ));
+  }
+
+  Future<void> deleteTemplate(String id) async {
+    await (update(txTemplates)..where((t) => t.id.equals(id))).write(
+      TxTemplatesCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  // ---------- Statistik satu kali baca & laporan ----------
+
+  Future<bool> hasAnyTransaction() async {
+    final rows = await (select(transactions)
+          ..where((t) => t.deletedAt.isNull())
+          ..limit(1))
+        .get();
+    return rows.isNotEmpty;
+  }
+
+  Future<int> budgetAmount(String categoryId, String key) async {
+    final b = await (select(budgets)
+          ..where((x) =>
+              x.deletedAt.isNull() &
+              x.categoryId.equals(categoryId) &
+              x.monthKey.equals(key)))
+        .getSingleOrNull();
+    return b?.amount ?? 0;
+  }
+
+  Future<int> expenseTotal(String categoryId, DateTime start, DateTime end) async {
+    final rows = await (select(transactions)
+          ..where((t) =>
+              t.deletedAt.isNull() &
+              t.type.equalsValue(TxType.expense) &
+              t.categoryId.equals(categoryId) &
+              t.date.isBiggerOrEqualValue(start) &
+              t.date.isSmallerThanValue(end)))
+        .get();
+    return rows.fold<int>(0, (s, t) => s + t.amount);
+  }
+
+  Future<List<TransactionEntry>> transactionsBetween(DateTime start, DateTime end) {
+    return (select(transactions)
+          ..where((t) =>
+              t.deletedAt.isNull() &
+              t.date.isBiggerOrEqualValue(start) &
+              t.date.isSmallerThanValue(end))
+          ..orderBy([
+            (t) => OrderingTerm.asc(t.date),
+            (t) => OrderingTerm.asc(t.createdAt),
+          ]))
+        .get();
   }
 }

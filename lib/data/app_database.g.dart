@@ -1206,6 +1206,15 @@ class $TransactionsTable extends Transactions
     requiredDuringInsert: false,
   );
   @override
+  late final GeneratedColumnWithTypeConverter<NeedWant?, String> needWant =
+      GeneratedColumn<String>(
+        'need_want',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<NeedWant?>($TransactionsTable.$converterneedWantn);
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     createdAt,
@@ -1219,6 +1228,7 @@ class $TransactionsTable extends Transactions
     walletId,
     toWalletId,
     receiptPath,
+    needWant,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1366,6 +1376,12 @@ class $TransactionsTable extends Transactions
         DriftSqlType.string,
         data['${effectivePrefix}receipt_path'],
       ),
+      needWant: $TransactionsTable.$converterneedWantn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}need_want'],
+        ),
+      ),
     );
   }
 
@@ -1376,6 +1392,10 @@ class $TransactionsTable extends Transactions
 
   static JsonTypeConverter2<TxType, String, String> $convertertype =
       const EnumNameConverter<TxType>(TxType.values);
+  static JsonTypeConverter2<NeedWant, String, String> $converterneedWant =
+      const EnumNameConverter<NeedWant>(NeedWant.values);
+  static JsonTypeConverter2<NeedWant?, String?, String?> $converterneedWantn =
+      JsonTypeConverter2.asNullable($converterneedWant);
 }
 
 class TransactionEntry extends DataClass
@@ -1392,6 +1412,7 @@ class TransactionEntry extends DataClass
   final String? walletId;
   final String? toWalletId;
   final String? receiptPath;
+  final NeedWant? needWant;
   const TransactionEntry({
     required this.id,
     required this.createdAt,
@@ -1405,6 +1426,7 @@ class TransactionEntry extends DataClass
     this.walletId,
     this.toWalletId,
     this.receiptPath,
+    this.needWant,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1433,6 +1455,11 @@ class TransactionEntry extends DataClass
     if (!nullToAbsent || receiptPath != null) {
       map['receipt_path'] = Variable<String>(receiptPath);
     }
+    if (!nullToAbsent || needWant != null) {
+      map['need_want'] = Variable<String>(
+        $TransactionsTable.$converterneedWantn.toSql(needWant),
+      );
+    }
     return map;
   }
 
@@ -1458,6 +1485,9 @@ class TransactionEntry extends DataClass
       receiptPath: receiptPath == null && nullToAbsent
           ? const Value.absent()
           : Value(receiptPath),
+      needWant: needWant == null && nullToAbsent
+          ? const Value.absent()
+          : Value(needWant),
     );
   }
 
@@ -1481,6 +1511,9 @@ class TransactionEntry extends DataClass
       walletId: serializer.fromJson<String?>(json['walletId']),
       toWalletId: serializer.fromJson<String?>(json['toWalletId']),
       receiptPath: serializer.fromJson<String?>(json['receiptPath']),
+      needWant: $TransactionsTable.$converterneedWantn.fromJson(
+        serializer.fromJson<String?>(json['needWant']),
+      ),
     );
   }
   @override
@@ -1501,6 +1534,9 @@ class TransactionEntry extends DataClass
       'walletId': serializer.toJson<String?>(walletId),
       'toWalletId': serializer.toJson<String?>(toWalletId),
       'receiptPath': serializer.toJson<String?>(receiptPath),
+      'needWant': serializer.toJson<String?>(
+        $TransactionsTable.$converterneedWantn.toJson(needWant),
+      ),
     };
   }
 
@@ -1517,6 +1553,7 @@ class TransactionEntry extends DataClass
     Value<String?> walletId = const Value.absent(),
     Value<String?> toWalletId = const Value.absent(),
     Value<String?> receiptPath = const Value.absent(),
+    Value<NeedWant?> needWant = const Value.absent(),
   }) => TransactionEntry(
     id: id ?? this.id,
     createdAt: createdAt ?? this.createdAt,
@@ -1530,6 +1567,7 @@ class TransactionEntry extends DataClass
     walletId: walletId.present ? walletId.value : this.walletId,
     toWalletId: toWalletId.present ? toWalletId.value : this.toWalletId,
     receiptPath: receiptPath.present ? receiptPath.value : this.receiptPath,
+    needWant: needWant.present ? needWant.value : this.needWant,
   );
   TransactionEntry copyWithCompanion(TransactionsCompanion data) {
     return TransactionEntry(
@@ -1551,6 +1589,7 @@ class TransactionEntry extends DataClass
       receiptPath: data.receiptPath.present
           ? data.receiptPath.value
           : this.receiptPath,
+      needWant: data.needWant.present ? data.needWant.value : this.needWant,
     );
   }
 
@@ -1568,7 +1607,8 @@ class TransactionEntry extends DataClass
           ..write('date: $date, ')
           ..write('walletId: $walletId, ')
           ..write('toWalletId: $toWalletId, ')
-          ..write('receiptPath: $receiptPath')
+          ..write('receiptPath: $receiptPath, ')
+          ..write('needWant: $needWant')
           ..write(')'))
         .toString();
   }
@@ -1587,6 +1627,7 @@ class TransactionEntry extends DataClass
     walletId,
     toWalletId,
     receiptPath,
+    needWant,
   );
   @override
   bool operator ==(Object other) =>
@@ -1603,7 +1644,8 @@ class TransactionEntry extends DataClass
           other.date == this.date &&
           other.walletId == this.walletId &&
           other.toWalletId == this.toWalletId &&
-          other.receiptPath == this.receiptPath);
+          other.receiptPath == this.receiptPath &&
+          other.needWant == this.needWant);
 }
 
 class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
@@ -1619,6 +1661,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
   final Value<String?> walletId;
   final Value<String?> toWalletId;
   final Value<String?> receiptPath;
+  final Value<NeedWant?> needWant;
   final Value<int> rowid;
   const TransactionsCompanion({
     this.id = const Value.absent(),
@@ -1633,6 +1676,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
     this.walletId = const Value.absent(),
     this.toWalletId = const Value.absent(),
     this.receiptPath = const Value.absent(),
+    this.needWant = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TransactionsCompanion.insert({
@@ -1648,6 +1692,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
     this.walletId = const Value.absent(),
     this.toWalletId = const Value.absent(),
     this.receiptPath = const Value.absent(),
+    this.needWant = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : amount = Value(amount),
        type = Value(type),
@@ -1666,6 +1711,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
     Expression<String>? walletId,
     Expression<String>? toWalletId,
     Expression<String>? receiptPath,
+    Expression<String>? needWant,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1681,6 +1727,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
       if (walletId != null) 'wallet_id': walletId,
       if (toWalletId != null) 'to_wallet_id': toWalletId,
       if (receiptPath != null) 'receipt_path': receiptPath,
+      if (needWant != null) 'need_want': needWant,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1698,6 +1745,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
     Value<String?>? walletId,
     Value<String?>? toWalletId,
     Value<String?>? receiptPath,
+    Value<NeedWant?>? needWant,
     Value<int>? rowid,
   }) {
     return TransactionsCompanion(
@@ -1713,6 +1761,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
       walletId: walletId ?? this.walletId,
       toWalletId: toWalletId ?? this.toWalletId,
       receiptPath: receiptPath ?? this.receiptPath,
+      needWant: needWant ?? this.needWant,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1758,6 +1807,11 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
     if (receiptPath.present) {
       map['receipt_path'] = Variable<String>(receiptPath.value);
     }
+    if (needWant.present) {
+      map['need_want'] = Variable<String>(
+        $TransactionsTable.$converterneedWantn.toSql(needWant.value),
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1779,6 +1833,7 @@ class TransactionsCompanion extends UpdateCompanion<TransactionEntry> {
           ..write('walletId: $walletId, ')
           ..write('toWalletId: $toWalletId, ')
           ..write('receiptPath: $receiptPath, ')
+          ..write('needWant: $needWant, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2879,6 +2934,15 @@ class $PendingTransactionsTable extends PendingTransactions
     requiredDuringInsert: false,
   );
   @override
+  late final GeneratedColumnWithTypeConverter<NeedWant?, String> needWant =
+      GeneratedColumn<String>(
+        'need_want',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<NeedWant?>($PendingTransactionsTable.$converterneedWantn);
+  @override
   List<GeneratedColumn> get $columns => [
     id,
     amount,
@@ -2890,6 +2954,7 @@ class $PendingTransactionsTable extends PendingTransactions
     date,
     createdAt,
     receiptPath,
+    needWant,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3022,6 +3087,12 @@ class $PendingTransactionsTable extends PendingTransactions
         DriftSqlType.string,
         data['${effectivePrefix}receipt_path'],
       ),
+      needWant: $PendingTransactionsTable.$converterneedWantn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}need_want'],
+        ),
+      ),
     );
   }
 
@@ -3032,6 +3103,10 @@ class $PendingTransactionsTable extends PendingTransactions
 
   static JsonTypeConverter2<TxType, String, String> $convertertype =
       const EnumNameConverter<TxType>(TxType.values);
+  static JsonTypeConverter2<NeedWant, String, String> $converterneedWant =
+      const EnumNameConverter<NeedWant>(NeedWant.values);
+  static JsonTypeConverter2<NeedWant?, String?, String?> $converterneedWantn =
+      JsonTypeConverter2.asNullable($converterneedWant);
 }
 
 class PendingTransaction extends DataClass
@@ -3046,6 +3121,7 @@ class PendingTransaction extends DataClass
   final DateTime date;
   final DateTime createdAt;
   final String? receiptPath;
+  final NeedWant? needWant;
   const PendingTransaction({
     required this.id,
     required this.amount,
@@ -3057,6 +3133,7 @@ class PendingTransaction extends DataClass
     required this.date,
     required this.createdAt,
     this.receiptPath,
+    this.needWant,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3079,6 +3156,11 @@ class PendingTransaction extends DataClass
     if (!nullToAbsent || receiptPath != null) {
       map['receipt_path'] = Variable<String>(receiptPath);
     }
+    if (!nullToAbsent || needWant != null) {
+      map['need_want'] = Variable<String>(
+        $PendingTransactionsTable.$converterneedWantn.toSql(needWant),
+      );
+    }
     return map;
   }
 
@@ -3098,6 +3180,9 @@ class PendingTransaction extends DataClass
       receiptPath: receiptPath == null && nullToAbsent
           ? const Value.absent()
           : Value(receiptPath),
+      needWant: needWant == null && nullToAbsent
+          ? const Value.absent()
+          : Value(needWant),
     );
   }
 
@@ -3121,6 +3206,9 @@ class PendingTransaction extends DataClass
       date: serializer.fromJson<DateTime>(json['date']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       receiptPath: serializer.fromJson<String?>(json['receiptPath']),
+      needWant: $PendingTransactionsTable.$converterneedWantn.fromJson(
+        serializer.fromJson<String?>(json['needWant']),
+      ),
     );
   }
   @override
@@ -3139,6 +3227,9 @@ class PendingTransaction extends DataClass
       'date': serializer.toJson<DateTime>(date),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'receiptPath': serializer.toJson<String?>(receiptPath),
+      'needWant': serializer.toJson<String?>(
+        $PendingTransactionsTable.$converterneedWantn.toJson(needWant),
+      ),
     };
   }
 
@@ -3153,6 +3244,7 @@ class PendingTransaction extends DataClass
     DateTime? date,
     DateTime? createdAt,
     Value<String?> receiptPath = const Value.absent(),
+    Value<NeedWant?> needWant = const Value.absent(),
   }) => PendingTransaction(
     id: id ?? this.id,
     amount: amount ?? this.amount,
@@ -3166,6 +3258,7 @@ class PendingTransaction extends DataClass
     date: date ?? this.date,
     createdAt: createdAt ?? this.createdAt,
     receiptPath: receiptPath.present ? receiptPath.value : this.receiptPath,
+    needWant: needWant.present ? needWant.value : this.needWant,
   );
   PendingTransaction copyWithCompanion(PendingTransactionsCompanion data) {
     return PendingTransaction(
@@ -3185,6 +3278,7 @@ class PendingTransaction extends DataClass
       receiptPath: data.receiptPath.present
           ? data.receiptPath.value
           : this.receiptPath,
+      needWant: data.needWant.present ? data.needWant.value : this.needWant,
     );
   }
 
@@ -3200,7 +3294,8 @@ class PendingTransaction extends DataClass
           ..write('note: $note, ')
           ..write('date: $date, ')
           ..write('createdAt: $createdAt, ')
-          ..write('receiptPath: $receiptPath')
+          ..write('receiptPath: $receiptPath, ')
+          ..write('needWant: $needWant')
           ..write(')'))
         .toString();
   }
@@ -3217,6 +3312,7 @@ class PendingTransaction extends DataClass
     date,
     createdAt,
     receiptPath,
+    needWant,
   );
   @override
   bool operator ==(Object other) =>
@@ -3231,7 +3327,8 @@ class PendingTransaction extends DataClass
           other.note == this.note &&
           other.date == this.date &&
           other.createdAt == this.createdAt &&
-          other.receiptPath == this.receiptPath);
+          other.receiptPath == this.receiptPath &&
+          other.needWant == this.needWant);
 }
 
 class PendingTransactionsCompanion extends UpdateCompanion<PendingTransaction> {
@@ -3245,6 +3342,7 @@ class PendingTransactionsCompanion extends UpdateCompanion<PendingTransaction> {
   final Value<DateTime> date;
   final Value<DateTime> createdAt;
   final Value<String?> receiptPath;
+  final Value<NeedWant?> needWant;
   final Value<int> rowid;
   const PendingTransactionsCompanion({
     this.id = const Value.absent(),
@@ -3257,6 +3355,7 @@ class PendingTransactionsCompanion extends UpdateCompanion<PendingTransaction> {
     this.date = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.receiptPath = const Value.absent(),
+    this.needWant = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   PendingTransactionsCompanion.insert({
@@ -3270,6 +3369,7 @@ class PendingTransactionsCompanion extends UpdateCompanion<PendingTransaction> {
     required DateTime date,
     this.createdAt = const Value.absent(),
     this.receiptPath = const Value.absent(),
+    this.needWant = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : amount = Value(amount),
        type = Value(type),
@@ -3287,6 +3387,7 @@ class PendingTransactionsCompanion extends UpdateCompanion<PendingTransaction> {
     Expression<DateTime>? date,
     Expression<DateTime>? createdAt,
     Expression<String>? receiptPath,
+    Expression<String>? needWant,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3300,6 +3401,7 @@ class PendingTransactionsCompanion extends UpdateCompanion<PendingTransaction> {
       if (date != null) 'date': date,
       if (createdAt != null) 'created_at': createdAt,
       if (receiptPath != null) 'receipt_path': receiptPath,
+      if (needWant != null) 'need_want': needWant,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -3315,6 +3417,7 @@ class PendingTransactionsCompanion extends UpdateCompanion<PendingTransaction> {
     Value<DateTime>? date,
     Value<DateTime>? createdAt,
     Value<String?>? receiptPath,
+    Value<NeedWant?>? needWant,
     Value<int>? rowid,
   }) {
     return PendingTransactionsCompanion(
@@ -3328,6 +3431,7 @@ class PendingTransactionsCompanion extends UpdateCompanion<PendingTransaction> {
       date: date ?? this.date,
       createdAt: createdAt ?? this.createdAt,
       receiptPath: receiptPath ?? this.receiptPath,
+      needWant: needWant ?? this.needWant,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -3367,6 +3471,11 @@ class PendingTransactionsCompanion extends UpdateCompanion<PendingTransaction> {
     if (receiptPath.present) {
       map['receipt_path'] = Variable<String>(receiptPath.value);
     }
+    if (needWant.present) {
+      map['need_want'] = Variable<String>(
+        $PendingTransactionsTable.$converterneedWantn.toSql(needWant.value),
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -3386,6 +3495,7 @@ class PendingTransactionsCompanion extends UpdateCompanion<PendingTransaction> {
           ..write('date: $date, ')
           ..write('createdAt: $createdAt, ')
           ..write('receiptPath: $receiptPath, ')
+          ..write('needWant: $needWant, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4428,6 +4538,1318 @@ class RecurringRulesCompanion extends UpdateCompanion<RecurringRule> {
   }
 }
 
+class $DebtsTable extends Debts with TableInfo<$DebtsTable, Debt> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DebtsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: () => newId(),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _personMeta = const VerificationMeta('person');
+  @override
+  late final GeneratedColumn<String> person = GeneratedColumn<String>(
+    'person',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 60,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<DebtDirection, String> direction =
+      GeneratedColumn<String>(
+        'direction',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<DebtDirection>($DebtsTable.$converterdirection);
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _paidAmountMeta = const VerificationMeta(
+    'paidAmount',
+  );
+  @override
+  late final GeneratedColumn<int> paidAmount = GeneratedColumn<int>(
+    'paid_amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _dueDateMeta = const VerificationMeta(
+    'dueDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dueDate = GeneratedColumn<DateTime>(
+    'due_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    person,
+    direction,
+    amount,
+    paidAmount,
+    note,
+    dueDate,
+    date,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'debts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Debt> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('person')) {
+      context.handle(
+        _personMeta,
+        person.isAcceptableOrUnknown(data['person']!, _personMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_personMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('paid_amount')) {
+      context.handle(
+        _paidAmountMeta,
+        paidAmount.isAcceptableOrUnknown(data['paid_amount']!, _paidAmountMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('due_date')) {
+      context.handle(
+        _dueDateMeta,
+        dueDate.isAcceptableOrUnknown(data['due_date']!, _dueDateMeta),
+      );
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Debt map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Debt(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      person: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}person'],
+      )!,
+      direction: $DebtsTable.$converterdirection.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}direction'],
+        )!,
+      ),
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount'],
+      )!,
+      paidAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}paid_amount'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      )!,
+      dueDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}due_date'],
+      ),
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      )!,
+    );
+  }
+
+  @override
+  $DebtsTable createAlias(String alias) {
+    return $DebtsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<DebtDirection, String, String> $converterdirection =
+      const EnumNameConverter<DebtDirection>(DebtDirection.values);
+}
+
+class Debt extends DataClass implements Insertable<Debt> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String person;
+  final DebtDirection direction;
+  final int amount;
+  final int paidAmount;
+  final String note;
+  final DateTime? dueDate;
+  final DateTime date;
+  const Debt({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.person,
+    required this.direction,
+    required this.amount,
+    required this.paidAmount,
+    required this.note,
+    this.dueDate,
+    required this.date,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['person'] = Variable<String>(person);
+    {
+      map['direction'] = Variable<String>(
+        $DebtsTable.$converterdirection.toSql(direction),
+      );
+    }
+    map['amount'] = Variable<int>(amount);
+    map['paid_amount'] = Variable<int>(paidAmount);
+    map['note'] = Variable<String>(note);
+    if (!nullToAbsent || dueDate != null) {
+      map['due_date'] = Variable<DateTime>(dueDate);
+    }
+    map['date'] = Variable<DateTime>(date);
+    return map;
+  }
+
+  DebtsCompanion toCompanion(bool nullToAbsent) {
+    return DebtsCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      person: Value(person),
+      direction: Value(direction),
+      amount: Value(amount),
+      paidAmount: Value(paidAmount),
+      note: Value(note),
+      dueDate: dueDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dueDate),
+      date: Value(date),
+    );
+  }
+
+  factory Debt.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Debt(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      person: serializer.fromJson<String>(json['person']),
+      direction: $DebtsTable.$converterdirection.fromJson(
+        serializer.fromJson<String>(json['direction']),
+      ),
+      amount: serializer.fromJson<int>(json['amount']),
+      paidAmount: serializer.fromJson<int>(json['paidAmount']),
+      note: serializer.fromJson<String>(json['note']),
+      dueDate: serializer.fromJson<DateTime?>(json['dueDate']),
+      date: serializer.fromJson<DateTime>(json['date']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'person': serializer.toJson<String>(person),
+      'direction': serializer.toJson<String>(
+        $DebtsTable.$converterdirection.toJson(direction),
+      ),
+      'amount': serializer.toJson<int>(amount),
+      'paidAmount': serializer.toJson<int>(paidAmount),
+      'note': serializer.toJson<String>(note),
+      'dueDate': serializer.toJson<DateTime?>(dueDate),
+      'date': serializer.toJson<DateTime>(date),
+    };
+  }
+
+  Debt copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? person,
+    DebtDirection? direction,
+    int? amount,
+    int? paidAmount,
+    String? note,
+    Value<DateTime?> dueDate = const Value.absent(),
+    DateTime? date,
+  }) => Debt(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    person: person ?? this.person,
+    direction: direction ?? this.direction,
+    amount: amount ?? this.amount,
+    paidAmount: paidAmount ?? this.paidAmount,
+    note: note ?? this.note,
+    dueDate: dueDate.present ? dueDate.value : this.dueDate,
+    date: date ?? this.date,
+  );
+  Debt copyWithCompanion(DebtsCompanion data) {
+    return Debt(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      person: data.person.present ? data.person.value : this.person,
+      direction: data.direction.present ? data.direction.value : this.direction,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      paidAmount: data.paidAmount.present
+          ? data.paidAmount.value
+          : this.paidAmount,
+      note: data.note.present ? data.note.value : this.note,
+      dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
+      date: data.date.present ? data.date.value : this.date,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Debt(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('person: $person, ')
+          ..write('direction: $direction, ')
+          ..write('amount: $amount, ')
+          ..write('paidAmount: $paidAmount, ')
+          ..write('note: $note, ')
+          ..write('dueDate: $dueDate, ')
+          ..write('date: $date')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    person,
+    direction,
+    amount,
+    paidAmount,
+    note,
+    dueDate,
+    date,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Debt &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.person == this.person &&
+          other.direction == this.direction &&
+          other.amount == this.amount &&
+          other.paidAmount == this.paidAmount &&
+          other.note == this.note &&
+          other.dueDate == this.dueDate &&
+          other.date == this.date);
+}
+
+class DebtsCompanion extends UpdateCompanion<Debt> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> person;
+  final Value<DebtDirection> direction;
+  final Value<int> amount;
+  final Value<int> paidAmount;
+  final Value<String> note;
+  final Value<DateTime?> dueDate;
+  final Value<DateTime> date;
+  final Value<int> rowid;
+  const DebtsCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.person = const Value.absent(),
+    this.direction = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.paidAmount = const Value.absent(),
+    this.note = const Value.absent(),
+    this.dueDate = const Value.absent(),
+    this.date = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DebtsCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String person,
+    required DebtDirection direction,
+    required int amount,
+    this.paidAmount = const Value.absent(),
+    this.note = const Value.absent(),
+    this.dueDate = const Value.absent(),
+    required DateTime date,
+    this.rowid = const Value.absent(),
+  }) : person = Value(person),
+       direction = Value(direction),
+       amount = Value(amount),
+       date = Value(date);
+  static Insertable<Debt> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? person,
+    Expression<String>? direction,
+    Expression<int>? amount,
+    Expression<int>? paidAmount,
+    Expression<String>? note,
+    Expression<DateTime>? dueDate,
+    Expression<DateTime>? date,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (person != null) 'person': person,
+      if (direction != null) 'direction': direction,
+      if (amount != null) 'amount': amount,
+      if (paidAmount != null) 'paid_amount': paidAmount,
+      if (note != null) 'note': note,
+      if (dueDate != null) 'due_date': dueDate,
+      if (date != null) 'date': date,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DebtsCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? person,
+    Value<DebtDirection>? direction,
+    Value<int>? amount,
+    Value<int>? paidAmount,
+    Value<String>? note,
+    Value<DateTime?>? dueDate,
+    Value<DateTime>? date,
+    Value<int>? rowid,
+  }) {
+    return DebtsCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      person: person ?? this.person,
+      direction: direction ?? this.direction,
+      amount: amount ?? this.amount,
+      paidAmount: paidAmount ?? this.paidAmount,
+      note: note ?? this.note,
+      dueDate: dueDate ?? this.dueDate,
+      date: date ?? this.date,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (person.present) {
+      map['person'] = Variable<String>(person.value);
+    }
+    if (direction.present) {
+      map['direction'] = Variable<String>(
+        $DebtsTable.$converterdirection.toSql(direction.value),
+      );
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    if (paidAmount.present) {
+      map['paid_amount'] = Variable<int>(paidAmount.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (dueDate.present) {
+      map['due_date'] = Variable<DateTime>(dueDate.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DebtsCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('person: $person, ')
+          ..write('direction: $direction, ')
+          ..write('amount: $amount, ')
+          ..write('paidAmount: $paidAmount, ')
+          ..write('note: $note, ')
+          ..write('dueDate: $dueDate, ')
+          ..write('date: $date, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $TxTemplatesTable extends TxTemplates
+    with TableInfo<$TxTemplatesTable, TxTemplate> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TxTemplatesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: () => newId(),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    clientDefault: () => DateTime.now(),
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 40,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<TxType, String> type =
+      GeneratedColumn<String>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<TxType>($TxTemplatesTable.$convertertype);
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _walletIdMeta = const VerificationMeta(
+    'walletId',
+  );
+  @override
+  late final GeneratedColumn<String> walletId = GeneratedColumn<String>(
+    'wallet_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<NeedWant?, String> needWant =
+      GeneratedColumn<String>(
+        'need_want',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      ).withConverter<NeedWant?>($TxTemplatesTable.$converterneedWantn);
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    name,
+    type,
+    amount,
+    categoryId,
+    walletId,
+    needWant,
+    note,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tx_templates';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TxTemplate> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryIdMeta);
+    }
+    if (data.containsKey('wallet_id')) {
+      context.handle(
+        _walletIdMeta,
+        walletId.isAcceptableOrUnknown(data['wallet_id']!, _walletIdMeta),
+      );
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TxTemplate map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TxTemplate(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      type: $TxTemplatesTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount'],
+      )!,
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      )!,
+      walletId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}wallet_id'],
+      ),
+      needWant: $TxTemplatesTable.$converterneedWantn.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}need_want'],
+        ),
+      ),
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      )!,
+    );
+  }
+
+  @override
+  $TxTemplatesTable createAlias(String alias) {
+    return $TxTemplatesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<TxType, String, String> $convertertype =
+      const EnumNameConverter<TxType>(TxType.values);
+  static JsonTypeConverter2<NeedWant, String, String> $converterneedWant =
+      const EnumNameConverter<NeedWant>(NeedWant.values);
+  static JsonTypeConverter2<NeedWant?, String?, String?> $converterneedWantn =
+      JsonTypeConverter2.asNullable($converterneedWant);
+}
+
+class TxTemplate extends DataClass implements Insertable<TxTemplate> {
+  final String id;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final String name;
+  final TxType type;
+  final int amount;
+  final String categoryId;
+  final String? walletId;
+  final NeedWant? needWant;
+  final String note;
+  const TxTemplate({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.name,
+    required this.type,
+    required this.amount,
+    required this.categoryId,
+    this.walletId,
+    this.needWant,
+    required this.note,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['name'] = Variable<String>(name);
+    {
+      map['type'] = Variable<String>(
+        $TxTemplatesTable.$convertertype.toSql(type),
+      );
+    }
+    map['amount'] = Variable<int>(amount);
+    map['category_id'] = Variable<String>(categoryId);
+    if (!nullToAbsent || walletId != null) {
+      map['wallet_id'] = Variable<String>(walletId);
+    }
+    if (!nullToAbsent || needWant != null) {
+      map['need_want'] = Variable<String>(
+        $TxTemplatesTable.$converterneedWantn.toSql(needWant),
+      );
+    }
+    map['note'] = Variable<String>(note);
+    return map;
+  }
+
+  TxTemplatesCompanion toCompanion(bool nullToAbsent) {
+    return TxTemplatesCompanion(
+      id: Value(id),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      name: Value(name),
+      type: Value(type),
+      amount: Value(amount),
+      categoryId: Value(categoryId),
+      walletId: walletId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(walletId),
+      needWant: needWant == null && nullToAbsent
+          ? const Value.absent()
+          : Value(needWant),
+      note: Value(note),
+    );
+  }
+
+  factory TxTemplate.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TxTemplate(
+      id: serializer.fromJson<String>(json['id']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      name: serializer.fromJson<String>(json['name']),
+      type: $TxTemplatesTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
+      amount: serializer.fromJson<int>(json['amount']),
+      categoryId: serializer.fromJson<String>(json['categoryId']),
+      walletId: serializer.fromJson<String?>(json['walletId']),
+      needWant: $TxTemplatesTable.$converterneedWantn.fromJson(
+        serializer.fromJson<String?>(json['needWant']),
+      ),
+      note: serializer.fromJson<String>(json['note']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'name': serializer.toJson<String>(name),
+      'type': serializer.toJson<String>(
+        $TxTemplatesTable.$convertertype.toJson(type),
+      ),
+      'amount': serializer.toJson<int>(amount),
+      'categoryId': serializer.toJson<String>(categoryId),
+      'walletId': serializer.toJson<String?>(walletId),
+      'needWant': serializer.toJson<String?>(
+        $TxTemplatesTable.$converterneedWantn.toJson(needWant),
+      ),
+      'note': serializer.toJson<String>(note),
+    };
+  }
+
+  TxTemplate copyWith({
+    String? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    String? name,
+    TxType? type,
+    int? amount,
+    String? categoryId,
+    Value<String?> walletId = const Value.absent(),
+    Value<NeedWant?> needWant = const Value.absent(),
+    String? note,
+  }) => TxTemplate(
+    id: id ?? this.id,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    name: name ?? this.name,
+    type: type ?? this.type,
+    amount: amount ?? this.amount,
+    categoryId: categoryId ?? this.categoryId,
+    walletId: walletId.present ? walletId.value : this.walletId,
+    needWant: needWant.present ? needWant.value : this.needWant,
+    note: note ?? this.note,
+  );
+  TxTemplate copyWithCompanion(TxTemplatesCompanion data) {
+    return TxTemplate(
+      id: data.id.present ? data.id.value : this.id,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      name: data.name.present ? data.name.value : this.name,
+      type: data.type.present ? data.type.value : this.type,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      walletId: data.walletId.present ? data.walletId.value : this.walletId,
+      needWant: data.needWant.present ? data.needWant.value : this.needWant,
+      note: data.note.present ? data.note.value : this.note,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TxTemplate(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('amount: $amount, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('walletId: $walletId, ')
+          ..write('needWant: $needWant, ')
+          ..write('note: $note')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    name,
+    type,
+    amount,
+    categoryId,
+    walletId,
+    needWant,
+    note,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TxTemplate &&
+          other.id == this.id &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.name == this.name &&
+          other.type == this.type &&
+          other.amount == this.amount &&
+          other.categoryId == this.categoryId &&
+          other.walletId == this.walletId &&
+          other.needWant == this.needWant &&
+          other.note == this.note);
+}
+
+class TxTemplatesCompanion extends UpdateCompanion<TxTemplate> {
+  final Value<String> id;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<String> name;
+  final Value<TxType> type;
+  final Value<int> amount;
+  final Value<String> categoryId;
+  final Value<String?> walletId;
+  final Value<NeedWant?> needWant;
+  final Value<String> note;
+  final Value<int> rowid;
+  const TxTemplatesCompanion({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.name = const Value.absent(),
+    this.type = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.walletId = const Value.absent(),
+    this.needWant = const Value.absent(),
+    this.note = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TxTemplatesCompanion.insert({
+    this.id = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    required String name,
+    required TxType type,
+    required int amount,
+    required String categoryId,
+    this.walletId = const Value.absent(),
+    this.needWant = const Value.absent(),
+    this.note = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : name = Value(name),
+       type = Value(type),
+       amount = Value(amount),
+       categoryId = Value(categoryId);
+  static Insertable<TxTemplate> custom({
+    Expression<String>? id,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? name,
+    Expression<String>? type,
+    Expression<int>? amount,
+    Expression<String>? categoryId,
+    Expression<String>? walletId,
+    Expression<String>? needWant,
+    Expression<String>? note,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (name != null) 'name': name,
+      if (type != null) 'type': type,
+      if (amount != null) 'amount': amount,
+      if (categoryId != null) 'category_id': categoryId,
+      if (walletId != null) 'wallet_id': walletId,
+      if (needWant != null) 'need_want': needWant,
+      if (note != null) 'note': note,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TxTemplatesCompanion copyWith({
+    Value<String>? id,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<String>? name,
+    Value<TxType>? type,
+    Value<int>? amount,
+    Value<String>? categoryId,
+    Value<String?>? walletId,
+    Value<NeedWant?>? needWant,
+    Value<String>? note,
+    Value<int>? rowid,
+  }) {
+    return TxTemplatesCompanion(
+      id: id ?? this.id,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      name: name ?? this.name,
+      type: type ?? this.type,
+      amount: amount ?? this.amount,
+      categoryId: categoryId ?? this.categoryId,
+      walletId: walletId ?? this.walletId,
+      needWant: needWant ?? this.needWant,
+      note: note ?? this.note,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(
+        $TxTemplatesTable.$convertertype.toSql(type.value),
+      );
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (walletId.present) {
+      map['wallet_id'] = Variable<String>(walletId.value);
+    }
+    if (needWant.present) {
+      map['need_want'] = Variable<String>(
+        $TxTemplatesTable.$converterneedWantn.toSql(needWant.value),
+      );
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TxTemplatesCompanion(')
+          ..write('id: $id, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('name: $name, ')
+          ..write('type: $type, ')
+          ..write('amount: $amount, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('walletId: $walletId, ')
+          ..write('needWant: $needWant, ')
+          ..write('note: $note, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4439,6 +5861,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PendingTransactionsTable pendingTransactions =
       $PendingTransactionsTable(this);
   late final $RecurringRulesTable recurringRules = $RecurringRulesTable(this);
+  late final $DebtsTable debts = $DebtsTable(this);
+  late final $TxTemplatesTable txTemplates = $TxTemplatesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4451,6 +5875,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     savingsGoals,
     pendingTransactions,
     recurringRules,
+    debts,
+    txTemplates,
   ];
 }
 
@@ -5692,6 +7118,7 @@ typedef $$TransactionsTableCreateCompanionBuilder =
       Value<String?> walletId,
       Value<String?> toWalletId,
       Value<String?> receiptPath,
+      Value<NeedWant?> needWant,
       Value<int> rowid,
     });
 typedef $$TransactionsTableUpdateCompanionBuilder =
@@ -5708,6 +7135,7 @@ typedef $$TransactionsTableUpdateCompanionBuilder =
       Value<String?> walletId,
       Value<String?> toWalletId,
       Value<String?> receiptPath,
+      Value<NeedWant?> needWant,
       Value<int> rowid,
     });
 
@@ -5822,6 +7250,12 @@ class $$TransactionsTableFilterComposer
     column: $table.receiptPath,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<NeedWant?, NeedWant, String> get needWant =>
+      $composableBuilder(
+        column: $table.needWant,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   $$CategoriesTableFilterComposer get categoryId {
     final $$CategoriesTableFilterComposer composer = $composerBuilder(
@@ -5947,6 +7381,11 @@ class $$TransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get needWant => $composableBuilder(
+    column: $table.needWant,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CategoriesTableOrderingComposer get categoryId {
     final $$CategoriesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6054,6 +7493,9 @@ class $$TransactionsTableAnnotationComposer
     column: $table.receiptPath,
     builder: (column) => column,
   );
+
+  GeneratedColumnWithTypeConverter<NeedWant?, String> get needWant =>
+      $composableBuilder(column: $table.needWant, builder: (column) => column);
 
   $$CategoriesTableAnnotationComposer get categoryId {
     final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
@@ -6169,6 +7611,7 @@ class $$TransactionsTableTableManager
                 Value<String?> walletId = const Value.absent(),
                 Value<String?> toWalletId = const Value.absent(),
                 Value<String?> receiptPath = const Value.absent(),
+                Value<NeedWant?> needWant = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsCompanion(
                 id: id,
@@ -6183,6 +7626,7 @@ class $$TransactionsTableTableManager
                 walletId: walletId,
                 toWalletId: toWalletId,
                 receiptPath: receiptPath,
+                needWant: needWant,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -6199,6 +7643,7 @@ class $$TransactionsTableTableManager
                 Value<String?> walletId = const Value.absent(),
                 Value<String?> toWalletId = const Value.absent(),
                 Value<String?> receiptPath = const Value.absent(),
+                Value<NeedWant?> needWant = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsCompanion.insert(
                 id: id,
@@ -6213,6 +7658,7 @@ class $$TransactionsTableTableManager
                 walletId: walletId,
                 toWalletId: toWalletId,
                 receiptPath: receiptPath,
+                needWant: needWant,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -6938,6 +8384,7 @@ typedef $$PendingTransactionsTableCreateCompanionBuilder =
       required DateTime date,
       Value<DateTime> createdAt,
       Value<String?> receiptPath,
+      Value<NeedWant?> needWant,
       Value<int> rowid,
     });
 typedef $$PendingTransactionsTableUpdateCompanionBuilder =
@@ -6952,6 +8399,7 @@ typedef $$PendingTransactionsTableUpdateCompanionBuilder =
       Value<DateTime> date,
       Value<DateTime> createdAt,
       Value<String?> receiptPath,
+      Value<NeedWant?> needWant,
       Value<int> rowid,
     });
 
@@ -7014,6 +8462,12 @@ class $$PendingTransactionsTableFilterComposer
     column: $table.receiptPath,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<NeedWant?, NeedWant, String> get needWant =>
+      $composableBuilder(
+        column: $table.needWant,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 }
 
 class $$PendingTransactionsTableOrderingComposer
@@ -7074,6 +8528,11 @@ class $$PendingTransactionsTableOrderingComposer
     column: $table.receiptPath,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get needWant => $composableBuilder(
+    column: $table.needWant,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$PendingTransactionsTableAnnotationComposer
@@ -7120,6 +8579,9 @@ class $$PendingTransactionsTableAnnotationComposer
     column: $table.receiptPath,
     builder: (column) => column,
   );
+
+  GeneratedColumnWithTypeConverter<NeedWant?, String> get needWant =>
+      $composableBuilder(column: $table.needWant, builder: (column) => column);
 }
 
 class $$PendingTransactionsTableTableManager
@@ -7175,6 +8637,7 @@ class $$PendingTransactionsTableTableManager
                 Value<DateTime> date = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<String?> receiptPath = const Value.absent(),
+                Value<NeedWant?> needWant = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PendingTransactionsCompanion(
                 id: id,
@@ -7187,6 +8650,7 @@ class $$PendingTransactionsTableTableManager
                 date: date,
                 createdAt: createdAt,
                 receiptPath: receiptPath,
+                needWant: needWant,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -7201,6 +8665,7 @@ class $$PendingTransactionsTableTableManager
                 required DateTime date,
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<String?> receiptPath = const Value.absent(),
+                Value<NeedWant?> needWant = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PendingTransactionsCompanion.insert(
                 id: id,
@@ -7213,6 +8678,7 @@ class $$PendingTransactionsTableTableManager
                 date: date,
                 createdAt: createdAt,
                 receiptPath: receiptPath,
+                needWant: needWant,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -8004,6 +9470,650 @@ typedef $$RecurringRulesTableProcessedTableManager =
       RecurringRule,
       PrefetchHooks Function({bool categoryId, bool walletId, bool toWalletId})
     >;
+typedef $$DebtsTableCreateCompanionBuilder = DebtsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  required String person,
+  required DebtDirection direction,
+  required int amount,
+  Value<int> paidAmount,
+  Value<String> note,
+  Value<DateTime?> dueDate,
+  required DateTime date,
+  Value<int> rowid,
+});
+typedef $$DebtsTableUpdateCompanionBuilder = DebtsCompanion Function({
+  Value<String> id,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<DateTime?> deletedAt,
+  Value<String> person,
+  Value<DebtDirection> direction,
+  Value<int> amount,
+  Value<int> paidAmount,
+  Value<String> note,
+  Value<DateTime?> dueDate,
+  Value<DateTime> date,
+  Value<int> rowid,
+});
+
+class $$DebtsTableFilterComposer extends Composer<_$AppDatabase, $DebtsTable> {
+  $$DebtsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get person => $composableBuilder(
+    column: $table.person,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<DebtDirection, DebtDirection, String>
+  get direction => $composableBuilder(
+    column: $table.direction,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get paidAmount => $composableBuilder(
+    column: $table.paidAmount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dueDate => $composableBuilder(
+    column: $table.dueDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DebtsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DebtsTable> {
+  $$DebtsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get person => $composableBuilder(
+    column: $table.person,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get direction => $composableBuilder(
+    column: $table.direction,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get paidAmount => $composableBuilder(
+    column: $table.paidAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dueDate => $composableBuilder(
+    column: $table.dueDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DebtsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DebtsTable> {
+  $$DebtsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get person =>
+      $composableBuilder(column: $table.person, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<DebtDirection, String> get direction =>
+      $composableBuilder(column: $table.direction, builder: (column) => column);
+
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<int> get paidAmount => $composableBuilder(
+    column: $table.paidAmount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dueDate =>
+      $composableBuilder(column: $table.dueDate, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+}
+
+class $$DebtsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DebtsTable,
+          Debt,
+          $$DebtsTableFilterComposer,
+          $$DebtsTableOrderingComposer,
+          $$DebtsTableAnnotationComposer,
+          $$DebtsTableCreateCompanionBuilder,
+          $$DebtsTableUpdateCompanionBuilder,
+          (Debt, BaseReferences<_$AppDatabase, $DebtsTable, Debt>),
+          Debt,
+          PrefetchHooks Function()
+        > {
+  $$DebtsTableTableManager(_$AppDatabase db, $DebtsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DebtsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DebtsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DebtsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> person = const Value.absent(),
+                Value<DebtDirection> direction = const Value.absent(),
+                Value<int> amount = const Value.absent(),
+                Value<int> paidAmount = const Value.absent(),
+                Value<String> note = const Value.absent(),
+                Value<DateTime?> dueDate = const Value.absent(),
+                Value<DateTime> date = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DebtsCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                person: person,
+                direction: direction,
+                amount: amount,
+                paidAmount: paidAmount,
+                note: note,
+                dueDate: dueDate,
+                date: date,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String person,
+                required DebtDirection direction,
+                required int amount,
+                Value<int> paidAmount = const Value.absent(),
+                Value<String> note = const Value.absent(),
+                Value<DateTime?> dueDate = const Value.absent(),
+                required DateTime date,
+                Value<int> rowid = const Value.absent(),
+              }) => DebtsCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                person: person,
+                direction: direction,
+                amount: amount,
+                paidAmount: paidAmount,
+                note: note,
+                dueDate: dueDate,
+                date: date,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$DebtsTable, Debt>(table),
+                  BaseReferences<_$AppDatabase, $DebtsTable, Debt>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DebtsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DebtsTable,
+      Debt,
+      $$DebtsTableFilterComposer,
+      $$DebtsTableOrderingComposer,
+      $$DebtsTableAnnotationComposer,
+      $$DebtsTableCreateCompanionBuilder,
+      $$DebtsTableUpdateCompanionBuilder,
+      (Debt, BaseReferences<_$AppDatabase, $DebtsTable, Debt>),
+      Debt,
+      PrefetchHooks Function()
+    >;
+typedef $$TxTemplatesTableCreateCompanionBuilder =
+    TxTemplatesCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      required String name,
+      required TxType type,
+      required int amount,
+      required String categoryId,
+      Value<String?> walletId,
+      Value<NeedWant?> needWant,
+      Value<String> note,
+      Value<int> rowid,
+    });
+typedef $$TxTemplatesTableUpdateCompanionBuilder =
+    TxTemplatesCompanion Function({
+      Value<String> id,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<String> name,
+      Value<TxType> type,
+      Value<int> amount,
+      Value<String> categoryId,
+      Value<String?> walletId,
+      Value<NeedWant?> needWant,
+      Value<String> note,
+      Value<int> rowid,
+    });
+
+class $$TxTemplatesTableFilterComposer
+    extends Composer<_$AppDatabase, $TxTemplatesTable> {
+  $$TxTemplatesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<TxType, TxType, String> get type =>
+      $composableBuilder(
+        column: $table.type,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get walletId => $composableBuilder(
+    column: $table.walletId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<NeedWant?, NeedWant, String> get needWant =>
+      $composableBuilder(
+        column: $table.needWant,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TxTemplatesTableOrderingComposer
+    extends Composer<_$AppDatabase, $TxTemplatesTable> {
+  $$TxTemplatesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get walletId => $composableBuilder(
+    column: $table.walletId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get needWant => $composableBuilder(
+    column: $table.needWant,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TxTemplatesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TxTemplatesTable> {
+  $$TxTemplatesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<TxType, String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get walletId =>
+      $composableBuilder(column: $table.walletId, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<NeedWant?, String> get needWant =>
+      $composableBuilder(column: $table.needWant, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+}
+
+class $$TxTemplatesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TxTemplatesTable,
+          TxTemplate,
+          $$TxTemplatesTableFilterComposer,
+          $$TxTemplatesTableOrderingComposer,
+          $$TxTemplatesTableAnnotationComposer,
+          $$TxTemplatesTableCreateCompanionBuilder,
+          $$TxTemplatesTableUpdateCompanionBuilder,
+          (
+            TxTemplate,
+            BaseReferences<_$AppDatabase, $TxTemplatesTable, TxTemplate>,
+          ),
+          TxTemplate,
+          PrefetchHooks Function()
+        > {
+  $$TxTemplatesTableTableManager(_$AppDatabase db, $TxTemplatesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TxTemplatesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TxTemplatesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TxTemplatesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<TxType> type = const Value.absent(),
+                Value<int> amount = const Value.absent(),
+                Value<String> categoryId = const Value.absent(),
+                Value<String?> walletId = const Value.absent(),
+                Value<NeedWant?> needWant = const Value.absent(),
+                Value<String> note = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TxTemplatesCompanion(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                name: name,
+                type: type,
+                amount: amount,
+                categoryId: categoryId,
+                walletId: walletId,
+                needWant: needWant,
+                note: note,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required String name,
+                required TxType type,
+                required int amount,
+                required String categoryId,
+                Value<String?> walletId = const Value.absent(),
+                Value<NeedWant?> needWant = const Value.absent(),
+                Value<String> note = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TxTemplatesCompanion.insert(
+                id: id,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                name: name,
+                type: type,
+                amount: amount,
+                categoryId: categoryId,
+                walletId: walletId,
+                needWant: needWant,
+                note: note,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$TxTemplatesTable, TxTemplate>(table),
+                  BaseReferences<_$AppDatabase, $TxTemplatesTable, TxTemplate>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TxTemplatesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TxTemplatesTable,
+      TxTemplate,
+      $$TxTemplatesTableFilterComposer,
+      $$TxTemplatesTableOrderingComposer,
+      $$TxTemplatesTableAnnotationComposer,
+      $$TxTemplatesTableCreateCompanionBuilder,
+      $$TxTemplatesTableUpdateCompanionBuilder,
+      (
+        TxTemplate,
+        BaseReferences<_$AppDatabase, $TxTemplatesTable, TxTemplate>,
+      ),
+      TxTemplate,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8022,4 +10132,8 @@ class $AppDatabaseManager {
       $$PendingTransactionsTableTableManager(_db, _db.pendingTransactions);
   $$RecurringRulesTableTableManager get recurringRules =>
       $$RecurringRulesTableTableManager(_db, _db.recurringRules);
+  $$DebtsTableTableManager get debts =>
+      $$DebtsTableTableManager(_db, _db.debts);
+  $$TxTemplatesTableTableManager get txTemplates =>
+      $$TxTemplatesTableTableManager(_db, _db.txTemplates);
 }

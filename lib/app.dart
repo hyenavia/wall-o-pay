@@ -18,6 +18,7 @@ import 'features/auth/auth_page.dart';
 import 'features/budget/budget_page.dart';
 import 'features/insights/insights_page.dart';
 import 'features/home/home_page.dart';
+import 'features/onboarding/onboarding_gate.dart';
 import 'features/security/lock_screen.dart';
 import 'features/transactions/transaction_form.dart';
 import 'features/transactions/transactions_page.dart';
@@ -93,7 +94,7 @@ class AuthGate extends ConsumerWidget {
     if (!ready) {
       final skip = ref.watch(skipAuthProvider);
       return skip
-          ? const LockGate(child: HomeShell())
+          ? const LockGate(child: OnboardingGate(child: HomeShell()))
           : FirebaseMissingPage(
               onContinue: () => ref.read(skipAuthProvider.notifier).skip(),
             );
@@ -105,7 +106,7 @@ class AuthGate extends ConsumerWidget {
       error: (e, _) => const AuthPage(),
       data: (user) => user == null
           ? const AuthPage()
-          : LockGate(key: ValueKey(user.uid), child: const HomeShell()),
+          : LockGate(key: ValueKey(user.uid), child: const OnboardingGate(child: HomeShell())),
     );
   }
 }

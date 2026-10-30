@@ -12,7 +12,7 @@
 [![Database](https://img.shields.io/badge/Database-Drift%20SQLite-1E4238?logo=sqlite&logoColor=white)](https://drift.simonbinder.eu/)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.7.0-234B3B.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.8.0-234B3B.svg)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://username.github.io/wall_o_pay/) • [📥 Download Latest APK](https://github.com/username/wall_o_pay/releases/latest) • [📋 Changelog](CHANGELOG.md)
 
@@ -37,6 +37,11 @@
 - ☁️ **Flexible Cloud Sync:** Enjoy full anonymity with 100% offline local storage, or link Google / Email accounts via Firebase Authentication to securely sync records across devices.
 - 📁 **Data Export:** Export transaction records anytime into standard CSV and JSON formats.
 - 🎨 **Curated Aesthetic:** Calming Deep Forest Green (`#1E4238`) and Sage palette designed with Material 3 and seamless Dark Mode / Light Mode support.
+- 🤝 **Debts & Split Bills:** Track who owes whom, record partial or full debt payments, and easily split restaurant or group expenses among friends with one-tap transaction logging.
+- 📄 **Exportable PDF Financial Reports:** Generate beautiful, printable PDF financial statements for any custom time period or month, complete with category summaries and transaction details.
+- ⏰ **Smart Local Notifications & Daily Reminders:** Set customizable daily log reminders and receive automatic threshold alerts when category spending crosses 80% and 100% of budgeted limits.
+- ⚡ **Quick Transaction Templates:** Save recurring expense templates (e.g. daily coffee, routine lunch) and log them with a single tap.
+- 🎯 **Needs vs. Wants Allocation:** Mark expenses as Needs or Wants to gain immediate visibility into essential vs. lifestyle spending on the Insight tab.
 - 🌐 **Multilingual Localization:** Seamlessly switch between English and Bahasa Indonesia within the app settings.
 
 ---

@@ -12,6 +12,10 @@ import '../../data/cloud.dart';
 import '../../data/cloud_backup.dart';
 import '../../data/cloud_sync.dart';
 import '../../data/budget_rule.dart';
+import '../../data/feature_prefs.dart';
+import '../../data/notifications.dart';
+import '../debts/debts_page.dart';
+import 'report_dialog.dart';
 import '../recurring/recurring_page.dart';
 import '../../data/export_service.dart';
 import '../../data/prefs.dart';
@@ -35,6 +39,8 @@ class SettingsPage extends ConsumerWidget {
     final backup = ref.watch(cloudBackupProvider);
     final prefs = ref.watch(appPrefsProvider);
     final prefsCtl = ref.read(appPrefsProvider.notifier);
+    final features = ref.watch(featurePrefsProvider);
+    final featuresCtl = ref.read(featurePrefsProvider.notifier);
     final name = ref.watch(displayNameProvider);
     final username = ref.watch(usernameProvider);
     final canUseCloud = ready && user != null && !backup.working;
@@ -177,6 +183,107 @@ class SettingsPage extends ConsumerWidget {
               ],
             ),
           ),
+
+          SectionHeader(title: context.tr('Budget & reminders')),
+          AppCard(
+            padding: EdgeInsets.zero,
+            child: Column(
+              children: [
+                SwitchListTile(
+                  secondary: const Icon(Icons.redo),
+                  title: Text(context.tr('Carry over unused budget')),
+                  subtitle: Text(
+                    context.tr('Leftover budget from the previous period is added to the next one.'),
+                  ),
+                  value: features.rollover,
+                  onChanged: featuresCtl.setRollover,
+                ),
+                SwitchListTile(
+                  secondary: const Icon(Icons.notifications_active_outlined),
+                  title: Text(context.tr('Budget alerts')),
+                  subtitle: Text(
+                    context.tr('Get notified when a category reaches 80% and 100% of its budget.'),
+                  ),
+                  value: features.budgetAlerts,
+                  onChanged: (v) async {
+                    if (v && !await NotificationService.instance.requestPermission()) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(context.tr('Notification permission was not granted.'))),
+                        );
+                      }
+                      return;
+                    }
+                    featuresCtl.setBudgetAlerts(v);
+                  },
+                ),
+                SwitchListTile(
+                  secondary: const Icon(Icons.alarm),
+                  title: Text(context.tr('Daily reminder')),
+                  subtitle: Text(
+                    context.tr('A gentle nudge to log your spending.'),
+                  ),
+                  value: features.dailyReminder,
+                  onChanged: (v) async {
+                    if (v && !await NotificationService.instance.requestPermission()) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(context.tr('Notification permission was not granted.'))),
+                        );
+                      }
+                      return;
+                    }
+                    await featuresCtl.setDailyReminder(v);
+                    await NotificationService.instance.syncReminder(
+                      enabled: v,
+                      time: features.reminderTime,
+                    );
+                  },
+                ),
+                if (features.dailyReminder)
+                  ListTile(
+                    leading: const SizedBox(width: 24),
+                    title: Text(context.tr('Reminder time')),
+                    trailing: Text(
+                      features.reminderTime.format(context),
+                      style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                    onTap: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: features.reminderTime,
+                      );
+                      if (picked != null) {
+                        await featuresCtl.setReminderTime(picked);
+                        await NotificationService.instance.syncReminder(
+                          enabled: true,
+                          time: picked,
+                        );
+                      }
+                    },
+                  ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.picture_as_pdf_outlined),
+                  title: Text(context.tr('PDF report')),
+                  subtitle: Text(context.tr('Export a report for any period')),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => showReportDialog(context),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.handshake_outlined),
+                  title: Text(context.tr('Debts & splits')),
+                  subtitle: Text(context.tr('Who owes whom, and splitting bills')),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute<void>(builder: (_) => const DebtsPage()),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           SectionHeader(title: context.tr('Security')),
           ValueListenableBuilder<AppLockState>(
             valueListenable: Lock.instance.state,

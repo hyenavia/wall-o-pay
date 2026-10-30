@@ -9,6 +9,7 @@ import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/app_database.dart';
 import '../../data/providers.dart';
+import '../../data/tables.dart' show NeedWant, TxType;
 import '../transactions/transaction_form.dart';
 import 'charts.dart';
 import 'insight_engine.dart';
@@ -44,6 +45,15 @@ class InsightsPage extends ConsumerWidget {
         data: (currentTxs) {
           final prevTxs = prevTxsAsync.value ?? const <TransactionEntry>[];
           final trendTxs = trendTxsAsync.value ?? const <TransactionEntry>[];
+
+          int needTotal = 0;
+          int wantTotal = 0;
+          for (final t in currentTxs) {
+            if (t.type == TxType.expense) {
+              if (t.needWant == NeedWant.need) needTotal += t.amount;
+              if (t.needWant == NeedWant.want) wantTotal += t.amount;
+            }
+          }
 
           final summary = InsightEngine.computeSummary(
             currentTxs: currentTxs,
@@ -356,6 +366,17 @@ class InsightsPage extends ConsumerWidget {
                     child: ExpensePieChart(
                       spent: {for (final c in categories) c.categoryId: c.amount},
                       cats: cats,
+                    ),
+                  ),
+                ],
+                if (needTotal + wantTotal > 0) ...[
+                  SectionHeader(
+                    title: context.tr('Needs vs wants'),
+                  ),
+                  AppCard(
+                    child: _NeedsWantsCard(
+                      needTotal: needTotal,
+                      wantTotal: wantTotal,
                     ),
                   ),
                 ],
@@ -838,6 +859,72 @@ class _LowDataCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+
+class _NeedsWantsCard extends StatelessWidget {
+  const _NeedsWantsCard({required this.needTotal, required this.wantTotal});
+  final int needTotal;
+  final int wantTotal;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final total = needTotal + wantTotal;
+    final needPct = total == 0 ? 0 : ((needTotal / total) * 100).round();
+    final wantPct = total == 0 ? 0 : 100 - needPct;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.check_circle_outline, size: 16, color: AppColors.sage),
+                const SizedBox(width: 6),
+                Text('${context.tr('Needs')}: $needPct%', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+              ],
+            ),
+            Row(
+              children: [
+                const Icon(Icons.favorite_border, size: 16, color: Color(0xFFEF9A9A)),
+                const SizedBox(width: 6),
+                Text('${context.tr('Wants')}: $wantPct%', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Row(
+            children: [
+              if (needTotal > 0)
+                Expanded(
+                  flex: needTotal,
+                  child: Container(height: 10, color: AppColors.sage),
+                ),
+              if (wantTotal > 0)
+                Expanded(
+                  flex: wantTotal,
+                  child: Container(height: 10, color: const Color(0xFFEF9A9A)),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(rupiah(needTotal), style: theme.textTheme.bodySmall?.copyWith(color: AppColors.sage, fontWeight: FontWeight.bold)),
+            Text(rupiah(wantTotal), style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xFFEF9A9A), fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ],
     );
   }
 }

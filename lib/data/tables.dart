@@ -3,6 +3,8 @@ import 'package:uuid/uuid.dart';
 
 enum TxType { income, expense, transfer }
 enum RecurFrequency { daily, weekly, monthly }
+enum NeedWant { need, want }
+enum DebtDirection { lent, borrowed }
 
 /// ID unik (UUID) supaya aman disinkronkan antar perangkat nanti.
 String newId() => const Uuid().v4();
@@ -49,6 +51,7 @@ class Transactions extends Table with SyncColumns {
   @ReferenceName('incomingTransfers')
   TextColumn get toWalletId => text().nullable().references(Wallets, #id)();
   TextColumn get receiptPath => text().nullable()();
+  TextColumn get needWant => textEnum<NeedWant>().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -87,6 +90,7 @@ class PendingTransactions extends Table {
   DateTimeColumn get date => dateTime()();
   DateTimeColumn get createdAt => dateTime().clientDefault(() => DateTime.now())();
   TextColumn get receiptPath => text().nullable()();
+  TextColumn get needWant => textEnum<NeedWant>().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -110,6 +114,36 @@ class RecurringRules extends Table with SyncColumns {
   DateTimeColumn get nextDueDate => dateTime()();
   DateTimeColumn get lastGeneratedDate => dateTime().nullable()();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  TextColumn get note => text().withDefault(const Constant(''))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+
+/// Utang-piutang dan patungan.
+class Debts extends Table with SyncColumns {
+  TextColumn get person => text().withLength(min: 1, max: 60)();
+  TextColumn get direction => textEnum<DebtDirection>()();
+  IntColumn get amount => integer()();
+  IntColumn get paidAmount => integer().withDefault(const Constant(0))();
+  TextColumn get note => text().withDefault(const Constant(''))();
+  DateTimeColumn get dueDate => dateTime().nullable()();
+  DateTimeColumn get date => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Template transaksi favorit untuk input sekali ketuk.
+@DataClassName('TxTemplate')
+class TxTemplates extends Table with SyncColumns {
+  TextColumn get name => text().withLength(min: 1, max: 40)();
+  TextColumn get type => textEnum<TxType>()();
+  IntColumn get amount => integer()();
+  TextColumn get categoryId => text()();
+  TextColumn get walletId => text().nullable()();
+  TextColumn get needWant => textEnum<NeedWant>().nullable()();
   TextColumn get note => text().withDefault(const Constant(''))();
 
   @override
