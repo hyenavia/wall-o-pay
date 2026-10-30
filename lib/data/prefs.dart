@@ -131,38 +131,43 @@ class AppPrefsController extends Notifier<AppPrefs> {
       final data = snap.data();
       if (data == null) return;
 
-      final p = ref.read(sharedPreferencesProvider);
-      final remoteAt = (data['updatedAt'] as num?)?.toInt() ?? 0;
-      final localAt = p.getInt(_k(_kUpdated, uid)) ?? 0;
-
-      if (remoteAt >= localAt) {
-        final themeStr = data['themeMode'] as String?;
-        final theme = switch (themeStr) {
-          'light' => ThemeMode.light,
-          'dark' => ThemeMode.dark,
-          _ => ThemeMode.system,
-        };
-        final locale = data['localeCode'] as String? ?? 'en';
-        final periodStr = data['periodType'] as String?;
-        final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
-        final firstDay = (data['firstDayOfWeek'] as num?)?.toInt() ?? DateTime.monday;
-
-        AppLocale.code = locale;
-        state = AppPrefs(
-          themeMode: theme,
-          localeCode: locale,
-          periodType: period,
-          firstDayOfWeek: firstDay,
-        );
-
-        await p.setString(_k(_kTheme, uid), theme.name);
-        await p.setString(_k(_kLocale, uid), locale);
-        await p.setString(_k(_kPeriod, uid), period.name);
-        await p.setInt(_k(_kFirstDayOfWeek, uid), firstDay);
-        await p.setInt(_k(_kUpdated, uid), remoteAt);
-      }
+      await applyRemoteData(data, uid);
     } catch (e) {
       debugPrint('[AppPrefs] Error restoring preferences: $e');
+    }
+  }
+
+  /// Terapkan data personalisasi dari cloud secara instan (dari get maupun snapshot)
+  Future<void> applyRemoteData(Map<String, dynamic> data, String uid) async {
+    final p = ref.read(sharedPreferencesProvider);
+    final remoteAt = (data['updatedAt'] as num?)?.toInt() ?? 0;
+    final localAt = p.getInt(_k(_kUpdated, uid)) ?? 0;
+
+    if (remoteAt >= localAt) {
+      final themeStr = data['themeMode'] as String?;
+      final theme = switch (themeStr) {
+        'light' => ThemeMode.light,
+        'dark' => ThemeMode.dark,
+        _ => ThemeMode.system,
+      };
+      final locale = data['localeCode'] as String? ?? 'en';
+      final periodStr = data['periodType'] as String?;
+      final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
+      final firstDay = (data['firstDayOfWeek'] as num?)?.toInt() ?? DateTime.monday;
+
+      AppLocale.code = locale;
+      state = AppPrefs(
+        themeMode: theme,
+        localeCode: locale,
+        periodType: period,
+        firstDayOfWeek: firstDay,
+      );
+
+      await p.setString(_k(_kTheme, uid), theme.name);
+      await p.setString(_k(_kLocale, uid), locale);
+      await p.setString(_k(_kPeriod, uid), period.name);
+      await p.setInt(_k(_kFirstDayOfWeek, uid), firstDay);
+      await p.setInt(_k(_kUpdated, uid), remoteAt);
     }
   }
 

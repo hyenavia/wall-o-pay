@@ -245,7 +245,7 @@ class InsightEngine {
             .fold<int>(0, (s, t) => s + t.amount);
 
         final label = 'W${i + 1}';
-        final fullLabel = 'Tgl $startDay – $endDay ${DateFormat('MMM', loc).format(period.start)}';
+        final fullLabel = '$startDay – $endDay ${DateFormat('MMM', loc).format(period.start)}';
         points.add(ChartPoint(
           label: label,
           fullLabel: fullLabel,
@@ -266,15 +266,15 @@ class InsightEngine {
   }) {
     final insights = <SmartInsightItem>[];
     final isWeekly = period.type == PeriodType.weekly;
-    final periodName = isWeekly ? context.tr('minggu') : context.tr('bulan');
-    final prevPeriodName = isWeekly ? context.tr('minggu lalu') : context.tr('bulan lalu');
+    final periodName = isWeekly ? context.tr('week') : context.tr('month');
+    final prevPeriodName = isWeekly ? context.tr('last week') : context.tr('last month');
 
     // 1. Cashflow & Savings rate insight
     if (summary.totalIncome > 0 && summary.netBalance > 0) {
       insights.add(SmartInsightItem(
-        title: context.tr('Cashflow Positif & Tabungan'),
+        title: context.tr('Positive Cashflow & Savings'),
         description: context.tr(
-          'Kamu berhasil menyisihkan {pct}% ({amount}) dari total pemasukanmu periode ini.',
+          'You managed to save {pct}% ({amount}) of your total income this period.',
           {
             'pct': summary.savingsRate.toStringAsFixed(1),
             'amount': rupiah(summary.netBalance),
@@ -282,18 +282,18 @@ class InsightEngine {
         ),
         icon: Icons.savings_outlined,
         accentColor: AppColors.income,
-        badge: '${summary.savingsRate.toStringAsFixed(0)}% Disimpan',
+        badge: context.tr('{pct}% Saved', {'pct': summary.savingsRate.toStringAsFixed(0)}),
       ));
     } else if (summary.isDeficit && summary.totalIncome > 0) {
       insights.add(SmartInsightItem(
-        title: context.tr('Pengeluaran Melebihi Pemasukan'),
+        title: context.tr('Spending Exceeded Income'),
         description: context.tr(
-          'Total belanja melebihi pemasukan sebesar {amount}. Periksa kembali pos pengeluaran sekunder agar arus kas tetap sehat.',
+          'Total spending exceeded income by {amount}. Review your secondary expenses to keep your cashflow healthy.',
           {'amount': rupiah(summary.netBalance.abs())},
         ),
         icon: Icons.warning_amber_rounded,
         accentColor: AppColors.expense,
-        badge: 'Defisit',
+        badge: context.tr('Deficit'),
       ));
     }
 
@@ -317,9 +317,9 @@ class InsightEngine {
 
     if (maxIncreaseCat != null && maxIncreasePct >= 10) {
       insights.add(SmartInsightItem(
-        title: context.tr('Lonjakan Kategori: {category}', {'category': maxIncreaseCat.name}),
+        title: context.tr('Category Surge: {category}', {'category': maxIncreaseCat.name}),
         description: context.tr(
-          'Pengeluaran {category} meningkat {pct}% (+{diff}) dibandingkan {prev}.',
+          '{category} spending increased by {pct}% (+{diff}) compared to {prev}.',
           {
             'category': maxIncreaseCat.name,
             'pct': maxIncreasePct.toStringAsFixed(0),
@@ -333,9 +333,9 @@ class InsightEngine {
       ));
     } else if (maxSavedCat != null && maxSavedPct <= -10) {
       insights.add(SmartInsightItem(
-        title: context.tr('Penghematan: {category}', {'category': maxSavedCat.name}),
+        title: context.tr('Savings: {category}', {'category': maxSavedCat.name}),
         description: context.tr(
-          'Hebat! Pengeluaran {category} berhasil ditekan turun {pct}% (hemat {saved}) dibanding {prev}.',
+          'Great job! {category} spending was cut by {pct}% (saved {saved}) compared to {prev}.',
           {
             'category': maxSavedCat.name,
             'pct': maxSavedPct.abs().toStringAsFixed(0),
@@ -353,9 +353,9 @@ class InsightEngine {
     if (categories.isNotEmpty && categories.first.percentage >= 35) {
       final top = categories.first;
       insights.add(SmartInsightItem(
-        title: context.tr('Pusat Pengeluaran: {category}', {'category': top.name}),
+        title: context.tr('Spending Hub: {category}', {'category': top.name}),
         description: context.tr(
-          '{category} menyerap porsi terbesar yaitu {pct}% ({amount}) dari seluruh belanja {period}.',
+          '{category} accounted for the largest share at {pct}% ({amount}) of all spending this {period}.',
           {
             'category': top.name,
             'pct': top.percentage.toStringAsFixed(1),
@@ -365,7 +365,7 @@ class InsightEngine {
         ),
         icon: Icons.pie_chart_outline_rounded,
         accentColor: top.color,
-        badge: '${top.percentage.toStringAsFixed(0)}% Total',
+        badge: context.tr('{pct}% of Total', {'pct': top.percentage.toStringAsFixed(0)}),
       ));
     }
 
@@ -379,9 +379,9 @@ class InsightEngine {
       final noteStr = largest.note.isNotEmpty ? ' ("${largest.note}")' : '';
 
       insights.add(SmartInsightItem(
-        title: context.tr('Transaksi Terbesar'),
+        title: context.tr('Largest Transaction'),
         description: context.tr(
-          'Pembelian terbesar periode ini adalah {cat}{note} sebesar {amount} pada {date}.',
+          'The largest purchase this period was {cat}{note} for {amount} on {date}.',
           {
             'cat': catName,
             'note': noteStr,
@@ -416,9 +416,9 @@ class InsightEngine {
       final dayName = DateFormat('EEEE, d MMM', AppLocale.code).format(peakDate);
 
       insights.add(SmartInsightItem(
-        title: context.tr('Hari Pengeluaran Tertinggi'),
+        title: context.tr('Peak Spending Day'),
         description: context.tr(
-          'Aktivitas belanja paling padat terjadi pada {day} dengan total pengeluaran {amount}.',
+          'Busiest spending occurred on {day} with total expenditure of {amount}.',
           {
             'day': dayName,
             'amount': rupiah(peakAmount),
@@ -441,25 +441,25 @@ class InsightEngine {
       final wantPct = ((wantTotal / totalTagged) * 100).round();
       if (wantPct > 40) {
         insights.add(SmartInsightItem(
-          title: context.tr('Porsi Keinginan (Wants) Cukup Tinggi'),
+          title: context.tr('High Proportion of Wants'),
           description: context.tr(
-            '{pct}% pengeluaran yang ditandai dialokasikan untuk pos keinginan ({amount}). Coba evaluasi pos belanja non-esensial untuk menambah tabungan.',
+            '{pct}% of tagged spending was allocated to wants ({amount}). Consider evaluating non-essential spending to increase savings.',
             {'pct': '$wantPct', 'amount': rupiah(wantTotal)},
           ),
           icon: Icons.favorite_border,
           accentColor: const Color(0xFFEF9A9A),
-          badge: '$wantPct% Keinginan',
+          badge: context.tr('{pct}% Wants', {'pct': '$wantPct'}),
         ));
       } else {
         insights.add(SmartInsightItem(
-          title: context.tr('Alokasi Kebutuhan Seimbang'),
+          title: context.tr('Balanced Needs Allocation'),
           description: context.tr(
-            '{pct}% pengeluaran dialokasikan untuk kebutuhan pokok ({amount}). Pola belanja esensialmu terjaga dengan baik!',
+            '{pct}% of spending was allocated to essential needs ({amount}). Your core spending habits are well on track!',
             {'pct': '${100 - wantPct}', 'amount': rupiah(needTotal)},
           ),
           icon: Icons.check_circle_outline,
           accentColor: AppColors.sage,
-          badge: '${100 - wantPct}% Kebutuhan',
+          badge: context.tr('{pct}% Needs', {'pct': '${100 - wantPct}'}),
         ));
       }
     }

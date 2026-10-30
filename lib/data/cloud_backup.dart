@@ -10,6 +10,8 @@ import 'app_database.dart';
 import '../core/l10n.dart';
 import 'cloud.dart';
 import 'profile.dart';
+import 'budget_rule.dart';
+import 'prefs.dart';
 import 'providers.dart';
 
 class NoCloudBackupException implements Exception {
@@ -131,6 +133,8 @@ class CloudBackupController extends Notifier<BackupState> {
     return _run((service, uid) async {
       final n = await service.backup(uid);
       await ref.read(profileProvider.notifier).uploadToCloud(uid);
+      await ref.read(budgetRuleProvider.notifier).uploadToCloud(uid);
+      await ref.read(appPrefsProvider.notifier).uploadToCloud(uid);
       _last = DateTime.now();
       await CloudBackupService.saveLastBackup(uid, _last!);
       if (n == 0) return trG('Your cloud backup is already up to date.');
@@ -144,6 +148,8 @@ class CloudBackupController extends Notifier<BackupState> {
     return _run((service, uid) async {
       final n = await service.restore(uid);
       await ref.read(profileProvider.notifier).restoreFromCloud(uid);
+      await ref.read(budgetRuleProvider.notifier).restoreFromCloud(uid);
+      await ref.read(appPrefsProvider.notifier).restoreFromCloud(uid);
       if (n == 0) return trG('This device already has everything from your cloud backup.');
       return n == 1
           ? trG('Restored 1 item from the cloud.')

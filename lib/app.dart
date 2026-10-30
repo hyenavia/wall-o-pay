@@ -8,7 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/brand.dart';
 import 'core/l10n.dart';
 import 'core/theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'data/cloud.dart';
+import 'data/cloud_sync.dart';
 import 'data/prefs.dart';
 import 'data/providers.dart';
 import 'data/update_checker.dart';
@@ -133,6 +135,12 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     WidgetsBinding.instance.addObserver(this);
     ShareService.initialize(context, ref);
     RecurringService.checkAndGenerateDue(ref.read(databaseProvider));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = ref.read(currentUserProvider);
+      if (user != null) {
+        ref.read(autoSyncServiceProvider).startSync(user.uid);
+      }
+    });
     Future.delayed(const Duration(milliseconds: 1500), () async {
       if (!mounted) return;
       await UpdateCheckerService.checkAndNotify(ref, context: context);
@@ -156,6 +164,14 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<User?>(currentUserProvider, (previous, next) {
+      if (next != null) {
+        ref.read(autoSyncServiceProvider).startSync(next.uid);
+      } else {
+        ref.read(autoSyncServiceProvider).stopSync();
+      }
+    });
+
     final scheme = Theme.of(context).colorScheme;
     final index = ref.watch(tabIndexProvider);
     final notifier = ref.read(tabIndexProvider.notifier);

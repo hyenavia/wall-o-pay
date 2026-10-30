@@ -243,6 +243,52 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
     );
   }
 
+  /// Terapkan data konfigurasi anggaran dari cloud secara langsung (baik dari get maupun snapshot).
+  void applyRemoteData(Map<String, dynamic> data, [String? uid]) {
+    final effectiveUid = uid ?? _uid();
+    final pools = <String, int>{};
+    if (data['totalPools'] is Map) {
+      for (final e in (data['totalPools'] as Map).entries) {
+        if (e.value is num) pools[e.key.toString()] = (e.value as num).toInt();
+      }
+    }
+
+    final buckets = <String, BudgetBucket>{};
+    if (data['categoryBuckets'] is Map) {
+      for (final e in (data['categoryBuckets'] as Map).entries) {
+        final bucket = BudgetBucket.values.firstWhere(
+          (b) => b.name == e.value,
+          orElse: () => BudgetBucket.wants,
+        );
+        buckets[e.key.toString()] = bucket;
+      }
+    }
+
+    final customAlloc = <String, Map<String, int>>{};
+    if (data['customAllocations'] is Map) {
+      for (final e in (data['customAllocations'] as Map).entries) {
+        if (e.value is Map) {
+          final inner = <String, int>{};
+          for (final sub in (e.value as Map).entries) {
+            if (sub.value is num) inner[sub.key.toString()] = (sub.value as num).toInt();
+          }
+          customAlloc[e.key.toString()] = inner;
+        }
+      }
+    }
+
+    state = BudgetRuleState(
+      totalPools: pools,
+      categoryBuckets: buckets,
+      customAllocations: customAlloc,
+    );
+
+    final prefs = ref.read(sharedPreferencesProvider);
+    prefs.setString(_key(_kTotalPools, effectiveUid), jsonEncode(pools));
+    prefs.setString(_key(_kCategoryBuckets, effectiveUid), jsonEncode(buckets.map((k, v) => MapEntry(k, v.name))));
+    prefs.setString(_key(_kCustomAllocations, effectiveUid), jsonEncode(customAlloc));
+  }
+
   /// Sinkronkan dan pulihkan data anggaran dari Cloud Firestore.
   Future<void> restoreFromCloud(String uid) async {
     try {
@@ -258,47 +304,7 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
       final data = doc.data();
       if (data == null) return;
 
-      final pools = <String, int>{};
-      if (data['totalPools'] is Map) {
-        for (final e in (data['totalPools'] as Map).entries) {
-          if (e.value is num) pools[e.key.toString()] = (e.value as num).toInt();
-        }
-      }
-
-      final buckets = <String, BudgetBucket>{};
-      if (data['categoryBuckets'] is Map) {
-        for (final e in (data['categoryBuckets'] as Map).entries) {
-          final bucket = BudgetBucket.values.firstWhere(
-            (b) => b.name == e.value,
-            orElse: () => BudgetBucket.wants,
-          );
-          buckets[e.key.toString()] = bucket;
-        }
-      }
-
-      final customAlloc = <String, Map<String, int>>{};
-      if (data['customAllocations'] is Map) {
-        for (final e in (data['customAllocations'] as Map).entries) {
-          if (e.value is Map) {
-            final inner = <String, int>{};
-            for (final sub in (e.value as Map).entries) {
-              if (sub.value is num) inner[sub.key.toString()] = (sub.value as num).toInt();
-            }
-            customAlloc[e.key.toString()] = inner;
-          }
-        }
-      }
-
-      state = BudgetRuleState(
-        totalPools: pools,
-        categoryBuckets: buckets,
-        customAllocations: customAlloc,
-      );
-
-      final prefs = ref.read(sharedPreferencesProvider);
-      await prefs.setString(_key(_kTotalPools, uid), jsonEncode(pools));
-      await prefs.setString(_key(_kCategoryBuckets, uid), jsonEncode(buckets.map((k, v) => MapEntry(k, v.name))));
-      await prefs.setString(_key(_kCustomAllocations, uid), jsonEncode(customAlloc));
+      applyRemoteData(data, uid);
     } catch (e) {
       debugPrint('[BudgetRule] Error restoring from cloud: $e');
     }

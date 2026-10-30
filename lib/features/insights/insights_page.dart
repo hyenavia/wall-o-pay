@@ -83,11 +83,11 @@ class InsightsPage extends ConsumerWidget {
           );
 
           final periodLabel = isWeekly
-              ? context.tr('Ringkasan Minggu Ini')
-              : context.tr('Ringkasan Bulan Ini');
+              ? context.tr('Weekly Summary')
+              : context.tr('Monthly Summary');
           final prevPeriodName = isWeekly
-              ? context.tr('minggu lalu')
-              : context.tr('bulan lalu');
+              ? context.tr('last week')
+              : context.tr('last month');
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
@@ -147,7 +147,7 @@ class InsightsPage extends ConsumerWidget {
                               const SizedBox(width: 4),
                               Text(
                                 summary.isDeficit
-                                    ? context.tr('Defisit')
+                                    ? context.tr('Deficit')
                                     : context.tr('Surplus'),
                                 style: TextStyle(
                                   fontSize: 11,
@@ -180,12 +180,12 @@ class InsightsPage extends ConsumerWidget {
                     Text(
                       summary.totalIncome > 0 && !summary.isDeficit
                           ? context.tr(
-                              '{pct}% dari pemasukan tersisa untuk ditabung',
+                              '{pct}% of income left for savings',
                               {'pct': summary.savingsRate.toStringAsFixed(1)},
                             )
                           : (summary.isDeficit
-                              ? context.tr('Pengeluaran melampaui pemasukan periode ini')
-                              : context.tr('Selisih bersih antara pemasukan dan pengeluaran')),
+                              ? context.tr('Spending exceeded income this period')
+                              : context.tr('Net difference between income and expenses')),
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: Colors.white.withValues(alpha: 0.75),
                       ),
@@ -245,8 +245,8 @@ class InsightsPage extends ConsumerWidget {
                 // 5. GRAFIK PENGELUARAN (Expense Chart)
                 SectionHeader(
                   title: isWeekly
-                      ? context.tr('Grafik Pengeluaran Harian')
-                      : context.tr('Grafik Pengeluaran Bulanan'),
+                      ? context.tr('Daily Expense Chart')
+                      : context.tr('Monthly Expense Chart'),
                 ),
                 AppCard(
                   child: Column(
@@ -257,8 +257,8 @@ class InsightsPage extends ConsumerWidget {
                         children: [
                           Text(
                             isWeekly
-                                ? context.tr('Tren pengeluaran 7 hari')
-                                : context.tr('Distribusi pengeluaran per minggu'),
+                                ? context.tr('7-day spending trend')
+                                : context.tr('Weekly spending distribution'),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: scheme.onSurface.withValues(alpha: 0.65),
                               fontWeight: FontWeight.w600,
@@ -286,8 +286,8 @@ class InsightsPage extends ConsumerWidget {
                         children: [
                           Text(
                             isWeekly
-                                ? context.tr('Rata-rata harian:')
-                                : context.tr('Rata-rata mingguan:'),
+                                ? context.tr('Daily average:')
+                                : context.tr('Weekly average:'),
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: scheme.onSurface.withValues(alpha: 0.6),
                             ),
@@ -308,7 +308,7 @@ class InsightsPage extends ConsumerWidget {
 
                 // 6. KATEGORI TERATAS (Top Categories)
                 SectionHeader(
-                  title: context.tr('Kategori Teratas'),
+                  title: context.tr('Top Categories'),
                 ),
                 if (categories.isEmpty)
                   AppCard(child: Text(context.tr('No expenses in this period.')))
@@ -338,15 +338,15 @@ class InsightsPage extends ConsumerWidget {
                 // 8. KOMPOSISI & TREN 6 PERIODE (Historical Trend)
                 SectionHeader(
                   title: isWeekly
-                      ? context.tr('Tren 6 Minggu Terakhir')
-                      : context.tr('Tren 6 Bulan Terakhir'),
+                      ? context.tr('Last 6 Weeks Trend')
+                      : context.tr('Last 6 Months Trend'),
                 ),
                 AppCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        context.tr('Perbandingan Pemasukan vs Pengeluaran'),
+                        context.tr('Income vs Expense Comparison'),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: scheme.onSurface.withValues(alpha: 0.65),
                           fontWeight: FontWeight.w600,
@@ -360,7 +360,7 @@ class InsightsPage extends ConsumerWidget {
 
                 if (categories.isNotEmpty) ...[
                   SectionHeader(
-                    title: context.tr('Komposisi Pengeluaran'),
+                    title: context.tr('Expense Composition'),
                   ),
                   AppCard(
                     child: ExpensePieChart(
@@ -492,7 +492,7 @@ class _PeriodComparisonCard extends StatelessWidget {
             Expanded(
               child: Text(
                 context.tr(
-                  'Belum ada data pengeluaran di {prev} untuk perbandingan tren.',
+                  'No expense data in {prev} for trend comparison.',
                   {'prev': prevPeriodName},
                 ),
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -518,17 +518,17 @@ class _PeriodComparisonCard extends StatelessWidget {
         : (isLower ? Icons.trending_down_rounded : Icons.trending_up_rounded);
 
     final String title = isSame
-        ? context.tr('Pengeluaran sama persis dengan {prev}.', {'prev': prevPeriodName})
+        ? context.tr('Spending exactly matches {prev}.', {'prev': prevPeriodName})
         : (isLower
             ? context.tr(
-                'Pengeluaran turun {pct}% ({diff} lebih hemat)',
+                'Spending down {pct}% ({diff} saved)',
                 {
                   'pct': pct,
                   'diff': rupiah(summary.expenseDiff.abs()),
                 },
               )
             : context.tr(
-                'Pengeluaran naik {pct}% (+{diff})',
+                'Spending up {pct}% (+{diff})',
                 {
                   'pct': pct,
                   'diff': rupiah(summary.expenseDiff),
@@ -536,14 +536,14 @@ class _PeriodComparisonCard extends StatelessWidget {
               ));
 
     final String subtitle = isSame
-        ? context.tr('Total belanja sama dengan periode sebelumnya ({amount}).', {'amount': rupiah(summary.totalExpense)})
+        ? context.tr('Total spending equals previous period ({amount}).', {'amount': rupiah(summary.totalExpense)})
         : (isLower
             ? context.tr(
-                'Bagus! Pengeluaranmu lebih terkendali dibandingkan {prev} ({amount}).',
+                'Great! Your spending is more controlled than in {prev} ({amount}).',
                 {'prev': prevPeriodName, 'amount': rupiah(summary.prevTotalExpense)},
               )
             : context.tr(
-                'Pengeluaran meningkat dibandingkan {prev} ({amount}).',
+                'Spending increased compared to {prev} ({amount}).',
                 {'prev': prevPeriodName, 'amount': rupiah(summary.prevTotalExpense)},
               ));
 
@@ -653,7 +653,7 @@ class _TopCategoryRow extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${category.txCount} ${context.tr('transaksi')}',
+                      '${category.txCount} ${context.tr('transactions')}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: scheme.onSurface.withValues(alpha: 0.5),
                         fontSize: 11,
@@ -826,7 +826,7 @@ class _LowDataCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            context.tr('Catat beberapa transaksi lagi'),
+            context.tr('Record a few more transactions'),
             textAlign: TextAlign.center,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
@@ -835,7 +835,7 @@ class _LowDataCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             context.tr(
-              'Catat beberapa transaksi lagi untuk melihat insight keuanganmu, grafik perbandingan pengeluaran, dan kategori teratas.',
+              'Record a few more transactions to see your financial insights, spending charts, and top categories.',
             ),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(

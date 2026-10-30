@@ -96,6 +96,9 @@ class AutoSyncService {
         'savingsGoals',
         'recurring_rules',
         'recurringRules',
+        'debts',
+        'tx_templates',
+        'txTemplates',
       };
       final hasSyncTable = updates.any((u) => syncTableNames.contains(u.table));
       if (hasSyncTable) {
@@ -157,9 +160,9 @@ class AutoSyncService {
         .snapshots()
         .listen((snap) async {
       if (snap.metadata.hasPendingWrites) return;
-      if (snap.exists) {
+      if (snap.exists && snap.data() != null) {
         try {
-          await _ref.read(budgetRuleProvider.notifier).restoreFromCloud(uid);
+          _ref.read(budgetRuleProvider.notifier).applyRemoteData(snap.data()!, uid);
         } catch (e) {
           debugPrint('[AutoSync] Error restoring budgetConfig snapshot: $e');
         }
@@ -176,9 +179,9 @@ class AutoSyncService {
         .snapshots()
         .listen((snap) async {
       if (snap.metadata.hasPendingWrites) return;
-      if (snap.exists) {
+      if (snap.exists && snap.data() != null) {
         try {
-          await _ref.read(appPrefsProvider.notifier).restoreFromCloud(uid);
+          await _ref.read(appPrefsProvider.notifier).applyRemoteData(snap.data()!, uid);
         } catch (e) {
           debugPrint('[AutoSync] Error restoring preferences snapshot: $e');
         }
@@ -364,6 +367,8 @@ class AutoSyncService {
         'budgets',
         'savingsGoals',
         'recurringRules',
+        'debts',
+        'txTemplates',
       ];
 
       for (final colName in collections) {

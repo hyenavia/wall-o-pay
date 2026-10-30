@@ -4,6 +4,20 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.1] - 2026-10-30
+
+### Fixed
+- **Insight Tab Multi-Language Localization:**
+  - Resolved issue where the Financial Insight tab remained in Indonesian even when the application language was switched to English.
+  - Replaced all Indonesian string literals in `InsightsPage` and `InsightEngine` with standard English translation keys, and populated comprehensive Indonesian translations in `l10n_extra.dart`.
+- **Multi-Device Budget & Cloud Synchronization:**
+  - Fixed sync initiation bug where `AutoSyncService` failed to launch when a user logged in or cold booted because sync was only checked once in `HomePage.initState()`. Added reactive `currentUserProvider` listeners in `HomeShell` and post-frame callback triggers.
+  - Added `applyRemoteData` to `BudgetRuleNotifier` and `AppPrefsController` to immediately ingest real-time Firestore snapshots for `budgetConfig` and `preferences` without redundant network roundtrips.
+  - Resolved `Budget` SQLite uniqueness and resurrection issues: when re-setting a budget with an amount > 0, `deletedAt` is now properly reset to null, and duplicate entries with conflicting IDs are defensively merged.
+  - Integrated `debts` and `txTemplates` into SQLite `syncTables`, manual backup/restore, cloud wiping, and local database resetting.
+
+---
+
 ## [1.8.0] - 2026-10-30
 
 ### Added

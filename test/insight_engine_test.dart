@@ -1,3 +1,4 @@
+import 'package:wall_o_pay/core/l10n.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:wall_o_pay/core/period.dart';
@@ -94,6 +95,20 @@ void main() {
       );
 
       expect(points.length, greaterThanOrEqualTo(4));
+    });
+
+    test('Insight localization returns English in en and Indonesian in id', () {
+      AppLocale.code = 'en';
+      expect(trG('Weekly Summary'), 'Weekly Summary');
+      expect(trG('Top Categories'), 'Top Categories');
+      expect(trG('Positive Cashflow & Savings'), 'Positive Cashflow & Savings');
+      expect(trG('Daily Expense Chart'), 'Daily Expense Chart');
+
+      AppLocale.code = 'id';
+      expect(trG('Weekly Summary'), 'Ringkasan Minggu Ini');
+      expect(trG('Top Categories'), 'Kategori Teratas');
+      expect(trG('Positive Cashflow & Savings'), 'Cashflow Positif & Tabungan');
+      expect(trG('Daily Expense Chart'), 'Grafik Pengeluaran Harian');
     });
   });
 }

@@ -484,12 +484,12 @@ class AppDatabase extends _$AppDatabase {
     String monthKey,
     int amount,
   ) async {
-    final existing = await (select(budgets)
+    final existingList = await (select(budgets)
           ..where((b) =>
               b.categoryId.equals(categoryId) & b.monthKey.equals(monthKey)))
-        .getSingleOrNull();
+        .get();
 
-    if (existing == null) {
+    if (existingList.isEmpty) {
       if (amount <= 0) return;
       await into(budgets).insert(BudgetsCompanion.insert(
         categoryId: categoryId,
@@ -497,6 +497,13 @@ class AppDatabase extends _$AppDatabase {
         amount: amount,
       ));
       return;
+    }
+
+    final existing = existingList.first;
+    if (existingList.length > 1) {
+      for (final dup in existingList.skip(1)) {
+        await (delete(budgets)..where((b) => b.id.equals(dup.id))).go();
+      }
     }
 
     await (update(budgets)..where((b) => b.id.equals(existing.id))).write(
@@ -508,6 +515,7 @@ class AppDatabase extends _$AppDatabase {
           : BudgetsCompanion(
               amount: Value(amount),
               updatedAt: Value(DateTime.now()),
+              deletedAt: const Value(null),
             ),
     );
   }
@@ -610,6 +618,12 @@ class AppDatabase extends _$AppDatabase {
       'budgets': (await select(budgets).get()).map((r) => r.toJson()).toList(),
       'savingsGoals':
           (await select(savingsGoals).get()).map((r) => r.toJson()).toList(),
+      'recurringRules':
+          (await select(recurringRules).get()).map((r) => r.toJson()).toList(),
+      'debts':
+          (await select(debts).get()).map((r) => r.toJson()).toList(),
+      'txTemplates':
+          (await select(txTemplates).get()).map((r) => r.toJson()).toList(),
     };
   }
 
@@ -639,6 +653,8 @@ class AppDatabase extends _$AppDatabase {
       await delete(budgets).go();
       await delete(savingsGoals).go();
       await delete(recurringRules).go();
+      await delete(debts).go();
+      await delete(txTemplates).go();
       await delete(categories).go();
       await delete(wallets).go();
       await delete(pendingTransactions).go();
@@ -717,10 +733,31 @@ class AppDatabase extends _$AppDatabase {
               .toList(),
           applyRemote: (json) async {
             final remote = Budget.fromJson(json);
-            final local = await (select(budgets)
+            final localById = await (select(budgets)
                   ..where((r) => r.id.equals(remote.id)))
                 .getSingleOrNull();
-            if (local != null && !remote.updatedAt.isAfter(local.updatedAt)) {
+            if (localById != null) {
+              if (!remote.updatedAt.isAfter(localById.updatedAt)) {
+                return false;
+              }
+              await into(budgets).insertOnConflictUpdate(remote);
+              return true;
+            }
+
+            final localByKey = await (select(budgets)
+                  ..where((r) =>
+                      r.categoryId.equals(remote.categoryId) &
+                      r.monthKey.equals(remote.monthKey)))
+                .get();
+            if (localByKey.isNotEmpty) {
+              final first = localByKey.first;
+              if (remote.updatedAt.isAfter(first.updatedAt)) {
+                for (final row in localByKey) {
+                  await (delete(budgets)..where((b) => b.id.equals(row.id))).go();
+                }
+                await into(budgets).insert(remote);
+                return true;
+              }
               return false;
             }
             await into(budgets).insertOnConflictUpdate(remote);
@@ -762,6 +799,44 @@ class AppDatabase extends _$AppDatabase {
               return false;
             }
             await into(recurringRules).insertOnConflictUpdate(remote);
+            return true;
+          },
+        ),
+        SyncTable(
+          name: 'debts',
+          changed: (since) async => (await (select(debts)
+                    ..where((r) => r.updatedAt.isBiggerThanValue(since)))
+                  .get())
+              .map((r) => r.toJson())
+              .toList(),
+          applyRemote: (json) async {
+            final remote = Debt.fromJson(json);
+            final local = await (select(debts)
+                  ..where((r) => r.id.equals(remote.id)))
+                .getSingleOrNull();
+            if (local != null && !remote.updatedAt.isAfter(local.updatedAt)) {
+              return false;
+            }
+            await into(debts).insertOnConflictUpdate(remote);
+            return true;
+          },
+        ),
+        SyncTable(
+          name: 'txTemplates',
+          changed: (since) async => (await (select(txTemplates)
+                    ..where((r) => r.updatedAt.isBiggerThanValue(since)))
+                  .get())
+              .map((r) => r.toJson())
+              .toList(),
+          applyRemote: (json) async {
+            final remote = TxTemplate.fromJson(json);
+            final local = await (select(txTemplates)
+                  ..where((r) => r.id.equals(remote.id)))
+                .getSingleOrNull();
+            if (local != null && !remote.updatedAt.isAfter(local.updatedAt)) {
+              return false;
+            }
+            await into(txTemplates).insertOnConflictUpdate(remote);
             return true;
           },
         ),
