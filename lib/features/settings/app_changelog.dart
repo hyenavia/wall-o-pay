@@ -41,10 +41,32 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.8.6',
+      version: '1.8.7',
       dateEn: 'October 30, 2026',
       dateId: '30 Oktober 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Unified signature Botanical Forest theme (Night Pine, Velvet Forest & Sage) for a distinctive, cohesive aesthetic identity.',
+          textId: 'Tema eksklusif Signature Botanical Forest (Night Pine, Velvet Forest & Sage) untuk identitas visual yang khas dan berkarakter.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Monthly Start Day (Payday) preference: customize the start day of monthly budget cycles (e.g. 25th) with dynamic period calculations.',
+          textId: 'Preferensi Tanggal Mulai Bulanan (Gajian): sesuaikan tanggal awal siklus anggaran bulanan (misal tgl 25) dengan kalkulasi periode dinamis.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Synchronized balance masking: hiding Total Balance now simultaneously masks individual wallet amounts in Wallets & Accounts.',
+          textId: 'Sinkronisasi sembunyikan saldo: menyembunyikan Total Saldo kini secara serentak juga menyamarkan nominal di bagian Dompet & Rekening.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.8.6',
+      dateEn: 'October 30, 2026',
+      dateId: '30 Oktober 2026',
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

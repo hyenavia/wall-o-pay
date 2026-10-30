@@ -130,5 +130,37 @@ void main() {
       expect(trG('Cash'), 'Tunai');
       expect(trG('E-Wallet'), 'E-Wallet');
     });
+
+    test('Period.containing with custom firstDayOfMonth (e.g. 25th Payday)', () {
+      // Tanggal 30 Oktober 2026, gajian tanggal 25
+      final p1 = Period.containing(
+        PeriodType.monthly,
+        DateTime(2026, 10, 30),
+        firstDayOfMonth: 25,
+      );
+      expect(p1.start, DateTime(2026, 10, 25));
+      expect(p1.end, DateTime(2026, 11, 25));
+      expect(p1.contains(DateTime(2026, 10, 25)), isTrue);
+      expect(p1.contains(DateTime(2026, 11, 15)), isTrue);
+      expect(p1.contains(DateTime(2026, 11, 25)), isFalse);
+
+      // Tanggal 10 November 2026 (sebelum gajian tanggal 25)
+      final p2 = Period.containing(
+        PeriodType.monthly,
+        DateTime(2026, 11, 10),
+        firstDayOfMonth: 25,
+      );
+      expect(p2.start, DateTime(2026, 10, 25));
+      expect(p2.end, DateTime(2026, 11, 25));
+
+      // Standar tanggal 1
+      final p3 = Period.containing(
+        PeriodType.monthly,
+        DateTime(2026, 10, 15),
+        firstDayOfMonth: 1,
+      );
+      expect(p3.start, DateTime(2026, 10, 1));
+      expect(p3.end, DateTime(2026, 11, 1));
+    });
   });
 }

@@ -12,33 +12,63 @@ class AppColors {
   static const warning = Color(0xFFE8A33D);
 }
 
-ThemeData buildTheme(Brightness brightness) {
-  final dark = brightness == Brightness.dark;
-  final scheme = ColorScheme.fromSeed(
-    seedColor: AppColors.deepForest,
-    brightness: brightness,
-  ).copyWith(
-    primary: dark ? AppColors.sage : AppColors.deepForest,
-    onPrimary: dark ? AppColors.ink : Colors.white,
-    primaryContainer: dark ? const Color(0xFF2C5A47) : const Color(0xFFDCE9E0),
-    onPrimaryContainer: dark ? Colors.white : AppColors.deepForest,
+ThemeData buildTheme([Brightness brightness = Brightness.dark]) {
+  // Palet Signature Botanical Forest eksklusif Wall o' Pay
+  const bg = Color(0xFF101713); // Atmospheric Night Forest Charcoal
+  const cardSurface = Color(0xFF18221C); // Velvet Deep Forest Surface
+  const surfaceContainer = Color(0xFF202C24); // Elevated Container
+  const borderOutline = Color(0xFF28382E); // Subtle Pine Border
+
+  final scheme = const ColorScheme.dark().copyWith(
+    primary: AppColors.sage,
+    onPrimary: AppColors.ink,
+    primaryContainer: AppColors.deepForest,
+    onPrimaryContainer: Colors.white,
     secondary: AppColors.sage,
-    surface: dark ? const Color(0xFF1B231E) : Colors.white,
-    onSurface: dark ? const Color(0xFFE9EFEA) : AppColors.ink,
-    outlineVariant: dark ? const Color(0xFF2F3A33) : const Color(0xFFE6EAE3),
+    onSecondary: AppColors.ink,
+    surface: cardSurface,
+    onSurface: const Color(0xFFE9EFEA),
+    surfaceContainerHighest: surfaceContainer,
+    outline: borderOutline,
+    outlineVariant: borderOutline,
   );
+
   final base = ThemeData(
     useMaterial3: true,
-    brightness: brightness,
+    brightness: Brightness.dark,
     colorScheme: scheme,
   );
 
   return base.copyWith(
-    scaffoldBackgroundColor: dark ? const Color(0xFF131915) : AppColors.ivory,
-    textTheme: GoogleFonts.plusJakartaSansTextTheme(base.textTheme),
+    scaffoldBackgroundColor: bg,
+    cardColor: cardSurface,
+    canvasColor: cardSurface,
+    dialogTheme: const DialogThemeData(backgroundColor: cardSurface),
+    textTheme: GoogleFonts.plusJakartaSansTextTheme(base.textTheme).apply(
+      bodyColor: const Color(0xFFE9EFEA),
+      displayColor: const Color(0xFFE9EFEA),
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      iconTheme: IconThemeData(color: Color(0xFFE9EFEA)),
+      titleTextStyle: TextStyle(
+        color: Color(0xFFE9EFEA),
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: cardSurface,
+      selectedItemColor: AppColors.sage,
+      unselectedItemColor: Color(0xFF6B7E72),
+    ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size(64, 48),
+        backgroundColor: AppColors.deepForest,
+        foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         textStyle: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w700),
       ),

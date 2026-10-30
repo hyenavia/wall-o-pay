@@ -102,7 +102,45 @@ class SettingsPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 10),
                 const SizedBox(width: double.infinity, child: PeriodTypeToggle()),
-                if (prefs.periodType == PeriodType.weekly) ...[
+                if (prefs.periodType == PeriodType.monthly) ...[
+                  const SizedBox(height: 14),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(context.tr('Monthly Start Day'), style: theme.textTheme.labelMedium),
+                            Text(
+                              context.tr('Day of the month to start monthly period (e.g. Payday on 25th)'),
+                              style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                            ),
+                          ],
+                        ),
+                      ),
+                      DropdownButton<int>(
+                        value: prefs.firstDayOfMonth,
+                        underline: const SizedBox(),
+                        borderRadius: BorderRadius.circular(12),
+                        items: [
+                          for (int d = 1; d <= 28; d++)
+                            DropdownMenuItem(
+                              value: d,
+                              child: Text(
+                                d == 25
+                                    ? context.tr('Day {day} (Payday)', {'day': d})
+                                    : context.tr('Day {day}', {'day': d}),
+                              ),
+                            ),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) prefsCtl.setFirstDayOfMonth(val);
+                        },
+                      ),
+                    ],
+                  ),
+                ] else if (prefs.periodType == PeriodType.weekly) ...[
                   const SizedBox(height: 14),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -143,30 +181,63 @@ class SettingsPage extends ConsumerWidget {
                 ],
                 const SizedBox(height: 20),
                 Text(context.tr('Theme'), style: theme.textTheme.labelLarge),
+                const SizedBox(height: 4),
+                Text(
+                  context.tr("Signature Botanical Forest — Wall o' Pay exclusive aesthetic"),
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                ),
                 const SizedBox(height: 10),
-                SizedBox(
-                  width: double.infinity,
-                  child: SegmentedButton<ThemeMode>(
-                    showSelectedIcon: false,
-                    segments: [
-                      ButtonSegment(
-                        value: ThemeMode.system,
-                        icon: const Icon(Icons.brightness_auto_outlined, size: 18),
-                        label: Text(context.tr('System')),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.deepForest.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.deepForest.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: AppColors.deepForest,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.forest_rounded, color: AppColors.sage, size: 20),
                       ),
-                      ButtonSegment(
-                        value: ThemeMode.light,
-                        icon: const Icon(Icons.light_mode_outlined, size: 18),
-                        label: Text(context.tr('Light')),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.tr('Deep Forest Botanical'),
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              context.tr('Curated signature palette (Night Pine, Velvet Forest & Sage)'),
+                              style: TextStyle(fontSize: 11, color: muted),
+                            ),
+                          ],
+                        ),
                       ),
-                      ButtonSegment(
-                        value: ThemeMode.dark,
-                        icon: const Icon(Icons.dark_mode_outlined, size: 18),
-                        label: Text(context.tr('Dark')),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.deepForest,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          context.tr('SIGNATURE'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
                       ),
                     ],
-                    selected: {prefs.themeMode},
-                    onSelectionChanged: (s) => prefsCtl.setThemeMode(s.first),
                   ),
                 ),
                 const SizedBox(height: 20),

@@ -18,24 +18,28 @@ class AppPrefs {
     required this.localeCode,
     required this.periodType,
     this.firstDayOfWeek = DateTime.monday,
+    this.firstDayOfMonth = 1,
   });
 
   final ThemeMode themeMode;
   final String localeCode; // 'en' (default) atau 'id'
   final PeriodType periodType;
   final int firstDayOfWeek; // 1 (Monday) sampai 7 (Sunday)
+  final int firstDayOfMonth; // 1 s.d. 28 (Hari/tanggal gajian)
 
   AppPrefs copyWith({
     ThemeMode? themeMode,
     String? localeCode,
     PeriodType? periodType,
     int? firstDayOfWeek,
+    int? firstDayOfMonth,
   }) {
     return AppPrefs(
       themeMode: themeMode ?? this.themeMode,
       localeCode: localeCode ?? this.localeCode,
       periodType: periodType ?? this.periodType,
       firstDayOfWeek: firstDayOfWeek ?? this.firstDayOfWeek,
+      firstDayOfMonth: firstDayOfMonth ?? this.firstDayOfMonth,
     );
   }
 }
@@ -46,6 +50,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
   static const _kLocale = 'pref_locale';
   static const _kPeriod = 'pref_period';
   static const _kFirstDayOfWeek = 'pref_first_day_of_week';
+  static const _kFirstDayOfMonth = 'pref_first_day_of_month';
   static const _kUpdated = 'pref_prefs_updated';
 
   String? _uid() {
@@ -88,6 +93,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
     final periodStr = p.getString(_k(_kPeriod, uid)) ?? p.getString(_kPeriod);
     final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
     final firstDay = p.getInt(_k(_kFirstDayOfWeek, uid)) ?? p.getInt(_kFirstDayOfWeek) ?? DateTime.monday;
+    final firstDayMonth = p.getInt(_k(_kFirstDayOfMonth, uid)) ?? p.getInt(_kFirstDayOfMonth) ?? 1;
 
     AppLocale.code = locale;
     return AppPrefs(
@@ -95,6 +101,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
       localeCode: locale,
       periodType: period,
       firstDayOfWeek: firstDay,
+      firstDayOfMonth: firstDayMonth,
     );
   }
 
@@ -112,6 +119,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
     final periodStr = p.getString(_k(_kPeriod, uid)) ?? p.getString(_kPeriod);
     final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
     final firstDay = p.getInt(_k(_kFirstDayOfWeek, uid)) ?? p.getInt(_kFirstDayOfWeek) ?? DateTime.monday;
+    final firstDayMonth = p.getInt(_k(_kFirstDayOfMonth, uid)) ?? p.getInt(_kFirstDayOfMonth) ?? 1;
 
     AppLocale.code = locale;
     state = AppPrefs(
@@ -119,6 +127,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
       localeCode: locale,
       periodType: period,
       firstDayOfWeek: firstDay,
+      firstDayOfMonth: firstDayMonth,
     );
   }
 
@@ -154,6 +163,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
       final periodStr = data['periodType'] as String?;
       final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
       final firstDay = (data['firstDayOfWeek'] as num?)?.toInt() ?? DateTime.monday;
+      final firstDayMonth = (data['firstDayOfMonth'] as num?)?.toInt() ?? 1;
 
       AppLocale.code = locale;
       state = AppPrefs(
@@ -161,12 +171,14 @@ class AppPrefsController extends Notifier<AppPrefs> {
         localeCode: locale,
         periodType: period,
         firstDayOfWeek: firstDay,
+        firstDayOfMonth: firstDayMonth,
       );
 
       await p.setString(_k(_kTheme, uid), theme.name);
       await p.setString(_k(_kLocale, uid), locale);
       await p.setString(_k(_kPeriod, uid), period.name);
       await p.setInt(_k(_kFirstDayOfWeek, uid), firstDay);
+      await p.setInt(_k(_kFirstDayOfMonth, uid), firstDayMonth);
       await p.setInt(_k(_kUpdated, uid), remoteAt);
     }
   }
@@ -182,8 +194,9 @@ class AppPrefsController extends Notifier<AppPrefs> {
         'localeCode': state.localeCode,
         'periodType': state.periodType.name,
         'firstDayOfWeek': state.firstDayOfWeek,
+        'firstDayOfMonth': state.firstDayOfMonth,
         'updatedAt': now,
-      }, SetOptions(merge: true));
+      });
 
       final p = ref.read(sharedPreferencesProvider);
       await p.setInt(_k(_kUpdated, uid), now);
@@ -234,6 +247,17 @@ class AppPrefsController extends Notifier<AppPrefs> {
     await p.setInt(_kFirstDayOfWeek, day);
     if (uid != null) {
       await p.setInt(_k(_kFirstDayOfWeek, uid), day);
+      uploadToCloud(uid);
+    }
+  }
+
+  Future<void> setFirstDayOfMonth(int day) async {
+    state = state.copyWith(firstDayOfMonth: day);
+    final p = ref.read(sharedPreferencesProvider);
+    final uid = _uid();
+    await p.setInt(_kFirstDayOfMonth, day);
+    if (uid != null) {
+      await p.setInt(_k(_kFirstDayOfMonth, uid), day);
       uploadToCloud(uid);
     }
   }

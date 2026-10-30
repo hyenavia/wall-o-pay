@@ -22,19 +22,29 @@ class Period {
     PeriodType type,
     DateTime d, {
     int firstDayOfWeek = DateTime.monday,
+    int firstDayOfMonth = 1,
   }) {
-    if (type == PeriodType.monthly) return Period(type, DateTime(d.year, d.month));
+    if (type == PeriodType.monthly) {
+      if (firstDayOfMonth <= 1) {
+        return Period(type, DateTime(d.year, d.month, 1));
+      }
+      if (d.day >= firstDayOfMonth) {
+        return Period(type, DateTime(d.year, d.month, firstDayOfMonth));
+      } else {
+        return Period(type, DateTime(d.year, d.month - 1, firstDayOfMonth));
+      }
+    }
     final diff = ((d.weekday - firstDayOfWeek) % 7 + 7) % 7;
     return Period(type, DateTime(d.year, d.month, d.day - diff));
   }
 
   /// Batas akhir (tidak termasuk).
   DateTime get end => type == PeriodType.monthly
-      ? DateTime(start.year, start.month + 1)
+      ? DateTime(start.year, start.month + 1, start.day)
       : DateTime(start.year, start.month, start.day + 7);
 
   Period shift(int n) => type == PeriodType.monthly
-      ? Period(type, DateTime(start.year, start.month + n))
+      ? Period(type, DateTime(start.year, start.month + n, start.day))
       : Period(type, DateTime(start.year, start.month, start.day + 7 * n));
 
   bool contains(DateTime d) => !d.isBefore(start) && d.isBefore(end);
@@ -44,15 +54,24 @@ class Period {
   /// Sisa hari termasuk hari ini (bermakna untuk periode yang sedang berjalan).
   int get daysLeft => _daysBetween(DateTime.now(), end);
 
-  /// Kunci untuk menyimpan anggaran: 2026-10 (bulanan) atau W2026-10-26 (mingguan).
+  /// Kunci untuk menyimpan anggaran: 2026-10 (bulanan standar) atau 2026-10-25 (gajian kustom) atau W2026-10-26 (mingguan).
   String get key => type == PeriodType.monthly
-      ? '${start.year}-${_two(start.month)}'
+      ? (start.day == 1
+          ? '${start.year}-${_two(start.month)}'
+          : '${start.year}-${_two(start.month)}-${_two(start.day)}')
       : 'W${start.year}-${_two(start.month)}-${_two(start.day)}';
 
   String label() {
     final loc = AppLocale.code;
     if (type == PeriodType.monthly) {
-      return DateFormat('MMMM yyyy', loc).format(start);
+      if (start.day == 1) {
+        return DateFormat('MMMM yyyy', loc).format(start);
+      }
+      final last = DateTime(end.year, end.month, end.day - 1);
+      final from = start.year == last.year
+          ? DateFormat('d MMM', loc).format(start)
+          : DateFormat('d MMM yyyy', loc).format(start);
+      return '$from – ${DateFormat('d MMM yyyy', loc).format(last)}';
     }
     final last = DateTime(end.year, end.month, end.day - 1);
     final from = start.year == last.year
@@ -62,6 +81,8 @@ class Period {
   }
 
   String shortLabel() => type == PeriodType.monthly
-      ? DateFormat('MMM', AppLocale.code).format(start)
+      ? (start.day == 1
+          ? DateFormat('MMM', AppLocale.code).format(start)
+          : DateFormat('d MMM', AppLocale.code).format(start))
       : DateFormat('d MMM', AppLocale.code).format(start);
 }

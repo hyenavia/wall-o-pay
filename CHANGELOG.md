@@ -4,6 +4,25 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.7] - 2026-10-30
+
+### Added
+- **Monthly Start Day (Payday Cycle Configuration):**
+  - Added "Monthly Start Day" option in Preferences (Settings), allowing users to pick any day from 1 to 28 (e.g. Payday on the 25th).
+  - Updated `Period.containing`, `Period.shift`, and budget period key generation (`2026-10-25`) to accurately compute custom monthly salary cycles (e.g. `25 Oct – 24 Nov 2026`).
+  - Added local persistence and cloud synchronization (`pref_first_day_of_month`) in `AppPrefs` and Firestore user preferences.
+- **Synchronized Global Balance Masking:**
+  - Integrated `hideBalanceProvider` into both the Home overview card and the "Wallets & Accounts" horizontal carousel cards.
+  - Hiding or showing balance on the Home card now instantaneously masks/unmasks all wallet balances (`Rp ••••••`), ensuring complete privacy across the interface.
+
+### Changed
+- **Unified Signature Botanical Forest Theme:**
+  - Standardized Wall o' Pay into an exclusive, curated Signature Botanical Forest visual identity instead of generic light/dark toggles.
+  - Crafted an elevated, nature-inspired palette combining Night Pine Charcoal (`#101713`), Velvet Forest card surfaces (`#18221C`), Deep Forest accents (`#234B3B`), and soft Sage (`#A9C5B1`).
+  - Updated Theme settings preview card displaying the signature aesthetic badge.
+
+---
+
 ## [1.8.6] - 2026-10-30
 
 ### Fixed

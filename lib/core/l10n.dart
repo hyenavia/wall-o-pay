@@ -541,5 +541,13 @@ const Map<String, String> _id = {
   "What's new in Wall o' Pay v{version}": "Yang baru di Wall o' Pay v{version}",
   'See what\'s new in v{version} and past releases': 'Lihat fitur baru v{version} dan riwayat rilis',
   'Close': 'Tutup',
+  'Monthly Start Day': 'Tanggal Mulai Bulanan',
+  'Day of the month to start monthly period (e.g. Payday on 25th)': 'Tanggal mulainya periode bulanan (misal gajian tanggal 25)',
+  'Day {day}': 'Tanggal {day}',
+  'Day {day} (Payday)': 'Tanggal {day} (Gajian)',
+  'Signature Botanical Forest — Wall o\' Pay exclusive aesthetic': 'Botanical Forest Khas — Estetika eksklusif Wall o\' Pay',
+  'Deep Forest Botanical': 'Deep Forest Botanical',
+  'Curated signature palette (Night Pine, Velvet Forest & Sage)': 'Palet khas terkurasi (Night Pine, Velvet Forest & Sage)',
+  'SIGNATURE': 'KHAS',
 };
 

@@ -35,9 +35,9 @@ class WallOPayApp extends ConsumerWidget {
     return MaterialApp(
       title: "Wall o' Pay",
       debugShowCheckedModeBanner: false,
-      themeMode: prefs.themeMode,
-      theme: buildTheme(Brightness.light),
-      darkTheme: buildTheme(Brightness.dark),
+      themeMode: ThemeMode.dark,
+      theme: buildTheme(),
+      darkTheme: buildTheme(),
       locale: Locale(prefs.localeCode),
       supportedLocales: AppLocale.supported,
       localizationsDelegates: [

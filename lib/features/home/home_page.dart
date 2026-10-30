@@ -377,7 +377,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
   }
 }
 
-class _BalanceCard extends StatefulWidget {
+class _BalanceCard extends ConsumerWidget {
   const _BalanceCard({
     required this.totalBalance,
     required this.periodFlow,
@@ -393,18 +393,12 @@ class _BalanceCard extends StatefulWidget {
   final int expense;
 
   @override
-  State<_BalanceCard> createState() => _BalanceCardState();
-}
-
-class _BalanceCardState extends State<_BalanceCard> {
-  bool _hidden = false;
-
-  String _money(int v) => _hidden ? 'Rp ••••••' : rupiah(v);
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isSurplus = widget.periodFlow >= 0;
+    final isSurplus = periodFlow >= 0;
+    final hidden = ref.watch(hideBalanceProvider);
+
+    String money(int v) => hidden ? 'Rp ••••••' : rupiah(v);
 
     return HeroCard(
       child: Column(
@@ -438,17 +432,17 @@ class _BalanceCardState extends State<_BalanceCard> {
                 ),
               ),
               IconButton(
-                tooltip: context.tr(_hidden ? 'Show amounts' : 'Hide amounts'),
+                tooltip: context.tr(hidden ? 'Show amounts' : 'Hide amounts'),
                 visualDensity: VisualDensity.compact,
                 color: Colors.white70,
-                icon: Icon(_hidden ? Icons.visibility_off_outlined : Icons.visibility_outlined),
-                onPressed: () => setState(() => _hidden = !_hidden),
+                icon: Icon(hidden ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                onPressed: () => ref.read(hideBalanceProvider.notifier).toggle(),
               ),
             ],
           ),
           const SizedBox(height: 2),
           Text(
-            _money(widget.totalBalance),
+            money(totalBalance),
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w800,
               color: Colors.white,
@@ -475,7 +469,7 @@ class _BalanceCardState extends State<_BalanceCard> {
                   style: const TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  _hidden ? '••••••' : '',
+                  hidden ? '••••••' : (isSurplus ? '+${rupiah(periodFlow)}' : rupiah(periodFlow)),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
@@ -498,7 +492,7 @@ class _BalanceCardState extends State<_BalanceCard> {
                   child: _FlowTile(
                     icon: Icons.arrow_downward,
                     label: context.tr('Income'),
-                    value: _money(widget.income),
+                    value: money(income),
                   ),
                 ),
                 Container(width: 1, height: 36, color: Colors.white24),
@@ -507,7 +501,7 @@ class _BalanceCardState extends State<_BalanceCard> {
                   child: _FlowTile(
                     icon: Icons.arrow_upward,
                     label: context.tr('Expense'),
-                    value: _money(widget.expense),
+                    value: money(expense),
                   ),
                 ),
               ],
@@ -763,6 +757,7 @@ class _WalletsSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final walletsAsync = ref.watch(walletsProvider);
     final balances = ref.watch(walletBalancesProvider);
+    final hidden = ref.watch(hideBalanceProvider);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
@@ -852,7 +847,7 @@ class _WalletsSection extends ConsumerWidget {
                           ),
                           const Spacer(),
                           Text(
-                            rupiah(bal),
+                            hidden ? 'Rp ••••••' : rupiah(bal),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -912,7 +907,7 @@ class _WalletsSection extends ConsumerWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          rupiah(currentBalance),
+                          ref.read(hideBalanceProvider) ? 'Rp ••••••' : rupiah(currentBalance),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,

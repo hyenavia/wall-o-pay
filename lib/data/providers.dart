@@ -37,9 +37,42 @@ final selectedAnchorProvider =
 final selectedPeriodProvider = Provider<Period>((ref) {
   final type = ref.watch(appPrefsProvider.select((p) => p.periodType));
   final firstDay = ref.watch(appPrefsProvider.select((p) => p.firstDayOfWeek));
+  final firstDayMonth = ref.watch(appPrefsProvider.select((p) => p.firstDayOfMonth));
   final anchor = ref.watch(selectedAnchorProvider);
-  return Period.containing(type, anchor, firstDayOfWeek: firstDay);
+  return Period.containing(
+    type,
+    anchor,
+    firstDayOfWeek: firstDay,
+    firstDayOfMonth: firstDayMonth,
+  );
 });
+
+/// Status sensor saldo (sembunyikan/tampilkan nominal di seluruh aplikasi).
+class HideBalanceNotifier extends Notifier<bool> {
+  static const _kKey = 'pref_hide_balance';
+
+  @override
+  bool build() {
+    final prefs = ref.watch(sharedPreferencesProvider);
+    return prefs.getBool(_kKey) ?? false;
+  }
+
+  Future<void> toggle() async {
+    final next = !state;
+    state = next;
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setBool(_kKey, next);
+  }
+
+  Future<void> set(bool value) async {
+    state = value;
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setBool(_kKey, value);
+  }
+}
+
+final hideBalanceProvider =
+    NotifierProvider<HideBalanceNotifier, bool>(HideBalanceNotifier.new);
 
 /// Tab aktif di navigasi bawah (0 Home, 1 Transactions, 2 Budget, 3 Goals).
 class TabIndex extends Notifier<int> {
