@@ -4,6 +4,19 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2026-11-01
+
+### Added
+- **Categorized & Sub-Categorized Account Architecture:**
+  - Grouped all user accounts into dedicated categories by type: **Commercial Bank**, **Digital Bank**, **E-Wallet**, and **Cash**.
+  - Added stylish section headers for each active category displaying category icon, category title, account count badge, and real-time category subtotal.
+  - Automatically sorts accounts within each category by balance descending, placing primary high-balance accounts at the top.
+  - Clean, frictionless user experience without manual drag handles (Opsi A).
+  - Empty categories with zero accounts are automatically hidden to keep the layout clean and compact.
+  - Full bilingual localization: English ("Commercial Bank", "Digital Bank", "E-Wallet", "Cash") and Indonesian ("Bank Konvensional", "Bank Digital", "E-Wallet", "Tunai").
+
+---
+
 ## [1.10.0] - 2026-11-01
 
 ### Added

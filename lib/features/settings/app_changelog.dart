@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.10.0',
+      version: '1.11.0',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added structured account categories: Commercial Bank, Digital Bank, E-Wallet, and Cash with section subtotals and counts.',
+          textId: 'Pengelompokan akun ke dalam kategori terstruktur: Bank Konvensional, Bank Digital, E-Wallet, dan Tunai lengkap dengan subtotal dan jumlah akun.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Automatic balance-descending ordering within each category for a clean, frictionless financial overview.',
+          textId: 'Pengurutan otomatis berdasarkan saldo terbesar di tiap kategori untuk pengalaman finansial yang bersih dan rapi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.10.0',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

@@ -167,57 +167,23 @@ final pendingTransactionsProvider = StreamProvider<List<PendingTransaction>>((re
   return ref.watch(databaseProvider).watchPendingTransactions();
 });
 
-/// Daftar dompet/rekening aktif langsung dari database.
-final _rawWalletsProvider = StreamProvider<List<Wallet>>((ref) {
-  return ref.watch(databaseProvider).watchWallets();
-});
+/// Urutan prioritas kategori akun: Commercial Bank -> Digital Bank -> E-Wallet -> Cash.
+const _kAccountCategoryOrder = {
+  'bank': 0,
+  'digital': 1,
+  'ewallet': 2,
+  'cash': 3,
+};
 
-/// Urutan kustom dompet/akun yang disimpan di SharedPreferences.
-class WalletOrderNotifier extends Notifier<List<String>> {
-  static const _kKey = 'pref_wallet_order';
-
-  @override
-  List<String> build() {
-    final prefs = ref.watch(sharedPreferencesProvider);
-    return prefs.getStringList(_kKey) ?? const [];
-  }
-
-  Future<void> updateOrder(List<String> newOrder) async {
-    state = List.unmodifiable(newOrder);
-    final prefs = ref.read(sharedPreferencesProvider);
-    await prefs.setStringList(_kKey, newOrder);
-  }
-
-  Future<void> reorder(int fromIndex, int toIndex, List<Wallet> currentList) async {
-    final ids = currentList.map((w) => w.id).toList();
-    if (fromIndex < 0 || fromIndex >= ids.length) return;
-    if (toIndex < 0 || toIndex >= ids.length) return;
-    if (fromIndex == toIndex) return;
-    final item = ids.removeAt(fromIndex);
-    ids.insert(toIndex, item);
-    await updateOrder(ids);
-  }
-}
-
-final walletOrderProvider =
-    NotifierProvider<WalletOrderNotifier, List<String>>(WalletOrderNotifier.new);
-
-/// Daftar dompet/rekening aktif (diurutkan sesuai preferensi kustom pengguna).
-final walletsProvider = Provider<AsyncValue<List<Wallet>>>((ref) {
-  final rawAsync = ref.watch(_rawWalletsProvider);
-  final order = ref.watch(walletOrderProvider);
-
-  return rawAsync.whenData((list) {
-    if (order.isEmpty) return list;
-    final orderMap = <String, int>{
-      for (var i = 0; i < order.length; i++) order[i]: i,
-    };
+/// Daftar dompet/rekening aktif yang terkelompok secara terstruktur berdasarkan kategori akun.
+final walletsProvider = StreamProvider<List<Wallet>>((ref) {
+  return ref.watch(databaseProvider).watchWallets().map((list) {
     final sorted = List<Wallet>.from(list);
     sorted.sort((a, b) {
-      final orderA = orderMap[a.id] ?? 999999;
-      final orderB = orderMap[b.id] ?? 999999;
+      final orderA = _kAccountCategoryOrder[a.type.toLowerCase()] ?? 99;
+      final orderB = _kAccountCategoryOrder[b.type.toLowerCase()] ?? 99;
       if (orderA != orderB) return orderA.compareTo(orderB);
-      return a.name.compareTo(b.name);
+      return a.createdAt.compareTo(b.createdAt);
     });
     return sorted;
   });

@@ -61,6 +61,7 @@ String trG(String key, [Map<String, Object?>? args]) =>
 
 const Map<String, String> _en = {
   'Rekening Utama': 'Main Account',
+  'Bank Konvensional': 'Commercial Bank',
   'Bank Digital': 'Digital Bank',
   'Tunai': 'Cash',
   'E-Wallet': 'E-Wallet',
@@ -78,6 +79,7 @@ const Map<String, String> _en = {
 
 const Map<String, String> _id = {
   'Main Account': 'Rekening Utama',
+  'Commercial Bank': 'Bank Konvensional',
   'Digital Bank': 'Bank Digital',
   'Cash': 'Tunai',
   'Bank': 'Bank',
