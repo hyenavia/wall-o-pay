@@ -97,6 +97,21 @@ void main() {
 
       // Verify no drag indicator icons exist (clean UI per Opsi A)
       expect(find.byIcon(Icons.drag_indicator_rounded), findsNothing);
+
+      // Verify eye toggle button in HeroCard works to hide and reveal balances
+      expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.visibility_outlined));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+      expect(find.text('Rp ••••••'), findsWidgets);
+
+      // Tap again to restore balance visibility
+      await tester.tap(find.byIcon(Icons.visibility_off_outlined));
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+      expect(find.text('Rp 2.000.000'), findsOneWidget);
     });
   });
 }

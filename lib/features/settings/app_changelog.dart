@@ -41,10 +41,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.0',
+      version: '1.11.1',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added privacy balance visibility toggle (eye icon) on the Accounts page HeroCard.',
+          textId: 'Menambahkan tombol sensor privasi saldo (ikon mata) langsung pada kartu Total Saldo di halaman Akun.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.0',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

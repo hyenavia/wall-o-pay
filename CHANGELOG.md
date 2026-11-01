@@ -4,6 +4,16 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.1] - 2026-11-01
+
+### Added
+- **Total Balance Privacy Toggle on Accounts Page:**
+  - Added visibility toggle button (eye icon) directly to the `HeroCard` on the Accounts page, matching the Home screen header.
+  - Allows users to instantly hide or reveal all sensitive account balances and category subtotals directly from the Accounts screen with one tap.
+  - Perfectly synchronized with the global `hideBalanceProvider` and fully localized in English and Indonesian.
+
+---
+
 ## [1.11.0] - 2026-11-01
 
 ### Added

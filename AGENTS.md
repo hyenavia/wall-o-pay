@@ -18,8 +18,11 @@ Setiap kali melakukan modifikasi kode, penambahan fitur, pembaruan UI, atau perb
    - Perbarui teks badge versi dan link download di `docs/index.html` dan variabel `APP_VERSION` di `docs/script.js`.
 
 ### Aturan Penomoran Versi (Semantic Versioning)
+> [!IMPORTANT]
+> **Kebijakan Versi Pinned v1.11.x**: Versi aplikasi sementara ini dikunci pada lini `v1.11.x`. Setiap pembaruan atau perbaikan selanjutnya hanya menaikkan nomor patch `x` (`1.11.(+1)+B`) dan tidak menaikkan nomor minor (`1.12.x`) sampai ada instruksi lebih lanjut dari pengguna.
+
 - **Major Release (`(+1).0.0+B`)**: Perombakan arsitektur besar, perubahan skema database tanpa backward-compatibility, atau perubahan fundamental pada alur aplikasi.
-- **Minor Feature (`X.(+1).0+B`)**: Penambahan modul atau fitur baru (contoh: integrasi fitur ekspor baru, penambahan halaman grafik analitik, dukungan multi-mata uang).
+- **Minor Feature (`X.(+1).0+B`)**: Penambahan modul atau fitur baru (saat ini ditahan pada lini `v1.11.x`).
 - **Patch / Bug Fix (`X.Y.(+1)+B`)**: Perbaikan bug, penyesuaian styling UI/tema, perbaikan teks/lokalisasi, atau optimasi performa ringan.
 
 ---

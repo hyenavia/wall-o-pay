@@ -45,7 +45,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '1.11.0';
+  static const currentVersion = '1.11.1';
 
   static const MethodChannel _channel = MethodChannel(
     'com.example.wall_o_pay/notifications',

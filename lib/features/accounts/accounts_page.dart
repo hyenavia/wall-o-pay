@@ -264,9 +264,21 @@ class AccountsPage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(context.tr('Total Balance'),
-                        style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70)),
-                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Text(context.tr('Total Balance'),
+                            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70)),
+                        const Spacer(),
+                        IconButton(
+                          tooltip: context.tr(hide ? 'Show amounts' : 'Hide amounts'),
+                          visualDensity: VisualDensity.compact,
+                          color: Colors.white70,
+                          icon: Icon(hide ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                          onPressed: () => ref.read(hideBalanceProvider.notifier).toggle(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
                     Text(
                       money(total),
                       style: theme.textTheme.headlineMedium?.copyWith(
