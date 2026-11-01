@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/l10n.dart';
 import '../../core/widgets.dart';
-import '../../data/providers.dart';
 import '../../data/tables.dart' show TxType;
 import '../accounts/accounts_page.dart';
+import '../categories/categories_page.dart';
 import '../debts/debts_page.dart';
 import '../goals/goals_page.dart';
 import '../recurring/recurring_page.dart';
@@ -14,11 +13,11 @@ import '../settings/settings_page.dart';
 import '../transactions/transaction_form.dart';
 
 /// Pusat fitur tambahan: akun & dompet, impian & tabungan, utang & patungan, transaksi berulang, laporan PDF, dan pengaturan.
-class MorePage extends ConsumerWidget {
+class MorePage extends StatelessWidget {
   const MorePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     Widget tile(IconData icon, String title, String subtitle, VoidCallback onTap) {
       return ListTile(
         leading: Icon(icon),
@@ -74,13 +73,10 @@ class MorePage extends ConsumerWidget {
                   () => open(const RecurringPage()),
                 ),
                 tile(
-                  Icons.insights_outlined,
-                  context.tr('Insight'),
-                  context.tr('Charts, needs vs wants, and trends'),
-                  () {
-                    ref.read(tabIndexProvider.notifier).set(3);
-                    Navigator.pop(context);
-                  },
+                  Icons.category_outlined,
+                  context.tr('Categories'),
+                  context.tr('Expense and income categories'),
+                  () => open(const CategoriesPage()),
                 ),
                 tile(
                   Icons.picture_as_pdf_outlined,

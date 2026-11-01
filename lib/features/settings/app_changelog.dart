@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '1.11.10',
+      dateEn: 'November 2, 2026',
+      dateId: '2 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Streamlined Home quick actions with essential workflows (Transfer, Goals, Debts, More) and unified compact period switcher.',
+          textId: 'Mengefisienkan aksi cepat Beranda dengan fitur esensial (Transfer, Impian, Utang, Lainnya) dan merampingkan navigasi periode.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Cleaned up duplicate menus between More page (Financial Tools) and Settings page (System Preferences).',
+          textId: 'Menata ulang menu tumpang tindih antara halaman Lainnya (Alat Finansial) dan halaman Pengaturan (Preferensi Sistem).',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '1.11.9',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
-      isCurrent: true,
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

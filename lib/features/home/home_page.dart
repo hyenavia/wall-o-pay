@@ -14,6 +14,8 @@ import '../../data/tables.dart' show TxType;
 import '../accounts/accounts_page.dart';
 import '../profile/profile_page.dart';
 import '../settings/settings_page.dart';
+import '../debts/debts_page.dart';
+import '../goals/goals_page.dart';
 import '../more/more_page.dart';
 import '../transactions/transaction_form.dart';
 import '../transactions/transaction_tile.dart';
@@ -153,10 +155,15 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                               ),
                               const SizedBox(height: 12),
                             ],
-                            const Center(child: PeriodTypeToggle()),
-                            const SizedBox(height: 4),
-                            const Center(child: PeriodSwitcher(compact: true)),
-                            const SizedBox(height: 8),
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 10),
+                              child: Row(
+                                children: [
+                                  Expanded(child: PeriodSwitcher(compact: true)),
+                                  PeriodTypeToggle(compact: true),
+                                ],
+                              ),
+                            ),
                             _BalanceCard(
                               totalBalance: totalBalance,
                               periodFlow: balance,
@@ -267,22 +274,28 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                             Row(
                               children: [
                                 _QuickAction(
-                                  icon: Icons.add_circle_outline,
-                                  label: context.tr('Add transaction'),
-                                  onTap: () => showTransactionForm(context),
+                                  icon: Icons.swap_horiz_rounded,
+                                  label: context.tr('Transfer'),
+                                  onTap: () => showTransactionForm(context, initialType: TxType.transfer),
                                 ),
                                 _QuickAction(
-                                  icon: Icons.pie_chart_outline,
-                                  label: context.tr('Budget'),
-                                  onTap: () => ref.read(tabIndexProvider.notifier).set(2),
+                                  icon: Icons.flag_outlined,
+                                  label: context.tr('Goals'),
+                                  onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute<void>(builder: (_) => const GoalsPage()),
+                                  ),
                                 ),
                                 _QuickAction(
-                                  icon: Icons.bar_chart,
-                                  label: context.tr('Insights'),
-                                  onTap: () => ref.read(tabIndexProvider.notifier).set(3),
+                                  icon: Icons.handshake_outlined,
+                                  label: context.tr('Debts'),
+                                  onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute<void>(builder: (_) => const DebtsPage()),
+                                  ),
                                 ),
                                 _QuickAction(
-                                  icon: Icons.apps,
+                                  icon: Icons.apps_rounded,
                                   label: context.tr('More'),
                                   onTap: () => Navigator.push(
                                     context,

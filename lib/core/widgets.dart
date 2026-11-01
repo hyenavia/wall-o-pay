@@ -349,11 +349,51 @@ class PeriodSwitcher extends ConsumerWidget {
 
 /// Pilihan Monthly / Weekly.
 class PeriodTypeToggle extends ConsumerWidget {
-  const PeriodTypeToggle({super.key});
+  const PeriodTypeToggle({super.key, this.compact = false});
+
+  final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final type = ref.watch(appPrefsProvider.select((p) => p.periodType));
+    if (compact) {
+      final isMonthly = type == PeriodType.monthly;
+      final theme = Theme.of(context);
+      return InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () {
+          final next = isMonthly ? PeriodType.weekly : PeriodType.monthly;
+          ref.read(appPrefsProvider.notifier).setPeriodType(next);
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isMonthly ? Icons.calendar_month_outlined : Icons.view_week_outlined,
+                size: 15,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 5),
+              Text(
+                context.tr(isMonthly ? 'Monthly' : 'Weekly'),
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return SegmentedButton<PeriodType>(
       showSelectedIcon: false,
       segments: [

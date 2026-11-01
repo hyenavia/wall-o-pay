@@ -14,11 +14,8 @@ import '../../data/cloud_sync.dart';
 import '../../data/budget_rule.dart';
 import '../../data/feature_prefs.dart';
 import '../../data/notifications.dart';
-import '../debts/debts_page.dart';
-import 'report_dialog.dart';
 import 'app_changelog.dart';
 import 'about_sheet.dart';
-import '../recurring/recurring_page.dart';
 import '../../data/export_service.dart';
 import '../../data/prefs.dart';
 import '../../data/profile.dart';
@@ -338,24 +335,6 @@ class SettingsPage extends ConsumerWidget {
                       }
                     },
                   ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.picture_as_pdf_outlined),
-                  title: Text(context.tr('PDF report')),
-                  subtitle: Text(context.tr('Export a report for any period')),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => showReportDialog(context),
-                ),
-                ListTile(
-                  leading: const Icon(Icons.handshake_outlined),
-                  title: Text(context.tr('Debts & splits')),
-                  subtitle: Text(context.tr('Who owes whom, and splitting bills')),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(builder: (_) => const DebtsPage()),
-                  ),
-                ),
               ],
             ),
           ),
@@ -585,17 +564,6 @@ class SettingsPage extends ConsumerWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.repeat_rounded),
-                  title: Text(context.tr('Recurring & Subscriptions')),
-                  subtitle: Text(context.tr('Manage routine expenses, incomes & transfers.')),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(builder: (_) => const RecurringPage()),
-                  ),
-                ),
-                const Divider(height: 1),
-                ListTile(
                   leading: const Icon(Icons.category_outlined),
                   title: Text(context.tr('Manage categories')),
                   trailing: const Icon(Icons.chevron_right),
@@ -604,6 +572,7 @@ class SettingsPage extends ConsumerWidget {
                     MaterialPageRoute<void>(builder: (_) => const CategoriesPage()),
                   ),
                 ),
+                const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.table_view_outlined),
                   title: Text(context.tr('Export transactions (CSV)')),

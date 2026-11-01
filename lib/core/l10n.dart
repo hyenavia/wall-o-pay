@@ -151,6 +151,8 @@ const Map<String, String> _id = {
   'Category': 'Kategori',
   'Category name': 'Nama kategori',
   'Category name cannot be empty.': 'Nama kategori tidak boleh kosong.',
+  'Debts': 'Utang',
+  'Expense and income categories': 'Kategori pengeluaran dan pemasukan',
   'Change photo': 'Ganti foto',
   'Choose file': 'Pilih file',
   'Choose how you manage money: by month or by week.': 'Pilih cara mengatur uangmu: per bulan atau per minggu.',

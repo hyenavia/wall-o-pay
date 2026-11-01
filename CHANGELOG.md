@@ -4,6 +4,18 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.10] - 2026-11-02
+
+### Changed
+- **Home Dashboard & Navigation Streamlining:**
+  - Revitalized Home quick actions by replacing redundant shortcuts (Add Tx, Budget, Insight) with essential 1-tap financial workflows: **Transfer Balance**, **Savings Goals**, **Debts & Splits**, and **More**.
+  - Unified the Period Switcher and Monthly/Weekly period toggle into a single compact horizontal header row, saving vertical space and bringing the balance summary immediately above the fold.
+- **Separation of Concerns between More & Settings:**
+  - Dedicated `MorePage` as the central Financial Toolbox with direct access to Accounts, Transfer, Goals, Debts, Recurring, Categories, and PDF Reports, removing redundant navigation shortcuts.
+  - Streamlined `SettingsPage` to focus exclusively on system preferences, user profile, security, cloud sync, notifications, and language.
+
+---
+
 ## [1.11.9] - 2026-11-01
 
 ### Removed
