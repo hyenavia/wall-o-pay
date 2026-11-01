@@ -4,6 +4,19 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2026-11-01
+
+### Added
+- **Drag-and-Drop Custom Account Ordering:**
+  - Added interactive drag-and-drop reordering for accounts in the Accounts page using `SliverReorderableList` and `ReorderableDragStartListener`.
+  - Added intuitive drag grip handles (`Icons.drag_indicator_rounded`) when multiple accounts exist, allowing effortless position customization.
+  - Tapping cards continues to smoothly open account editing without touch conflicts.
+  - Custom display order is stored in `SharedPreferences` (`pref_wallet_order`) without requiring SQLite schema alterations, maintaining 100% offline-first reliability.
+  - Custom ordering automatically synchronizes across all application touchpoints, including the "Your accounts" list, the Home screen account chips, and wallet selection in transaction forms.
+  - Added bilingual localization for the drag-to-reorder action hint (*"Drag to reorder"* / *"Tahan & geser untuk urutkan"*).
+
+---
+
 ## [1.9.2] - 2026-11-01
 
 ### Fixed

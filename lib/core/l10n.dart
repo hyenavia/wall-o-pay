@@ -88,6 +88,7 @@ const Map<String, String> _id = {
   'New Account': 'Akun Baru',
   'Transfer Between Accounts': 'Transfer Antar Akun',
   'Recent transfers': 'Riwayat transfer terbaru',
+  'Drag to reorder': 'Tahan & geser untuk urutkan',
   'Wallet': 'Dompet',
   'Delete this transfer?': 'Hapus transfer ini?',
   'Edit Account': 'Edit Akun',

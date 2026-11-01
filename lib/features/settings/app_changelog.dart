@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.9.2',
+      version: '1.10.0',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added drag-and-drop customization for accounts in Accounts page, allowing custom ordering across the entire app.',
+          textId: 'Menambahkan fitur drag-and-drop untuk mengatur dan mengkustomisasi urutan akun di halaman Akun dan seluruh aplikasi.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added interactive grip handles on account cards and seamless offline storage for preferred order.',
+          textId: 'Menambahkan pegangan geser interaktif pada kartu akun serta penyimpanan urutan preferensi secara offline.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.9.2',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

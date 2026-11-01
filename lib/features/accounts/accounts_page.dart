@@ -1,3 +1,5 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -163,98 +165,170 @@ class AccountsPage extends ConsumerWidget {
         error: (e, _) => Center(
           child: Text(context.tr('Could not load data: {error}', {'error': e})),
         ),
-        data: (accounts) => ListView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
-          children: [
-            HeroCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(context.tr('Total Balance'),
-                      style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70)),
-                  const SizedBox(height: 4),
-                  Text(
-                    money(total),
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
+        data: (accounts) => CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+              sliver: SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    HeroCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(context.tr('Total Balance'),
+                              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70)),
+                          const SizedBox(height: 4),
+                          Text(
+                            money(total),
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            context.tr('Across all your accounts'),
+                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    context.tr('Across all your accounts'),
-                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
-                  ),
-                ],
+                    SectionHeader(title: context.tr('Your accounts')),
+                  ],
+                ),
               ),
             ),
-            SectionHeader(title: context.tr('Your accounts')),
-            for (final a in accounts)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: AppCard(
-                  onTap: () => showAccountForm(context, wallet: a),
-                  child: Row(
-                    children: [
-                      CategoryBadge(
-                        icon: accountIcon(a.type),
-                        color: Color(a.colorValue),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverReorderableList(
+                itemCount: accounts.length,
+                onReorderItem: (oldIndex, newIndex) {
+                  ref.read(walletOrderProvider.notifier).reorder(
+                        oldIndex,
+                        newIndex,
+                        accounts,
+                      );
+                },
+                proxyDecorator: (child, index, animation) {
+                  return AnimatedBuilder(
+                    animation: animation,
+                    builder: (context, child) {
+                      final animValue = Curves.easeInOut.transform(animation.value);
+                      final elevation = lerpDouble(0, 6, animValue) ?? 0;
+                      return Material(
+                        elevation: elevation,
+                        color: Colors.transparent,
+                        shadowColor: Colors.black54,
+                        borderRadius: BorderRadius.circular(20),
+                        child: child,
+                      );
+                    },
+                    child: child,
+                  );
+                },
+                itemBuilder: (context, index) {
+                  final a = accounts[index];
+                  return Padding(
+                    key: ValueKey(a.id),
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: AppCard(
+                      onTap: () => showAccountForm(context, wallet: a),
+                      child: Row(
+                        children: [
+                          CategoryBadge(
+                            icon: accountIcon(a.type),
+                            color: Color(a.colorValue),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(context.tr(a.name),
+                                    style: theme.textTheme.bodyLarge
+                                        ?.copyWith(fontWeight: FontWeight.w700)),
+                                Text(accountKindLabel(context, a.type),
+                                    style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            money(balances[a.id] ?? 0),
+                            style: theme.textTheme.bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                          if (accounts.length > 1) ...[
+                            const SizedBox(width: 4),
+                            ReorderableDragStartListener(
+                              index: index,
+                              child: Tooltip(
+                                message: context.tr('Drag to reorder'),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                                  child: Icon(
+                                    Icons.drag_indicator_rounded,
+                                    color: muted.withValues(alpha: 0.5),
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
+                    ),
+                  );
+                },
+              ),
+            ),
+            if (transfers.isNotEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SectionHeader(title: context.tr('Recent transfers')),
+                      AppCard(
+                        padding: EdgeInsets.zero,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(context.tr(a.name),
-                                style: theme.textTheme.bodyLarge
-                                    ?.copyWith(fontWeight: FontWeight.w700)),
-                            Text(accountKindLabel(context, a.type),
-                                style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+                            for (final t in transfers.take(10))
+                              ListTile(
+                                leading: const Icon(Icons.swap_horiz),
+                                title: Text(
+                                  '${context.tr(walletMap[t.walletId]?.name ?? 'Wallet')}'
+                                  ' → ${context.tr(walletMap[t.toWalletId]?.name ?? 'Wallet')}',
+                                ),
+                                subtitle: Text(
+                                  t.note.isEmpty ? shortDate(t.date) : '${shortDate(t.date)} • ${t.note}',
+                                ),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(money(t.amount),
+                                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                                    IconButton(
+                                      tooltip: context.tr('Delete'),
+                                      icon: const Icon(Icons.delete_outline, size: 20),
+                                      onPressed: () => _confirmDeleteTransfer(context, ref, t.id),
+                                    ),
+                                  ],
+                                ),
+                              ),
                           ],
                         ),
-                      ),
-                      Text(
-                        money(balances[a.id] ?? 0),
-                        style: theme.textTheme.bodyLarge
-                            ?.copyWith(fontWeight: FontWeight.w800),
                       ),
                     ],
                   ),
                 ),
+              )
+            else
+              const SliverPadding(
+                padding: EdgeInsets.only(bottom: 96),
               ),
-            if (transfers.isNotEmpty) ...[
-              SectionHeader(title: context.tr('Recent transfers')),
-              AppCard(
-                padding: EdgeInsets.zero,
-                child: Column(
-                  children: [
-                    for (final t in transfers.take(10))
-                      ListTile(
-                        leading: const Icon(Icons.swap_horiz),
-                        title: Text(
-                          '${context.tr(walletMap[t.walletId]?.name ?? 'Wallet')}'
-                          ' → ${context.tr(walletMap[t.toWalletId]?.name ?? 'Wallet')}',
-                        ),
-                        subtitle: Text(
-                          t.note.isEmpty ? shortDate(t.date) : '${shortDate(t.date)} • ${t.note}',
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(money(t.amount),
-                                style: const TextStyle(fontWeight: FontWeight.w700)),
-                            IconButton(
-                              tooltip: context.tr('Delete'),
-                              icon: const Icon(Icons.delete_outline, size: 20),
-                              onPressed: () => _confirmDeleteTransfer(context, ref, t.id),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
           ],
         ),
       ),
