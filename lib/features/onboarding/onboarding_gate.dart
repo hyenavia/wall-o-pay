@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -55,6 +56,23 @@ class _OnboardingGateState extends ConsumerState<OnboardingGate>
         if (mounted) setState(() { _loading = false; _needsOnboarding = false; });
         return;
       }
+      final user = ref.read(currentUserProvider);
+      if (user != null) {
+        try {
+          final doc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .collection('meta')
+              .doc('preferences')
+              .get()
+              .timeout(const Duration(seconds: 3));
+          if (doc.exists && doc.data()?['onboardingDone'] == true) {
+            await prefs.setBool(_doneKey, true);
+            if (mounted) setState(() { _loading = false; _needsOnboarding = false; });
+            return;
+          }
+        } catch (_) {}
+      }
       final hasData = await ref.read(databaseProvider).hasAnyTransaction();
       if (hasData) {
         await prefs.setBool(_doneKey, true);
@@ -83,6 +101,10 @@ class _OnboardingGateState extends ConsumerState<OnboardingGate>
     ref.read(sharedPreferencesProvider).setBool(_doneKey, true);
     if (mounted) {
       setState(() => _needsOnboarding = false);
+    }
+    final user = ref.read(currentUserProvider);
+    if (user != null) {
+      ref.read(appPrefsProvider.notifier).uploadToCloud(user.uid);
     }
     _background();
   }

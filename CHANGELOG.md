@@ -4,6 +4,20 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.4] - 2026-11-01
+
+### Added
+- **Multi-Device Personalization & Settings Cloud Sync:**
+  - Integrated `FeaturePrefs` (daily reminder toggle, reminder time, budget alerts, and budget rollover) into Cloud Firestore (`meta/preferences`).
+  - Added cloud synchronization for privacy balance visibility toggle (`hideBalance`) and account onboarding completion status (`onboardingDone`).
+  - Switching to a new device or logging in on multiple phones now instantly restores all user preferences, notification schedules, and skips completed onboarding automatically without requiring manual reconfiguration.
+
+### Changed
+- **Settings Menu Hierarchy & Offline Backup Clarification:**
+  - Renamed offline file backup section to **Manual Backup & Export** (`Cadangan Manual & Ekspor`) to clearly distinguish between automated real-time Cloud Sync and manual JSON/CSV archives for privacy-conscious offline users.
+
+---
+
 ## [1.11.3] - 2026-11-01
 
 ### Changed

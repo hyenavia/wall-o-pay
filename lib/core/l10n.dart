@@ -613,5 +613,6 @@ const Map<String, String> _id = {
   'Please enter a valid amount': 'Mohon masukkan nominal yang valid',
   'e.g. Kopi Kenangan, Grab, Alfamart': 'cth. Kopi Kenangan, Grab, Alfamart',
   'Wall o\' Pay': 'Wall o\' Pay',
+  'Manual Backup & Export': 'Cadangan Manual & Ekspor',
 };
 

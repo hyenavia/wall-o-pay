@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.3',
+      version: '1.11.4',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Synced all user settings (reminders, rollover, alerts, privacy, onboarding) to Cloud Firestore for seamless multi-device continuity.',
+          textId: 'Menyinkronkan seluruh pengaturan akun (pengingat harian, rollover, sensor privasi, onboarding) ke cloud agar tidak perlu setting ulang saat ganti perangkat.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Clarified settings layout between automated real-time Cloud Sync and Manual Backup & Export.',
+          textId: 'Menata ulang menu Pengaturan untuk memperjelas perbedaan Sinkronisasi Cloud Otomatis dan Cadangan Manual/Ekspor.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.3',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

@@ -6,6 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/l10n.dart';
 import '../core/period.dart';
+import 'feature_prefs.dart';
+import 'notifications.dart';
+import 'providers.dart';
 
 /// Diisi di main.dart dengan instance SharedPreferences yang sudah dimuat.
 final sharedPreferencesProvider = Provider<SharedPreferences>(
@@ -180,6 +183,43 @@ class AppPrefsController extends Notifier<AppPrefs> {
       await p.setInt(_k(_kFirstDayOfWeek, uid), firstDay);
       await p.setInt(_k(_kFirstDayOfMonth, uid), firstDayMonth);
       await p.setInt(_k(_kUpdated, uid), remoteAt);
+
+      // Terapkan pengaturan fitur & pengingat (FeaturePrefs)
+      final rollover = data['rollover'] as bool?;
+      final budgetAlerts = data['budgetAlerts'] as bool?;
+      final dailyReminder = data['dailyReminder'] as bool?;
+      final reminderHour = (data['reminderHour'] as num?)?.toInt();
+      final reminderMinute = (data['reminderMinute'] as num?)?.toInt();
+
+      ref.read(featurePrefsProvider.notifier).applyRemote(
+        rollover: rollover,
+        budgetAlerts: budgetAlerts,
+        dailyReminder: dailyReminder,
+        reminderHour: reminderHour,
+        reminderMinute: reminderMinute,
+      );
+
+      // Jadwalkan notifikasi lokal di perangkat ini jika pengingat harian aktif di cloud
+      if (dailyReminder != null) {
+        final hour = reminderHour ?? ref.read(featurePrefsProvider).reminderHour;
+        final min = reminderMinute ?? ref.read(featurePrefsProvider).reminderMinute;
+        await NotificationService.instance.syncReminder(
+          enabled: dailyReminder,
+          time: TimeOfDay(hour: hour, minute: min),
+        );
+      }
+
+      // Terapkan sensor privasi saldo
+      final hide = data['hideBalance'] as bool?;
+      if (hide != null) {
+        await ref.read(hideBalanceProvider.notifier).set(hide);
+      }
+
+      // Terapkan status onboarding jika sudah pernah diselesaikan
+      final onboardingDone = data['onboardingDone'] as bool?;
+      if (onboardingDone == true) {
+        await p.setBool('onboarding_done_$uid', true);
+      }
     }
   }
 
@@ -189,16 +229,27 @@ class AppPrefsController extends Notifier<AppPrefs> {
       final doc = _doc(uid);
       if (doc == null) return;
       final now = DateTime.now().millisecondsSinceEpoch;
+      final p = ref.read(sharedPreferencesProvider);
+      final feat = ref.read(featurePrefsProvider);
+      final hide = ref.read(hideBalanceProvider);
+      final onboardingDone = p.getBool('onboarding_done_$uid') ?? false;
+
       await doc.set({
         'themeMode': state.themeMode.name,
         'localeCode': state.localeCode,
         'periodType': state.periodType.name,
         'firstDayOfWeek': state.firstDayOfWeek,
         'firstDayOfMonth': state.firstDayOfMonth,
+        'rollover': feat.rollover,
+        'budgetAlerts': feat.budgetAlerts,
+        'dailyReminder': feat.dailyReminder,
+        'reminderHour': feat.reminderHour,
+        'reminderMinute': feat.reminderMinute,
+        'hideBalance': hide,
+        'onboardingDone': onboardingDone,
         'updatedAt': now,
-      });
+      }, SetOptions(merge: true));
 
-      final p = ref.read(sharedPreferencesProvider);
       await p.setInt(_k(_kUpdated, uid), now);
     } catch (e) {
       debugPrint('[AppPrefs] Error uploading preferences: $e');

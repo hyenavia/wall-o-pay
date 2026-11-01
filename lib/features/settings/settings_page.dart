@@ -539,7 +539,7 @@ class SettingsPage extends ConsumerWidget {
               ],
             ),
           ),
-          SectionHeader(title: context.tr('Backup file (offline)')),
+          SectionHeader(title: context.tr('Manual Backup & Export')),
           AppCard(
             padding: EdgeInsets.zero,
             child: Column(

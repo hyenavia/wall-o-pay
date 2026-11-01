@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -57,19 +58,53 @@ class FeaturePrefsController extends Notifier<FeaturePrefs> {
     );
   }
 
+  void _syncToCloud() {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid != null) {
+        ref.read(appPrefsProvider.notifier).uploadToCloud(uid);
+      }
+    } catch (_) {}
+  }
+
+  void applyRemote({
+    bool? rollover,
+    bool? budgetAlerts,
+    bool? dailyReminder,
+    int? reminderHour,
+    int? reminderMinute,
+  }) {
+    state = state.copyWith(
+      rollover: rollover,
+      budgetAlerts: budgetAlerts,
+      dailyReminder: dailyReminder,
+      reminderHour: reminderHour,
+      reminderMinute: reminderMinute,
+    );
+    final p = ref.read(sharedPreferencesProvider);
+    if (rollover != null) p.setBool(_kRollover, rollover);
+    if (budgetAlerts != null) p.setBool(_kAlerts, budgetAlerts);
+    if (dailyReminder != null) p.setBool(_kReminder, dailyReminder);
+    if (reminderHour != null) p.setInt(_kHour, reminderHour);
+    if (reminderMinute != null) p.setInt(_kMinute, reminderMinute);
+  }
+
   Future<void> setRollover(bool v) async {
     state = state.copyWith(rollover: v);
     await ref.read(sharedPreferencesProvider).setBool(_kRollover, v);
+    _syncToCloud();
   }
 
   Future<void> setBudgetAlerts(bool v) async {
     state = state.copyWith(budgetAlerts: v);
     await ref.read(sharedPreferencesProvider).setBool(_kAlerts, v);
+    _syncToCloud();
   }
 
   Future<void> setDailyReminder(bool v) async {
     state = state.copyWith(dailyReminder: v);
     await ref.read(sharedPreferencesProvider).setBool(_kReminder, v);
+    _syncToCloud();
   }
 
   Future<void> setReminderTime(TimeOfDay t) async {
@@ -77,6 +112,7 @@ class FeaturePrefsController extends Notifier<FeaturePrefs> {
     final p = ref.read(sharedPreferencesProvider);
     await p.setInt(_kHour, t.hour);
     await p.setInt(_kMinute, t.minute);
+    _syncToCloud();
   }
 }
 

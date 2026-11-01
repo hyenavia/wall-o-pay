@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/period.dart';
@@ -51,6 +52,15 @@ final selectedPeriodProvider = Provider<Period>((ref) {
 class HideBalanceNotifier extends Notifier<bool> {
   static const _kKey = 'pref_hide_balance';
 
+  void _syncToCloud() {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid != null) {
+        ref.read(appPrefsProvider.notifier).uploadToCloud(uid);
+      }
+    } catch (_) {}
+  }
+
   @override
   bool build() {
     final prefs = ref.watch(sharedPreferencesProvider);
@@ -62,12 +72,14 @@ class HideBalanceNotifier extends Notifier<bool> {
     state = next;
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setBool(_kKey, next);
+    _syncToCloud();
   }
 
   Future<void> set(bool value) async {
     state = value;
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setBool(_kKey, value);
+    _syncToCloud();
   }
 }
 
