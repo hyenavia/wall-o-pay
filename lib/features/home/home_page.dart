@@ -358,23 +358,28 @@ class _HomeHeader extends ConsumerWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  name != null
-                      ? '${context.tr('Hello, {name}', {'name': name})} 👋'
-                      : greeting(),
+                  greeting(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  (name != null && name!.trim().isNotEmpty)
+                      ? name!.trim()
+                      : context.tr('Wall o\' Pay'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
                   ),
-                ),
-                Text(
-                  name != null ? greeting() : context.tr('Your money, under your control.'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
                 ),
               ],
             ),

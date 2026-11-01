@@ -52,11 +52,27 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             tooltip: context.tr('Filter by date range'),
             icon: Icon(
               Icons.date_range,
-              color: _range == null ? null : Theme.of(context).colorScheme.primary,
+              color: _range == null ? null : AppColors.sage,
             ),
             onPressed: _pickRange,
           ),
         ],
+        bottom: Center(
+          child: _range == null
+              ? const PeriodSwitcher(onDark: true)
+              : InputChip(
+                  avatar: const Icon(Icons.date_range, size: 18, color: Colors.white),
+                  label: Text(
+                    '${shortDate(_range!.start)} - ${shortDate(_range!.end)}',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                  ),
+                  deleteIconColor: Colors.white70,
+                  backgroundColor: Colors.white.withValues(alpha: 0.18),
+                  side: BorderSide(color: Colors.white.withValues(alpha: 0.25)),
+                  onDeleted: () => setState(() => _range = null),
+                ),
+        ),
+        bottomHeight: 44,
       ),
       body: txAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -86,19 +102,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           }
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             children: [
-              if (_range == null)
-                const Center(child: PeriodSwitcher())
-              else
-                Center(
-                  child: InputChip(
-                    avatar: const Icon(Icons.date_range, size: 18),
-                    label: Text('${shortDate(_range!.start)} - ${shortDate(_range!.end)}'),
-                    onDeleted: () => setState(() => _range = null),
-                  ),
-                ),
-              const SizedBox(height: 4),
               TextField(
                 onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
                 decoration: appInput(

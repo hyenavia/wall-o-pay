@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.9.0',
+      version: '1.9.1',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Refined Home header layout: dynamic greeting on top and prominent username below without truncation.',
+          textId: 'Penyempurnaan tata letak header Beranda: sapaan ramah di atas dan nama pengguna tebal di bawah tanpa terpotong.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Unified Transactions page header: date switcher placed inside curved green app bar consistent with Budget and Insights.',
+          textId: 'Penyelarasan header halaman Transaksi: pemilih rentang tanggal disematkan di header hijau melengkung seragam dengan Anggaran dan Wawasan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.9.0',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

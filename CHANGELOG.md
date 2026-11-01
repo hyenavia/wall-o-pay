@@ -4,6 +4,18 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] - 2026-11-01
+
+### Changed
+- **Home Header Layout Optimization:**
+  - Placed conversational time-based greeting (*Selamat pagi* / *Good morning*) on the top line in a subtle style, followed by the user's name prominently displayed on the second line.
+  - Eliminated redundant "Hello," prefix and emojis, providing full horizontal width so long names never get truncated.
+- **Unified Period Switcher Across Main Tabs:**
+  - Relocated the date range switcher on the Transactions page into the curved Deep Forest `pageAppBar` header (`bottomHeight: 44`), perfectly standardizing header height and date navigation across Transactions, Budget, and Insights.
+  - Formatted active custom date range filter as a white chip within the header.
+
+---
+
 ## [1.9.0] - 2026-11-01
 
 ### Added
