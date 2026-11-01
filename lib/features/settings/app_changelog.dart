@@ -41,10 +41,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.5',
+      version: '1.11.6',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Adopted new signature botanical forest brand icon across launcher, in-app branding, and web landing page.',
+          textId: 'Menerapkan ikon visual baru bertema botanical forest pada ikon launcher, identitas dalam aplikasi, dan web landing page.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.5',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

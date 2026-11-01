@@ -4,6 +4,16 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.6] - 2026-11-01
+
+### Changed
+- **Signature Botanical Forest Brand Icon & Visual Identity:**
+  - Adopted new brand icon (Variasi 1) featuring the elegant white rounded "W" monogram, sprouting botanical leaf, and celestial star against a deep emerald forest gradient (`#11392E`).
+  - Updated all Android adaptive launcher icons (`mipmap-*/ic_launcher.png`, `drawable-*/ic_launcher_foreground.png`, `colors.xml`, and `ic_launcher.xml`) with safe-zone compliance for squircle, circle, and rounded rectangle masks.
+  - Replaced in-app brand mark (`assets/images/logo.png`), landing page brand showcase (`docs/images/logo.png`), and web favicons (`docs/favicon.png`, `docs/images/icon.png`).
+
+---
+
 ## [1.11.5] - 2026-11-01
 
 ### Fixed
