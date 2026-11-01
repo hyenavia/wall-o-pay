@@ -13,11 +13,11 @@ class AppColors {
 }
 
 ThemeData buildTheme([Brightness brightness = Brightness.dark]) {
-  // Palet Signature Botanical Forest eksklusif Wall o' Pay
-  const bg = Color(0xFF101713); // Atmospheric Night Forest Charcoal
-  const cardSurface = Color(0xFF18221C); // Velvet Deep Forest Surface
-  const surfaceContainer = Color(0xFF202C24); // Elevated Container
-  const borderOutline = Color(0xFF28382E); // Subtle Pine Border
+  // Palet Signature Botanical Forest eksklusif Wall o' Pay (Lush Emerald Depth)
+  const bg = Color(0xFF121D17); // Lush Botanical Night Pine
+  const cardSurface = Color(0xFF1E3026); // Elevated Velvet Emerald Card Surface
+  const surfaceContainer = Color(0xFF253C2F); // Elevated Container & Dialog Surface
+  const borderOutline = Color(0xFF2F473A); // Crisp Pine Border Outline
 
   final scheme = const ColorScheme.dark().copyWith(
     primary: AppColors.sage,
@@ -62,7 +62,7 @@ ThemeData buildTheme([Brightness brightness = Brightness.dark]) {
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: cardSurface,
       selectedItemColor: AppColors.sage,
-      unselectedItemColor: Color(0xFF6B7E72),
+      unselectedItemColor: Color(0xFF7E9687),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(

@@ -4,15 +4,15 @@
    ========================================================================== */
 
 :root, [data-theme="signature"], [data-theme="dark"] {
-  /* Color Palette - Signature Botanical Forest (Night Pine, Velvet Forest & Sage) */
+  /* Color Palette - Signature Botanical Forest (Lush Emerald Depth) */
   --primary: #A9C5B1;                 /* Signature Sage (AppColors.sage) */
   --primary-hover: #C5DBCB;           /* Hover Mint */
   --primary-light: #234B3B;           /* Deep Forest Container (AppColors.deepForest) */
   --primary-container: #234B3B;       /* Deep Forest Container */
-  --on-primary: #101713;              /* Night Pine Charcoal contrast on sage */
+  --on-primary: #121D17;              /* Night Pine Charcoal contrast on sage */
   
   --secondary: #234B3B;               /* Deep Forest */
-  --secondary-light: #18221C;         /* Velvet Deep Forest */
+  --secondary-light: #1E3026;         /* Elevated Velvet Emerald Card Surface */
   --secondary-dark: #A9C5B1;          /* Sage Highlight */
   
   --accent: #34D399;                  /* Luminous Botanical Emerald */
@@ -20,19 +20,19 @@
   --expense: #E55353;                 /* Botanical Coral */
   --warning: #E8A33D;                 /* Warm Amber */
   
-  --bg-page: #101713;                 /* Atmospheric Night Forest Charcoal */
-  --bg-surface: #18221C;              /* Velvet Deep Forest Surface */
-  --bg-surface-elevated: #202C24;     /* Elevated Container */
-  --bg-card: rgba(24, 34, 28, 0.92);  /* Velvet Forest Glassmorphism */
+  --bg-page: #121D17;                 /* Lush Botanical Night Pine */
+  --bg-surface: #1E3026;              /* Elevated Velvet Emerald Card Surface */
+  --bg-surface-elevated: #253C2F;     /* Elevated Container */
+  --bg-card: rgba(30, 48, 38, 0.92);  /* Velvet Forest Glassmorphism */
   
-  --border: #28382E;                  /* Subtle Pine Border */
-  --border-subtle: rgba(169, 197, 177, 0.12);
-  --border-focus: rgba(169, 197, 177, 0.45);
+  --border: #2F473A;                  /* Crisp Pine Border Outline */
+  --border-subtle: rgba(169, 197, 177, 0.16);
+  --border-focus: rgba(169, 197, 177, 0.5);
   
   --text-main: #E9EFEA;               /* Off-white Ivory */
-  --text-muted: #9EB3A5;              /* Soft Sage Muted */
-  --text-subtle: #6B8072;             /* Deep Pine Muted */
-  --text-inverse: #101713;
+  --text-muted: #A8BDAE;              /* Soft Sage Muted */
+  --text-subtle: #799182;             /* Deep Pine Muted */
+  --text-inverse: #121D17;
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
@@ -111,7 +111,7 @@ button, input, select {
   right: -100px;
   width: 550px;
   height: 550px;
-  background: radial-gradient(circle, rgba(35, 75, 59, 0.5) 0%, rgba(16, 23, 19, 0) 70%);
+  background: radial-gradient(circle, rgba(35, 75, 59, 0.5) 0%, rgba(18, 29, 23, 0) 70%);
 }
 
 .glow-2 {
@@ -119,7 +119,7 @@ button, input, select {
   left: -200px;
   width: 650px;
   height: 650px;
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.12) 0%, rgba(16, 23, 19, 0) 70%);
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.12) 0%, rgba(18, 29, 23, 0) 70%);
 }
 
 .glow-3 {
@@ -127,7 +127,7 @@ button, input, select {
   right: 15%;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(169, 197, 177, 0.16) 0%, rgba(16, 23, 19, 0) 70%);
+  background: radial-gradient(circle, rgba(169, 197, 177, 0.16) 0%, rgba(18, 29, 23, 0) 70%);
 }
 
 /* ==========================================================================
@@ -1295,7 +1295,7 @@ section {
 .lore-quote-card {
   margin-top: 2.5rem;
   padding: 2.25rem 2.5rem;
-  background: linear-gradient(135deg, rgba(35, 75, 59, 0.45) 0%, rgba(16, 23, 19, 0.85) 100%);
+  background: linear-gradient(135deg, rgba(35, 75, 59, 0.45) 0%, rgba(18, 29, 23, 0.85) 100%);
   border: 1px solid rgba(169, 197, 177, 0.25);
   border-radius: var(--radius-xl);
   text-align: center;

@@ -4,6 +4,16 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.8] - 2026-11-01
+
+### Changed
+- **Botanical Forest Theme Contrast & Visual Refinement (Lush Emerald Depth):**
+  - Replaced dead near-black charcoal background (`#101713`) with a richer, organic night pine green (`#121D17`).
+  - Elevated card surfaces from `#18221C` to `#1E3026` with crisp pine borders (`#2F473A`), giving all financial cards, wallet balances, and transaction lists a distinct floating depth.
+  - Enhanced contrast and legibility for secondary typography, inactive navigation icons (`#7E9687`), dialogs (`#253C2F`), and synchronized design tokens across mobile and web landing page (`docs/style.css`).
+
+---
+
 ## [1.11.7] - 2026-11-01
 
 ### Added

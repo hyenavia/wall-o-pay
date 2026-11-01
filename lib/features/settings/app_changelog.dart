@@ -41,10 +41,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.7',
+      version: '1.11.8',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Refined Botanical Forest theme contrast with richer night pine canvas (#121D17) and floating emerald cards (#1E3026).',
+          textId: 'Menyempurnakan kontras tema Botanical Forest dengan latar hijau pinus yang lebih hidup (#121D17) dan kartu mengapung yang jelas (#1E3026).',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.7',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,
