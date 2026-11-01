@@ -41,10 +41,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.4',
+      version: '1.11.5',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Hardened account deletion flow by cancelling scheduled notifications and purging all local device flags.',
+          textId: 'Menyempurnakan alur hapus akun dengan membatalkan pengingat harian dan membersihkan seluruh penanda lokal.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.4',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

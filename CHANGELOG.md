@@ -4,6 +4,15 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.5] - 2026-11-01
+
+### Fixed
+- **Account Deletion & Data Wipe Hardening:**
+  - Automatically cancels all scheduled daily notification alarms when an account is deleted to prevent orphan notifications.
+  - Clears device-level onboarding flags (`onboarding_done_$uid`) to ensure complete data hygiene upon permanent deletion.
+
+---
+
 ## [1.11.4] - 2026-11-01
 
 ### Added

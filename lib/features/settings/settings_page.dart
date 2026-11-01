@@ -1107,8 +1107,18 @@ class SettingsPage extends ConsumerWidget {
       await ref.read(budgetRuleProvider.notifier).clearLocal();
       await Lock.instance.loadForUser(null);
 
+      // Batalkan seluruh jadwal pengingat harian lokal
+      try {
+        await NotificationService.instance.cancelDailyReminder();
+      } catch (e) {
+        debugPrint('[SettingsPage] Error cancelling reminder on delete: $e');
+      }
+
       final prefs = ref.read(sharedPreferencesProvider);
       await prefs.remove('current_sync_user_id');
+      if (userUid != null) {
+        await prefs.remove('onboarding_done_$userUid');
+      }
 
       if (context.mounted) {
         Navigator.of(context, rootNavigator: true).popUntil((r) => r.isFirst);
