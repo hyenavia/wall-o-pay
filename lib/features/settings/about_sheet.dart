@@ -132,7 +132,7 @@ class AboutWallOPaySheet extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.deepForest,
+                                color: AppColors.sage,
                               ),
                             ),
                           ),
@@ -154,10 +154,10 @@ class AboutWallOPaySheet extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.deepForest.withValues(alpha: 0.08),
+                        color: AppColors.sage.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: AppColors.deepForest.withValues(alpha: 0.15),
+                          color: AppColors.sage.withValues(alpha: 0.25),
                         ),
                       ),
                       child: Row(
@@ -165,7 +165,7 @@ class AboutWallOPaySheet extends StatelessWidget {
                         children: [
                           const Icon(
                             Icons.format_quote_rounded,
-                            color: AppColors.deepForest,
+                            color: AppColors.sage,
                             size: 28,
                           ),
                           const SizedBox(width: 10),
@@ -193,7 +193,7 @@ class AboutWallOPaySheet extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.deepForest,
+                        color: AppColors.sage,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -253,7 +253,7 @@ class AboutWallOPaySheet extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.deepForest,
+                        color: AppColors.sage,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -280,7 +280,7 @@ class AboutWallOPaySheet extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.deepForest,
+                        color: AppColors.sage,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -324,8 +324,8 @@ class AboutWallOPaySheet extends StatelessWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.deepForest,
-                              side: BorderSide(color: AppColors.deepForest.withValues(alpha: 0.3)),
+                              foregroundColor: AppColors.sage,
+                              side: BorderSide(color: AppColors.sage.withValues(alpha: 0.4)),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -346,8 +346,8 @@ class AboutWallOPaySheet extends StatelessWidget {
                         Expanded(
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.deepForest,
-                              foregroundColor: Colors.white,
+                              backgroundColor: AppColors.sage,
+                              foregroundColor: AppColors.ink,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -411,7 +411,7 @@ class _LoreCard extends StatelessWidget {
               color: AppColors.sage.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: AppColors.deepForest, size: 20),
+            child: Icon(icon, color: AppColors.sage, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -459,7 +459,7 @@ class _PrincipleRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: AppColors.deepForest, size: 20),
+        Icon(icon, color: AppColors.sage, size: 20),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
@@ -519,7 +519,7 @@ class _MetaRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
-                  color: isLink ? AppColors.deepForest : null,
+                  color: isLink ? AppColors.sage : null,
                 ),
               ),
               if (isLink) ...[
@@ -527,7 +527,7 @@ class _MetaRow extends StatelessWidget {
                 const Icon(
                   Icons.open_in_new_rounded,
                   size: 14,
-                  color: AppColors.deepForest,
+                  color: AppColors.sage,
                 ),
               ],
             ],

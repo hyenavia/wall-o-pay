@@ -4,6 +4,18 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.12] - 2026-11-02
+
+### Fixed
+- **Dark Theme Contrast in About Sheet:**
+  - Resolved low-contrast and unreadable elements in `about_sheet.dart` by replacing hardcoded `AppColors.deepForest` foreground colors on the version badge, lore quote icon, section headers, lore pillar icons, principles icons, links, and action buttons with high-contrast `AppColors.sage`.
+- **Home Screen Scroll Transition & Clipping:**
+  - Added a smooth gradient fade transition (`ShaderMask`) at the top of the curved `_Sheet` in `HomePage`, preventing cards and account chips from getting sliced abruptly by the sheet's top rounded corners during scroll.
+- **Accounts Breakdown Card Distinct Identity:**
+  - Refined `AccountsSummaryCard` header to show "Wallets & Accounts" with active accounts count and subtotal, eliminating title duplication with the hero balance card.
+
+---
+
 ## [1.11.11] - 2026-11-02
 
 ### Fixed

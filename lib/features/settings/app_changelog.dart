@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.11',
+      version: '1.11.12',
       dateEn: 'November 2, 2026',
       dateId: '2 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Fixed dark theme contrast in About sheet (version badge, quote, headers, and lore icons now brightly legible).',
+          textId: 'Memperbaiki kontras tema gelap pada lembar Tentang (badge versi, kutipan, judul, dan ikon kini terlihat jelas).',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Added smooth fade scroll transition at top of Home sheet to prevent abrupt clipping of cards and account chips.',
+          textId: 'Menambahkan transisi scroll halus di bagian atas lembar Beranda untuk mencegah elemen terpotong kasar saat digulir.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.11',
+      dateEn: 'November 2, 2026',
+      dateId: '2 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

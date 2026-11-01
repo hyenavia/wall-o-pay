@@ -145,7 +145,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                           ]);
                         },
                         child: ListView(
-                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                          padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
                           children: [
                             if (updateInfo != null) ...[
                               _UpdateBannerCard(
@@ -439,7 +439,22 @@ class _Sheet extends StatelessWidget {
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      child: child,
+      child: ShaderMask(
+        shaderCallback: (Rect bounds) {
+          return const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.transparent,
+              Colors.white,
+              Colors.white,
+            ],
+            stops: [0.0, 0.028, 1.0],
+          ).createShader(bounds);
+        },
+        blendMode: BlendMode.dstIn,
+        child: child,
+      ),
     );
   }
 }

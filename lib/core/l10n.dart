@@ -639,5 +639,6 @@ const Map<String, String> _id = {
   'e.g. Kopi Kenangan, Grab, Alfamart': 'cth. Kopi Kenangan, Grab, Alfamart',
   'Wall o\' Pay': 'Wall o\' Pay',
   'Manual Backup & Export': 'Cadangan Manual & Ekspor',
+  '{count} active accounts • {total}': '{count} akun aktif • {total}',
 };
 

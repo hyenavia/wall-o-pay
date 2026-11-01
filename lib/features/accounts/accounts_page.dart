@@ -80,12 +80,19 @@ class AccountsSummaryCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(context.tr('Total Balance'),
-                        style: theme.textTheme.bodySmall?.copyWith(color: muted)),
                     Text(
-                      money(total),
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w800),
+                      context.tr('Wallets & Accounts'),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      context.tr('{count} active accounts • {total}', {
+                        'count': accounts.length,
+                        'total': money(total),
+                      }),
+                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
                     ),
                   ],
                 ),
