@@ -57,8 +57,8 @@ class MorePage extends ConsumerWidget {
                 ),
                 tile(
                   Icons.swap_horiz_rounded,
-                  context.tr('Transfer Saldo'),
-                  context.tr('Pindahkan uang antar rekening dan kantong'),
+                  context.tr('Transfer balance'),
+                  context.tr('Move money between accounts and wallets'),
                   () => showTransactionForm(context, initialType: TxType.transfer),
                 ),
                 tile(

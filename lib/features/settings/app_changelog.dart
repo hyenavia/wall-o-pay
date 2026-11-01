@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.2',
+      version: '1.11.3',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Restored pure native Android layout without desktop wrapper layers.',
+          textId: 'Mengembalikan tata letak murni native Android tanpa wrapper desktop tambahan.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Completed comprehensive bilingual localization across recurring schedules, accounts, and review sheets.',
+          textId: 'Melengkapi lokalisasi dwibahasa menyeluruh pada jadwal rutin, akun, dan lembar tinjauan transaksi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.2',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

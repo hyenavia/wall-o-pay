@@ -164,7 +164,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     subtitle: context.tr(
                       'Every small transaction brings you closer to your financial goals.',
                     ),
-                    actionLabel: context.tr('Add Transaction'),
+                    actionLabel: context.tr('Add transaction'),
                     onAction: () => showTransactionForm(context),
                   ),
                 )

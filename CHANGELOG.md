@@ -4,6 +4,19 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.3] - 2026-11-01
+
+### Changed
+- **Pure Android Native Layout Alignment:**
+  - Removed desktop-specific container wrappers in `MaterialApp`, restoring 100% native edge-to-edge mobile rendering and IME keyboard behavior for Android.
+
+### Fixed
+- **Comprehensive Bilingual Localization Audit:**
+  - Audited and localized over 25 previously untranslated or mismatched UI phrases across accounts, recurring schedules, home shortcuts, transfer menus, and pending review sheets in both Indonesian and English.
+  - Standardized action label capitalization across pages to match global translation dictionaries.
+
+---
+
 ## [1.11.2] - 2026-11-01
 
 ### Fixed

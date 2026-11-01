@@ -268,7 +268,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                               children: [
                                 _QuickAction(
                                   icon: Icons.add_circle_outline,
-                                  label: context.tr('Add Transaction'),
+                                  label: context.tr('Add transaction'),
                                   onTap: () => showTransactionForm(context),
                                 ),
                                 _QuickAction(
@@ -302,7 +302,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                                 subtitle: context.tr(
                                   'Every small transaction brings you closer to your financial goals.',
                                 ),
-                                actionLabel: context.tr('Add Transaction'),
+                                actionLabel: context.tr('Add transaction'),
                                 onAction: () => showTransactionForm(context),
                               )
                             else
