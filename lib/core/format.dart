@@ -33,16 +33,16 @@ String dayHeader(DateTime d) {
   return dateLabel(d);
 }
 
-String greeting() {
-  final h = DateTime.now().hour;
+String greeting([int? hour]) {
+  final h = hour ?? DateTime.now().hour;
   if (AppLocale.code == 'id') {
-    if (h < 11) return 'Selamat pagi';
-    if (h < 15) return 'Selamat siang';
-    if (h < 18) return 'Selamat sore';
+    if (h >= 5 && h < 11) return 'Selamat pagi';
+    if (h >= 11 && h < 15) return 'Selamat siang';
+    if (h >= 15 && h < 18) return 'Selamat sore';
     return 'Selamat malam';
   }
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
+  if (h >= 5 && h < 12) return 'Good morning';
+  if (h >= 12 && h < 17) return 'Good afternoon';
   return 'Good evening';
 }
 

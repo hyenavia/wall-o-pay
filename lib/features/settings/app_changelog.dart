@@ -41,10 +41,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.10',
+      version: '1.11.11',
       dateEn: 'November 2, 2026',
       dateId: '2 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Fixed time-based greeting to properly show "Good evening" during midnight and wee hours (00:00 - 04:59) instead of "Good morning".',
+          textId: 'Memperbaiki sapaan waktu agar menampilkan "Selamat malam" pada tengah malam dan dini hari (00:00 - 04:59), bukan "Selamat pagi".',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.10',
+      dateEn: 'November 2, 2026',
+      dateId: '2 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

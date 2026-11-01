@@ -4,6 +4,16 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.11] - 2026-11-02
+
+### Fixed
+- **Time-Aware Greeting Accuracy:**
+  - Fixed greeting logic in `lib/core/format.dart` where early morning hours (00:00 - 04:59 midnight / wee hours) mistakenly greeted the user with "Selamat pagi" ("Good morning").
+  - Adjusted time ranges so that 00:00 - 04:59 properly greets with "Selamat malam" ("Good evening"), aligning with Indonesian cultural conventions and English evening greetings.
+  - Added unit test coverage in `test/greeting_test.dart` validating all 24 hours of the day across both Indonesian and English locales.
+
+---
+
 ## [1.11.10] - 2026-11-02
 
 ### Changed
