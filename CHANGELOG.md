@@ -4,6 +4,21 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.2] - 2026-11-01
+
+### Fixed
+- **Onboarding Skip & Finish Transition on Desktop / Offline Mode:**
+  - Resolved an issue where clicking "Skip" or "Finish" in Onboarding Step 4 failed to transition to the main app dashboard. Replaced fragile `FutureBuilder` snapshot caching with deterministic state management in `OnboardingGate`.
+  - Added comprehensive `try-catch` safety around database setup operations in `OnboardingPage` to prevent saving state deadlocks.
+- **Persistent Offline / Desktop Authentication Bypass:**
+  - Persisted "Continue without account" (`skipAuthProvider`) into `SharedPreferences`. The app will now remember offline mode on subsequent launches on desktop or environments without Firebase initialized.
+
+### Added
+- **Responsive Max-Width Container for Desktop & Tablets:**
+  - Wrapped root app view in a centered, max-width constrained container (`maxWidth: 540`) with atmospheric dark background margins to provide an optimal reading and navigation experience on widescreen PC / laptop displays without awkwardly stretched layouts.
+
+---
+
 ## [1.11.1] - 2026-11-01
 
 ### Added

@@ -23,7 +23,8 @@ class OnboardingGate extends ConsumerStatefulWidget {
 
 class _OnboardingGateState extends ConsumerState<OnboardingGate>
     with WidgetsBindingObserver {
-  late Future<bool> _needed;
+  bool _loading = true;
+  bool _needsOnboarding = false;
 
   String get _doneKey =>
       'onboarding_done_${ref.read(currentUserProvider)?.uid ?? 'local'}';
@@ -32,7 +33,7 @@ class _OnboardingGateState extends ConsumerState<OnboardingGate>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _needed = _check();
+    _check();
     _background();
   }
 
@@ -47,15 +48,24 @@ class _OnboardingGateState extends ConsumerState<OnboardingGate>
     if (state == AppLifecycleState.resumed) _background();
   }
 
-  Future<bool> _check() async {
-    final prefs = ref.read(sharedPreferencesProvider);
-    if (prefs.getBool(_doneKey) ?? false) return false;
-    final hasData = await ref.read(databaseProvider).hasAnyTransaction();
-    if (hasData) {
-      await prefs.setBool(_doneKey, true);
-      return false;
+  Future<void> _check() async {
+    try {
+      final prefs = ref.read(sharedPreferencesProvider);
+      if (prefs.getBool(_doneKey) ?? false) {
+        if (mounted) setState(() { _loading = false; _needsOnboarding = false; });
+        return;
+      }
+      final hasData = await ref.read(databaseProvider).hasAnyTransaction();
+      if (hasData) {
+        await prefs.setBool(_doneKey, true);
+        if (mounted) setState(() { _loading = false; _needsOnboarding = false; });
+        return;
+      }
+      if (mounted) setState(() { _loading = false; _needsOnboarding = true; });
+    } catch (e) {
+      debugPrint('Error checking onboarding: $e');
+      if (mounted) setState(() { _loading = false; _needsOnboarding = false; });
     }
-    return true;
   }
 
   Future<void> _background() async {
@@ -71,20 +81,17 @@ class _OnboardingGateState extends ConsumerState<OnboardingGate>
 
   void _finish() {
     ref.read(sharedPreferencesProvider).setBool(_doneKey, true);
-    setState(() => _needed = Future.value(false));
+    if (mounted) {
+      setState(() => _needsOnboarding = false);
+    }
     _background();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: _needed,
-      builder: (context, snap) {
-        if (!snap.hasData) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
-        }
-        return snap.data! ? OnboardingPage(onDone: _finish) : widget.child;
-      },
-    );
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    return _needsOnboarding ? OnboardingPage(onDone: _finish) : widget.child;
   }
 }

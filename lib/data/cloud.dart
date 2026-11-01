@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'prefs.dart';
+
 /// Diisi true oleh main.dart jika Firebase berhasil diinisialisasi.
 final firebaseReadyProvider = Provider<bool>((ref) => false);
 
@@ -23,12 +25,21 @@ final usernameProvider = Provider<String?>((ref) {
   return (name == null || name.isEmpty) ? null : name;
 });
 
-/// Untuk mode darurat tanpa Firebase: lanjut memakai aplikasi tanpa akun.
+/// Untuk mode darurat/offline tanpa Firebase: lanjut memakai aplikasi tanpa akun.
 class SkipAuth extends Notifier<bool> {
-  @override
-  bool build() => false;
+  static const _kKey = 'pref_skip_auth';
 
-  void skip() => state = true;
+  @override
+  bool build() {
+    final prefs = ref.watch(sharedPreferencesProvider);
+    return prefs.getBool(_kKey) ?? false;
+  }
+
+  Future<void> skip() async {
+    state = true;
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setBool(_kKey, true);
+  }
 }
 
 final skipAuthProvider = NotifierProvider<SkipAuth, bool>(SkipAuth.new);

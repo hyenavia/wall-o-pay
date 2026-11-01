@@ -86,6 +86,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       }.entries) {
         if (e.value > 0) await db.setBudget(e.key, key, e.value);
       }
+    } catch (e, st) {
+      debugPrint('Error finishing onboarding: $e\n$st');
     } finally {
       if (mounted) setState(() => _saving = false);
     }

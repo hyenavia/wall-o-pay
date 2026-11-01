@@ -41,10 +41,33 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.1',
+      version: '1.11.2',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Fixed Onboarding Skip & Finish button transition on desktop and offline mode.',
+          textId: 'Memperbaiki tombol Lewati & Selesai pada Onboarding yang macet di desktop dan mode offline.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Persisted offline mode without account so desktop launches do not repeatedly show the Firebase screen.',
+          textId: 'Menyimpan preferensi mode offline tanpa akun agar desktop tidak berulang kali memunculkan layar Firebase.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added centered responsive container for desktop and widescreen monitors.',
+          textId: 'Menambahkan tata letak responsif terpusat untuk PC/laptop layar lebar.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.1',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

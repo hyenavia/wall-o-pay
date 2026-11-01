@@ -44,6 +44,17 @@ class WallOPayApp extends ConsumerWidget {
         AppStrings.delegate,
         ...GlobalMaterialLocalizations.delegates,
       ],
+      builder: (context, child) {
+        return Container(
+          color: const Color(0xFF0C110E),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 540),
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
+        );
+      },
       home: const _Root(),
     );
   }
