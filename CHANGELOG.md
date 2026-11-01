@@ -4,6 +4,16 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.7] - 2026-11-01
+
+### Added
+- **Official Brand Lore & Philosophy (In-App & Landing Page):**
+  - Added dedicated **About Wall o' Pay** modal sheet in app settings (`settings_page.dart` -> `about_sheet.dart`) featuring complete bilingual explanation of the 4 core pillars: The Protective Wall (financial shield & offline sovereignty), The Growing Sprout ("Pay yourself first"), The Guiding Star (milestone clarity), and The Botanical Sanctuary (mindful peace).
+  - Added a responsive **Brand Philosophy & Lore** section to the web landing page (`docs/index.html`) linking directly from the navigation bar.
+  - Included app metadata, MIT open-source license information, quick links to changelog and user feedback.
+
+---
+
 ## [1.11.6] - 2026-11-01
 
 ### Changed

@@ -17,6 +17,7 @@ import '../../data/notifications.dart';
 import '../debts/debts_page.dart';
 import 'report_dialog.dart';
 import 'app_changelog.dart';
+import 'about_sheet.dart';
 import '../recurring/recurring_page.dart';
 import '../../data/export_service.dart';
 import '../../data/prefs.dart';
@@ -646,6 +647,14 @@ class SettingsPage extends ConsumerWidget {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
+                ListTile(
+                  leading: const Icon(Icons.info_outline_rounded),
+                  title: Text(context.tr('About Wall o\' Pay')),
+                  subtitle: Text(context.tr('Philosophy, brand lore & app details')),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => showAboutWallOPaySheet(context),
+                ),
+                const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.system_update_alt_rounded),
                   title: Row(

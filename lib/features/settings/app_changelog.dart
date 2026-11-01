@@ -41,10 +41,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.6',
+      version: '1.11.7',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added official Brand Lore & Philosophy section in About Wall o\' Pay sheet and web landing page.',
+          textId: 'Menambahkan kisah dan filosofi brand resmi pada menu Tentang Wall o\' Pay dan web landing page.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.6',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

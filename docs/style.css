@@ -1219,4 +1219,114 @@ section {
   .download-card-wrapper { padding: 2.25rem 1.5rem; }
   .footer-top { grid-template-columns: 1fr; }
   .phone-card-float { display: none; }
+  .lore-grid { grid-template-columns: 1fr; }
+  .lore-quote-card { padding: 1.75rem 1.25rem; }
+  .lore-quote-text { font-size: 1.05rem; }
+}
+
+/* ==========================================================================
+   Brand Philosophy & Lore Section
+   ========================================================================== */
+
+.philosophy-section {
+  padding: 6rem 0;
+  position: relative;
+}
+
+.lore-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.75rem;
+  margin-top: 2.5rem;
+}
+
+.lore-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+
+.lore-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+.lore-icon-box {
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-md);
+  background: rgba(169, 197, 177, 0.12);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.lore-emoji {
+  font-size: 1.75rem;
+}
+
+.lore-content {
+  flex: 1;
+}
+
+.lore-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.lore-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.lore-quote-card {
+  margin-top: 2.5rem;
+  padding: 2.25rem 2.5rem;
+  background: linear-gradient(135deg, rgba(35, 75, 59, 0.45) 0%, rgba(16, 23, 19, 0.85) 100%);
+  border: 1px solid rgba(169, 197, 177, 0.25);
+  border-radius: var(--radius-xl);
+  text-align: center;
+  position: relative;
+  box-shadow: var(--shadow-md);
+}
+
+.lore-quote-icon {
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--primary);
+  font-family: Georgia, serif;
+  margin-bottom: 0.5rem;
+  opacity: 0.6;
+}
+
+.lore-quote-text {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--text-main);
+  max-width: 720px;
+  margin: 0 auto 0.75rem auto;
+  line-height: 1.55;
+}
+
+.lore-quote-author {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
