@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
 import '../../core/l10n.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/app_database.dart';
 import '../../data/feature_providers.dart';
@@ -63,6 +64,13 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           child: Text(context.tr('Could not load data: {error}', {'error': e})),
         ),
         data: (txs) {
+          final totalIncome = txs
+              .where((t) => t.type == TxType.income)
+              .fold<int>(0, (a, t) => a + t.amount);
+          final totalExpense = txs
+              .where((t) => t.type == TxType.expense)
+              .fold<int>(0, (a, t) => a + t.amount);
+
           final shown = txs.where((t) {
             if (_filter != null && t.type != _filter) return false;
             if (_query.isEmpty) return true;
@@ -121,12 +129,38 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   ],
                 ),
               ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: _SummaryTile(
+                      label: context.tr('Total Income'),
+                      value: rupiah(totalIncome),
+                      color: AppColors.income,
+                      icon: Icons.arrow_downward,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _SummaryTile(
+                      label: context.tr('Total Expense'),
+                      value: rupiah(totalExpense),
+                      color: AppColors.expense,
+                      icon: Icons.arrow_upward,
+                    ),
+                  ),
+                ],
+              ),
               if (txs.isEmpty)
                 Padding(
-                  padding: const EdgeInsets.only(top: 48),
-                  child: EmptyState(
-                    icon: Icons.receipt_long_outlined,
-                    message: context.tr('No transactions in this period.\nTap + to add your first one.'),
+                  padding: const EdgeInsets.only(top: 20),
+                  child: EmptyStateCard(
+                    title: context.tr('Start recording your first transaction!'),
+                    subtitle: context.tr(
+                      'Every small transaction brings you closer to your financial goals.',
+                    ),
+                    actionLabel: context.tr('Add Transaction'),
+                    onAction: () => showTransactionForm(context),
                   ),
                 )
               else if (shown.isEmpty)
@@ -169,6 +203,58 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+class _SummaryTile extends StatelessWidget {
+  const _SummaryTile({
+    required this.label,
+    required this.value,
+    required this.color,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final Color color;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AppCard(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          CategoryBadge(icon: icon, color: color, size: 34),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+                Text(
+                  value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

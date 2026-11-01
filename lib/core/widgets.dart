@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/app_database.dart';
@@ -10,25 +11,62 @@ import 'l10n.dart';
 import 'period.dart';
 import 'theme.dart';
 
-/// AppBar transparan dengan judul rata kiri, sesuai desain.
+/// AppBar dengan header hijau tua dan lembar berujung melengkung di bawahnya.
 PreferredSizeWidget pageAppBar(
   BuildContext context, {
   required Widget title,
   List<Widget>? actions,
+  Widget? bottom,
+  double bottomHeight = 0,
 }) {
   return AppBar(
     title: title,
     actions: actions,
     centerTitle: false,
-    backgroundColor: Colors.transparent,
+    backgroundColor: AppColors.deepForest,
+    foregroundColor: Colors.white,
     surfaceTintColor: Colors.transparent,
     elevation: 0,
     scrolledUnderElevation: 0,
+    systemOverlayStyle: SystemUiOverlayStyle.light,
+    iconTheme: const IconThemeData(color: Colors.white),
+    actionsIconTheme: const IconThemeData(color: Colors.white),
     titleTextStyle: Theme.of(context)
         .textTheme
         .titleLarge
-        ?.copyWith(fontWeight: FontWeight.w800),
+        ?.copyWith(fontWeight: FontWeight.w800, color: Colors.white),
+    bottom: _SheetEdge(childHeight: bottomHeight, child: bottom),
   );
+}
+
+/// Lengkungan atas lembar background di bawah header hijau.
+class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
+  const _SheetEdge({this.child, this.childHeight = 0});
+
+  final Widget? child;
+  final double childHeight;
+
+  static const double edge = 24;
+
+  @override
+  Size get preferredSize => Size.fromHeight(childHeight + edge);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (child != null) SizedBox(height: childHeight, child: child),
+        Container(
+          height: edge,
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 /// Gaya field input yang seragam.
@@ -263,9 +301,12 @@ class SectionHeader extends StatelessWidget {
 
 /// Pemilih periode "‹ April 2025 ›" (bulan) atau "‹ 21 Apr – 27 Apr 2025 ›" (minggu).
 class PeriodSwitcher extends ConsumerWidget {
-  const PeriodSwitcher({super.key, this.compact = false});
+  const PeriodSwitcher({super.key, this.compact = false, this.onDark = false});
 
   final bool compact;
+
+  /// Teks dan ikon putih, untuk dipakai di atas header hijau.
+  final bool onDark;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -281,19 +322,24 @@ class PeriodSwitcher extends ConsumerWidget {
           tooltip: context.tr('Previous period'),
           visualDensity: compact ? VisualDensity.compact : null,
           onPressed: () => notifier.step(-1),
+          color: onDark ? Colors.white : null,
           icon: const Icon(Icons.chevron_left),
         ),
         Flexible(
           child: Text(
             period.label(),
             overflow: TextOverflow.ellipsis,
-            style: style?.copyWith(fontWeight: FontWeight.w700),
+            style: style?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: onDark ? Colors.white : null,
+            ),
           ),
         ),
         IconButton(
           tooltip: context.tr('Next period'),
           visualDensity: compact ? VisualDensity.compact : null,
           onPressed: () => notifier.step(1),
+          color: onDark ? Colors.white : null,
           icon: const Icon(Icons.chevron_right),
         ),
       ],
@@ -443,6 +489,72 @@ class _AmountDialogState extends State<_AmountDialog> {
           child: Text(context.tr('Save')),
         ),
       ],
+    );
+  }
+}
+
+/// Kartu hijau tua untuk keadaan kosong, dengan ajakan positif.
+class EmptyStateCard extends StatelessWidget {
+  const EmptyStateCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    this.actionLabel,
+    this.onAction,
+    this.icon = Icons.eco_outlined,
+  });
+
+  final String title;
+  final String subtitle;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return HeroCard(
+      padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+      child: Column(
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: AppColors.sage.withValues(alpha: 0.22),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 38, color: AppColors.sage),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+          ),
+          if (actionLabel != null) ...[
+            const SizedBox(height: 18),
+            FilledButton(
+              onPressed: onAction,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.sage,
+                foregroundColor: AppColors.deepForest,
+                minimumSize: const Size.fromHeight(48),
+              ),
+              child: Text(actionLabel!),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

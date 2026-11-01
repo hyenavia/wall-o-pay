@@ -14,14 +14,19 @@ import '../transactions/transaction_form.dart';
 import 'charts.dart';
 import 'insight_engine.dart';
 
-/// Halaman Insight finansial yang menganalisis transaksi secara deterministik:
-/// ringkasan periode, perbandingan periode, grafik pengeluaran, kategori teratas,
-/// dan ringkasan analitis cerdas (smart financial insights).
-class InsightsPage extends ConsumerWidget {
+/// Halaman Insight bertab: Ringkasan, Kategori, dan Tren dengan analisis deterministik.
+class InsightsPage extends ConsumerStatefulWidget {
   const InsightsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<InsightsPage> createState() => _InsightsPageState();
+}
+
+class _InsightsPageState extends ConsumerState<InsightsPage> {
+  int _tab = 0;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final period = ref.watch(selectedPeriodProvider);
@@ -36,6 +41,8 @@ class InsightsPage extends ConsumerWidget {
       appBar: pageAppBar(
         context,
         title: Text(context.tr('Insight')),
+        bottom: const Center(child: PeriodSwitcher(onDark: true)),
+        bottomHeight: 44,
       ),
       body: currentTxsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -88,235 +95,31 @@ class InsightsPage extends ConsumerWidget {
           final prevPeriodName = isWeekly
               ? context.tr('last week')
               : context.tr('last month');
+          final trendTitle = isWeekly
+              ? context.tr('Last 6 Weeks Trend')
+              : context.tr('Last 6 Months Trend');
 
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-            children: [
-              // 1. Pemilih periode & tipe periode
-              Center(
-                child: Column(
-                  children: [
-                    const PeriodTypeToggle(),
-                    const SizedBox(height: 8),
-                    const PeriodSwitcher(),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // 2. KARTU HERO: Ringkasan Periode Ini (Pemasukan, Pengeluaran, Selisih)
-              HeroCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          periodLabel,
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: Colors.white70,
-                            letterSpacing: 0.5,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: summary.isDeficit
-                                ? AppColors.expense.withValues(alpha: 0.3)
-                                : AppColors.sage.withValues(alpha: 0.25),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: summary.isDeficit
-                                  ? AppColors.expense.withValues(alpha: 0.6)
-                                  : AppColors.sage.withValues(alpha: 0.5),
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                summary.isDeficit
-                                    ? Icons.warning_rounded
-                                    : Icons.trending_up_rounded,
-                                size: 14,
-                                color: summary.isDeficit ? Colors.white : AppColors.sage,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                summary.isDeficit
-                                    ? context.tr('Deficit')
-                                    : context.tr('Surplus'),
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: summary.isDeficit ? Colors.white : AppColors.sage,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+          final List<Widget> content;
+          switch (_tab) {
+            case 1:
+              content = [
+                if (needTotal + wantTotal > 0) ...[
+                  SectionHeader(title: context.tr('Needs vs wants')),
+                  AppCard(
+                    child: _NeedsWantsCard(
+                      needTotal: needTotal,
+                      wantTotal: wantTotal,
                     ),
-                    const SizedBox(height: 8),
-
-                    // Nominal Selisih Bersih
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          '${summary.netBalance >= 0 ? '+' : ''}${rupiah(summary.netBalance)}',
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      summary.totalIncome > 0 && !summary.isDeficit
-                          ? context.tr(
-                              '{pct}% of income left for savings',
-                              {'pct': summary.savingsRate.toStringAsFixed(1)},
-                            )
-                          : (summary.isDeficit
-                              ? context.tr('Spending exceeded income this period')
-                              : context.tr('Net difference between income and expenses')),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.75),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Divider tipis
-                    Container(
-                      height: 1,
-                      color: Colors.white.withValues(alpha: 0.12),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Sub-box: Pemasukan & Pengeluaran
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _SummarySubBox(
-                            label: context.tr('Income'),
-                            amount: rupiah(summary.totalIncome),
-                            icon: Icons.arrow_downward_rounded,
-                            iconColor: AppColors.income,
-                            bgColor: Colors.black.withValues(alpha: 0.18),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _SummarySubBox(
-                            label: context.tr('Expense'),
-                            amount: rupiah(summary.totalExpense),
-                            icon: Icons.arrow_upward_rounded,
-                            iconColor: AppColors.expense,
-                            bgColor: Colors.black.withValues(alpha: 0.18),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 14),
-
-              // 3. PERBANDINGAN PERIODE (Period Comparison Banner)
-              _PeriodComparisonCard(
-                summary: summary,
-                prevPeriodName: prevPeriodName,
-                isWeekly: isWeekly,
-              ),
-
-              // 4. LOW DATA STATE vs REGULAR INSIGHTS & CHARTS
-              if (summary.isLowData) ...[
-                const SizedBox(height: 20),
-                _LowDataCard(
-                  onAddTransaction: () => showTransactionForm(context),
-                ),
-              ] else ...[
-                // 5. GRAFIK PENGELUARAN (Expense Chart)
-                SectionHeader(
-                  title: isWeekly
-                      ? context.tr('Daily Expense Chart')
-                      : context.tr('Monthly Expense Chart'),
-                ),
-                AppCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            isWeekly
-                                ? context.tr('7-day spending trend')
-                                : context.tr('Weekly spending distribution'),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurface.withValues(alpha: 0.65),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(
-                            rupiah(summary.totalExpense),
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.sage,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      PeriodExpenseBarChart(
-                        points: chartPoints,
-                        totalExpense: summary.totalExpense,
-                      ),
-                      const SizedBox(height: 10),
-                      Divider(color: scheme.outlineVariant.withValues(alpha: 0.4)),
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            isWeekly
-                                ? context.tr('Daily average:')
-                                : context.tr('Weekly average:'),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurface.withValues(alpha: 0.6),
-                            ),
-                          ),
-                          Text(
-                            isWeekly
-                                ? rupiah(summary.totalExpense ~/ 7)
-                                : rupiah(summary.totalExpense ~/ (chartPoints.isEmpty ? 1 : chartPoints.length)),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
                   ),
-                ),
-
-                // 6. KATEGORI TERATAS (Top Categories)
-                SectionHeader(
-                  title: context.tr('Top Categories'),
-                ),
+                ],
+                SectionHeader(title: context.tr('Spending by category')),
                 if (categories.isEmpty)
                   AppCard(child: Text(context.tr('No expenses in this period.')))
                 else
                   AppCard(
                     child: Column(
                       children: [
-                        for (int i = 0; i < categories.length && i < 5; i++)
+                        for (int i = 0; i < categories.length; i++)
                           _TopCategoryRow(
                             rank: i + 1,
                             category: categories[i],
@@ -325,22 +128,20 @@ class InsightsPage extends ConsumerWidget {
                       ],
                     ),
                   ),
-
-                // 7. FINANCIAL INSIGHTS (Analisis Finansial Cerdas)
-                if (smartInsights.isNotEmpty) ...[
-                  SectionHeader(
-                    title: context.tr('Financial Insights'),
+                if (categories.isNotEmpty) ...[
+                  SectionHeader(title: context.tr('Expense Composition')),
+                  AppCard(
+                    child: ExpensePieChart(
+                      spent: {for (final c in categories) c.categoryId: c.amount},
+                      cats: cats,
+                    ),
                   ),
-                  for (final item in smartInsights)
-                    _SmartInsightCard(item: item),
                 ],
-
-                // 8. KOMPOSISI & TREN 6 PERIODE (Historical Trend)
-                SectionHeader(
-                  title: isWeekly
-                      ? context.tr('Last 6 Weeks Trend')
-                      : context.tr('Last 6 Months Trend'),
-                ),
+              ];
+              break;
+            case 2:
+              content = [
+                SectionHeader(title: trendTitle),
                 AppCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -357,30 +158,249 @@ class InsightsPage extends ConsumerWidget {
                     ],
                   ),
                 ),
+                const SizedBox(height: 12),
+                _TrendTable(txs: trendTxs, period: period),
+              ];
+              break;
+            default:
+              content = [
+                HeroCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            periodLabel,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: Colors.white70,
+                              letterSpacing: 0.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: summary.isDeficit
+                                  ? AppColors.expense.withValues(alpha: 0.3)
+                                  : AppColors.sage.withValues(alpha: 0.25),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: summary.isDeficit
+                                    ? AppColors.expense.withValues(alpha: 0.6)
+                                    : AppColors.sage.withValues(alpha: 0.5),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  summary.isDeficit
+                                      ? Icons.warning_rounded
+                                      : Icons.trending_up_rounded,
+                                  size: 14,
+                                  color: summary.isDeficit ? Colors.white : AppColors.sage,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  summary.isDeficit
+                                      ? context.tr('Deficit')
+                                      : context.tr('Surplus'),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: summary.isDeficit ? Colors.white : AppColors.sage,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            '${summary.netBalance >= 0 ? '+' : ''}${rupiah(summary.netBalance)}',
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        summary.totalIncome > 0 && !summary.isDeficit
+                            ? context.tr(
+                                '{pct}% of income left for savings',
+                                {'pct': summary.savingsRate.toStringAsFixed(1)},
+                              )
+                            : (summary.isDeficit
+                                ? context.tr('Spending exceeded income this period')
+                                : context.tr('Net difference between income and expenses')),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.75),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        height: 1,
+                        color: Colors.white.withValues(alpha: 0.12),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _SummarySubBox(
+                              label: context.tr('Income'),
+                              amount: rupiah(summary.totalIncome),
+                              icon: Icons.arrow_downward_rounded,
+                              iconColor: AppColors.income,
+                              bgColor: Colors.black.withValues(alpha: 0.18),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _SummarySubBox(
+                              label: context.tr('Expense'),
+                              amount: rupiah(summary.totalExpense),
+                              icon: Icons.arrow_upward_rounded,
+                              iconColor: AppColors.expense,
+                              bgColor: Colors.black.withValues(alpha: 0.18),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                _PeriodComparisonCard(
+                  summary: summary,
+                  prevPeriodName: prevPeriodName,
+                  isWeekly: isWeekly,
+                ),
+                if (summary.isLowData) ...[
+                  const SizedBox(height: 20),
+                  _LowDataCard(
+                    onAddTransaction: () => showTransactionForm(context),
+                  ),
+                ] else ...[
+                  SectionHeader(
+                    title: isWeekly
+                        ? context.tr('Daily Expense Chart')
+                        : context.tr('Monthly Expense Chart'),
+                  ),
+                  AppCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              isWeekly
+                                  ? context.tr('7-day spending trend')
+                                  : context.tr('Weekly spending distribution'),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: scheme.onSurface.withValues(alpha: 0.65),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              rupiah(summary.totalExpense),
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.sage,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        PeriodExpenseBarChart(
+                          points: chartPoints,
+                          totalExpense: summary.totalExpense,
+                        ),
+                        const SizedBox(height: 10),
+                        Divider(color: scheme.outlineVariant.withValues(alpha: 0.4)),
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              isWeekly
+                                  ? context.tr('Daily average:')
+                                  : context.tr('Weekly average:'),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: scheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                            ),
+                            Text(
+                              isWeekly
+                                  ? rupiah(summary.totalExpense ~/ 7)
+                                  : rupiah(summary.totalExpense ~/ (chartPoints.isEmpty ? 1 : chartPoints.length)),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (smartInsights.isNotEmpty) ...[
+                    SectionHeader(
+                      title: context.tr('Financial Insights'),
+                    ),
+                    for (final item in smartInsights)
+                      _SmartInsightCard(item: item),
+                  ],
+                  SectionHeader(
+                    title: context.tr('Top Categories'),
+                  ),
+                  if (categories.isEmpty)
+                    AppCard(child: Text(context.tr('No expenses in this period.')))
+                  else
+                    AppCard(
+                      child: Column(
+                        children: [
+                          for (int i = 0; i < categories.length && i < 3; i++)
+                            _TopCategoryRow(
+                              rank: i + 1,
+                              category: categories[i],
+                              prevPeriodName: prevPeriodName,
+                            ),
+                        ],
+                      ),
+                    ),
+                ],
+              ];
+              break;
+          }
 
-                if (categories.isNotEmpty) ...[
-                  SectionHeader(
-                    title: context.tr('Expense Composition'),
-                  ),
-                  AppCard(
-                    child: ExpensePieChart(
-                      spent: {for (final c in categories) c.categoryId: c.amount},
-                      cats: cats,
-                    ),
-                  ),
-                ],
-                if (needTotal + wantTotal > 0) ...[
-                  SectionHeader(
-                    title: context.tr('Needs vs wants'),
-                  ),
-                  AppCard(
-                    child: _NeedsWantsCard(
-                      needTotal: needTotal,
-                      wantTotal: wantTotal,
-                    ),
-                  ),
-                ],
-              ],
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<int>(
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment(value: 0, label: Text(context.tr('Overview'))),
+                    ButtonSegment(value: 1, label: Text(context.tr('Categories'))),
+                    ButtonSegment(value: 2, label: Text(context.tr('Trend'))),
+                  ],
+                  selected: {_tab},
+                  onSelectionChanged: (s) => setState(() => _tab = s.first),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...content,
             ],
           );
         },
@@ -925,6 +945,55 @@ class _NeedsWantsCard extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// Pemasukan dan pengeluaran tiap periode dalam 6 periode terakhir.
+class _TrendTable extends StatelessWidget {
+  const _TrendTable({required this.txs, required this.period});
+
+  final List<TransactionEntry> txs;
+  final Period period;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final periods = [for (var i = 5; i >= 0; i--) period.shift(-i)];
+
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (final p in periods.reversed)
+            Builder(builder: (context) {
+              final inPeriod = txs.where((t) => p.contains(t.date));
+              final income = inPeriod
+                  .where((t) => t.type == TxType.income)
+                  .fold<int>(0, (a, t) => a + t.amount);
+              final expense = inPeriod
+                  .where((t) => t.type == TxType.expense)
+                  .fold<int>(0, (a, t) => a + t.amount);
+              return ListTile(
+                dense: true,
+                title: Text(p.label(),
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                trailing: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('+${rupiah(income)}',
+                        style: theme.textTheme.labelSmall
+                            ?.copyWith(color: AppColors.income, fontWeight: FontWeight.w700)),
+                    Text('-${rupiah(expense)}',
+                        style: theme.textTheme.labelSmall
+                            ?.copyWith(color: AppColors.expense, fontWeight: FontWeight.w700)),
+                  ],
+                ),
+              );
+            }),
+        ],
+      ),
     );
   }
 }

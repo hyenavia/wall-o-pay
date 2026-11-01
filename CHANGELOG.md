@@ -4,6 +4,31 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-11-01
+
+### Added
+- **Dedicated Accounts & Wallets Management (`AccountsPage`):**
+  - Introduced an all-in-one accounts hub showing total balance, account types (Cash, Bank, Digital Bank, E-Wallet), individual balances, and recent transfer history.
+  - Added inter-account transfer modal bottom sheet (`showTransferSheet`) with fee handling and custom transfer notes.
+  - Added account editing and non-destructive archiving (`showAccountForm`).
+- **3-Tab Deterministic Financial Insights:**
+  - Restructured Insights into 3 intuitive tabs: Overview (Ringkasan), Categories (Kategori), and Trend (Tren).
+  - Overview tab highlights hero period delta, period comparison, smart recommendations, daily/weekly expense distribution, and top 3 categories.
+  - Categories tab features needs vs wants breakdown, category progress bars, and expense composition pie chart.
+  - Trend tab includes 6-period historical trend bar chart and a comprehensive income vs expense period breakdown table (`_TrendTable`).
+- **Transaction Summary Tiles & Empty State Improvements:**
+  - Added quick-glance Total Income and Total Expense `_SummaryTile` widgets on the Transactions page.
+  - Added encouraging `EmptyStateCard` with positive action buttons for empty periods.
+
+### Changed
+- **Curved Sheet Header Architecture:**
+  - Integrated Deep Forest top sheet edges with smooth 28px bottom radii across Home, Budget, and Insights screens.
+  - Embedded `PeriodSwitcher(onDark: true)` directly into page app bar headers for seamless period navigation.
+  - Modernized quick action buttons with refined circular container styling on the Home page.
+  - Added savings percentage indicator badge to the Home balance card.
+
+---
+
 ## [1.8.7] - 2026-10-30
 
 ### Added

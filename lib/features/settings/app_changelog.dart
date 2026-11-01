@@ -41,10 +41,38 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '1.9.0',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Dedicated Accounts management page with balances, inter-account transfers, and transaction history.',
+          textId: 'Halaman manajemen Akun khusus dengan rincian saldo, transfer antar rekening, dan riwayat transaksi.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: '3-Tab Insights layout (Overview, Categories, Trend) with 6-period historical trend table.',
+          textId: 'Tampilan Wawasan 3 tab (Ringkasan, Kategori, Tren) dengan tabel perbandingan tren 6 periode.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Income & Expense summary tiles on Transactions page and positive action EmptyStateCards.',
+          textId: 'Ringkasan Pemasukan & Pengeluaran di halaman Transaksi serta EmptyStateCard dengan ajakan positif.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Curved sheet headers across Home, Budget, and Insights for a polished, cohesive aesthetic.',
+          textId: 'Header lembar melengkung di Beranda, Anggaran, dan Wawasan untuk tampilan yang elegan dan kohesif.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '1.8.7',
       dateEn: 'October 30, 2026',
       dateId: '30 Oktober 2026',
-      isCurrent: true,
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

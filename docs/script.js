@@ -2,7 +2,7 @@
  * Wall o' Pay - Landing Page Interactive Logic (Full English)
  */
 
-const APP_VERSION = "1.8.7";
+const APP_VERSION = "1.9.0";
 
 // Showcase Tabs Data (Full English)
 const showcaseData = {

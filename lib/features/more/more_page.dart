@@ -5,13 +5,15 @@ import '../../core/l10n.dart';
 import '../../core/widgets.dart';
 import '../../data/providers.dart';
 import '../../data/tables.dart' show TxType;
+import '../accounts/accounts_page.dart';
 import '../debts/debts_page.dart';
+import '../goals/goals_page.dart';
 import '../recurring/recurring_page.dart';
 import '../settings/report_dialog.dart';
 import '../settings/settings_page.dart';
 import '../transactions/transaction_form.dart';
 
-/// Pusat fitur tambahan: utang & patungan, transaksi berulang, laporan PDF, dan pengaturan.
+/// Pusat fitur tambahan: akun & dompet, impian & tabungan, utang & patungan, transaksi berulang, laporan PDF, dan pengaturan.
 class MorePage extends ConsumerWidget {
   const MorePage({super.key});
 
@@ -41,6 +43,18 @@ class MorePage extends ConsumerWidget {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
+                tile(
+                  Icons.account_balance_wallet_outlined,
+                  context.tr('Accounts'),
+                  context.tr('Cash, bank, and e-wallet balances'),
+                  () => open(const AccountsPage()),
+                ),
+                tile(
+                  Icons.flag_outlined,
+                  context.tr('Goals'),
+                  context.tr('Savings goals and progress'),
+                  () => open(const GoalsPage()),
+                ),
                 tile(
                   Icons.swap_horiz_rounded,
                   context.tr('Transfer Saldo'),

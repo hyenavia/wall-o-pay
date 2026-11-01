@@ -162,5 +162,21 @@ void main() {
       expect(p3.start, DateTime(2026, 10, 1));
       expect(p3.end, DateTime(2026, 11, 1));
     });
+
+    test('Accounts and Insights tabs localization in English and Indonesian', () {
+      AppLocale.code = 'en';
+      expect(trG('Accounts'), 'Accounts');
+      expect(trG('Overview'), 'Overview');
+      expect(trG('Categories'), 'Categories');
+      expect(trG('Trend'), 'Trend');
+      expect(trG('Transfer Between Accounts'), 'Transfer Between Accounts');
+
+      AppLocale.code = 'id';
+      expect(trG('Accounts'), 'Akun & Rekening');
+      expect(trG('Overview'), 'Ringkasan');
+      expect(trG('Categories'), 'Kategori');
+      expect(trG('Trend'), 'Tren');
+      expect(trG('Transfer Between Accounts'), 'Transfer Antar Akun');
+    });
   });
 }
