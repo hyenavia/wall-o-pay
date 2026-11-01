@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.9.1',
+      version: '1.9.2',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Synchronized Total Balance to strictly equal the sum of active accounts listed in Your Accounts.',
+          textId: 'Menyelaraskan Total Saldo agar benar-benar persis sama dengan total penjumlahan uang pada daftar Akun Anda.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Streamlined account balance input: simplified label to "Balance" showing real-time current balance instead of starting balance.',
+          textId: 'Penyederhanaan input saldo akun: mengganti label menjadi "Saldo" yang menampilkan saldo riil saat ini (bukan saldo awal).',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.9.1',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

@@ -194,27 +194,32 @@ final walletBalancesProvider = Provider<Map<String, int>>((ref) {
     for (final w in wallets) w.id: w.initialBalance,
   };
 
+  final activeIds = balances.keys.toSet();
+
   for (final t in txs) {
-    final walletId = t.walletId ?? 'wallet-main';
-    if (t.type == TxType.income) {
-      balances[walletId] = (balances[walletId] ?? 0) + t.amount;
-    } else if (t.type == TxType.expense) {
-      balances[walletId] = (balances[walletId] ?? 0) - t.amount;
-    } else if (t.type == TxType.transfer) {
-      balances[walletId] = (balances[walletId] ?? 0) - t.amount;
-      if (t.toWalletId != null) {
-        balances[t.toWalletId!] = (balances[t.toWalletId!] ?? 0) + t.amount;
+    final walletId = t.walletId;
+    if (walletId != null && activeIds.contains(walletId)) {
+      if (t.type == TxType.income) {
+        balances[walletId] = (balances[walletId] ?? 0) + t.amount;
+      } else if (t.type == TxType.expense) {
+        balances[walletId] = (balances[walletId] ?? 0) - t.amount;
+      } else if (t.type == TxType.transfer) {
+        balances[walletId] = (balances[walletId] ?? 0) - t.amount;
       }
+    }
+    if (t.type == TxType.transfer && t.toWalletId != null && activeIds.contains(t.toWalletId!)) {
+      balances[t.toWalletId!] = (balances[t.toWalletId!] ?? 0) + t.amount;
     }
   }
 
   return balances;
 });
 
-/// Total saldo dari seluruh dompet/rekening yang dimiliki.
+/// Total saldo dari seluruh dompet/rekening aktif yang terdaftar di Your Accounts.
 final totalCurrentBalanceProvider = Provider<int>((ref) {
+  final wallets = ref.watch(walletsProvider).value ?? const [];
   final balances = ref.watch(walletBalancesProvider);
-  return balances.values.fold<int>(0, (sum, val) => sum + val);
+  return wallets.fold<int>(0, (sum, w) => sum + (balances[w.id] ?? 0));
 });
 
 

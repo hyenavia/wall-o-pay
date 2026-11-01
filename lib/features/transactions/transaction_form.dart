@@ -91,8 +91,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     );
     _note = TextEditingController(text: e?.note ?? widget.initialNote ?? '');
     _categoryId = e?.categoryId;
-    _walletId = e?.walletId ?? widget.initialWalletId ?? 'wallet-main';
-    _toWalletId = e?.toWalletId ?? 'wallet-digital';
+    _walletId = e?.walletId ?? widget.initialWalletId;
+    _toWalletId = e?.toWalletId;
     _date = e?.date ?? DateTime.now();
     _receiptPath = e?.receiptPath ?? widget.initialReceiptPath;
     _needWant = e?.needWant;
@@ -276,6 +276,10 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
         return;
       }
 
+      final activeWallets = ref.read(walletsProvider).value ?? const [];
+      final defaultWalletId = activeWallets.isNotEmpty ? activeWallets.first.id : 'wallet-main';
+      final actualWalletId = _walletId ?? defaultWalletId;
+
       if (e == null) {
         await db.addTransaction(
           amount: amount,
@@ -283,7 +287,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           categoryId: _categoryId!,
           date: day,
           note: _note.text.trim(),
-          walletId: _walletId ?? 'wallet-main',
+          walletId: actualWalletId,
           receiptPath: _receiptPath,
         );
       } else {
@@ -294,7 +298,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           categoryId: _categoryId!,
           date: day,
           note: _note.text.trim(),
-          walletId: _walletId ?? 'wallet-main',
+          walletId: actualWalletId,
           receiptPath: _receiptPath,
           clearReceipt: _receiptPath == null,
         );
@@ -469,7 +473,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     AppChip(
                       icon: iconFor(w.icon),
                       label: context.tr(w.name),
-                      selected: _walletId == w.id,
+                      selected: (_walletId ?? (wallets.isNotEmpty ? wallets.first.id : '')) == w.id,
                       onSelected: () => setState(() => _walletId = w.id),
                     ),
                 ],
@@ -485,7 +489,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     AppChip(
                       icon: iconFor(w.icon),
                       label: context.tr(w.name),
-                      selected: _toWalletId == w.id,
+                      selected: (_toWalletId ?? (wallets.length > 1 ? wallets[1].id : '')) == w.id,
                       onSelected: () => setState(() => _toWalletId = w.id),
                     ),
                 ],
@@ -506,7 +510,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     AppChip(
                       icon: iconFor(w.icon),
                       label: context.tr(w.name),
-                      selected: (_walletId ?? 'wallet-main') == w.id,
+                      selected: (_walletId ?? (wallets.isNotEmpty ? wallets.first.id : '')) == w.id,
                       onSelected: () => setState(() => _walletId = w.id),
                     ),
                 ],

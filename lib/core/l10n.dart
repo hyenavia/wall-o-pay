@@ -96,6 +96,7 @@ const Map<String, String> _id = {
   'Please enter an account name': 'Silakan masukkan nama akun',
   'Account Type': 'Jenis Akun',
   'Starting balance': 'Saldo awal',
+  'Balance': 'Saldo',
   'Save Changes': 'Simpan Perubahan',
   'Archive account': 'Arsipkan akun',
   'Archive {name}?': 'Arsipkan {name}?',

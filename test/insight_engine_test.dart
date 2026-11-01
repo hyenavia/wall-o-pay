@@ -170,6 +170,7 @@ void main() {
       expect(trG('Categories'), 'Categories');
       expect(trG('Trend'), 'Trend');
       expect(trG('Transfer Between Accounts'), 'Transfer Between Accounts');
+      expect(trG('Balance'), 'Balance');
 
       AppLocale.code = 'id';
       expect(trG('Accounts'), 'Akun & Rekening');
@@ -177,6 +178,7 @@ void main() {
       expect(trG('Categories'), 'Kategori');
       expect(trG('Trend'), 'Tren');
       expect(trG('Transfer Between Accounts'), 'Transfer Antar Akun');
+      expect(trG('Balance'), 'Saldo');
     });
   });
 }

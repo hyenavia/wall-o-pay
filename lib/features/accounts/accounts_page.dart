@@ -322,7 +322,12 @@ class _AccountFormState extends ConsumerState<AccountForm> {
     super.initState();
     final w = widget.wallet;
     _name = TextEditingController(text: w == null ? '' : w.name);
-    _balance = TextEditingController(text: formatThousands(w?.initialBalance ?? 0));
+    final currentBal = w != null
+        ? (ref.read(walletBalancesProvider)[w.id] ?? w.initialBalance)
+        : 0;
+    _balance = TextEditingController(
+      text: currentBal > 0 ? formatThousands(currentBal) : (w == null ? '' : '0'),
+    );
     _type = w?.type ?? 'bank';
     _color = w?.colorValue ?? categoryColors[1];
   }
@@ -356,12 +361,15 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 : 'account_balance',
       );
     } else {
+      final currentBal = ref.read(walletBalancesProvider)[w.id] ?? w.initialBalance;
+      final netTx = currentBal - w.initialBalance;
+      final newInitial = balance - netTx;
       await db.updateWallet(
         w.id,
         name: name,
         type: _type,
         colorValue: _color,
-        initialBalance: balance,
+        initialBalance: newInitial,
         icon: w.icon,
       );
     }
@@ -440,7 +448,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               inputFormatters: amountFormatters(),
               decoration: appInput(
                 context,
-                label: context.tr('Starting balance'),
+                label: context.tr('Balance'),
                 prefixText: 'Rp ',
               ),
             ),
