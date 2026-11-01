@@ -4,6 +4,21 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.9] - 2026-11-01
+
+### Removed
+- **Repository Cleanliness & Asset Hygiene:**
+  - Removed obsolete setup manual `LANGKAH_LOGO.txt` from repository root.
+  - Removed orphaned legacy `docs/images/logo_foreground.png`.
+
+### Changed
+- **Asset Alignment & Tooling Hygiene:**
+  - Synchronized `assets/images/logo_foreground.png` with the new signature botanical forest adaptive icon foreground.
+  - Updated `flutter_launcher_icons` configuration in `pubspec.yaml` to reference `#11392E`.
+  - Added `*.ps1` to `.gitignore` to prevent temporary PowerShell scripts from being tracked.
+
+---
+
 ## [1.11.8] - 2026-11-01
 
 ### Changed

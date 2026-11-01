@@ -41,10 +41,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.8',
+      version: '1.11.9',
       dateEn: 'November 1, 2026',
       dateId: '1 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Cleaned up obsolete repository setup files and orphaned assets.',
+          textId: 'Membersihkan file panduan lama dan aset usang dari repositori.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.8',
+      dateEn: 'November 1, 2026',
+      dateId: '1 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,
