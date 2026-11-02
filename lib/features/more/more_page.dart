@@ -35,10 +35,9 @@ class MorePage extends StatelessWidget {
 
     return Scaffold(
       appBar: pageAppBar(context, title: Text(context.tr('More'))),
-      body: FadedScrollBody(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-          children: [
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        children: [
           AppCard(
             padding: EdgeInsets.zero,
             child: Column(
@@ -95,7 +94,6 @@ class MorePage extends StatelessWidget {
             ),
           ),
         ],
-        ),
       ),
     );
   }

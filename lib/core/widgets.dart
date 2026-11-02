@@ -69,53 +69,6 @@ class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// Pembungkus scroll view yang memberikan efek transisi pudar (fade) halus di bagian atas saat di-scroll.
-class FadedScrollBody extends StatefulWidget {
-  const FadedScrollBody({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  State<FadedScrollBody> createState() => _FadedScrollBodyState();
-}
-
-class _FadedScrollBodyState extends State<FadedScrollBody> {
-  bool _isScrolled = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (notification.metrics.axis == Axis.vertical) {
-          final isScrolled = notification.metrics.pixels > 2;
-          if (isScrolled != _isScrolled) {
-            setState(() => _isScrolled = isScrolled);
-          }
-        }
-        return false;
-      },
-      child: _isScrolled
-          ? ShaderMask(
-              shaderCallback: (Rect bounds) {
-                return const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.white,
-                    Colors.white,
-                  ],
-                  stops: [0.0, 0.035, 1.0],
-                ).createShader(bounds);
-              },
-              blendMode: BlendMode.dstIn,
-              child: widget.child,
-            )
-          : widget.child,
-    );
-  }
-}
-
 /// Gaya field input yang seragam.
 InputDecoration appInput(
   BuildContext context, {

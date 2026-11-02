@@ -4,6 +4,16 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.14] - 2026-11-02
+
+### Fixed
+- **Scroll Responsiveness & Gesture Restoration:**
+  - Resolved scroll-lock issue across secondary screens by removing the dynamic `NotificationListener` wrapper (`FadedScrollBody`), which previously disrupted active scroll drag gestures via mid-scroll rebuilds.
+  - Restored native, reliable Flutter scrolling across all screens (Transactions, Budget, Insights, More, Settings, Accounts, Goals, Debts, Recurring, Security, and Profile).
+  - Maintained the zero-overhead static top fade transition on Home page exclusively where curved container clipping actually occurs.
+
+---
+
 ## [1.11.13] - 2026-11-02
 
 ### Changed

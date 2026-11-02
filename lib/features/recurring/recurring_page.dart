@@ -70,8 +70,7 @@ class RecurringPage extends ConsumerWidget {
             );
           }
 
-          return FadedScrollBody(
-            child: ListView.separated(
+          return ListView.separated(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 80),
             itemCount: rules.length,
             separatorBuilder: (_, _) => const SizedBox(height: 10),
@@ -184,7 +183,6 @@ class RecurringPage extends ConsumerWidget {
                 ),
               );
             },
-            ),
           );
         },
       ),

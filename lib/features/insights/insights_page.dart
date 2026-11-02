@@ -383,27 +383,25 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
               break;
           }
 
-          return FadedScrollBody(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: SegmentedButton<int>(
-                    showSelectedIcon: false,
-                    segments: [
-                      ButtonSegment(value: 0, label: Text(context.tr('Overview'))),
-                      ButtonSegment(value: 1, label: Text(context.tr('Categories'))),
-                      ButtonSegment(value: 2, label: Text(context.tr('Trend'))),
-                    ],
-                    selected: {_tab},
-                    onSelectionChanged: (s) => setState(() => _tab = s.first),
-                  ),
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: SegmentedButton<int>(
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment(value: 0, label: Text(context.tr('Overview'))),
+                    ButtonSegment(value: 1, label: Text(context.tr('Categories'))),
+                    ButtonSegment(value: 2, label: Text(context.tr('Trend'))),
+                  ],
+                  selected: {_tab},
+                  onSelectionChanged: (s) => setState(() => _tab = s.first),
                 ),
-                const SizedBox(height: 12),
-                ...content,
-              ],
-            ),
+              ),
+              const SizedBox(height: 12),
+              ...content,
+            ],
           );
         },
       ),

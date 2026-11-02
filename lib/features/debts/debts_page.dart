@@ -60,8 +60,7 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
               return aDone.compareTo(bDone);
             });
 
-          return FadedScrollBody(
-            child: ListView(
+          return ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
             children: [
               HeroCard(
@@ -117,7 +116,6 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
                     child: _DebtCard(debt: d),
                   ),
             ],
-            ),
           );
         },
       ),

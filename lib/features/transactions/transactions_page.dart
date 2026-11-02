@@ -101,8 +101,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             groups.putIfAbsent(day, () => []).add(t);
           }
 
-          return FadedScrollBody(
-            child: ListView(
+          return ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             children: [
               TextField(
@@ -207,7 +206,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   ),
                 ],
             ],
-            ),
           );
         },
       ),

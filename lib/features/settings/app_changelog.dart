@@ -41,10 +41,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.13',
+      version: '1.11.14',
       dateEn: 'November 2, 2026',
       dateId: '2 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Restored smooth native scrolling across all screens by removing dynamic gesture-interrupting listeners.',
+          textId: 'Memulihkan responsivitas scroll di seluruh halaman dengan mengembalikan penanganan gestur gulir native.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.13',
+      dateEn: 'November 2, 2026',
+      dateId: '2 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,
