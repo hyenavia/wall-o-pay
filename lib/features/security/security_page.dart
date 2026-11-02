@@ -112,6 +112,22 @@ class SecurityPage extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 16),
+              AppCard(
+                child: SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    context.tr('Privacy Shield'),
+                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                  ),
+                  subtitle: Text(
+                    context.tr('Hide app preview in Recent Apps switcher and block screenshots.'),
+                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                  ),
+                  value: st.privacyShield,
+                  onChanged: (v) => Lock.instance.setPrivacyShield(v),
+                ),
+              ),
             ],
           );
         },

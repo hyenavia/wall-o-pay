@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'auto_tracker.dart';
 import 'lock.dart';
+import 'transaction_parser.dart';
 import '../features/transactions/transaction_form.dart';
 
 class ShareService {

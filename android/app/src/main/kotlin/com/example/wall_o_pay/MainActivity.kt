@@ -1,16 +1,14 @@
 package com.example.wall_o_pay
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import androidx.core.app.NotificationManagerCompat
+import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
-import org.json.JSONArray
 import java.io.File
 
 class MainActivity : FlutterActivity() {
@@ -97,19 +95,9 @@ class MainActivity : FlutterActivity() {
             }
         }
 
-        // Channel untuk Notifikasi Otomatis
+        // Channel untuk Sistem / Utilitas Aplikasi
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
-                "isNotificationAccessGranted" -> {
-                    val enabledPackages = NotificationManagerCompat.getEnabledListenerPackages(this)
-                    result.success(enabledPackages.contains(packageName))
-                }
-                "openNotificationSettings" -> {
-                    val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    startActivity(intent)
-                    result.success(true)
-                }
                 "openAppSettings" -> {
                     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                         data = Uri.fromParts("package", packageName, null)
@@ -130,32 +118,16 @@ class MainActivity : FlutterActivity() {
                         result.error("INVALID_URL", "URL is null or empty", null)
                     }
                 }
-                "getPendingNotifications" -> {
-                    val prefs = getSharedPreferences(
-                        TransactionNotificationListenerService.PREFS_NAME,
-                        Context.MODE_PRIVATE
-                    )
-                    val raw = prefs.getString(TransactionNotificationListenerService.KEY_NOTIFICATIONS, "[]") ?: "[]"
-                    val jsonArray = JSONArray(raw)
-                    val list = mutableListOf<Map<String, Any>>()
-                    for (i in 0 until jsonArray.length()) {
-                        val obj = jsonArray.getJSONObject(i)
-                        val map = mutableMapOf<String, Any>()
-                        map["id"] = obj.optString("id")
-                        map["package"] = obj.optString("package")
-                        map["title"] = obj.optString("title")
-                        map["text"] = obj.optString("text")
-                        map["timestamp"] = obj.optLong("timestamp")
-                        list.add(map)
+                "setSecureScreen" -> {
+                    val secure = call.argument<Boolean>("secure") ?: false
+                    if (secure) {
+                        window.setFlags(
+                            WindowManager.LayoutParams.FLAG_SECURE,
+                            WindowManager.LayoutParams.FLAG_SECURE
+                        )
+                    } else {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
                     }
-                    result.success(list)
-                }
-                "clearPendingNotifications" -> {
-                    val prefs = getSharedPreferences(
-                        TransactionNotificationListenerService.PREFS_NAME,
-                        Context.MODE_PRIVATE
-                    )
-                    prefs.edit().putString(TransactionNotificationListenerService.KEY_NOTIFICATIONS, "[]").apply()
                     result.success(true)
                 }
                 else -> result.notImplemented()

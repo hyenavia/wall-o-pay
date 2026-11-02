@@ -4,6 +4,36 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.15] - 2026-11-02
+
+### Added
+- **Direct Database Transaction Search (Direct SQL Search):**
+  - Integrated `watchSearchTransactions` in Drift database using indexed SQL JOIN on notes and category names with instant reactive stream updates.
+  - Implemented seamless `unwrapPrevious()` handling in `TransactionsPage` ensuring the keyboard never dismisses or flickers while typing search queries.
+- **Privacy Shield (App Switcher Protection):**
+  - Added Android native `FLAG_SECURE` toggling via method channel to hide sensitive financial screen content on Recent Apps switcher and prevent unwanted screenshots.
+  - Provided bilingual toggle in Security settings with immediate startup enforcement.
+- **Rollover Budget Integration:**
+  - Implemented automatic carryover calculation in `effectiveBudgetProvider` that rolls forward unspent positive balances from previous periods into the current budget.
+  - Added Rollover active banner and per-category rollover breakdown badges in `BudgetPage`.
+
+### Changed
+- **Database Indexing & Performance:**
+  - Added composite indexes on `Transactions` (`date, deleted_at`, `category_id, deleted_at`, `wallet_id, deleted_at`, `to_wallet_id, deleted_at`) and `Budgets` (`month_key, deleted_at`) with self-healing SQLite setup on startup.
+- **Code Modularization & Architecture Cleanliness:**
+  - Refactored monolithic `budget_page.dart` (1,071 lines down to ~345 lines) by modularizing `BudgetPillarCard`, `showTotalBudgetDialog`, and `showCategoryBudgetSheet`.
+  - Refactored monolithic `settings_page.dart` (1,132 lines down to ~720 lines) by extracting data, authentication, and cloud synchronization logic into `SettingsActions`.
+- **Scheduled Recurring Rules Execution:**
+  - Scheduled rules now record transactions directly into the official `transactions` table, properly preserving source/destination wallet associations.
+
+### Removed
+- **Sensitive Background Auto-Tracker & Notification Listener:**
+  - Purged Android `TransactionNotificationListenerService.kt` and obsolete method channel handlers.
+  - Removed `PendingTransactions` table from Drift schema and cleaned all related pending models, cards, and review sheets.
+  - Decoupled manual Android receipt/text share receiver into standalone `transaction_parser.dart`.
+
+---
+
 ## [1.11.14] - 2026-11-02
 
 ### Fixed

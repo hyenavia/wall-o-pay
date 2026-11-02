@@ -174,11 +174,6 @@ final spentByCategoryProvider = Provider<Map<String, int>>((ref) {
       );
 });
 
-/// Daftar transaksi otomatis dari notifikasi yang menunggu konfirmasi pengguna.
-final pendingTransactionsProvider = StreamProvider<List<PendingTransaction>>((ref) {
-  return ref.watch(databaseProvider).watchPendingTransactions();
-});
-
 /// Urutan prioritas kategori akun: Commercial Bank -> Digital Bank -> E-Wallet -> Cash.
 const _kAccountCategoryOrder = {
   'bank': 0,

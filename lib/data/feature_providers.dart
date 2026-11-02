@@ -5,6 +5,7 @@ import '../core/period.dart';
 import 'app_database.dart';
 import 'feature_prefs.dart';
 import 'providers.dart';
+import 'tables.dart' show TxType;
 
 // ---------- Akun ----------
 
@@ -30,7 +31,7 @@ final templatesProvider = StreamProvider<List<TxTemplate>>((ref) {
   return ref.watch(databaseProvider).watchTemplates();
 });
 
-// ---------- Filter rentang tanggal ----------
+// ---------- Filter rentang tanggal & pencarian ----------
 
 /// Transaksi pada rentang tanggal kustom ([range.end] inklusif).
 final rangeTransactionsProvider =
@@ -38,6 +39,49 @@ final rangeTransactionsProvider =
   final start = DateTime(range.start.year, range.start.month, range.start.day);
   final end = DateTime(range.end.year, range.end.month, range.end.day + 1);
   return ref.watch(databaseProvider).watchTransactionsBetween(start, end);
+});
+
+/// Parameter pencarian transaksi di database.
+class TxSearchParams {
+  const TxSearchParams({
+    required this.query,
+    this.type,
+    this.range,
+  });
+
+  final String query;
+  final TxType? type;
+  final DateTimeRange? range;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TxSearchParams &&
+          runtimeType == other.runtimeType &&
+          query == other.query &&
+          type == other.type &&
+          range == other.range;
+
+  @override
+  int get hashCode => Object.hash(query, type, range);
+}
+
+/// Pencarian transaksi berbasis query SQL langsung di database SQLite.
+final searchTransactionsProvider =
+    StreamProvider.family<List<TransactionEntry>, TxSearchParams>((ref, params) {
+  final start = params.range != null
+      ? DateTime(params.range!.start.year, params.range!.start.month, params.range!.start.day)
+      : null;
+  final end = params.range != null
+      ? DateTime(params.range!.end.year, params.range!.end.month, params.range!.end.day + 1)
+      : null;
+
+  return ref.watch(databaseProvider).watchSearchTransactions(
+        query: params.query,
+        type: params.type,
+        start: start,
+        end: end,
+      );
 });
 
 // ---------- Periode sebelumnya (perbandingan dan rollover) ----------
@@ -83,9 +127,18 @@ final carryOverProvider = Provider<Map<String, int>>((ref) {
   return result;
 });
 
+/// Total nominal sisa anggaran periode lalu yang dibawa ke periode ini.
+final totalCarryOverProvider = Provider<int>((ref) {
+  final carry = ref.watch(carryOverProvider);
+  return carry.values.fold<int>(0, (sum, val) => sum + val);
+});
+
 /// Anggaran efektif = anggaran periode ini + sisa dari periode lalu.
 final effectiveBudgetProvider = Provider<Map<String, int>>((ref) {
   final base = ref.watch(budgetByCategoryProvider);
   final carry = ref.watch(carryOverProvider);
-  return {for (final e in base.entries) e.key: e.value + (carry[e.key] ?? 0)};
+  final allKeys = {...base.keys, ...carry.keys};
+  return {
+    for (final k in allKeys) k: (base[k] ?? 0) + (carry[k] ?? 0),
+  };
 });

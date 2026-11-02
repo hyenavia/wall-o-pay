@@ -39,6 +39,10 @@ class Wallets extends Table with SyncColumns {
   Set<Column> get primaryKey => {id};
 }
 
+@TableIndex(name: 'tx_date_idx', columns: {#date, #deletedAt})
+@TableIndex(name: 'tx_category_idx', columns: {#categoryId, #deletedAt})
+@TableIndex(name: 'tx_wallet_idx', columns: {#walletId, #deletedAt})
+@TableIndex(name: 'tx_to_wallet_idx', columns: {#toWalletId, #deletedAt})
 @DataClassName('TransactionEntry')
 class Transactions extends Table with SyncColumns {
   IntColumn get amount => integer()();
@@ -57,6 +61,7 @@ class Transactions extends Table with SyncColumns {
   Set<Column> get primaryKey => {id};
 }
 
+@TableIndex(name: 'budgets_month_idx', columns: {#monthKey, #deletedAt})
 class Budgets extends Table with SyncColumns {
   TextColumn get categoryId => text().references(Categories, #id)();
   IntColumn get amount => integer()();
@@ -77,25 +82,6 @@ class SavingsGoals extends Table with SyncColumns {
   @override
   Set<Column> get primaryKey => {id};
 }
-
-@DataClassName('PendingTransaction')
-class PendingTransactions extends Table {
-  TextColumn get id => text().clientDefault(() => newId())();
-  IntColumn get amount => integer()();
-  TextColumn get type => textEnum<TxType>()();
-  TextColumn get sourceApp => text()();
-  TextColumn get rawNotification => text()();
-  TextColumn get suggestedCategory => text().nullable()();
-  TextColumn get note => text().withDefault(const Constant(''))();
-  DateTimeColumn get date => dateTime()();
-  DateTimeColumn get createdAt => dateTime().clientDefault(() => DateTime.now())();
-  TextColumn get receiptPath => text().nullable()();
-  TextColumn get needWant => textEnum<NeedWant>().nullable()();
-
-  @override
-  Set<Column> get primaryKey => {id};
-}
-
 
 @DataClassName('RecurringRule')
 class RecurringRules extends Table with SyncColumns {

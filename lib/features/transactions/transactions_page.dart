@@ -37,9 +37,15 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final txAsync = _range == null
-        ? ref.watch(transactionsProvider)
-        : ref.watch(rangeTransactionsProvider(_range!));
+    final isSearching = _query.isNotEmpty;
+    final txAsync = (isSearching
+            ? ref.watch(searchTransactionsProvider(
+                TxSearchParams(query: _query, type: _filter, range: _range),
+              ))
+            : (_range == null
+                ? ref.watch(transactionsProvider)
+                : ref.watch(rangeTransactionsProvider(_range!))))
+        .unwrapPrevious();
     final cats = ref.watch(categoryMapProvider);
     final wallets = ref.watch(walletMapProvider);
 
@@ -80,19 +86,16 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           child: Text(context.tr('Could not load data: {error}', {'error': e})),
         ),
         data: (txs) {
-          final totalIncome = txs
+          final shown = isSearching
+              ? txs
+              : (_filter == null ? txs : txs.where((t) => t.type == _filter).toList());
+
+          final totalIncome = (isSearching ? shown : txs)
               .where((t) => t.type == TxType.income)
               .fold<int>(0, (a, t) => a + t.amount);
-          final totalExpense = txs
+          final totalExpense = (isSearching ? shown : txs)
               .where((t) => t.type == TxType.expense)
               .fold<int>(0, (a, t) => a + t.amount);
-
-          final shown = txs.where((t) {
-            if (_filter != null && t.type != _filter) return false;
-            if (_query.isEmpty) return true;
-            final name = cats[t.categoryId]?.name.toLowerCase() ?? '';
-            return name.contains(_query) || t.note.toLowerCase().contains(_query);
-          }).toList();
 
           // Kelompokkan per hari (urutan sudah dari terbaru).
           final groups = <DateTime, List<TransactionEntry>>{};
@@ -159,14 +162,19 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               if (txs.isEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
-                  child: EmptyStateCard(
-                    title: context.tr('Start recording your first transaction!'),
-                    subtitle: context.tr(
-                      'Every small transaction brings you closer to your financial goals.',
-                    ),
-                    actionLabel: context.tr('Add transaction'),
-                    onAction: () => showTransactionForm(context),
-                  ),
+                  child: isSearching
+                      ? EmptyState(
+                          icon: Icons.search_off,
+                          message: context.tr('No matching transactions.'),
+                        )
+                      : EmptyStateCard(
+                          title: context.tr('Start recording your first transaction!'),
+                          subtitle: context.tr(
+                            'Every small transaction brings you closer to your financial goals.',
+                          ),
+                          actionLabel: context.tr('Add transaction'),
+                          onAction: () => showTransactionForm(context),
+                        ),
                 )
               else if (shown.isEmpty)
                 Padding(

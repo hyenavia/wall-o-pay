@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,11 +6,9 @@ import '../../core/l10n.dart';
 import '../../core/period.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
-import '../../data/auth_service.dart';
 import '../../data/cloud.dart';
 import '../../data/cloud_backup.dart';
 import '../../data/cloud_sync.dart';
-import '../../data/budget_rule.dart';
 import '../../data/feature_prefs.dart';
 import '../../data/notifications.dart';
 import 'app_changelog.dart';
@@ -25,6 +22,7 @@ import '../categories/categories_page.dart';
 import '../profile/profile_page.dart';
 import '../../data/lock.dart';
 import '../security/security_page.dart';
+import 'settings_actions.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -479,7 +477,7 @@ class SettingsPage extends ConsumerWidget {
                           ),
                           icon: const Icon(Icons.cloud_upload_outlined, size: 16),
                           label: Text(context.tr('Send to Cloud')),
-                          onPressed: canUseCloud ? () => _handleManualUpload(context, ref) : null,
+                          onPressed: canUseCloud ? () => SettingsActions.handleManualUpload(context, ref) : null,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -494,7 +492,7 @@ class SettingsPage extends ConsumerWidget {
                           ),
                           icon: const Icon(Icons.cloud_download_outlined, size: 16),
                           label: Text(context.tr('Fetch from Cloud')),
-                          onPressed: canUseCloud ? () => _handleManualRestore(context, ref) : null,
+                          onPressed: canUseCloud ? () => SettingsActions.handleManualRestore(context, ref) : null,
                         ),
                       ),
                     ],
@@ -512,7 +510,7 @@ class SettingsPage extends ConsumerWidget {
                       ),
                       icon: const Icon(Icons.sync_rounded, size: 16),
                       label: Text(context.tr('Sync Now (Two-Way)')),
-                      onPressed: canUseCloud ? () => _handleTwoWaySync(context, ref) : null,
+                      onPressed: canUseCloud ? () => SettingsActions.handleTwoWaySync(context, ref) : null,
                     ),
                   ),
                 ],
@@ -528,7 +526,7 @@ class SettingsPage extends ConsumerWidget {
                   leading: const Icon(Icons.file_upload_outlined),
                   title: Text(context.tr('Export backup file (JSON)')),
                   subtitle: Text(context.tr('Save or share a copy of all your data.')),
-                  onTap: () => _runAction(context, () async {
+                  onTap: () => SettingsActions.runAction(context, () async {
                     await ExportService(ref.read(databaseProvider)).shareBackup();
                     return trG('Backup file ready to share.');
                   }),
@@ -538,7 +536,7 @@ class SettingsPage extends ConsumerWidget {
                   title: Text(context.tr('Import backup file (JSON)')),
                   subtitle: Text(context.tr('Merges a backup file into this device.')),
                   onTap: () async {
-                    final ok = await _confirm(
+                    final ok = await SettingsActions.confirm(
                       context,
                       title: context.tr('Import backup file?'),
                       message: context.tr(
@@ -547,7 +545,7 @@ class SettingsPage extends ConsumerWidget {
                       action: context.tr('Choose file'),
                     );
                     if (ok && context.mounted) {
-                      await _runAction(
+                      await SettingsActions.runAction(
                         context,
                         () => ExportService(ref.read(databaseProvider))
                             .importBackupFile(),
@@ -577,7 +575,7 @@ class SettingsPage extends ConsumerWidget {
                   leading: const Icon(Icons.table_view_outlined),
                   title: Text(context.tr('Export transactions (CSV)')),
                   subtitle: Text(context.tr('Open in Excel or Google Sheets.')),
-                  onTap: () => _runAction(context, () async {
+                  onTap: () => SettingsActions.runAction(context, () async {
                     await ExportService(ref.read(databaseProvider)).shareCsv();
                     return trG('CSV file ready to share.');
                   }),
@@ -595,7 +593,7 @@ class SettingsPage extends ConsumerWidget {
                     leading: const Icon(Icons.logout),
                     title: Text(context.tr('Log out')),
                     subtitle: Text(user.email ?? ''),
-                    onTap: () => _signOut(context, ref),
+                    onTap: () => SettingsActions.signOut(context, ref),
                   ),
                   const Divider(height: 1, indent: 56),
                   ListTile(
@@ -605,7 +603,7 @@ class SettingsPage extends ConsumerWidget {
                       style: const TextStyle(color: AppColors.expense, fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(context.tr('Permanently delete your account and all data.')),
-                    onTap: () => _deleteAccount(context, ref),
+                    onTap: () => SettingsActions.deleteAccount(context, ref),
                   ),
                 ],
               ),
@@ -708,160 +706,6 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleManualUpload(BuildContext context, WidgetRef ref) async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.tr('Sending data to cloud...')),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-    try {
-      final count = await ref.read(autoSyncServiceProvider).pushAllLocalToCloud();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.cloud_done_rounded, color: Colors.green, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    context.tr(
-                      'Successfully sent {count} items to the cloud.',
-                      {'count': count},
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: const Color(0xFF1E4238),
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.tr('Failed to send data: {error}', {'error': e.toString()}),
-            ),
-            backgroundColor: Colors.red.shade800,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _handleManualRestore(BuildContext context, WidgetRef ref) async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(context.tr('Fetching data from cloud...')),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-    try {
-      final count = await ref.read(autoSyncServiceProvider).pullAllRemoteToLocal();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.cloud_done_rounded, color: Colors.green, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    context.tr(
-                      'Successfully restored {count} items from the cloud.',
-                      {'count': count},
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: const Color(0xFF1E4238),
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              context.tr('Failed to fetch data: {error}', {'error': e.toString()}),
-            ),
-            backgroundColor: Colors.red.shade800,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _handleTwoWaySync(BuildContext context, WidgetRef ref) async {
-    try {
-      await ref.read(autoSyncServiceProvider).triggerTwoWaySync();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.tr('Synced with cloud.')),
-            backgroundColor: const Color(0xFF1E4238),
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.tr('Sync failed: {error}', {'error': e.toString()})),
-            backgroundColor: Colors.red.shade800,
-          ),
-        );
-      }
-    }
-  }
-
-  /// Menjalankan aksi lalu menampilkan pesan hasilnya.
-  Future<void> _runAction(
-    BuildContext context,
-    Future<String> Function() action,
-  ) async {
-    String message;
-    try {
-      message = await action();
-    } catch (e) {
-      message = trG('Failed: {error}', {'error': e});
-    }
-    if (context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(message)));
-    }
-  }
-
-  Future<bool> _confirm(
-    BuildContext context, {
-    required String title,
-    required String message,
-    required String action,
-  }) async {
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.tr('Cancel')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(action),
-          ),
-        ],
-      ),
-    );
-    return ok == true;
-  }
-
   String _getDayName(BuildContext context, int day) {
     return switch (day) {
       DateTime.monday => context.tr('Monday'),
@@ -873,260 +717,5 @@ class SettingsPage extends ConsumerWidget {
       DateTime.sunday => context.tr('Sunday'),
       _ => context.tr('Monday'),
     };
-  }
-
-  Future<void> _signOut(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.tr('Log out?')),
-        content: Text(context.tr(
-          'Your financial data is safely stored in the cloud. You can log back in on this or another device anytime.',
-        )),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.tr('Cancel')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(context.tr('Log out')),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-
-    if (context.mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => Center(
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 16),
-                  Text(context.tr('Logging out...')),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    try {
-      ref.read(autoSyncServiceProvider).stopSync();
-      final db = ref.read(databaseProvider);
-
-      // Reset database lokal perangkat agar tidak bocor ke akun berikutnya
-      try {
-        await db.resetAllData();
-      } catch (e) {
-        debugPrint('[SettingsPage] Error resetting local db on logout: $e');
-      }
-      try {
-        await ref.read(profileProvider.notifier).clearLocal();
-        await ref.read(budgetRuleProvider.notifier).clearLocal();
-      } catch (e) {
-        debugPrint('[SettingsPage] Error clearing local caches: $e');
-      }
-      try {
-        await Lock.instance.loadForUser(null);
-      } catch (e) {
-        debugPrint('[SettingsPage] Error resetting lock: $e');
-      }
-
-      final prefs = ref.read(sharedPreferencesProvider);
-      await prefs.remove('current_sync_user_id');
-
-      await FirebaseAuth.instance.signOut();
-
-      if (context.mounted) {
-        Navigator.of(context, rootNavigator: true).popUntil((r) => r.isFirst);
-      }
-    } catch (e) {
-      debugPrint('[SettingsPage] Sign out failed: $e');
-      if (context.mounted) {
-        Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.expense,
-            content: Text(context.tr('Log out failed: {error}', {'error': e})),
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
-    final passwordController = TextEditingController();
-    var hasPasswordAuth = false;
-    final user = ref.read(currentUserProvider);
-    if (user != null) {
-      for (final info in user.providerData) {
-        if (info.providerId == 'password') hasPasswordAuth = true;
-      }
-    }
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(
-          context.tr('Delete Account Permanently?'),
-          style: const TextStyle(color: AppColors.expense, fontWeight: FontWeight.bold),
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(context.tr(
-                'Warning: This action is permanent and cannot be undone. Your user account, all transactions, budgets, wallets, and settings will be permanently erased from the cloud and this device.',
-              )),
-              if (hasPasswordAuth) ...[
-                const SizedBox(height: 16),
-                TextField(
-                  controller: passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: context.tr('Enter Password to Confirm'),
-                    hintText: context.tr('Password'),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    prefixIcon: const Icon(Icons.lock_outline),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.tr('Cancel')),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.expense),
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(context.tr('Delete Permanently')),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) {
-      passwordController.dispose();
-      return;
-    }
-
-    final password = passwordController.text.trim();
-    passwordController.dispose();
-
-    if (hasPasswordAuth && password.isEmpty) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.expense,
-            content: Text(context.tr('Password is required to delete account.')),
-          ),
-        );
-      }
-      return;
-    }
-
-    final db = ref.read(databaseProvider);
-    final userUid = user?.uid;
-    final username = ref.read(usernameProvider);
-
-    if (context.mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => Center(
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 16),
-                  Text(context.tr('Deleting account and wiping data...')),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    try {
-      ref.read(autoSyncServiceProvider).stopSync();
-      await AuthService().deleteAccount(
-        password: password.isNotEmpty ? password : null,
-        username: username,
-      );
-
-      if (userUid != null) {
-        await ref.read(profileProvider.notifier).clearLocal(userUid);
-        await ref.read(budgetRuleProvider.notifier).clearLocal(userUid);
-        await Lock.instance.clearLocal(userUid);
-      }
-      try {
-        await db.resetAllData();
-      } catch (e) {
-        debugPrint('[SettingsPage] Error resetting local db on delete: $e');
-      }
-      await ref.read(profileProvider.notifier).clearLocal();
-      await ref.read(budgetRuleProvider.notifier).clearLocal();
-      await Lock.instance.loadForUser(null);
-
-      // Batalkan seluruh jadwal pengingat harian lokal
-      try {
-        await NotificationService.instance.cancelDailyReminder();
-      } catch (e) {
-        debugPrint('[SettingsPage] Error cancelling reminder on delete: $e');
-      }
-
-      final prefs = ref.read(sharedPreferencesProvider);
-      await prefs.remove('current_sync_user_id');
-      if (userUid != null) {
-        await prefs.remove('onboarding_done_$userUid');
-      }
-
-      if (context.mounted) {
-        Navigator.of(context, rootNavigator: true).popUntil((r) => r.isFirst);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.income,
-            content: Text(context.tr('Account and all data successfully deleted.')),
-          ),
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      if (context.mounted) {
-        Navigator.of(context).pop(); // dismiss loading
-        final errorMsg = e.code == 'wrong-password' || e.code == 'invalid-credential'
-            ? context.tr('Incorrect password. Account was not deleted.')
-            : e.message ?? e.code;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(backgroundColor: AppColors.expense, content: Text(errorMsg)),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        Navigator.of(context).pop(); // dismiss loading
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: AppColors.expense,
-            content: Text(context.tr('Error: {error}', {'error': e})),
-          ),
-        );
-      }
-    }
   }
 }

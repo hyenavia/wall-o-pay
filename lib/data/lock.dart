@@ -5,13 +5,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppLockState {
-  const AppLockState({this.enabled = false, this.delayMin = 1});
+  const AppLockState({
+    this.enabled = false,
+    this.delayMin = 1,
+    this.privacyShield = false,
+  });
 
   final bool enabled;
   final int delayMin; // auto-lock timeout in minutes (0 = immediately / 3s grace)
+  final bool privacyShield; // true = FLAG_SECURE active (hide app switcher preview)
 }
 
 /// Kunci aplikasi dengan PIN 6 digit.
@@ -23,8 +29,18 @@ class Lock {
 
   final state = ValueNotifier<AppLockState>(const AppLockState());
   final isLocked = ValueNotifier<bool>(false);
+  static const _channel = MethodChannel('com.example.wall_o_pay/notifications');
   SharedPreferences? _p;
   String? _activeUid;
+
+  /// Atur perlindungan layar (FLAG_SECURE) ke native Android.
+  static Future<void> setSecureScreen(bool enabled) async {
+    try {
+      await _channel.invokeMethod('setSecureScreen', {'secure': enabled});
+    } catch (e) {
+      debugPrint('Failed to set secure screen: $e');
+    }
+  }
 
   String get _currentUid {
     if (_activeUid != null) return _activeUid!;
@@ -49,6 +65,10 @@ class Lock {
     }
     _migrateLegacyIfNeeded(_activeUid);
     _emit();
+    final shield = _p?.getBool('security.privacy_shield') ?? false;
+    if (shield) {
+      await setSecureScreen(true);
+    }
     try {
       if (_activeUid != null) {
         syncWithCloud(_activeUid!);
@@ -94,13 +114,24 @@ class Lock {
     final p = _p;
     if (p == null) return;
     final enabled = p.getString(_k('hash')) != null;
+    final privacyShield = p.getBool('security.privacy_shield') ?? false;
     state.value = AppLockState(
       enabled: enabled,
       delayMin: p.getInt(_k('delay')) ?? 1,
+      privacyShield: privacyShield,
     );
     if (!enabled) {
       isLocked.value = false;
     }
+  }
+
+  /// Atur status perisai privasi (FLAG_SECURE) untuk menyembunyikan pratinjau di Recent Apps.
+  Future<void> setPrivacyShield(bool enabled) async {
+    final p = _p;
+    if (p == null) return;
+    await p.setBool('security.privacy_shield', enabled);
+    await setSecureScreen(enabled);
+    _emit();
   }
 
   String _hash(String pin, String salt) =>

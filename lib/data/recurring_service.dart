@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drift/drift.dart';
 
 import 'app_database.dart';
 import 'providers.dart';
@@ -64,17 +63,15 @@ class RecurringService {
       var generatedCount = 0;
 
       for (final rule in dueRules) {
-        // Masukkan ke inbox konfirmasi (PendingTransactions)
-        await db.insertPendingTransaction(
-          PendingTransactionsCompanion.insert(
-            amount: rule.amount,
-            type: rule.type,
-            sourceApp: 'recurring',
-            rawNotification: 'Transaksi Terjadwal: ${rule.title}',
-            suggestedCategory: Value(rule.categoryId),
-            note: Value(rule.note.isNotEmpty ? rule.note : rule.title),
-            date: DateTime(now.year, now.month, now.day),
-          ),
+        // Catat transaksi berulang langsung ke tabel transaksi resmi
+        await db.addTransaction(
+          amount: rule.amount,
+          type: rule.type,
+          categoryId: rule.categoryId,
+          walletId: rule.walletId,
+          toWalletId: rule.toWalletId,
+          note: rule.note.isNotEmpty ? rule.note : rule.title,
+          date: DateTime(now.year, now.month, now.day),
         );
 
         // Perbarui tanggal jatuh tempo berikutnya

@@ -59,9 +59,10 @@ class SyncTable {
   final Future<bool> Function(Map<String, dynamic> json) applyRemote;
 }
 
-@DriftDatabase(tables: [Categories, Wallets, Transactions, Budgets, SavingsGoals, PendingTransactions, RecurringRules, Debts, TxTemplates])
+@DriftDatabase(tables: [Categories, Wallets, Transactions, Budgets, SavingsGoals, RecurringRules, Debts, TxTemplates])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(driftDatabase(name: 'wall_o_pay'));
+  AppDatabase([QueryExecutor? executor])
+      : super(executor ?? driftDatabase(name: 'wall_o_pay'));
 
   @override
   int get schemaVersion => 8;
@@ -76,10 +77,8 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (m, from, to) async {
           if (from < 2) await _remapDefaultCategoryIds();
           if (from < 3) await _renameDefaultCategories();
-          if (from < 4) await m.createTable(pendingTransactions);
           if (from < 6) {
             await m.addColumn(transactions, transactions.receiptPath);
-            await m.addColumn(pendingTransactions, pendingTransactions.receiptPath);
             await m.createTable(recurringRules);
           }
           if (from < 5) {
@@ -114,6 +113,12 @@ class AppDatabase extends _$AppDatabase {
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
+          // Indeks performa untuk mempercepat query tabel transaksi, anggaran, dan kategori
+          await customStatement('CREATE INDEX IF NOT EXISTS tx_date_idx ON transactions (date, deleted_at)');
+          await customStatement('CREATE INDEX IF NOT EXISTS tx_category_idx ON transactions (category_id, deleted_at)');
+          await customStatement('CREATE INDEX IF NOT EXISTS tx_wallet_idx ON transactions (wallet_id, deleted_at)');
+          await customStatement('CREATE INDEX IF NOT EXISTS tx_to_wallet_idx ON transactions (to_wallet_id, deleted_at)');
+          await customStatement('CREATE INDEX IF NOT EXISTS budgets_month_idx ON budgets (month_key, deleted_at)');
           // Update default wallet names to multi-language English identifiers if still using legacy Indonesian names
           await customStatement("UPDATE wallets SET name = 'Main Account' WHERE id = 'wallet-main' AND name = 'Rekening Utama'");
           await customStatement("UPDATE wallets SET name = 'Digital Bank' WHERE id = 'wallet-digital' AND name = 'Bank Digital'");
@@ -453,6 +458,50 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  /// Mencari transaksi langsung pada database SQLite berdasarkan catatan (note) atau kategori,
+  /// dengan filter tipe transaksi dan rentang tanggal opsional.
+  Stream<List<TransactionEntry>> watchSearchTransactions({
+    required String query,
+    TxType? type,
+    DateTime? start,
+    DateTime? end,
+    int limit = 100,
+  }) {
+    final pattern = '%${query.toLowerCase()}%';
+    final q = select(transactions).join([
+      innerJoin(categories, categories.id.equalsExp(transactions.categoryId)),
+    ]);
+
+    q.where(transactions.deletedAt.isNull());
+
+    if (query.trim().isNotEmpty) {
+      q.where(
+        transactions.note.lower().like(pattern) |
+        categories.name.lower().like(pattern),
+      );
+    }
+
+    if (type != null) {
+      q.where(transactions.type.equalsValue(type));
+    }
+
+    if (start != null) {
+      q.where(transactions.date.isBiggerOrEqualValue(start));
+    }
+    if (end != null) {
+      q.where(transactions.date.isSmallerThanValue(end));
+    }
+
+    q.orderBy([
+      OrderingTerm.desc(transactions.date),
+      OrderingTerm.desc(transactions.createdAt),
+    ]);
+
+    q.limit(limit);
+
+    return q.watch().map((rows) => rows.map((row) => row.readTable(transactions)).toList());
+  }
+
   Future<void> addTransaction({
     required int amount,
     required TxType type,
@@ -709,7 +758,7 @@ class AppDatabase extends _$AppDatabase {
       }
       await delete(categories).go();
       await delete(wallets).go();
-      await delete(pendingTransactions).go();
+      await customStatement('DROP TABLE IF EXISTS pending_transactions');
       await _seedCategories();
       await _seedWallets();
     });
@@ -893,25 +942,6 @@ class AppDatabase extends _$AppDatabase {
           },
         ),
       ];
-
-  // ---------------------------------------------------------------------------
-  // Pending Transactions (Auto-Track Inbox)
-  // ---------------------------------------------------------------------------
-
-  Stream<List<PendingTransaction>> watchPendingTransactions() =>
-      (select(pendingTransactions)..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).watch();
-
-  Future<List<PendingTransaction>> getPendingTransactions() =>
-      (select(pendingTransactions)..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).get();
-
-  Future<int> insertPendingTransaction(PendingTransactionsCompanion companion) =>
-      into(pendingTransactions).insert(companion);
-
-  Future<int> deletePendingTransaction(String id) =>
-      (delete(pendingTransactions)..where((t) => t.id.equals(id))).go();
-
-  Future<int> clearAllPendingTransactions() =>
-      delete(pendingTransactions).go();
 
   // ---------------------------------------------------------------------------
   // Recurring Rules (Transaksi Berulang)

@@ -21,8 +21,6 @@ import '../transactions/transaction_form.dart';
 import '../transactions/transaction_tile.dart';
 import '../../data/cloud.dart';
 import '../../data/cloud_sync.dart';
-import '../../data/auto_tracker.dart';
-import 'pending_inbox_card.dart';
 import '../../data/budget_rule.dart';
 import '../../data/update_checker.dart';
 
@@ -39,7 +37,6 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     Future.microtask(() {
-      ref.read(autoTrackerServiceProvider).syncPendingFromNative();
       final user = ref.read(currentUserProvider);
       if (user != null) {
         ref.read(autoSyncServiceProvider).startSync(user.uid);
@@ -56,7 +53,6 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      ref.read(autoTrackerServiceProvider).syncPendingFromNative();
       ref.read(autoSyncServiceProvider).triggerTwoWaySync();
     }
   }
@@ -140,7 +136,6 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                         onRefresh: () async {
                           await Future.wait([
                             ref.read(autoSyncServiceProvider).triggerTwoWaySync(),
-                            ref.read(autoTrackerServiceProvider).syncPendingFromNative(),
                             UpdateCheckerService.checkAndNotify(ref, context: context),
                           ]);
                         },
@@ -172,8 +167,6 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                               expense: expense,
                               savedPct: savedPct,
                             ),
-                            const SizedBox(height: 14),
-                            const PendingInboxCard(),
                             const SizedBox(height: 14),
                             const AccountsSummaryCard(),
                             const SizedBox(height: 14),
