@@ -44,12 +44,31 @@ final availableUpdateProvider =
     );
 
 class UpdateCheckerService {
-  /// Versi aplikasi saat ini. Selalu disinkronkan dengan pubspec.yaml.
-  static const currentVersion = '1.11.14';
+  /// Versi fallback jika native method channel gagal membaca PackageManager.
+  static const fallbackVersion = '1.11.16';
+  static String _resolvedVersion = fallbackVersion;
+
+  /// Versi aplikasi saat ini. Dinamis dibaca dari native PackageManager Android atau fallback.
+  static String get currentVersion => _resolvedVersion;
 
   static const MethodChannel _channel = MethodChannel(
     'com.example.wall_o_pay/notifications',
   );
+
+  /// Membaca versi terpasang langsung dari native Android PackageManager (versionName di pubspec.yaml).
+  static Future<String> getInstalledVersion() async {
+    try {
+      final nativeVersion = await _channel.invokeMethod<String>('getAppVersion');
+      if (nativeVersion != null && nativeVersion.isNotEmpty) {
+        final clean = nativeVersion.split('+').first.trim();
+        _resolvedVersion = clean;
+        return clean;
+      }
+    } catch (e) {
+      debugPrint('Failed to get native version: $e');
+    }
+    return _resolvedVersion;
+  }
 
   static const String _latestReleaseApi =
       'https://api.github.com/repos/hyenavia/wall-o-pay/releases/latest';
@@ -107,10 +126,11 @@ class UpdateCheckerService {
   /// Memeriksa apakah ada pembaruan rilis terbaru di GitHub.
   static Future<AppUpdateInfo?> checkForUpdate() async {
     try {
+      final installedVersion = await getInstalledVersion();
       final client = HttpClient();
       client.connectionTimeout = const Duration(seconds: 8);
       final request = await client.getUrl(Uri.parse(_latestReleaseApi));
-      request.headers.set('User-Agent', 'Wall-o-Pay-Android/$currentVersion');
+      request.headers.set('User-Agent', 'Wall-o-Pay-Android/$installedVersion');
       request.headers.set('Accept', 'application/vnd.github.v3+json');
 
       final response = await request.close();
@@ -143,10 +163,10 @@ class UpdateCheckerService {
         }
       }
 
-      final hasUpdate = _isVersionGreater(cleanTag, currentVersion);
+      final hasUpdate = _isVersionGreater(cleanTag, installedVersion);
 
       return AppUpdateInfo(
-        currentVersion: currentVersion,
+        currentVersion: installedVersion,
         latestVersion: cleanTag,
         releaseName: releaseName,
         releaseNotes: releaseNotes,

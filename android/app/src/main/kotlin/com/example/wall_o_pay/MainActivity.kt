@@ -130,6 +130,19 @@ class MainActivity : FlutterActivity() {
                     }
                     result.success(true)
                 }
+                "getAppVersion" -> {
+                    try {
+                        val pInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            packageManager.getPackageInfo(packageName, android.content.pm.PackageManager.PackageInfoFlags.of(0))
+                        } else {
+                            @Suppress("DEPRECATION")
+                            packageManager.getPackageInfo(packageName, 0)
+                        }
+                        result.success(pInfo.versionName)
+                    } catch (e: Exception) {
+                        result.error("VERSION_ERROR", e.message, null)
+                    }
+                }
                 else -> result.notImplemented()
             }
         }

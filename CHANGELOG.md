@@ -4,6 +4,16 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.16] - 2026-11-02
+
+### Fixed
+- **Dynamically Resolved Installed App Version (Looping Update Prompt Fix):**
+  - Integrated native Android `PackageManager.getPackageInfo` method channel (`getAppVersion`) to dynamically query the real installed app version (`versionName` set from `pubspec.yaml` by Gradle).
+  - Resolved the persistent looping update prompt where updating to `v1.11.15` continued prompting the user to update due to a hardcoded version string in `UpdateCheckerService`.
+  - Added startup initialization of the resolved version in `main.dart` and aligned in-app changelog entries for `v1.11.15` and `v1.11.16`.
+
+---
+
 ## [1.11.15] - 2026-11-02
 
 ### Added

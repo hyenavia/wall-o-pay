@@ -16,6 +16,9 @@ Setiap kali melakukan modifikasi kode, penambahan fitur, pembaruan UI, atau perb
 3. **Sinkronkan Versi pada Dokumentasi**:
    - Perbarui badge versi dan teks terkait di `README.md`.
    - Perbarui teks badge versi dan link download di `docs/index.html` dan variabel `APP_VERSION` di `docs/script.js`.
+4. **Sinkronkan Versi pada Layanan & In-App Changelog**:
+   - Perbarui konstanta fallback di `lib/data/update_checker.dart` (`fallbackVersion = 'X.Y.Z'`).
+   - Tambahkan entri rilis pada `lib/features/settings/app_changelog.dart` (`AppChangelog.releases`) dan tandai versi terbaru dengan `isCurrent: true`.
 
 ### Aturan Penomoran Versi (Semantic Versioning)
 > [!IMPORTANT]

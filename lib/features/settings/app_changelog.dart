@@ -41,10 +41,46 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.14',
+      version: '1.11.16',
       dateEn: 'November 2, 2026',
       dateId: '2 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Resolved looping update prompts by dynamically detecting the installed version via native Android PackageManager.',
+          textId: 'Mengatasi pop-up pembaruan berulang dengan mendeteksi versi aplikasi terpasang secara dinamis via PackageManager native Android.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.15',
+      dateEn: 'November 2, 2026',
+      dateId: '2 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Direct database SQL transaction search, App Switcher Privacy Shield (FLAG_SECURE), and automatic rollover budget.',
+          textId: 'Pencarian transaksi langsung SQL database, Pelindung Privasi App Switcher (FLAG_SECURE), dan rollover sisa anggaran otomatis.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Database indexing optimization and modularized Budget & Settings architecture.',
+          textId: 'Optimasi indeks database dan modularisasi arsitektur Anggaran & Pengaturan.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Decommissioned sensitive background notification tracking services and cleaned pending transactions schema.',
+          textId: 'Menonaktifkan layanan pelacak notifikasi latar belakang dan membersihkan skema transaksi tertunda.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.14',
+      dateEn: 'November 2, 2026',
+      dateId: '2 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

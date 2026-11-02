@@ -11,6 +11,7 @@ import 'data/cloud.dart';
 import 'data/lock.dart';
 import 'data/notifications.dart';
 import 'data/prefs.dart';
+import 'data/update_checker.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -41,6 +42,13 @@ Future<void> main() async {
     await Lock.instance.load();
   } catch (e) {
     debugPrint('Error loading lock state: $e');
+  }
+
+  // Muat versi terpasang dari native Android package manager.
+  try {
+    await UpdateCheckerService.getInstalledVersion();
+  } catch (e) {
+    debugPrint('Error loading app version: $e');
   }
 
   runApp(
