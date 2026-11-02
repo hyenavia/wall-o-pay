@@ -4,6 +4,19 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.17] - 2026-11-03
+
+### Added
+- **Gaussian Blur Balance Masking:**
+  - Replaced dot-masking (`Rp ••••••`) with native `ImageFiltered` Gaussian blur (`sigma: 8.0`) when toggling balance hiding.
+  - Applied blur to Total Balance, Period Cashflow, Income, Expense, and individual account balances in Wallets & Accounts without causing layout shifts.
+
+### Changed
+- **Home Balance Card Header Cleanliness:**
+  - Removed redundant "All Accounts" pill badge in the balance card header to eliminate visual crowding and collision with the savings percentage badge.
+
+---
+
 ## [1.11.16] - 2026-11-02
 
 ### Fixed

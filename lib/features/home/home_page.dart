@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -475,7 +477,9 @@ class _BalanceCard extends ConsumerWidget {
     final isSurplus = periodFlow >= 0;
     final hidden = ref.watch(hideBalanceProvider);
 
-    String money(int v) => hidden ? 'Rp ••••••' : rupiah(v);
+    Widget blurred(Widget child) => hidden
+        ? ClipRect(child: ImageFiltered(imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), child: child))
+        : child;
 
     return HeroCard(
       child: Column(
@@ -484,28 +488,12 @@ class _BalanceCard extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: Row(
-                  children: [
-                    Text(
-                      context.tr('Total Balance'),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white70,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        context.tr('All Accounts'),
-                        style: const TextStyle(fontSize: 10, color: Colors.white70, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  context.tr('Total Balance'),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               if (savedPct != null) ...[
@@ -536,11 +524,13 @@ class _BalanceCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 2),
-          Text(
-            money(totalBalance),
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
+          blurred(
+            Text(
+              rupiah(totalBalance),
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
             ),
           ),
           const SizedBox(height: 10),
@@ -563,12 +553,14 @@ class _BalanceCard extends ConsumerWidget {
                   '$periodLabel: ',
                   style: const TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w500),
                 ),
-                Text(
-                  hidden ? '••••••' : (isSurplus ? '+${rupiah(periodFlow)}' : rupiah(periodFlow)),
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: isSurplus ? const Color(0xFF6EE7B7) : const Color(0xFFFCA5A5),
+                blurred(
+                  Text(
+                    isSurplus ? '+${rupiah(periodFlow)}' : rupiah(periodFlow),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: isSurplus ? const Color(0xFF6EE7B7) : const Color(0xFFFCA5A5),
+                    ),
                   ),
                 ),
               ],
@@ -587,7 +579,8 @@ class _BalanceCard extends ConsumerWidget {
                   child: _FlowTile(
                     icon: Icons.arrow_downward,
                     label: context.tr('Income'),
-                    value: money(income),
+                    value: rupiah(income),
+                    blurred: hidden,
                   ),
                 ),
                 Container(width: 1, height: 36, color: Colors.white24),
@@ -596,7 +589,8 @@ class _BalanceCard extends ConsumerWidget {
                   child: _FlowTile(
                     icon: Icons.arrow_upward,
                     label: context.tr('Expense'),
-                    value: money(expense),
+                    value: rupiah(expense),
+                    blurred: hidden,
                   ),
                 ),
               ],
@@ -609,15 +603,25 @@ class _BalanceCard extends ConsumerWidget {
 }
 
 class _FlowTile extends StatelessWidget {
-  const _FlowTile({required this.icon, required this.label, required this.value});
+  const _FlowTile({required this.icon, required this.label, required this.value, this.blurred = false});
 
   final IconData icon;
   final String label;
   final String value;
+  final bool blurred;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final valueWidget = Text(
+      value,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: theme.textTheme.bodyMedium?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
+      ),
+    );
     return Row(
       children: [
         CircleAvatar(
@@ -632,15 +636,9 @@ class _FlowTile extends StatelessWidget {
             children: [
               Text(label,
                   style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70)),
-              Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
+              blurred
+                  ? ClipRect(child: ImageFiltered(imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), child: valueWidget))
+                  : valueWidget,
             ],
           ),
         ),

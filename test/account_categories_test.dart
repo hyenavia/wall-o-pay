@@ -104,7 +104,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
-      expect(find.text('Rp ••••••'), findsWidgets);
+      // Amounts are now blurred via ImageFiltered instead of replaced with dots
+      expect(find.byType(ImageFiltered), findsWidgets);
 
       // Tap again to restore balance visibility
       await tester.tap(find.byIcon(Icons.visibility_off_outlined));

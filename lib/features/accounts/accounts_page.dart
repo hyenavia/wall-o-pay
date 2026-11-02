@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -58,7 +60,9 @@ class AccountsSummaryCard extends ConsumerWidget {
 
     if (accounts.isEmpty) return const SizedBox.shrink();
 
-    String money(int val) => hide ? 'Rp ••••••' : rupiah(val);
+    Widget blurred(Widget child) => hide
+        ? ClipRect(child: ImageFiltered(imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), child: child))
+        : child;
 
     return AppCard(
       onTap: () => Navigator.push(
@@ -87,12 +91,14 @@ class AccountsSummaryCard extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      context.tr('{count} active accounts • {total}', {
-                        'count': accounts.length,
-                        'total': money(total),
-                      }),
-                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                    blurred(
+                      Text(
+                        context.tr('{count} active accounts • {total}', {
+                          'count': accounts.length,
+                          'total': rupiah(total),
+                        }),
+                        style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                      ),
                     ),
                   ],
                 ),
@@ -113,9 +119,11 @@ class AccountsSummaryCard extends ConsumerWidget {
                       color: Color(a.colorValue).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      '${context.tr(a.name)}: ${money(balances[a.id] ?? 0)}',
-                      style: theme.textTheme.labelSmall,
+                    child: blurred(
+                      Text(
+                        '${context.tr(a.name)}: ${rupiah(balances[a.id] ?? 0)}',
+                        style: theme.textTheme.labelSmall,
+                      ),
                     ),
                   ),
               ],
@@ -133,17 +141,27 @@ class _AccountCategoryHeader extends StatelessWidget {
     required this.icon,
     required this.count,
     required this.subtotalFormatted,
+    this.hide = false,
   });
 
   final String title;
   final IconData icon;
   final int count;
   final String subtotalFormatted;
+  final bool hide;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurface.withValues(alpha: 0.65);
+
+    final subtotalWidget = Text(
+      subtotalFormatted,
+      style: theme.textTheme.bodyMedium?.copyWith(
+        fontWeight: FontWeight.w800,
+        color: muted,
+      ),
+    );
 
     return Padding(
       padding: const EdgeInsets.only(top: 22, bottom: 10),
@@ -180,13 +198,9 @@ class _AccountCategoryHeader extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          Text(
-            subtotalFormatted,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: muted,
-            ),
-          ),
+          hide
+              ? ClipRect(child: ImageFiltered(imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), child: subtotalWidget))
+              : subtotalWidget,
         ],
       ),
     );
@@ -212,7 +226,11 @@ class AccountsPage extends ConsumerWidget {
       orElse: () => const <TransactionEntry>[],
     );
 
-    String money(int val) => hide ? 'Rp ••••••' : rupiah(val);
+    String money(int val) => rupiah(val);
+
+    Widget blurred(Widget child) => hide
+        ? ClipRect(child: ImageFiltered(imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), child: child))
+        : child;
 
     return Scaffold(
       appBar: pageAppBar(
@@ -286,11 +304,13 @@ class AccountsPage extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      money(total),
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                    blurred(
+                      Text(
+                        money(total),
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -317,6 +337,7 @@ class AccountsPage extends ConsumerWidget {
                   subtotalFormatted: money(
                     grouped[cat]!.fold<int>(0, (sum, a) => sum + (balances[a.id] ?? 0)),
                   ),
+                  hide: hide,
                 ),
                 for (final a in grouped[cat]!)
                   Padding(
@@ -346,10 +367,12 @@ class AccountsPage extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          Text(
-                            money(balances[a.id] ?? 0),
-                            style: theme.textTheme.bodyLarge
-                                ?.copyWith(fontWeight: FontWeight.w800),
+                          blurred(
+                            Text(
+                              money(balances[a.id] ?? 0),
+                              style: theme.textTheme.bodyLarge
+                                  ?.copyWith(fontWeight: FontWeight.w800),
+                            ),
                           ),
                         ],
                       ),
@@ -375,8 +398,10 @@ class AccountsPage extends ConsumerWidget {
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(money(t.amount),
-                                  style: const TextStyle(fontWeight: FontWeight.w700)),
+                              blurred(
+                                Text(money(t.amount),
+                                    style: const TextStyle(fontWeight: FontWeight.w700)),
+                              ),
                               IconButton(
                                 tooltip: context.tr('Delete'),
                                 icon: const Icon(Icons.delete_outline, size: 20),

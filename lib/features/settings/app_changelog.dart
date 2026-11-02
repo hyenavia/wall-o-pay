@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '1.11.17',
+      dateEn: 'November 3, 2026',
+      dateId: '3 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Modern Gaussian blur effect for hidden balances across Home overview and Wallets & Accounts.',
+          textId: 'Efek Gaussian blur modern saat menyembunyikan saldo di kartu Beranda dan Kantong & Rekening.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Cleaned up Home balance card header by removing redundant "All Accounts" badge to avoid text collisions.',
+          textId: 'Menghapus badge "Semua Rekening" yang redundan di kartu saldo utama agar tampilan lebih bersih dan tidak bertabrakan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '1.11.16',
       dateEn: 'November 2, 2026',
       dateId: '2 November 2026',
-      isCurrent: true,
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,
