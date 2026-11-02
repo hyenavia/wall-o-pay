@@ -264,7 +264,8 @@ class AccountsPage extends ConsumerWidget {
           final activeCategories =
               categoryOrder.where((cat) => grouped[cat]!.isNotEmpty).toList();
 
-          return ListView(
+          return FadedScrollBody(
+            child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
             children: [
               HeroCard(
@@ -390,6 +391,7 @@ class AccountsPage extends ConsumerWidget {
                 ),
               ],
             ],
+            ),
           );
         },
       ),

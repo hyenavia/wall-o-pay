@@ -54,9 +54,10 @@ class SettingsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: pageAppBar(context, title: Text(context.tr('Settings'))),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-        children: [
+      body: FadedScrollBody(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          children: [
           AppCard(
             padding: const EdgeInsets.all(14),
             onTap: () => Navigator.push(
@@ -704,6 +705,7 @@ class SettingsPage extends ConsumerWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }

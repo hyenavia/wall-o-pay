@@ -4,6 +4,15 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.13] - 2026-11-02
+
+### Changed
+- **Unified Smooth Scroll Transition Across All Screens:**
+  - Introduced `FadedScrollBody` in `lib/core/widgets.dart` powered by `NotificationListener<ScrollNotification>` and `ShaderMask`.
+  - Standardized smooth feathering and fade-out at the top edge of all major screens (Transactions, Budget, Insights, More, Settings, Accounts, Goals, Debts, Recurring, Security, and Profile), creating a cohesive, luxurious scrolling experience throughout the entire app without harsh edge clipping.
+
+---
+
 ## [1.11.12] - 2026-11-02
 
 ### Fixed

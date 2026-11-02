@@ -42,7 +42,8 @@ class SecurityPage extends StatelessWidget {
       body: ValueListenableBuilder<AppLockState>(
         valueListenable: Lock.instance.state,
         builder: (context, st, _) {
-          return ListView(
+          return FadedScrollBody(
+            child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
             children: [
               AppCard(
@@ -113,6 +114,7 @@ class SecurityPage extends StatelessWidget {
                 ),
               ),
             ],
+            ),
           );
         },
       ),

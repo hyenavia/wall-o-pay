@@ -28,7 +28,8 @@ class GoalsPage extends ConsumerWidget {
           final active = goals.where((g) => g.currentAmount < g.targetAmount).toList();
           final done = goals.where((g) => g.currentAmount >= g.targetAmount).toList();
 
-          return ListView(
+          return FadedScrollBody(
+            child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
             children: [
               HeroCard(
@@ -103,6 +104,7 @@ class GoalsPage extends ConsumerWidget {
                   ),
               ],
             ],
+            ),
           );
         },
       ),

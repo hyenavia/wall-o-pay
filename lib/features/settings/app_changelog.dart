@@ -41,10 +41,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.12',
+      version: '1.11.13',
       dateEn: 'November 2, 2026',
       dateId: '2 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Unified smooth fade scroll transition across all screens in the app for a cohesive, premium experience.',
+          textId: 'Menyeragamkan efek transisi scroll pudar halus di seluruh halaman aplikasi agar pengalaman visual konsisten dan mulus.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.12',
+      dateEn: 'November 2, 2026',
+      dateId: '2 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

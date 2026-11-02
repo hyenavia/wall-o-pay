@@ -68,9 +68,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     return Scaffold(
       appBar: pageAppBar(context, title: Text(context.tr('Profile'))),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-        children: [
+      body: FadedScrollBody(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          children: [
           Center(
             child: Stack(
               children: [
@@ -146,6 +147,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           const SizedBox(height: 20),
           FilledButton(onPressed: _save, child: Text(context.tr('Save'))),
         ],
+        ),
       ),
     );
   }

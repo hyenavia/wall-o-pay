@@ -38,7 +38,8 @@ class BudgetPage extends ConsumerWidget {
         ),
         data: (all) {
 
-          return ListView(
+          return FadedScrollBody(
+            child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
             children: [
               const SizedBox(height: 6),
@@ -324,6 +325,7 @@ class BudgetPage extends ConsumerWidget {
                 ),
               ),
             ],
+            ),
           );
         },
       ),
