@@ -8,6 +8,7 @@ import '../categories/categories_page.dart';
 import '../debts/debts_page.dart';
 import '../goals/goals_page.dart';
 import '../recurring/recurring_page.dart';
+import '../settings/module_sheet.dart';
 import '../settings/report_dialog.dart';
 import '../settings/settings_page.dart';
 import '../transactions/transaction_form.dart';
@@ -42,6 +43,12 @@ class MorePage extends StatelessWidget {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
+                tile(
+                  Icons.widgets_outlined,
+                  context.tr('Active Modules & Features'),
+                  context.tr('Customize which modules appear on your home screen and menus.'),
+                  () => showModuleSelectionSheet(context),
+                ),
                 tile(
                   Icons.account_balance_wallet_outlined,
                   context.tr('Accounts'),

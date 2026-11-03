@@ -18,12 +18,15 @@ import '../profile/profile_page.dart';
 import '../settings/settings_page.dart';
 import '../debts/debts_page.dart';
 import '../goals/goals_page.dart';
+import '../recurring/recurring_page.dart';
 import '../more/more_page.dart';
+import 'daily_financial_pulse_card.dart';
 import '../transactions/transaction_form.dart';
 import '../transactions/transaction_tile.dart';
 import '../../data/cloud.dart';
 import '../../data/cloud_sync.dart';
 import '../../data/budget_rule.dart';
+import '../../data/module_prefs.dart';
 import '../../data/update_checker.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -72,6 +75,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
     final name = ref.watch(displayNameProvider);
     final muted = scheme.onSurface.withValues(alpha: 0.65);
     final updateInfo = ref.watch(availableUpdateProvider);
+    final modules = ref.watch(modulePrefsProvider);
 
     void openProfile() => Navigator.push(
           context,
@@ -126,6 +130,16 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                           balance > 0 && daysLeft > 0 ? balance ~/ daysLeft : 0;
                       final isCurrent = period.isCurrent;
 
+                      final now = DateTime.now();
+                      final todayStart = DateTime(now.year, now.month, now.day);
+                      final todayEnd = todayStart.add(const Duration(days: 1));
+                      final todayExpense = txs
+                          .where((t) =>
+                              t.type == TxType.expense &&
+                              !t.date.isBefore(todayStart) &&
+                              t.date.isBefore(todayEnd))
+                          .fold<int>(0, (s, t) => s + t.amount);
+
                       final budgetTitle = isCurrent
                           ? (isWeekly ? "This Week's Budget" : "This Month's Budget")
                           : (isWeekly ? 'Weekly Budget' : 'Monthly Budget');
@@ -172,123 +186,108 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                             const SizedBox(height: 14),
                             const AccountsSummaryCard(),
                             const SizedBox(height: 14),
-                            AppCard(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          context.tr(budgetTitle),
-                                          style: theme.textTheme.bodyLarge
-                                              ?.copyWith(fontWeight: FontWeight.w700),
-                                        ),
-                                      ),
-                                      if (totalBudget > 0)
-                                        Text(
-                                          context.tr('{pct}% used', {'pct': (ratio * 100).round()}),
-                                          style: theme.textTheme.bodySmall?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                            color: budgetColor(ratio, scheme),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  if (totalBudget > 0) ...[
-                                    AppProgressBar(value: ratio, color: budgetColor(ratio, scheme)),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      context.tr('{spent} of {total}', {
-                                        'spent': rupiah(budgetSpent),
-                                        'total': rupiah(totalBudget),
-                                      }),
-                                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                                    ),
-                                  ] else
+                            if (modules.budget) ...[
+                              AppCard(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Row(
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            context.tr('No budget set yet.'),
-                                            style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                                          ),
-                                        ),
-                                        TextButton(
-                                          onPressed: () => ref.read(tabIndexProvider.notifier).set(2),
-                                          child: Text(context.tr('Set budget')),
-                                        ),
-                                      ],
-                                    ),
-                                ],
-                              ),
-                            ),
-                            if (isCurrent) ...[
-                              const SizedBox(height: 14),
-                              AppCard(
-                                child: Row(
-                                  children: [
-                                    CategoryBadge(
-                                      icon: Icons.today_outlined,
-                                      color: scheme.primary,
-                                      size: 40,
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            context.tr('Safe daily spend'),
-                                            style: theme.textTheme.bodyMedium
+                                            context.tr(budgetTitle),
+                                            style: theme.textTheme.bodyLarge
                                                 ?.copyWith(fontWeight: FontWeight.w700),
                                           ),
+                                        ),
+                                        if (totalBudget > 0)
                                           Text(
-                                            balance > 0
-                                                ? (daysLeft == 1
-                                                    ? context.tr('1 day left')
-                                                    : context.tr('{n} days left', {'n': daysLeft}))
-                                                : context.tr('Expenses already exceed income'),
-                                            style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                                            context.tr('{pct}% used', {'pct': (ratio * 100).round()}),
+                                            style: theme.textTheme.bodySmall?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                              color: budgetColor(ratio, scheme),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    if (totalBudget > 0) ...[
+                                      AppProgressBar(value: ratio, color: budgetColor(ratio, scheme)),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        context.tr('{spent} of {total}', {
+                                          'spent': rupiah(budgetSpent),
+                                          'total': rupiah(totalBudget),
+                                        }),
+                                        style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                                      ),
+                                    ] else
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              context.tr('No budget set yet.'),
+                                              style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                                            ),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => ref.read(tabIndexProvider.notifier).set(2),
+                                            child: Text(context.tr('Set budget')),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                    if (balance > 0)
-                                      Text(
-                                        context.tr('{amount}/day', {'amount': rupiah(dailyAllowance)}),
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(fontWeight: FontWeight.w800),
-                                      ),
                                   ],
                                 ),
+                              ),
+                              const SizedBox(height: 14),
+                            ],
+                            if (isCurrent) ...[
+                              DailyFinancialPulseCard(
+                                dailyAllowance: dailyAllowance,
+                                todayExpense: todayExpense,
+                                daysLeft: daysLeft,
+                                balance: balance,
+                                totalBudget: totalBudget,
+                                budgetSpent: budgetSpent,
+                                txCount: txs.length,
                               ),
                             ],
                             const SizedBox(height: 18),
                             Row(
                               children: [
-                                _QuickAction(
-                                  icon: Icons.swap_horiz_rounded,
-                                  label: context.tr('Transfer'),
-                                  onTap: () => showTransactionForm(context, initialType: TxType.transfer),
-                                ),
-                                _QuickAction(
-                                  icon: Icons.flag_outlined,
-                                  label: context.tr('Goals'),
-                                  onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute<void>(builder: (_) => const GoalsPage()),
+                                if (modules.transfer)
+                                  _QuickAction(
+                                    icon: Icons.swap_horiz_rounded,
+                                    label: context.tr('Transfer'),
+                                    onTap: () => showTransactionForm(context, initialType: TxType.transfer),
                                   ),
-                                ),
-                                _QuickAction(
-                                  icon: Icons.handshake_outlined,
-                                  label: context.tr('Debts'),
-                                  onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute<void>(builder: (_) => const DebtsPage()),
+                                if (modules.goals)
+                                  _QuickAction(
+                                    icon: Icons.flag_outlined,
+                                    label: context.tr('Goals'),
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute<void>(builder: (_) => const GoalsPage()),
+                                    ),
                                   ),
-                                ),
+                                if (modules.debts)
+                                  _QuickAction(
+                                    icon: Icons.handshake_outlined,
+                                    label: context.tr('Debts'),
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute<void>(builder: (_) => const DebtsPage()),
+                                    ),
+                                  ),
+                                if (modules.recurring)
+                                  _QuickAction(
+                                    icon: Icons.event_repeat_rounded,
+                                    label: context.tr('Recurring'),
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute<void>(builder: (_) => const RecurringPage()),
+                                    ),
+                                  ),
                                 _QuickAction(
                                   icon: Icons.apps_rounded,
                                   label: context.tr('More'),

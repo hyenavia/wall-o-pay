@@ -41,10 +41,51 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.17',
+      version: '1.11.19',
       dateEn: 'November 3, 2026',
       dateId: '3 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Modular feature selection step in onboarding allowing new users to customize enabled modules.',
+          textId: 'Langkah pemilihan modul pada onboarding awal yang memungkinkan pengguna menyesuaikan fitur yang aktif.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Dynamic Home quick actions and budget dashboard that automatically adapt to active modules.',
+          textId: 'Aksi cepat Beranda dan kartu anggaran dinamis yang otomatis menyesuaikan dengan modul yang aktif.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Active Modules & Features sheet accessible from Settings and More menus.',
+          textId: 'Lembar kelola Modul & Fitur Aktif yang dapat diakses kapan saja dari menu Pengaturan dan Lainnya.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.18',
+      dateEn: 'November 3, 2026',
+      dateId: '3 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Daily Financial Pulse card with human-centered Safe, Caution, and Limit status indicators on Home screen.',
+          textId: 'Kartu Status Finansial Harian dengan indikator visual humanis Aman, Waspada, dan Batas pada layar Beranda.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Real-time daily quota tracker comparing today\'s spending velocity against remaining days and budget caps.',
+          textId: 'Pelacak kuota harian waktu nyata yang membandingkan laju belanja hari ini terhadap sisa hari dan batas anggaran.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.17',
+      dateEn: 'November 3, 2026',
+      dateId: '3 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

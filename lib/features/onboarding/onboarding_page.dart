@@ -6,13 +6,15 @@ import '../../core/brand.dart';
 import '../../core/format.dart';
 import '../../core/l10n.dart';
 import '../../core/period.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import '../../data/module_prefs.dart';
 import '../../data/prefs.dart';
 import '../../data/providers.dart';
 import '../../data/recurring_service.dart';
 import '../../data/tables.dart' show RecurFrequency, TxType;
 
-/// Pengenalan awal: periode, uang saku, saldo awal, dan anggaran pertama.
+/// Pengenalan awal: periode, modul pilihan, saldo awal, uang saku, dan anggaran pertama.
 class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key, required this.onDone});
 
@@ -23,9 +25,15 @@ class OnboardingPage extends ConsumerStatefulWidget {
 }
 
 class _OnboardingPageState extends ConsumerState<OnboardingPage> {
-  static const _lastStep = 3;
+  static const _lastStep = 4;
 
   int _step = 0;
+  bool _moduleGoals = true;
+  bool _moduleDebts = true;
+  bool _moduleRecurring = true;
+  bool _moduleTransfer = true;
+  bool _moduleBudget = true;
+
   bool _hasAllowance = true;
   int _dayOfWeek = DateTime.now().weekday;
   int _dayOfMonth = 1;
@@ -54,11 +62,20 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       final db = ref.read(databaseProvider);
       final type = ref.read(appPrefsProvider).periodType;
 
+      // Simpan preferensi modul yang dipilih pengguna
+      await ref.read(modulePrefsProvider.notifier).setAll(
+            goals: _moduleGoals,
+            debts: _moduleDebts,
+            recurring: _moduleRecurring,
+            transfer: _moduleTransfer,
+            budget: _moduleBudget,
+          );
+
       final cash = parseAmount(_cash.text);
       if (cash > 0) await db.updateWalletInitialBalance('wallet-cash', cash);
 
       final allowance = parseAmount(_allowance.text);
-      if (_hasAllowance && allowance > 0) {
+      if (_moduleRecurring && _hasAllowance && allowance > 0) {
         final now = DateTime.now();
         await db.addRecurringRule(
           title: trG('Allowance'),
@@ -78,13 +95,15 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         await RecurringService.checkAndGenerateDue(db);
       }
 
-      final key = Period.containing(type, DateTime.now()).key;
-      for (final e in {
-        'cat-exp-food': parseAmount(_food.text),
-        'cat-exp-transport': parseAmount(_transport.text),
-        'cat-exp-fun': parseAmount(_fun.text),
-      }.entries) {
-        if (e.value > 0) await db.setBudget(e.key, key, e.value);
+      if (_moduleBudget) {
+        final key = Period.containing(type, DateTime.now()).key;
+        for (final e in {
+          'cat-exp-food': parseAmount(_food.text),
+          'cat-exp-transport': parseAmount(_transport.text),
+          'cat-exp-fun': parseAmount(_fun.text),
+        }.entries) {
+          if (e.value > 0) await db.setBudget(e.key, key, e.value);
+        }
       }
     } catch (e, st) {
       debugPrint('Error finishing onboarding: $e\n$st');
@@ -103,9 +122,52 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     );
   }
 
+  Widget _moduleItem({
+    required IconData icon,
+    required String title,
+    required String desc,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final muted = scheme.onSurface.withValues(alpha: 0.65);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: value ? AppColors.sage.withValues(alpha: 0.5) : scheme.outlineVariant,
+          width: value ? 1.4 : 1.0,
+        ),
+      ),
+      child: CheckboxListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+        secondary: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: (value ? AppColors.sage : muted).withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: value ? AppColors.sage : muted, size: 22),
+        ),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+        subtitle: Text(desc, style: TextStyle(fontSize: 12, color: muted)),
+        value: value,
+        activeColor: AppColors.sage,
+        checkColor: AppColors.ink,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        onChanged: (v) => onChanged(v ?? false),
+      ),
+    );
+  }
+
   Widget _body(BuildContext context) {
     final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.65);
+    final scheme = theme.colorScheme;
+    final muted = scheme.onSurface.withValues(alpha: 0.65);
     final type = ref.watch(appPrefsProvider.select((p) => p.periodType));
     final weekly = type == PeriodType.weekly;
 
@@ -133,6 +195,90 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           ],
         );
       case 1:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            heading(
+              context.tr('Choose your features'),
+              context.tr('Pick the modules you want to use. You can change them anytime in Settings.'),
+            ),
+            Row(
+              children: [
+                ActionChip(
+                  avatar: const Icon(Icons.done_all_rounded, size: 16),
+                  label: Text(context.tr('All Features')),
+                  onPressed: () => setState(() {
+                    _moduleGoals = true;
+                    _moduleDebts = true;
+                    _moduleRecurring = true;
+                    _moduleTransfer = true;
+                    _moduleBudget = true;
+                  }),
+                ),
+                const SizedBox(width: 8),
+                ActionChip(
+                  avatar: const Icon(Icons.flash_on_rounded, size: 16),
+                  label: Text(context.tr('Minimalist')),
+                  onPressed: () => setState(() {
+                    _moduleGoals = false;
+                    _moduleDebts = false;
+                    _moduleRecurring = false;
+                    _moduleTransfer = false;
+                    _moduleBudget = false;
+                  }),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            _moduleItem(
+              icon: Icons.flag_outlined,
+              title: context.tr('Savings Goals'),
+              desc: context.tr('Set targets for emergency funds, gadgets, or vacations.'),
+              value: _moduleGoals,
+              onChanged: (v) => setState(() => _moduleGoals = v),
+            ),
+            _moduleItem(
+              icon: Icons.handshake_outlined,
+              title: context.tr('Debts & Split Bills'),
+              desc: context.tr('Track who owes whom and split group dining bills.'),
+              value: _moduleDebts,
+              onChanged: (v) => setState(() => _moduleDebts = v),
+            ),
+            _moduleItem(
+              icon: Icons.event_repeat_rounded,
+              title: context.tr('Recurring Schedules'),
+              desc: context.tr('Automate allowance, subscriptions, and rent reminders.'),
+              value: _moduleRecurring,
+              onChanged: (v) => setState(() => _moduleRecurring = v),
+            ),
+            _moduleItem(
+              icon: Icons.swap_horiz_rounded,
+              title: context.tr('Account Transfers'),
+              desc: context.tr('Move funds between cash, bank, and digital wallets.'),
+              value: _moduleTransfer,
+              onChanged: (v) => setState(() => _moduleTransfer = v),
+            ),
+            _moduleItem(
+              icon: Icons.pie_chart_outline_rounded,
+              title: context.tr('Category Budgets'),
+              desc: context.tr('Set monthly or weekly spending limits per category.'),
+              value: _moduleBudget,
+              onChanged: (v) => setState(() => _moduleBudget = v),
+            ),
+          ],
+        );
+      case 2:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            heading(
+              context.tr('Money you have now'),
+              context.tr('Enter your current cash. You can add bank and e-wallet accounts later in More > Accounts.'),
+            ),
+            _amountField(_cash, context.tr('Cash on hand')),
+          ],
+        );
+      case 3:
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -179,17 +325,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   onChanged: (v) => setState(() => _dayOfMonth = v ?? 1),
                 ),
             ],
-          ],
-        );
-      case 2:
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            heading(
-              context.tr('Money you have now'),
-              context.tr('Enter your current cash. You can add bank and e-wallet accounts later in More > Accounts.'),
-            ),
-            _amountField(_cash, context.tr('Cash on hand')),
           ],
         );
       default:

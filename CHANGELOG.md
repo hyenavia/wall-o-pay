@@ -4,6 +4,30 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.19] - 2026-11-03
+
+### Added
+- **Modular Feature Architecture & Onboarding Setup:**
+  - Implemented modular feature system with persistent `modulePrefsProvider` supporting five core modular components: Savings Goals, Debts & Split Bills, Recurring Schedules, Account Transfers, and Category Budgets.
+  - Added dedicated Module Selection step to the initial onboarding flow (`OnboardingPage`), enabling new users to choose their desired features or pick "All Features" vs "Minimalist" presets.
+  - Dynamic Home dashboard quick actions and budget card that automatically adapt to show only active modules without visual clutter.
+  - Added "Active Modules & Features" management bottom sheet accessible from both Settings and the More screen.
+  - Full bilingual localization (English and Indonesian) and automated test suite for module preference state.
+
+---
+
+## [1.11.18] - 2026-11-03
+
+### Added
+- **Daily Financial Pulse Card (Humanized Status Visuals):**
+  - Integrated a dedicated `DailyFinancialPulseCard` on the Home screen inspired by empathetic, human-centered financial design.
+  - Features three-tier botanical health status badges: **Safe (Aman)** in soothing Sage, **Caution (Waspada)** in warm Amber, and **Limit (Batas)** in soft Terracotta clay.
+  - Automatically assesses today's spending velocity against daily safe allowance (`balance / daysLeft`) and overall budget exhaustion.
+  - Includes real-time spent vs daily quota progress meter, days remaining counter, and reassuring contextual advice to alleviate financial anxiety.
+  - Full bilingual localization support (English & Indonesian) and comprehensive automated widget and logic test suite.
+
+---
+
 ## [1.11.17] - 2026-11-03
 
 ### Added
