@@ -16,9 +16,6 @@ import '../../data/tables.dart' show TxType;
 import '../accounts/accounts_page.dart';
 import '../profile/profile_page.dart';
 import '../settings/settings_page.dart';
-import '../debts/debts_page.dart';
-import '../goals/goals_page.dart';
-import '../recurring/recurring_page.dart';
 import '../more/more_page.dart';
 import 'daily_financial_pulse_card.dart';
 import '../transactions/transaction_form.dart';
@@ -81,6 +78,10 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
           context,
           MaterialPageRoute<void>(builder: (_) => const ProfilePage()),
         );
+    void openMore() => Navigator.push(
+          context,
+          MaterialPageRoute<void>(builder: (_) => const MorePage()),
+        );
     void openSettings() => Navigator.push(
           context,
           MaterialPageRoute<void>(builder: (_) => const SettingsPage()),
@@ -97,6 +98,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
               _HomeHeader(
                 name: name,
                 onProfile: openProfile,
+                onMore: openMore,
                 onSettings: openSettings,
               ),
               Expanded(
@@ -251,53 +253,8 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                                 budgetSpent: budgetSpent,
                                 txCount: txs.length,
                               ),
+                              const SizedBox(height: 14),
                             ],
-                            const SizedBox(height: 18),
-                            Row(
-                              children: [
-                                if (modules.transfer)
-                                  _QuickAction(
-                                    icon: Icons.swap_horiz_rounded,
-                                    label: context.tr('Transfer'),
-                                    onTap: () => showTransactionForm(context, initialType: TxType.transfer),
-                                  ),
-                                if (modules.goals)
-                                  _QuickAction(
-                                    icon: Icons.flag_outlined,
-                                    label: context.tr('Goals'),
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute<void>(builder: (_) => const GoalsPage()),
-                                    ),
-                                  ),
-                                if (modules.debts)
-                                  _QuickAction(
-                                    icon: Icons.handshake_outlined,
-                                    label: context.tr('Debts'),
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute<void>(builder: (_) => const DebtsPage()),
-                                    ),
-                                  ),
-                                if (modules.recurring)
-                                  _QuickAction(
-                                    icon: Icons.event_repeat_rounded,
-                                    label: context.tr('Recurring'),
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute<void>(builder: (_) => const RecurringPage()),
-                                    ),
-                                  ),
-                                _QuickAction(
-                                  icon: Icons.apps_rounded,
-                                  label: context.tr('More'),
-                                  onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute<void>(builder: (_) => const MorePage()),
-                                  ),
-                                ),
-                              ],
-                            ),
                             SectionHeader(
                               title: context.tr('Recent Transactions'),
                               actionLabel: context.tr('See All'),
@@ -339,16 +296,18 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
   }
 }
 
-/// Header hijau di Beranda: foto, sapaan, status sinkronisasi, dan pengaturan.
+/// Header hijau di Beranda: foto, sapaan, status sinkronisasi, menu lainnya, dan pengaturan.
 class _HomeHeader extends ConsumerWidget {
   const _HomeHeader({
     required this.name,
     required this.onProfile,
+    required this.onMore,
     required this.onSettings,
   });
 
   final String? name;
   final VoidCallback onProfile;
+  final VoidCallback onMore;
   final VoidCallback onSettings;
 
   @override
@@ -367,14 +326,32 @@ class _HomeHeader extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  greeting(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w500,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        greeting(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.white70,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    if (sync.status == SyncStatus.syncing) ...[
+                      const SizedBox(width: 6),
+                      const SizedBox(
+                        width: 10,
+                        height: 10,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.8,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -391,26 +368,16 @@ class _HomeHeader extends ConsumerWidget {
               ],
             ),
           ),
-          if (sync.status == SyncStatus.syncing)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              child: SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-              ),
-            )
-          else
-            IconButton(
-              tooltip: context.tr('Sync Now'),
-              color: Colors.white,
-              icon: const Icon(Icons.sync, size: 20),
-              onPressed: () => ref.read(autoSyncServiceProvider).triggerTwoWaySync(),
-            ),
+          IconButton(
+            tooltip: context.tr('More Features'),
+            color: Colors.white,
+            icon: const Icon(Icons.grid_view_rounded, size: 22),
+            onPressed: onMore,
+          ),
           IconButton(
             tooltip: context.tr('Settings'),
             color: Colors.white,
-            icon: const Icon(Icons.settings_outlined),
+            icon: const Icon(Icons.settings_outlined, size: 22),
             onPressed: onSettings,
           ),
         ],
@@ -642,48 +609,6 @@ class _FlowTile extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _QuickAction extends StatelessWidget {
-  const _QuickAction({required this.icon, required this.label, required this.onTap});
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Expanded(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: scheme.primaryContainer.withValues(alpha: 0.55),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: scheme.primary),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

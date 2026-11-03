@@ -41,10 +41,33 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.19',
+      version: '1.11.20',
       dateEn: 'November 3, 2026',
       dateId: '3 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Removed Quick Action button row from Home screen to deliver an uncluttered, minimalist dashboard.',
+          textId: 'Menghapus deretan tombol Quick Action dari layar Beranda untuk tampilan yang lebih bersih dan minimalis.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Replaced manual header sync button with one-tap More Features hub icon, keeping sync feedback subtle.',
+          textId: 'Mengganti tombol sinkronisasi manual di header dengan ikon Fitur Lainnya yang instan dan elegan.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added interactive Active Modules summary banner and direct customization button on the More screen.',
+          textId: 'Menambahkan banner ringkasan Modul Aktif interaktif dan tombol kustomisasi langsung di halaman Lainnya.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.19',
+      dateEn: 'November 3, 2026',
+      dateId: '3 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

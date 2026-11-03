@@ -676,5 +676,7 @@ const Map<String, String> _id = {
   'Category Budgets': 'Anggaran Kategori',
   'Set monthly or weekly spending limits per category.': 'Batasi pengeluaran per kategori agar tidak boros.',
   'Customize which modules appear on your home screen and menus.': 'Atur modul mana saja yang tampil di layar utama dan menumu.',
+  'More Features': 'Fitur Lainnya',
+  'Customize': 'Sesuaikan',
 };
 

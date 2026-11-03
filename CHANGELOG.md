@@ -4,6 +4,17 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.20] - 2026-11-03
+
+### Changed
+- **Minimalist Home Screen & Header Feature Hub:**
+  - Removed cluttered Quick Action button row from the center of the Home screen to achieve a zen, distraction-free aesthetic flowing directly from Daily Financial Pulse to Recent Transactions.
+  - Replaced the redundant manual sync icon button on the Home header with a dedicated **More Features** hub icon (`Icons.grid_view_rounded`) for one-tap access to all modular tools.
+  - Refined background synchronization feedback into an unobtrusive, subtle micro-spinner next to the header greeting during active syncing.
+  - Elevated the **More** screen with an interactive Active Modules & Features summary banner and direct customization shortcut.
+
+---
+
 ## [1.11.19] - 2026-11-03
 
 ### Added

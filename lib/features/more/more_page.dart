@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/l10n.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import '../../data/module_prefs.dart';
 import '../../data/tables.dart' show TxType;
 import '../accounts/accounts_page.dart';
 import '../categories/categories_page.dart';
@@ -13,12 +16,18 @@ import '../settings/report_dialog.dart';
 import '../settings/settings_page.dart';
 import '../transactions/transaction_form.dart';
 
-/// Pusat fitur tambahan: akun & dompet, impian & tabungan, utang & patungan, transaksi berulang, laporan PDF, dan pengaturan.
-class MorePage extends StatelessWidget {
+/// Pusat fitur dan modul: kelola modul aktif, akun & dompet, impian & tabungan,
+/// utang & patungan, transaksi berulang, laporan PDF, dan pengaturan.
+class MorePage extends ConsumerWidget {
   const MorePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modules = ref.watch(modulePrefsProvider);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final muted = scheme.onSurface.withValues(alpha: 0.65);
+
     Widget tile(IconData icon, String title, String subtitle, VoidCallback onTap) {
       return ListTile(
         leading: Icon(icon),
@@ -35,20 +44,78 @@ class MorePage extends StatelessWidget {
         );
 
     return Scaffold(
-      appBar: pageAppBar(context, title: Text(context.tr('More'))),
+      appBar: pageAppBar(context, title: Text(context.tr('More Features'))),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
         children: [
+          // Banner Modul & Fitur Aktif
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: scheme.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.sage.withValues(alpha: 0.3)),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.sage.withValues(alpha: 0.12),
+                  scheme.surface,
+                ],
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.sage.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.widgets_outlined, color: AppColors.sage, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.tr('Active Modules & Features'),
+                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        context.tr('{count} of {total} modules active', {
+                          'count': modules.activeCount,
+                          'total': 5,
+                        }),
+                        style: TextStyle(fontSize: 12, color: muted),
+                      ),
+                    ],
+                  ),
+                ),
+                FilledButton.tonal(
+                  onPressed: () => showModuleSelectionSheet(context),
+                  style: FilledButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    backgroundColor: AppColors.sage.withValues(alpha: 0.2),
+                    foregroundColor: AppColors.sage,
+                  ),
+                  child: Text(
+                    context.tr('Customize'),
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
           AppCard(
             padding: EdgeInsets.zero,
             child: Column(
               children: [
-                tile(
-                  Icons.widgets_outlined,
-                  context.tr('Active Modules & Features'),
-                  context.tr('Customize which modules appear on your home screen and menus.'),
-                  () => showModuleSelectionSheet(context),
-                ),
                 tile(
                   Icons.account_balance_wallet_outlined,
                   context.tr('Accounts'),
