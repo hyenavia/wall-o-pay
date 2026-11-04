@@ -4,6 +4,88 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.27] - 2026-11-04
+
+### Changed
+- **Home Screen Simplicity & 3-Block Architecture:**
+  - Consolidated the home screen into three essential, focused blocks that instantly answer *"Are my finances safe?"*:
+    1. **Balance & Period Cashflow Card**: Real-time total balance and monthly/weekly net flow.
+    2. **Unified Financial Health & Budget Pulse**: Combines health status tier (Safe / Caution / Limit), safe daily spending quota, today's expenses, and monthly budget progress with direct access to budget setup.
+    3. **Recent Transactions**: Immediate access to the latest 4 records with single-tap navigation to the full transactions view.
+  - Removed duplicate accounts card from the home screen to eliminate vertical clutter, directing users to the dedicated Accounts tab for detailed account balances.
+
+---
+
+## [1.11.26] - 2026-11-04
+
+### Changed
+- **Progressive Disclosure in Transaction Form (The 5-Second Rule):**
+  - Streamlined `TransactionForm` to focus strictly on core inputs: **Amount** (with calculator & quick chips), **Category**, and **Account/Wallet**, followed immediately by the **Save** action.
+  - Collapsed secondary inputs (Date, Notes, Need/Want classification, Receipt photo attachments, and Save as template) behind a clean, interactive **"More details"** expansion panel.
+  - In transfer mode, tucked the admin fee input behind a compact **"+ Add admin fee"** button to eliminate visual clutter.
+  - In edit mode or when applying templates with notes/receipts, automatically expands the details panel to prevent any hidden data confusion.
+
+---
+
+## [1.11.25] - 2026-11-04
+
+### Added
+- **Custom Transfer Admin Fee (Biaya Admin Transfer):**
+  - Added dedicated Admin Fee support to transfer transactions in `TransactionForm`.
+  - Supports completely custom admin fee entry to match any bank or e-wallet tariff, alongside one-tap quick preset chips (`Free (Rp 0)`, `Rp 1.000`, `Rp 2.500`, `Rp 6.500`).
+  - Automatically deducts the transfer admin fee from the source account via a corresponding expense transaction (`TxType.expense`) without requiring database schema migrations.
+- **Due Date Reminders for Debts & Receivables:**
+  - Added automated local notifications for upcoming or due debts and receivables (`dueDate` today, tomorrow H-1, or overdue up to 7 days).
+  - Categorizes reminders into debt collection (`Debt collection reminder`) and debt repayment (`Debt repayment reminder`).
+  - Implemented daily deduplication through `SharedPreferences` to ensure users receive at most one reminder notification per debt item each day.
+  - Linked reminder checks to app lifecycle startup, resume events, and immediate debt creation/payment flows.
+
+---
+
+## [1.11.24] - 2026-11-04
+
+### Added
+- **Integrated Mini Calculator & Quick "000" Input:**
+  - Added a dedicated mini-calculator bottom sheet in `TransactionForm` accessible directly via a calculator icon button in the amount input field, allowing users to effortlessly sum multi-item receipts or split bills.
+  - Included a prominent **"000"** (triple zero) key alongside digits, clear, backspace, and standard arithmetic operators (`+`, `-`, `×`, `÷`, `=`).
+  - Added horizontal quick-denomination chips (`+000`, `+10rb`, `+50rb`, `+100rb`) immediately beneath the transaction amount field for lightning-fast amount entry.
+
+---
+
+## [1.11.23] - 2026-11-04
+
+### Added
+- **Account & Category Filters on Transactions:**
+  - Added dedicated interactive filter dropdown pills for **Accounts / Wallets** and **Categories** on the Transactions screen, allowing users to quickly filter transactions by specific accounts (e.g. GoPay, Digital Bank) or categories with one tap.
+  - Added dynamic transaction summary indicators that update real-time income and expense totals based on active account/category filters.
+  - Added a quick "Clear filters" action to immediately restore full view.
+- **Goal Savings Deposit & Withdrawal with Wallet Integration:**
+  - Added support for withdrawing funds from savings goals back into chosen accounts.
+  - Added editing support for goal names, target amounts, and target dates via popup menu.
+  - Integrated account selection toggle into goal funds deposits and withdrawals, automatically generating expense or income transactions tied to the specified account.
+
+### Changed
+- **Debt Repayment Account Association:**
+  - Enhanced debt payment recording dialog to include an account/wallet selector when recording transactions, ensuring repayments are properly attributed to specific accounts and keeping wallet balances synchronized.
+
+---
+
+## [1.11.22] - 2026-11-04
+
+### Fixed & Optimized
+- **Firestore Sync Quota & Battery Optimization:**
+  - Removed aggressive 60-second periodic full-database polling in `AutoSyncService`, relying on reactive Firestore real-time snapshot listeners, network connectivity triggers, and app lifecycle resumption.
+  - Eliminated redundant `col.get()` full-collection fetches during debounced local auto-pushes by only querying SQLite records changed since the last sync timestamp (`_lastPushedAt`).
+  - Cached remote document timestamps during the pull phase of two-way synchronization, avoiding duplicate remote collection reads during the subsequent push phase.
+- **Unified App Lifecycle Management:**
+  - Consolidated `WidgetsBindingObserver` lifecycle listening inside `HomeShell` and removed duplicate observer and initial sync triggers in `HomePage`.
+  - Replaced `HomePage` stateful lifecycle boilerplate with a clean `ConsumerWidget`.
+- **Repository Documentation Accuracy:**
+  - Updated repository clone, release, and landing page URLs in `README.md` to reference the official `hyenavia/wall-o-pay` repository.
+  - Corrected aesthetic styling description in `README.md` to accurately represent the signature Botanical Forest dark theme.
+
+---
+
 ## [1.11.21] - 2026-11-04
 
 ### Changed

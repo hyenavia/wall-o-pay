@@ -8,6 +8,7 @@ import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/app_database.dart';
 import '../../data/providers.dart';
+import '../../data/tables.dart' show TxType;
 
 class GoalsPage extends ConsumerWidget {
   const GoalsPage({super.key});
@@ -145,6 +146,51 @@ class _GoalCard extends ConsumerWidget {
 
   final SavingsGoal goal;
 
+  Future<void> _handleFunds(BuildContext context, WidgetRef ref, bool isDeposit) async {
+    final result = await showDialog<(int, bool, String?)>(
+      context: context,
+      builder: (_) => _GoalFundsDialog(goal: goal, isDeposit: isDeposit),
+    );
+    if (result != null && result.$1 > 0) {
+      final amount = result.$1;
+      final affectWallet = result.$2;
+      final walletId = result.$3;
+      final db = ref.read(databaseProvider);
+
+      await db.addToSavings(goal.id, isDeposit ? amount : -amount);
+
+      if (affectWallet && walletId != null) {
+        await db.addTransaction(
+          amount: amount,
+          type: isDeposit ? TxType.expense : TxType.income,
+          categoryId: isDeposit ? 'cat-exp-other' : 'cat-inc-other',
+          walletId: walletId,
+          date: DateTime.now(),
+          note: isDeposit
+              ? trG('Savings deposit: {name}', {'name': goal.name})
+              : trG('Savings withdrawal: {name}', {'name': goal.name}),
+        );
+      }
+    }
+  }
+
+  Future<void> _editGoal(BuildContext context, WidgetRef ref) async {
+    final db = ref.read(databaseProvider);
+    final result = await showDialog<(String, int, DateTime?)>(
+      context: context,
+      builder: (_) => _GoalDialog(editingGoal: goal),
+    );
+    if (result != null) {
+      await db.updateSavingsGoal(
+        goal.id,
+        name: result.$1,
+        targetAmount: result.$2,
+        currentAmount: goal.currentAmount,
+        targetDate: result.$3,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -183,11 +229,18 @@ class _GoalCard extends ConsumerWidget {
               ),
               PopupMenuButton<String>(
                 onSelected: (v) async {
-                  if (v == 'delete') {
+                  if (v == 'edit') {
+                    await _editGoal(context, ref);
+                  } else if (v == 'withdraw') {
+                    await _handleFunds(context, ref, false);
+                  } else if (v == 'delete') {
                     await ref.read(databaseProvider).deleteSavingsGoal(goal.id);
                   }
                 },
                 itemBuilder: (_) => [
+                  PopupMenuItem(value: 'edit', child: Text(context.tr('Edit goal'))),
+                  if (goal.currentAmount > 0)
+                    PopupMenuItem(value: 'withdraw', child: Text(context.tr('Withdraw funds'))),
                   PopupMenuItem(value: 'delete', child: Text(context.tr('Delete goal'))),
                 ],
               ),
@@ -205,16 +258,7 @@ class _GoalCard extends ConsumerWidget {
                 ),
               ),
               TextButton.icon(
-                onPressed: () async {
-                  final db = ref.read(databaseProvider);
-                  final amount = await showAmountDialog(
-                    context,
-                    title: context.tr('Add funds to {name}', {'name': goal.name}),
-                  );
-                  if (amount != null && amount > 0) {
-                    await db.addToSavings(goal.id, amount);
-                  }
-                },
+                onPressed: () => _handleFunds(context, ref, true),
                 icon: const Icon(Icons.add, size: 18),
                 label: Text(context.tr('Add funds')),
               ),
@@ -267,16 +311,22 @@ class _CompletedGoalCard extends StatelessWidget {
 }
 
 class _GoalDialog extends StatefulWidget {
-  const _GoalDialog();
+  const _GoalDialog({this.editingGoal});
+
+  final SavingsGoal? editingGoal;
 
   @override
   State<_GoalDialog> createState() => _GoalDialogState();
 }
 
 class _GoalDialogState extends State<_GoalDialog> {
-  final _name = TextEditingController();
-  final _target = TextEditingController();
-  DateTime? _date;
+  late final TextEditingController _name =
+      TextEditingController(text: widget.editingGoal?.name ?? '');
+  late final TextEditingController _target = TextEditingController(
+      text: widget.editingGoal != null
+          ? formatThousands(widget.editingGoal!.targetAmount)
+          : '');
+  late DateTime? _date = widget.editingGoal?.targetDate;
   String? _error;
 
   @override
@@ -310,7 +360,7 @@ class _GoalDialogState extends State<_GoalDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(context.tr('New goal')),
+      title: Text(context.tr(widget.editingGoal != null ? 'Edit goal' : 'New goal')),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -356,6 +406,106 @@ class _GoalDialogState extends State<_GoalDialog> {
           child: Text(context.tr('Cancel')),
         ),
         FilledButton(onPressed: _submit, child: Text(context.tr('Save'))),
+      ],
+    );
+  }
+}
+
+class _GoalFundsDialog extends ConsumerStatefulWidget {
+  const _GoalFundsDialog({
+    required this.goal,
+    required this.isDeposit,
+  });
+
+  final SavingsGoal goal;
+  final bool isDeposit;
+
+  @override
+  ConsumerState<_GoalFundsDialog> createState() => _GoalFundsDialogState();
+}
+
+class _GoalFundsDialogState extends ConsumerState<_GoalFundsDialog> {
+  late final TextEditingController _amount = TextEditingController();
+  bool _affectWallet = true;
+  String? _walletId;
+
+  @override
+  void dispose() {
+    _amount.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final wallets = ref.watch(walletsProvider).value ?? [];
+    if (_walletId == null && wallets.isNotEmpty) {
+      _walletId = wallets.first.id;
+    }
+
+    final maxWithdraw = widget.goal.currentAmount;
+
+    return AlertDialog(
+      title: Text(context.tr(
+        widget.isDeposit ? 'Add funds to {name}' : 'Withdraw from {name}',
+        {'name': widget.goal.name},
+      )),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _amount,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              inputFormatters: amountFormatters(),
+              decoration: appInput(
+                context,
+                prefixText: 'Rp ',
+                hint: widget.isDeposit ? '0' : formatThousands(maxWithdraw),
+              ),
+            ),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: _affectWallet,
+              onChanged: (v) => setState(() => _affectWallet = v),
+              title: Text(context.tr(
+                widget.isDeposit ? 'Deduct from account' : 'Deposit to account',
+              )),
+            ),
+            if (_affectWallet && wallets.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: _walletId,
+                decoration: appInput(context, label: context.tr('Account / Wallet')),
+                items: [
+                  for (final w in wallets)
+                    DropdownMenuItem(value: w.id, child: Text(w.name)),
+                ],
+                onChanged: (val) => setState(() => _walletId = val),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.tr('Cancel')),
+        ),
+        FilledButton(
+          onPressed: () {
+            var val = parseAmount(_amount.text);
+            if (!widget.isDeposit && val > maxWithdraw) {
+              val = maxWithdraw;
+            }
+            if (val > 0) {
+              Navigator.pop(context, (val, _affectWallet, _walletId));
+            }
+          },
+          child: Text(context.tr('Save')),
+        ),
       ],
     );
   }

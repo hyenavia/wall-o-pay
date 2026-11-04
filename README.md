@@ -12,9 +12,9 @@
 [![Database](https://img.shields.io/badge/Database-Drift%20SQLite-1E4238?logo=sqlite&logoColor=white)](https://drift.simonbinder.eu/)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.11.21-234B3B.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.11.27-234B3B.svg)](CHANGELOG.md)
 
-[🌐 Visit Landing Page](https://username.github.io/wall_o_pay/) • [📥 Download Latest APK](https://github.com/username/wall_o_pay/releases/latest) • [📋 Changelog](CHANGELOG.md)
+[🌐 Visit Landing Page](https://hyenavia.github.io/wall-o-pay/) • [📥 Download Latest APK](https://github.com/hyenavia/wall-o-pay/releases/latest) • [📋 Changelog](CHANGELOG.md)
 
 </div>
 
@@ -36,7 +36,7 @@
 - 📈 **Interactive Insights & Analytics:** Understand spending habits through responsive pie charts and trend graphs powered by `fl_chart`.
 - ☁️ **Flexible Cloud Sync:** Enjoy full anonymity with 100% offline local storage, or link Google / Email accounts via Firebase Authentication to securely sync records across devices.
 - 📁 **Data Export:** Export transaction records anytime into standard CSV and JSON formats.
-- 🎨 **Curated Aesthetic:** Calming Deep Forest Green (`#1E4238`) and Sage palette designed with Material 3 and seamless Dark Mode / Light Mode support.
+- 🎨 **Curated Aesthetic:** Calming Deep Forest Green (`#1E4238`) and Sage palette designed with Material 3 with signature Botanical Forest styling.
 - 🤝 **Debts & Split Bills:** Track who owes whom, record partial or full debt payments, and easily split restaurant or group expenses among friends with one-tap transaction logging.
 - 📄 **Exportable PDF Financial Reports:** Generate beautiful, printable PDF financial statements for any custom time period or month, complete with category summaries and transaction details.
 - ⏰ **Smart Local Notifications & Daily Reminders:** Set customizable daily log reminders and receive automatic threshold alerts when category spending crosses 80% and 100% of budgeted limits.
@@ -74,7 +74,7 @@
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/username/wall_o_pay.git
+   git clone https://github.com/hyenavia/wall-o-pay.git
    cd wall_o_pay
    ```
 

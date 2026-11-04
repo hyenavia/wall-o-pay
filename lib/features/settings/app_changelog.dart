@@ -41,10 +41,118 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.21',
+      version: '1.11.27',
       dateEn: 'November 4, 2026',
       dateId: '4 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Consolidated home screen into 3 essential blocks: 1) Total Balance & Cashflow, 2) Unified Financial Health & Period Budget Pulse, 3) Recent Transactions. Removed duplicate accounts card from home.',
+          textId: 'Memadatkan halaman utama menjadi 3 blok inti: 1) Saldo & Arus Kas, 2) Kondisi Kesehatan Finansial & Anggaran Terpadu, 3) Transaksi Terakhir. Menghapus kartu akun redundan dari halaman utama.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.26',
+      dateEn: 'November 4, 2026',
+      dateId: '4 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Streamlined transaction form with progressive disclosure: core flow (Amount, Category, Account, Save) takes < 5 seconds with zero scrolling; optional details (Date, Notes, Needs/Wants, Receipts) neatly tucked under "More details".',
+          textId: 'Menyederhanakan form transaksi dengan progressive disclosure: alur inti (Nominal, Kategori, Dompet, Simpan) selesai dalam < 5 detik tanpa perlu scrolling; detail opsional (Tanggal, Catatan, Kebutuhan/Keinginan, Struk) rapi terlipat di balik "Detail lainnya".',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.25',
+      dateEn: 'November 4, 2026',
+      dateId: '4 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added customizable Transfer Admin Fee input with quick presets (Free, Rp 1.000, Rp 2.500, Rp 6.500) and automatic expense deduction from the source wallet.',
+          textId: 'Menambahkan kolom input biaya admin transfer yang dapat dikustomisasi bebas lengkap dengan tombol cepat (Gratis, Rp 1.000, Rp 2.500, Rp 6.500) dan pencatatan pengeluaran otomatis dari rekening asal.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added automated local due date reminders for debts and receivables (due today or tomorrow H-1) with daily deduplication to keep obligations on track.',
+          textId: 'Menambahkan notifikasi lokal pengingat jatuh tempo utang-piutang (jatuh tempo hari ini atau besok H-1) dengan pencegahan duplikasi harian.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.24',
+      dateEn: 'November 4, 2026',
+      dateId: '4 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Integrated in-app mini calculator into the transaction form amount field, supporting multi-item receipt additions and bill splitting.',
+          textId: 'Menghadirkan kalkulator mini terintegrasi pada kolom nominal transaksi untuk memudahkan penjumlahan nota belanjaan dan patungan.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added dedicated "000" triple-zero keypad button and quick amount chips (+000, +10k, +50k, +100k) for lightning-fast Rupiah entry.',
+          textId: 'Menambahkan tombol angka "000" (tiga nol instan) pada keypad kalkulator dan chip cepat (+000, +10rb, +50rb, +100rb) di bawah input nominal.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.23',
+      dateEn: 'November 4, 2026',
+      dateId: '4 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added dedicated interactive Account and Category filter pills to the Transactions page with real-time summary updates and one-tap reset.',
+          textId: 'Menambahkan filter interaktif Rekening dan Kategori di halaman Transaksi lengkap dengan pembaruan total ringkasan dan reset 1-ketuk.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Integrated wallet selection for Savings Goals deposits and withdrawals, automatically synchronizing bank balances with financial targets.',
+          textId: 'Mengintegrasikan pilihan rekening pada setoran dan penarikan Impian/Tabungan, menyinkronkan saldo rekening dengan target keuangan secara otomatis.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Added wallet account selector when recording debt and split bill repayments, keeping balances consistent.',
+          textId: 'Menambahkan pilihan dompet/rekening saat mencatat pelunasan utang dan patungan agar saldo akun selalu akurat.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.22',
+      dateEn: 'November 4, 2026',
+      dateId: '4 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Optimized Firestore background auto-sync by removing redundant 60-second polling and full collection fetches, significantly saving quota and battery.',
+          textId: 'Mengoptimalkan sinkronisasi cloud dengan menghapus polling 60 detik dan fetch koleksi penuh berulang, sangat menghemat kuota Firestore dan baterai.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Unified application lifecycle handling into HomeShell, removing duplicate sync triggers from the Home screen.',
+          textId: 'Menyatukan manajemen siklus hidup aplikasi ke HomeShell, menghilangkan pemicu sinkronisasi ganda dari layar Beranda.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Updated repository links and theme documentation in README for full consistency.',
+          textId: 'Memperbarui tautan repositori resmi dan dokumentasi tema pada README.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.21',
+      dateEn: 'November 4, 2026',
+      dateId: '4 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

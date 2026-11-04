@@ -24,6 +24,8 @@ class DailyFinancialPulseCard extends StatelessWidget {
     required this.totalBudget,
     required this.budgetSpent,
     required this.txCount,
+    this.budgetTitle,
+    this.onSetBudget,
   });
 
   final int dailyAllowance;
@@ -33,6 +35,8 @@ class DailyFinancialPulseCard extends StatelessWidget {
   final int totalBudget;
   final int budgetSpent;
   final int txCount;
+  final String? budgetTitle;
+  final VoidCallback? onSetBudget;
 
   DailyHealthTier get tier {
     final isBudgetOver = totalBudget > 0 && budgetSpent >= totalBudget;
@@ -146,9 +150,11 @@ class DailyFinancialPulseCard extends StatelessWidget {
                   Icon(Icons.calendar_today_rounded, size: 12, color: muted),
                   const SizedBox(width: 5),
                   Text(
-                    daysLeft == 1
-                        ? context.tr('1 day left')
-                        : context.tr('{n} days left', {'n': daysLeft}),
+                    daysLeft <= 0
+                        ? context.tr('Period ended')
+                        : (daysLeft == 1
+                            ? context.tr('1 day left')
+                            : context.tr('{n} days left', {'n': daysLeft})),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: muted,
                       fontWeight: FontWeight.w600,
@@ -267,6 +273,61 @@ class DailyFinancialPulseCard extends StatelessWidget {
                     color: muted,
                     fontSize: 11,
                   ),
+                ),
+              ],
+            ),
+          ],
+          if (totalBudget > 0) ...[
+            const SizedBox(height: 14),
+            Divider(color: scheme.onSurface.withValues(alpha: 0.08), height: 1),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  budgetTitle != null ? context.tr(budgetTitle!) : context.tr('Period Budget'),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: scheme.onSurface,
+                  ),
+                ),
+                Text(
+                  context.tr('{spent} of {total}', {
+                    'spent': rupiah(budgetSpent),
+                    'total': rupiah(totalBudget),
+                  }),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: muted,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            AppProgressBar(
+              value: (budgetSpent / totalBudget).clamp(0.0, 1.0),
+              color: budgetSpent >= totalBudget
+                  ? const Color(0xFFD65D5D)
+                  : ((budgetSpent / totalBudget) >= 0.85 ? AppColors.warning : AppColors.sage),
+              backgroundColor: scheme.surfaceContainerHighest,
+              height: 6,
+            ),
+          ] else if (onSetBudget != null) ...[
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  context.tr('No budget set yet.'),
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted, fontSize: 11),
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    padding: EdgeInsets.zero,
+                  ),
+                  onPressed: onSetBudget,
+                  child: Text(context.tr('Set budget'), style: const TextStyle(fontSize: 12)),
                 ),
               ],
             ),

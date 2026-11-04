@@ -8,6 +8,7 @@ import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/app_database.dart';
 import '../../data/feature_providers.dart';
+import '../../data/notifications.dart';
 import '../../data/providers.dart';
 import '../../data/tables.dart' show DebtDirection, TxType;
 
@@ -251,7 +252,7 @@ class _DebtDetail extends ConsumerWidget {
 
   final Debt debt;
 
-  Future<void> _record(WidgetRef ref, int amount, bool alsoTransaction) async {
+  Future<void> _record(WidgetRef ref, int amount, bool alsoTransaction, String? walletId) async {
     final db = ref.read(databaseProvider);
     await db.addDebtPayment(debt.id, amount);
     if (alsoTransaction) {
@@ -260,12 +261,14 @@ class _DebtDetail extends ConsumerWidget {
         amount: amount,
         type: lent ? TxType.income : TxType.expense,
         categoryId: lent ? 'cat-inc-other' : 'cat-exp-other',
+        walletId: walletId,
         date: DateTime.now(),
         note: lent
             ? trG('Repayment from {person}', {'person': debt.person})
             : trG('Payment to {person}', {'person': debt.person}),
       );
     }
+    checkDebtDueReminders(db);
   }
 
   @override
@@ -306,12 +309,12 @@ class _DebtDetail extends ConsumerWidget {
               icon: const Icon(Icons.payments_outlined),
               label: Text(context.tr('Record payment')),
               onPressed: () async {
-                final result = await showDialog<(int, bool)>(
+                final result = await showDialog<(int, bool, String?)>(
                   context: context,
                   builder: (_) => _PaymentDialog(remaining: left, lent: lent),
                 );
                 if (result != null && result.$1 > 0) {
-                  await _record(ref, result.$1, result.$2);
+                  await _record(ref, result.$1, result.$2, result.$3);
                   if (context.mounted) Navigator.pop(context);
                 }
               },
@@ -319,8 +322,14 @@ class _DebtDetail extends ConsumerWidget {
             const SizedBox(height: 8),
             OutlinedButton(
               onPressed: () async {
-                await _record(ref, left, false);
-                if (context.mounted) Navigator.pop(context);
+                final result = await showDialog<(int, bool, String?)>(
+                  context: context,
+                  builder: (_) => _PaymentDialog(remaining: left, lent: lent),
+                );
+                if (result != null && result.$1 > 0) {
+                  await _record(ref, result.$1, result.$2, result.$3);
+                  if (context.mounted) Navigator.pop(context);
+                }
               },
               child: Text(context.tr('Mark as fully paid')),
             ),
@@ -339,20 +348,21 @@ class _DebtDetail extends ConsumerWidget {
   }
 }
 
-class _PaymentDialog extends StatefulWidget {
+class _PaymentDialog extends ConsumerStatefulWidget {
   const _PaymentDialog({required this.remaining, required this.lent});
 
   final int remaining;
   final bool lent;
 
   @override
-  State<_PaymentDialog> createState() => _PaymentDialogState();
+  ConsumerState<_PaymentDialog> createState() => _PaymentDialogState();
 }
 
-class _PaymentDialogState extends State<_PaymentDialog> {
+class _PaymentDialogState extends ConsumerState<_PaymentDialog> {
   late final TextEditingController _amount =
       TextEditingController(text: formatThousands(widget.remaining));
-  bool _record = false;
+  bool _record = true;
+  String? _walletId;
 
   @override
   void dispose() {
@@ -362,27 +372,48 @@ class _PaymentDialogState extends State<_PaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final wallets = ref.watch(walletsProvider).value ?? [];
+    if (_walletId == null && wallets.isNotEmpty) {
+      _walletId = wallets.first.id;
+    }
+
     return AlertDialog(
       title: Text(context.tr('Record payment')),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _amount,
-            autofocus: true,
-            keyboardType: TextInputType.number,
-            inputFormatters: amountFormatters(),
-            decoration: appInput(context, prefixText: 'Rp '),
-          ),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            value: _record,
-            onChanged: (v) => setState(() => _record = v),
-            title: Text(context.tr(widget.lent
-                ? 'Also add as income'
-                : 'Also add as expense')),
-          ),
-        ],
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _amount,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              inputFormatters: amountFormatters(),
+              decoration: appInput(context, prefixText: 'Rp '),
+            ),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: _record,
+              onChanged: (v) => setState(() => _record = v),
+              title: Text(context.tr(widget.lent
+                  ? 'Also add as income'
+                  : 'Also add as expense')),
+            ),
+            if (_record && wallets.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: _walletId,
+                decoration: appInput(context, label: context.tr('Account / Wallet')),
+                items: [
+                  for (final w in wallets)
+                    DropdownMenuItem(value: w.id, child: Text(w.name)),
+                ],
+                onChanged: (val) => setState(() => _walletId = val),
+              ),
+            ],
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -392,7 +423,7 @@ class _PaymentDialogState extends State<_PaymentDialog> {
         FilledButton(
           onPressed: () {
             final v = parseAmount(_amount.text).clamp(0, widget.remaining).toInt();
-            Navigator.pop(context, (v, _record));
+            Navigator.pop(context, (v, _record, _walletId));
           },
           child: Text(context.tr('Save')),
         ),
@@ -457,13 +488,15 @@ class _DebtFormState extends ConsumerState<_DebtForm> {
       setState(() => _error = context.tr('Enter a name and an amount.'));
       return;
     }
-    await ref.read(databaseProvider).addDebt(
+    final db = ref.read(databaseProvider);
+    await db.addDebt(
           person: person,
           direction: _direction,
           amount: amount,
           dueDate: _due,
           note: _note.text.trim(),
         );
+    checkDebtDueReminders(db);
     if (mounted) Navigator.pop(context);
   }
 

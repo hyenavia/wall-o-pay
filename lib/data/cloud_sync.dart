@@ -54,9 +54,9 @@ class AutoSyncService {
   bool _isApplyingRemote = false;
   bool _isSyncing = false;
   Timer? _debounceTimer;
-  Timer? _periodicTimer;
   final List<StreamSubscription> _subscriptions = [];
   String? _currentUid;
+  DateTime _lastPushedAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   static const _timeout = Duration(seconds: 20);
 
@@ -67,6 +67,12 @@ class AutoSyncService {
 
     _currentUid = uid;
     debugPrint('[AutoSync] Starting sync session for user: $uid');
+
+    // Muat riwayat push terakhir untuk membatasi query push lokal
+    try {
+      final lastBackup = await CloudBackupService.lastBackup(uid);
+      _lastPushedAt = lastBackup ?? DateTime.fromMillisecondsSinceEpoch(0);
+    } catch (_) {}
 
     // Cek apakah terjadi pergantian akun atau sesi baru pada perangkat ini
     try {
@@ -203,15 +209,7 @@ class AutoSyncService {
     });
     _subscriptions.add(connSub);
 
-    // 5. Timer periodik keamanan setiap 60 detik
-    _periodicTimer?.cancel();
-    _periodicTimer = Timer.periodic(const Duration(seconds: 60), (_) {
-      if (_currentUid != null && !_isSyncing) {
-        triggerTwoWaySync();
-      }
-    });
-
-    // 6. Jalankan sinkronisasi awal dua arah (pull remote + push local)
+    // 5. Jalankan sinkronisasi awal dua arah (pull remote + push local)
     triggerTwoWaySync();
   }
 
@@ -219,8 +217,6 @@ class AutoSyncService {
   void stopSync() {
     _debounceTimer?.cancel();
     _debounceTimer = null;
-    _periodicTimer?.cancel();
-    _periodicTimer = null;
     for (final sub in _subscriptions) {
       sub.cancel();
     }
@@ -252,8 +248,9 @@ class AutoSyncService {
 
     try {
       final root = FirebaseFirestore.instance.collection('users').doc(uid);
+      final remoteUpdatedMaps = <String, Map<String, int>>{};
 
-      // Langkah 1: PULL (Tarik data cloud ke lokal)
+      // Langkah 1: PULL (Tarik data cloud ke lokal dan rekam timestamp remote)
       try {
         await _ref.read(profileProvider.notifier).restoreFromCloud(uid);
       } catch (e) {
@@ -275,14 +272,18 @@ class AutoSyncService {
       for (final t in _db.syncTables) {
         try {
           final snap = await root.collection(t.name).get().timeout(_timeout);
+          final remoteMap = <String, int>{};
           _isApplyingRemote = true;
           try {
             for (final doc in snap.docs) {
-              await t.applyRemote(doc.data());
+              final data = doc.data();
+              remoteMap[doc.id] = (data['updatedAt'] as num?)?.toInt() ?? 0;
+              await t.applyRemote(data);
             }
           } finally {
             _isApplyingRemote = false;
           }
+          remoteUpdatedMaps[t.name] = remoteMap;
         } catch (e) {
           debugPrint('[AutoSync] Warning pulling table ${t.name}: $e');
         }
@@ -310,11 +311,8 @@ class AutoSyncService {
       for (final t in _db.syncTables) {
         try {
           final col = root.collection(t.name);
-          final remote = <String, int>{};
-          final snap = await col.get().timeout(_timeout);
-          for (final doc in snap.docs) {
-            remote[doc.id] = (doc.data()['updatedAt'] as num?)?.toInt() ?? 0;
-          }
+          // Pakai cache remote map dari Langkah 1, hemat puluhan/ratusan read get() Firestore
+          final remote = remoteUpdatedMaps[t.name] ?? const {};
 
           final rows = await t.changed(DateTime.fromMillisecondsSinceEpoch(0));
           final toUpload = rows.where((r) {
@@ -340,6 +338,7 @@ class AutoSyncService {
       await RecurringService.checkAndGenerateDue(_db);
 
       final now = DateTime.now();
+      _lastPushedAt = now;
       await CloudBackupService.saveLastBackup(uid, now);
       _ref.read(syncStateProvider.notifier).update(SyncState(
             status: SyncStatus.synced,
@@ -559,46 +558,40 @@ class AutoSyncService {
   }
 
   Future<void> _pushLocalOnly(String uid) async {
-    if (_isSyncing) return;
+    if (_isSyncing || _isApplyingRemote) return;
     try {
       final root = FirebaseFirestore.instance.collection('users').doc(uid);
-      await _ref.read(profileProvider.notifier).uploadToCloud(uid);
-      await _ref.read(appPrefsProvider.notifier).uploadToCloud(uid);
-      await _ref.read(budgetRuleProvider.notifier).uploadToCloud(uid);
+      // Query hanya data lokal yang diperbarui sejak push terakhir (beri buffer 5 detik untuk clock skew)
+      final since = _lastPushedAt.subtract(const Duration(seconds: 5));
+      var hasChanges = false;
 
       for (final t in _db.syncTables) {
-        final col = root.collection(t.name);
-        final remote = <String, int>{};
-        final snap = await col.get().timeout(_timeout);
-        for (final doc in snap.docs) {
-          remote[doc.id] = (doc.data()['updatedAt'] as num?)?.toInt() ?? 0;
-        }
-
-        final rows = await t.changed(DateTime.fromMillisecondsSinceEpoch(0));
-        final toUpload = rows.where((r) {
-          final remoteMs = remote[r['id'] as String];
-          return remoteMs == null || (r['updatedAt'] as num).toInt() > remoteMs;
-        }).toList();
-
-        if (toUpload.isNotEmpty) {
-          for (var i = 0; i < toUpload.length; i += 400) {
+        final rows = await t.changed(since);
+        if (rows.isNotEmpty) {
+          hasChanges = true;
+          final col = root.collection(t.name);
+          for (var i = 0; i < rows.length; i += 400) {
             final batch = FirebaseFirestore.instance.batch();
-            for (final r in toUpload.skip(i).take(400)) {
+            for (final r in rows.skip(i).take(400)) {
               batch.set(col.doc(r['id'] as String), r);
             }
             await batch.commit().timeout(_timeout);
           }
         }
       }
+
       // Periksa transaksi berulang yang jatuh tempo
       await RecurringService.checkAndGenerateDue(_db);
 
       final now = DateTime.now();
-      await CloudBackupService.saveLastBackup(uid, now);
-      _ref.read(syncStateProvider.notifier).update(SyncState(
-            status: SyncStatus.synced,
-            lastSynced: now,
-          ));
+      _lastPushedAt = now;
+      if (hasChanges) {
+        await CloudBackupService.saveLastBackup(uid, now);
+        _ref.read(syncStateProvider.notifier).update(SyncState(
+              status: SyncStatus.synced,
+              lastSynced: now,
+            ));
+      }
     } catch (e) {
       debugPrint('[AutoSync] Background push error: $e');
     }

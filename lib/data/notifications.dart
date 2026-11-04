@@ -4,9 +4,11 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 
+import '../core/format.dart';
 import '../core/l10n.dart';
 import '../core/period.dart';
 import 'app_database.dart';
+import 'tables.dart' show DebtDirection;
 
 /// Notifikasi lokal: peringatan anggaran dan pengingat harian.
 /// Semua pemanggilan aman: jika terjadi kesalahan, hanya dicatat ke log.
@@ -78,6 +80,33 @@ class NotificationService {
       );
     } catch (e) {
       debugPrint('Budget alert failed: $e');
+    }
+  }
+
+  Future<void> showDebtReminder({
+    required int notificationId,
+    required String title,
+    required String body,
+  }) async {
+    if (!_supported) return;
+    await init();
+    if (!_ready) return;
+    try {
+      await _plugin.show(
+        notificationId,
+        title,
+        body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            'debt_reminders',
+            trG('Debt reminders'),
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Debt reminder failed: $e');
     }
   }
 
@@ -160,4 +189,67 @@ Future<void> checkBudgetAfterExpense({
     percent: level,
     notificationId: categoryId.hashCode & 0x7fffffff,
   );
+}
+
+/// Periksa utang-piutang yang mendekati atau melewati jatuh tempo.
+/// Pengingat dikirim maksimal sekali sehari per item utang.
+Future<void> checkDebtDueReminders(AppDatabase db) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+
+    final activeDebts = await (db.select(db.debts)
+          ..where((d) => d.deletedAt.isNull())
+          ..where((d) => d.dueDate.isNotNull()))
+        .get();
+
+    for (final debt in activeDebts) {
+      if (debt.paidAmount >= debt.amount || debt.dueDate == null) continue;
+      final due = DateTime(debt.dueDate!.year, debt.dueDate!.month, debt.dueDate!.day);
+
+      // Cek jatuh tempo: besok (H-1), hari ini (H), atau lewat jatuh tempo hingga 7 hari
+      final diffDays = due.difference(todayDate).inDays;
+      if (diffDays < -7 || diffDays > 1) continue;
+
+      final key = 'notified_debt_${debt.id}_${todayDate.year}_${todayDate.month}_${todayDate.day}';
+      if (prefs.getBool(key) == true) continue;
+
+      final remaining = debt.amount - debt.paidAmount;
+      final formattedAmount = rupiah(remaining);
+      String formattedDate;
+      try {
+        formattedDate = shortDate(due);
+      } catch (_) {
+        formattedDate = '${due.day}/${due.month}/${due.year}';
+      }
+
+      final isLent = debt.direction == DebtDirection.lent;
+      final title = isLent
+          ? trG('Debt collection reminder')
+          : trG('Debt repayment reminder');
+
+      final body = isLent
+          ? trG('{person} owes you {amount} due on {date}', {
+              'person': debt.person,
+              'amount': formattedAmount,
+              'date': formattedDate,
+            })
+          : trG('Your debt to {person} of {amount} is due on {date}', {
+              'person': debt.person,
+              'amount': formattedAmount,
+              'date': formattedDate,
+            });
+
+      await NotificationService.instance.showDebtReminder(
+        notificationId: debt.id.hashCode & 0x7fffffff,
+        title: title,
+        body: body,
+      );
+
+      await prefs.setBool(key, true);
+    }
+  } catch (e) {
+    debugPrint('Debt due reminder check failed: $e');
+  }
 }

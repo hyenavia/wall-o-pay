@@ -13,55 +13,21 @@ import '../../data/profile.dart';
 import '../../data/providers.dart';
 import '../../data/tables.dart' show TxType;
 
-import '../accounts/accounts_page.dart';
 import '../profile/profile_page.dart';
 import '../settings/settings_page.dart';
 import '../more/more_page.dart';
 import 'daily_financial_pulse_card.dart';
 import '../transactions/transaction_form.dart';
 import '../transactions/transaction_tile.dart';
-import '../../data/cloud.dart';
-import '../../data/cloud_sync.dart';
 import '../../data/budget_rule.dart';
+import '../../data/cloud_sync.dart';
 import '../../data/update_checker.dart';
 
-class HomePage extends ConsumerStatefulWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  ConsumerState<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    Future.microtask(() {
-      final user = ref.read(currentUserProvider);
-      if (user != null) {
-        ref.read(autoSyncServiceProvider).startSync(user.uid);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      ref.read(autoSyncServiceProvider).triggerTwoWaySync();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+  Widget build(BuildContext context, WidgetRef ref) {
     final period = ref.watch(selectedPeriodProvider);
     final isWeekly = period.type == PeriodType.weekly;
     final txAsync = ref.watch(transactionsProvider);
@@ -69,7 +35,6 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
     final budgets = ref.watch(budgetByCategoryProvider);
     final spent = ref.watch(spentByCategoryProvider);
     final name = ref.watch(displayNameProvider);
-    final muted = scheme.onSurface.withValues(alpha: 0.65);
     final updateInfo = ref.watch(availableUpdateProvider);
 
     void openProfile() => Navigator.push(
@@ -123,7 +88,6 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                       final budgetSpent = budgetPool > 0
                           ? expense
                           : budgets.keys.fold<int>(0, (a, id) => a + (spent[id] ?? 0));
-                      final ratio = totalBudget == 0 ? 0.0 : budgetSpent / totalBudget;
 
                       final daysLeft = period.daysLeft;
                       final dailyAllowance =
@@ -184,73 +148,18 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                               savedPct: savedPct,
                             ),
                             const SizedBox(height: 14),
-                            const AccountsSummaryCard(),
-                            const SizedBox(height: 14),
-                            AppCard(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          context.tr(budgetTitle),
-                                          style: theme.textTheme.bodyLarge
-                                              ?.copyWith(fontWeight: FontWeight.w700),
-                                        ),
-                                      ),
-                                      if (totalBudget > 0)
-                                        Text(
-                                          context.tr('{pct}% used', {'pct': (ratio * 100).round()}),
-                                          style: theme.textTheme.bodySmall?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                            color: budgetColor(ratio, scheme),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  if (totalBudget > 0) ...[
-                                    AppProgressBar(value: ratio, color: budgetColor(ratio, scheme)),
-                                    const SizedBox(height: 8),
-                                    Text(
-                                      context.tr('{spent} of {total}', {
-                                        'spent': rupiah(budgetSpent),
-                                        'total': rupiah(totalBudget),
-                                      }),
-                                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                                    ),
-                                  ] else
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            context.tr('No budget set yet.'),
-                                            style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                                          ),
-                                        ),
-                                        TextButton(
-                                          onPressed: () => ref.read(tabIndexProvider.notifier).set(2),
-                                          child: Text(context.tr('Set budget')),
-                                        ),
-                                      ],
-                                    ),
-                                ],
-                              ),
+                            DailyFinancialPulseCard(
+                              dailyAllowance: dailyAllowance,
+                              todayExpense: todayExpense,
+                              daysLeft: daysLeft,
+                              balance: balance,
+                              totalBudget: totalBudget,
+                              budgetSpent: budgetSpent,
+                              txCount: txs.length,
+                              budgetTitle: budgetTitle,
+                              onSetBudget: () => ref.read(tabIndexProvider.notifier).set(2),
                             ),
-                            const SizedBox(height: 14),
-                            if (isCurrent) ...[
-                              DailyFinancialPulseCard(
-                                dailyAllowance: dailyAllowance,
-                                todayExpense: todayExpense,
-                                daysLeft: daysLeft,
-                                balance: balance,
-                                totalBudget: totalBudget,
-                                budgetSpent: budgetSpent,
-                                txCount: txs.length,
-                              ),
-                              const SizedBox(height: 14),
-                            ],
+                            const SizedBox(height: 16),
                             SectionHeader(
                               title: context.tr('Recent Transactions'),
                               actionLabel: context.tr('See All'),

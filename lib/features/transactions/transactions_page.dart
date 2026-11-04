@@ -23,6 +23,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   String _query = '';
   TxType? _filter;
   DateTimeRange? _range;
+  String? _selectedWalletId;
+  String? _selectedCategoryId;
 
   Future<void> _pickRange() async {
     final now = DateTime.now();
@@ -86,14 +88,23 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           child: Text(context.tr('Could not load data: {error}', {'error': e})),
         ),
         data: (txs) {
-          final shown = isSearching
-              ? txs
-              : (_filter == null ? txs : txs.where((t) => t.type == _filter).toList());
+          final shown = txs.where((t) {
+            if (!isSearching && _filter != null && t.type != _filter) return false;
+            if (_selectedWalletId != null &&
+                t.walletId != _selectedWalletId &&
+                t.toWalletId != _selectedWalletId) {
+              return false;
+            }
+            if (_selectedCategoryId != null && t.categoryId != _selectedCategoryId) {
+              return false;
+            }
+            return true;
+          }).toList();
 
-          final totalIncome = (isSearching ? shown : txs)
+          final totalIncome = shown
               .where((t) => t.type == TxType.income)
               .fold<int>(0, (a, t) => a + t.amount);
-          final totalExpense = (isSearching ? shown : txs)
+          final totalExpense = shown
               .where((t) => t.type == TxType.expense)
               .fold<int>(0, (a, t) => a + t.amount);
 
@@ -134,6 +145,187 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           onSelected: () => setState(() => _filter = f.$2),
                         ),
                       ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    // Account filter button
+                    PopupMenuButton<String?>(
+                      tooltip: context.tr('Filter by account'),
+                      onSelected: (val) => setState(() => _selectedWalletId = val),
+                      itemBuilder: (context) => [
+                        PopupMenuItem<String?>(
+                          value: null,
+                          child: Text(context.tr('All Accounts')),
+                        ),
+                        for (final w in wallets.values)
+                          PopupMenuItem<String?>(
+                            value: w.id,
+                            child: Row(
+                              children: [
+                                if (w.id == _selectedWalletId)
+                                  const Icon(Icons.check, size: 16, color: AppColors.income)
+                                else
+                                  const SizedBox(width: 16),
+                                const SizedBox(width: 8),
+                                Text(w.name),
+                              ],
+                            ),
+                          ),
+                      ],
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _selectedWalletId != null
+                              ? AppColors.deepForest.withValues(alpha: 0.18)
+                              : Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: _selectedWalletId != null
+                                ? AppColors.sage
+                                : Theme.of(context).colorScheme.outlineVariant,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.account_balance_wallet_outlined,
+                              size: 15,
+                              color: _selectedWalletId != null
+                                  ? AppColors.sage
+                                  : Theme.of(context).colorScheme.onSurface,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              _selectedWalletId == null
+                                  ? context.tr('All Accounts')
+                                  : (wallets[_selectedWalletId]?.name ?? context.tr('All Accounts')),
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                                color: _selectedWalletId != null
+                                    ? AppColors.sage
+                                    : Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_drop_down,
+                              size: 16,
+                              color: _selectedWalletId != null
+                                  ? AppColors.sage
+                                  : Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    // Category filter button
+                    PopupMenuButton<String?>(
+                      tooltip: context.tr('Filter by category'),
+                      onSelected: (val) => setState(() => _selectedCategoryId = val),
+                      itemBuilder: (context) => [
+                        PopupMenuItem<String?>(
+                          value: null,
+                          child: Text(context.tr('All Categories')),
+                        ),
+                        for (final c in cats.values)
+                          PopupMenuItem<String?>(
+                            value: c.id,
+                            child: Row(
+                              children: [
+                                if (c.id == _selectedCategoryId)
+                                  const Icon(Icons.check, size: 16, color: AppColors.income)
+                                else
+                                  const SizedBox(width: 16),
+                                const SizedBox(width: 8),
+                                Text(c.name),
+                              ],
+                            ),
+                          ),
+                      ],
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _selectedCategoryId != null
+                              ? AppColors.deepForest.withValues(alpha: 0.18)
+                              : Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: _selectedCategoryId != null
+                                ? AppColors.sage
+                                : Theme.of(context).colorScheme.outlineVariant,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.category_outlined,
+                              size: 15,
+                              color: _selectedCategoryId != null
+                                  ? AppColors.sage
+                                  : Theme.of(context).colorScheme.onSurface,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              _selectedCategoryId == null
+                                  ? context.tr('All Categories')
+                                  : (cats[_selectedCategoryId]?.name ?? context.tr('All Categories')),
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                                color: _selectedCategoryId != null
+                                    ? AppColors.sage
+                                    : Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_drop_down,
+                              size: 16,
+                              color: _selectedCategoryId != null
+                                  ? AppColors.sage
+                                  : Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (_selectedWalletId != null || _selectedCategoryId != null) ...[
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: () => setState(() {
+                          _selectedWalletId = null;
+                          _selectedCategoryId = null;
+                        }),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.close, size: 15, color: AppColors.expense),
+                              const SizedBox(width: 4),
+                              Text(
+                                context.tr('Clear filters'),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.expense,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

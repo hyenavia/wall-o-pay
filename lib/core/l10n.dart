@@ -18,7 +18,8 @@ class AppStrings {
   final String code;
 
   static AppStrings of(BuildContext context) =>
-      Localizations.of<AppStrings>(context, AppStrings)!;
+      Localizations.of<AppStrings>(context, AppStrings) ??
+      AppStrings(AppLocale.code);
 
   static const LocalizationsDelegate<AppStrings> delegate = _AppStringsDelegate();
 
@@ -678,5 +679,38 @@ const Map<String, String> _id = {
   'Customize which modules appear on your home screen and menus.': 'Atur modul mana saja yang tampil di layar utama dan menumu.',
   'More Features': 'Fitur Lainnya',
   'Customize': 'Sesuaikan',
+  'Filter by account': 'Filter berdasarkan rekening',
+  'Filter by category': 'Filter berdasarkan kategori',
+  'All Categories': 'Semua Kategori',
+  'Clear filters': 'Hapus filter',
+  'Edit goal': 'Edit impian',
+  'Withdraw funds': 'Tarik dana',
+  'Withdraw from {name}': 'Tarik dana dari {name}',
+  'Deduct from account': 'Potong dari saldo rekening',
+  'Deposit to account': 'Setor ke saldo rekening',
+  'Savings deposit: {name}': 'Setoran tabungan: {name}',
+  'Savings withdrawal: {name}': 'Penarikan tabungan: {name}',
+  'Account / Wallet': 'Rekening / Dompet',
+  'Mark as fully paid': 'Tandai lunas',
+  'Calculator': 'Kalkulator',
+  'Use Amount': 'Gunakan Nominal',
+  'Debt reminders': 'Pengingat utang',
+  'Debt collection reminder': 'Pengingat piutang',
+  'Debt repayment reminder': 'Pengingat pelunasan utang',
+  '{person} owes you {amount} due on {date}': '{person} berutang kepadamu {amount} jatuh tempo pada {date}',
+  'Your debt to {person} of {amount} is due on {date}': 'Utangmu ke {person} sebesar {amount} jatuh tempo pada {date}',
+  'Admin fee: transfer to {wallet}': 'Biaya admin transfer ke {wallet}',
+  'Admin Fee (Optional)': 'Biaya Admin (Opsional)',
+  'Admin Fee': 'Biaya Admin',
+  'Free / Rp 0': 'Gratis / Rp 0',
+  'Free (Rp 0)': 'Gratis (Rp 0)',
+  'Deducted from source wallet as an admin fee expense': 'Dipotong dari rekening asal sebagai pengeluaran biaya admin',
+  'Destination': 'Tujuan',
+  'More details (Date, note, receipt...)': 'Detail lainnya (Tanggal, catatan, struk...)',
+  'Hide extra details': 'Sembunyikan detail lainnya',
+  '+ Add admin fee': '+ Tambah biaya admin',
+  'Hide admin fee': 'Sembunyikan biaya admin',
+  'Period Budget': 'Anggaran Periode',
+  'Period ended': 'Periode berakhir',
 };
 

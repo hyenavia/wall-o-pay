@@ -11,6 +11,7 @@ import 'core/theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'data/cloud.dart';
 import 'data/cloud_sync.dart';
+import 'data/notifications.dart';
 import 'data/prefs.dart';
 import 'data/providers.dart';
 import 'data/update_checker.dart';
@@ -135,6 +136,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     WidgetsBinding.instance.addObserver(this);
     ShareService.initialize(context, ref);
     RecurringService.checkAndGenerateDue(ref.read(databaseProvider));
+    checkDebtDueReminders(ref.read(databaseProvider));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final user = ref.read(currentUserProvider);
       if (user != null) {
@@ -152,7 +154,12 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     if (state == AppLifecycleState.resumed) {
       UpdateCheckerService.checkAndNotify(ref, context: context);
       RecurringService.checkAndGenerateDue(ref.read(databaseProvider));
+      checkDebtDueReminders(ref.read(databaseProvider));
       ShareService.checkSharedData(context);
+      final user = ref.read(currentUserProvider);
+      if (user != null) {
+        ref.read(autoSyncServiceProvider).triggerTwoWaySync();
+      }
     }
   }
 
