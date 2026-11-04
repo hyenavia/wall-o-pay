@@ -41,10 +41,33 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '1.11.21',
+      dateEn: 'November 4, 2026',
+      dateId: '4 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Integrated direct Budget navigation into More Features alongside other tools for instant 1-tap access.',
+          textId: 'Menambahkan menu Anggaran langsung ke halaman Fitur Lainnya untuk akses instan 1-ketuk.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Removed confusing Active Modules toggles from Settings and More screen; all core modules are always accessible.',
+          textId: 'Menghapus toggle Modul Aktif dari Pengaturan dan Fitur Lainnya; semua modul utama kini selalu aktif dan dapat diakses.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Streamlined onboarding by removing module selection step for a faster and friction-free setup.',
+          textId: 'Membuat alur onboarding lebih ringkas dengan meniadakan langkah pilih modul.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '1.11.20',
       dateEn: 'November 3, 2026',
       dateId: '3 November 2026',
-      isCurrent: true,
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

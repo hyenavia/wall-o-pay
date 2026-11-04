@@ -4,6 +4,22 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.21] - 2026-11-04
+
+### Changed
+- **Direct Access Menu in More Features:**
+  - Removed the confusing "Active Modules & Features" toggle banner and popup sheet from More Features.
+  - Added a direct **Budget** menu tile into the More Features screen alongside Accounts, Goals, Transfer Balance, Debts & Splits, Recurring, Categories, PDF Report, and Settings, giving immediate 1-tap access to every core feature.
+  - Ensured the Home screen budget card remains consistently visible as a standard budgeting overview.
+
+### Removed
+- **Streamlined Settings & Simplified Onboarding:**
+  - Removed the redundant "Active Modules & Features" toggle item and sheet from Settings.
+  - Streamlined new user onboarding by removing the feature toggle step so all tools are activated by default with zero friction.
+  - Removed orphaned `module_sheet.dart` component.
+
+---
+
 ## [1.11.20] - 2026-11-03
 
 ### Changed

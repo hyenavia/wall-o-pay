@@ -23,7 +23,6 @@ import '../transactions/transaction_tile.dart';
 import '../../data/cloud.dart';
 import '../../data/cloud_sync.dart';
 import '../../data/budget_rule.dart';
-import '../../data/module_prefs.dart';
 import '../../data/update_checker.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -72,7 +71,6 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
     final name = ref.watch(displayNameProvider);
     final muted = scheme.onSurface.withValues(alpha: 0.65);
     final updateInfo = ref.watch(availableUpdateProvider);
-    final modules = ref.watch(modulePrefsProvider);
 
     void openProfile() => Navigator.push(
           context,
@@ -188,61 +186,59 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
                             const SizedBox(height: 14),
                             const AccountsSummaryCard(),
                             const SizedBox(height: 14),
-                            if (modules.budget) ...[
-                              AppCard(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
+                            AppCard(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          context.tr(budgetTitle),
+                                          style: theme.textTheme.bodyLarge
+                                              ?.copyWith(fontWeight: FontWeight.w700),
+                                        ),
+                                      ),
+                                      if (totalBudget > 0)
+                                        Text(
+                                          context.tr('{pct}% used', {'pct': (ratio * 100).round()}),
+                                          style: theme.textTheme.bodySmall?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color: budgetColor(ratio, scheme),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  if (totalBudget > 0) ...[
+                                    AppProgressBar(value: ratio, color: budgetColor(ratio, scheme)),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      context.tr('{spent} of {total}', {
+                                        'spent': rupiah(budgetSpent),
+                                        'total': rupiah(totalBudget),
+                                      }),
+                                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                                    ),
+                                  ] else
                                     Row(
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            context.tr(budgetTitle),
-                                            style: theme.textTheme.bodyLarge
-                                                ?.copyWith(fontWeight: FontWeight.w700),
+                                            context.tr('No budget set yet.'),
+                                            style: theme.textTheme.bodySmall?.copyWith(color: muted),
                                           ),
                                         ),
-                                        if (totalBudget > 0)
-                                          Text(
-                                            context.tr('{pct}% used', {'pct': (ratio * 100).round()}),
-                                            style: theme.textTheme.bodySmall?.copyWith(
-                                              fontWeight: FontWeight.w700,
-                                              color: budgetColor(ratio, scheme),
-                                            ),
-                                          ),
+                                        TextButton(
+                                          onPressed: () => ref.read(tabIndexProvider.notifier).set(2),
+                                          child: Text(context.tr('Set budget')),
+                                        ),
                                       ],
                                     ),
-                                    const SizedBox(height: 12),
-                                    if (totalBudget > 0) ...[
-                                      AppProgressBar(value: ratio, color: budgetColor(ratio, scheme)),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        context.tr('{spent} of {total}', {
-                                          'spent': rupiah(budgetSpent),
-                                          'total': rupiah(totalBudget),
-                                        }),
-                                        style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                                      ),
-                                    ] else
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              context.tr('No budget set yet.'),
-                                              style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                                            ),
-                                          ),
-                                          TextButton(
-                                            onPressed: () => ref.read(tabIndexProvider.notifier).set(2),
-                                            child: Text(context.tr('Set budget')),
-                                          ),
-                                        ],
-                                      ),
-                                  ],
-                                ),
+                                ],
                               ),
-                              const SizedBox(height: 14),
-                            ],
+                            ),
+                            const SizedBox(height: 14),
                             if (isCurrent) ...[
                               DailyFinancialPulseCard(
                                 dailyAllowance: dailyAllowance,

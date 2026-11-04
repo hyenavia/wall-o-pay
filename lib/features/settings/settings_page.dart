@@ -10,11 +10,9 @@ import '../../data/cloud.dart';
 import '../../data/cloud_backup.dart';
 import '../../data/cloud_sync.dart';
 import '../../data/feature_prefs.dart';
-import '../../data/module_prefs.dart';
 import '../../data/notifications.dart';
 import 'app_changelog.dart';
 import 'about_sheet.dart';
-import 'module_sheet.dart';
 import '../../data/export_service.dart';
 import '../../data/prefs.dart';
 import '../../data/profile.dart';
@@ -42,7 +40,6 @@ class SettingsPage extends ConsumerWidget {
     final prefsCtl = ref.read(appPrefsProvider.notifier);
     final features = ref.watch(featurePrefsProvider);
     final featuresCtl = ref.read(featurePrefsProvider.notifier);
-    final modulePrefs = ref.watch(modulePrefsProvider);
     final name = ref.watch(displayNameProvider);
     final username = ref.watch(usernameProvider);
     final canUseCloud = ready && user != null && !isSyncing;
@@ -263,19 +260,6 @@ class SettingsPage extends ConsumerWidget {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
-                ListTile(
-                  leading: const Icon(Icons.widgets_outlined),
-                  title: Text(context.tr('Active Modules & Features')),
-                  subtitle: Text(
-                    context.tr('{count} of {total} modules active', {
-                      'count': modulePrefs.activeCount,
-                      'total': 5,
-                    }),
-                  ),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => showModuleSelectionSheet(context),
-                ),
-                const Divider(height: 1),
                 SwitchListTile(
                   secondary: const Icon(Icons.redo),
                   title: Text(context.tr('Carry over unused budget')),
