@@ -417,7 +417,7 @@ class _BalanceCard extends ConsumerWidget {
                 Icon(
                   isSurplus ? Icons.trending_up_rounded : Icons.trending_down_rounded,
                   size: 15,
-                  color: isSurplus ? const Color(0xFF6EE7B7) : const Color(0xFFFCA5A5),
+                  color: isSurplus ? AppColors.incomeOnDark : AppColors.expenseOnDark,
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -430,7 +430,7 @@ class _BalanceCard extends ConsumerWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
-                      color: isSurplus ? const Color(0xFF6EE7B7) : const Color(0xFFFCA5A5),
+                      color: isSurplus ? AppColors.incomeOnDark : AppColors.expenseOnDark,
                     ),
                   ),
                 ),
@@ -624,7 +624,7 @@ class _UpdateBannerCard extends StatelessWidget {
                           Text(
                             'v${info.currentVersion} ➔ v${info.latestVersion}',
                             style: const TextStyle(
-                              color: Color(0xFF6EE7B7),
+                              color: AppColors.incomeOnDark,
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                             ),

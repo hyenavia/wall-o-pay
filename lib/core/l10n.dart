@@ -712,5 +712,7 @@ const Map<String, String> _id = {
   'Hide admin fee': 'Sembunyikan biaya admin',
   'Period Budget': 'Anggaran Periode',
   'Period ended': 'Periode berakhir',
+  'Admin fee: {context}': 'Biaya admin: {context}',
+  'Recorded as an additional admin fee expense': 'Dicatat sebagai pengeluaran biaya admin terpisah',
 };
 

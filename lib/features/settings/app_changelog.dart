@@ -41,10 +41,28 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.27',
+      version: '1.11.28',
       dateEn: 'November 4, 2026',
       dateId: '4 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added optional Admin Fee support to Expense transactions with custom nominal entry and quick presets (Free, Rp 1.000, Rp 2.500, Rp 5.000).',
+          textId: 'Menambahkan dukungan Biaya Admin opsional pada transaksi Pengeluaran dengan input nominal kustom dan tombol cepat (Gratis, Rp 1.000, Rp 2.500, Rp 5.000).',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Applied tabular figures typography for aligned numerical values, enhanced contrast for income/expense semantic colors, and styled primary action buttons in luminous Sage.',
+          textId: 'Menerapkan tipografi tabular figures untuk perataan angka monospaced, meningkatkan kontras warna pemasukan/pengeluaran, dan menyematkan warna Sage kontras tinggi pada tombol aksi utama.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.27',
+      dateEn: 'November 4, 2026',
+      dateId: '4 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

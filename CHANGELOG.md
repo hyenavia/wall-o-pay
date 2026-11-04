@@ -4,6 +4,23 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.28] - 2026-11-04
+
+### Added
+- **Admin Fee on Expense Transactions:**
+  - Added dedicated Admin Fee support to Expense transactions within the "More details" section.
+  - Supports completely custom admin fee entry (e.g. food delivery fees, electricity token convenience charges) alongside one-tap quick chips (`Free`, `Rp 1.000`, `Rp 2.500`, `Rp 5.000`).
+  - Automatically records an associated secondary expense transaction from the selected payment account without requiring database schema changes.
+
+### Changed
+- **Botanical Forest Theme & Typography Polish:**
+  - Configured tabular figures (`FontFeature.tabularFigures()`) across all text styles, ensuring monospaced alignment for numerical values and Rupiah amounts in calculators and lists.
+  - Promoted primary CTA buttons (`FilledButton` & Floating Action Button) to high-contrast `AppColors.sage` (`#A9C5B1`) with dark ink text (`#202923`) for crisp visual prominence.
+  - Enhanced `AppColors.income` contrast to `#38B271` and exposed high-contrast surface/semantic tokens (`incomeOnDark`, `expenseOnDark`, `bg`, `cardSurface`, `surfaceContainer`, `borderOutline`) in `AppColors`.
+  - Centralized `bottomSheetTheme`, `popupMenuTheme`, and `snackBarTheme` in `buildTheme()`.
+
+---
+
 ## [1.11.27] - 2026-11-04
 
 ### Changed

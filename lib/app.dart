@@ -279,8 +279,8 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
         floatingActionButton: FloatingActionButton(
           tooltip: context.tr('Add transaction'),
           shape: const CircleBorder(),
-          backgroundColor: AppColors.deepForest,
-          foregroundColor: Colors.white,
+          backgroundColor: AppColors.sage,
+          foregroundColor: AppColors.ink,
           onPressed: () => showTransactionForm(context),
           child: const Icon(Icons.add, size: 28),
         ),

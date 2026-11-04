@@ -268,6 +268,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     final db = ref.read(databaseProvider);
     final day = DateTime(_date.year, _date.month, _date.day);
     final e = widget.entry;
+    final feeAmount = parseAmount(_fee.text);
 
     if (_type == TxType.transfer) {
       if (_walletId == null || _toWalletId == null) {
@@ -279,7 +280,6 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
         return;
       }
 
-      final feeAmount = parseAmount(_fee.text);
       if (e == null) {
         await db.transferBetweenWallets(
           amount: amount,
@@ -355,6 +355,23 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           walletId: actualWalletId,
           receiptPath: _receiptPath,
         );
+        if (_type == TxType.expense && feeAmount > 0) {
+          final cat = (ref.read(categoriesProvider).value ?? const [])
+              .where((c) => c.id == _categoryId)
+              .firstOrNull;
+          final catName = cat?.name ?? 'Expense';
+          final noteContext = _note.text.trim().isNotEmpty
+              ? _note.text.trim()
+              : trG(catName);
+          await db.addTransaction(
+            amount: feeAmount,
+            type: TxType.expense,
+            categoryId: 'cat-exp-other',
+            date: day,
+            walletId: actualWalletId,
+            note: trG('Admin fee: {context}', {'context': noteContext}),
+          );
+        }
       } else {
         await db.updateTransaction(
           e.id,
@@ -367,6 +384,23 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           receiptPath: _receiptPath,
           clearReceipt: _receiptPath == null,
         );
+        if (_type == TxType.expense && feeAmount > 0) {
+          final cat = (ref.read(categoriesProvider).value ?? const [])
+              .where((c) => c.id == _categoryId)
+              .firstOrNull;
+          final catName = cat?.name ?? 'Expense';
+          final noteContext = _note.text.trim().isNotEmpty
+              ? _note.text.trim()
+              : trG(catName);
+          await db.addTransaction(
+            amount: feeAmount,
+            type: TxType.expense,
+            categoryId: 'cat-exp-other',
+            date: day,
+            walletId: actualWalletId,
+            note: trG('Admin fee: {context}', {'context': noteContext}),
+          );
+        }
       }
     }
 
@@ -780,6 +814,63 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     selected: _needWant == null ? {} : {_needWant!},
                     onSelectionChanged: (s) => setState(() => _needWant = s.isEmpty ? null : s.first),
                   ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(context.tr('Admin Fee (Optional)'), style: theme.textTheme.labelLarge),
+                    if (parseAmount(_fee.text) > 0)
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                        ),
+                        onPressed: () => setState(() => _fee.clear()),
+                        child: Text(context.tr('Free / Rp 0'), style: const TextStyle(fontSize: 12)),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _fee,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: amountFormatters(),
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    prefixText: 'Rp ',
+                    hintText: '0 (${context.tr("Free (Rp 0)")})',
+                    helperText: context.tr('Recorded as an additional admin fee expense'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final opt in [
+                      (amount: 0, label: 'Free (Rp 0)'),
+                      (amount: 1000, label: 'Rp 1.000'),
+                      (amount: 2500, label: 'Rp 2.500'),
+                      (amount: 5000, label: 'Rp 5.000'),
+                    ])
+                      ActionChip(
+                        label: Text(context.tr(opt.label)),
+                        avatar: (opt.amount == 0 && parseAmount(_fee.text) == 0) ||
+                                (opt.amount > 0 && parseAmount(_fee.text) == opt.amount)
+                            ? const Icon(Icons.check, size: 16)
+                            : null,
+                        onPressed: () {
+                          setState(() {
+                            if (opt.amount == 0) {
+                              _fee.clear();
+                            } else {
+                              _fee.text = formatThousands(opt.amount);
+                            }
+                          });
+                        },
+                      ),
+                  ],
                 ),
               ],
               const SizedBox(height: 16),

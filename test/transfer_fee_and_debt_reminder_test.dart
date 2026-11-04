@@ -63,6 +63,42 @@ void main() {
       expect(feeTx.categoryId, 'cat-exp-other');
       expect(feeTx.note, contains('Biaya admin'));
     });
+
+    test('Expense with admin fee records both primary expense and secondary fee transaction', () async {
+      final now = DateTime.now();
+
+      // Primary expense: Token listrik PLN 50,000 from wallet-main
+      await db.addTransaction(
+        amount: 50000,
+        type: TxType.expense,
+        categoryId: 'cat-exp-housing',
+        date: now,
+        walletId: 'wallet-main',
+        note: 'Token Listrik PLN',
+      );
+
+      // Associated admin fee: 2,500
+      await db.addTransaction(
+        amount: 2500,
+        type: TxType.expense,
+        categoryId: 'cat-exp-other',
+        date: now,
+        walletId: 'wallet-main',
+        note: 'Biaya admin: Token Listrik PLN',
+      );
+
+      final txs = await db.watchAllTransactions().first;
+      expect(txs.length, 2);
+
+      final primaryTx = txs.firstWhere((t) => t.categoryId == 'cat-exp-housing');
+      expect(primaryTx.amount, 50000);
+      expect(primaryTx.walletId, 'wallet-main');
+
+      final feeTx = txs.firstWhere((t) => t.categoryId == 'cat-exp-other');
+      expect(feeTx.amount, 2500);
+      expect(feeTx.walletId, 'wallet-main');
+      expect(feeTx.note, 'Biaya admin: Token Listrik PLN');
+    });
   });
 
   group('Debt Due Date Reminder Tests', () {
