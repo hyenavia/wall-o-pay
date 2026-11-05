@@ -12,7 +12,7 @@
 [![Database](https://img.shields.io/badge/Database-Drift%20SQLite-1E4238?logo=sqlite&logoColor=white)](https://drift.simonbinder.eu/)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.11.31-234B3B.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.11.32-234B3B.svg)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://hyenavia.github.io/wall-o-pay/) • [📥 Download Latest APK](https://github.com/hyenavia/wall-o-pay/releases/latest) • [📋 Changelog](CHANGELOG.md)
 
@@ -29,7 +29,7 @@
 ## ✨ Key Features
 
 - ⚡ **Offline-First & Instantaneous:** Transactions and calculations are handled locally on-device with Drift SQLite. Zero network latency, instant launches, and full reliability anywhere.
-- 🔔 **Auto-Detected Transaction Inbox with Confirmation:** Background notification listener detects transactions from Indonesian banks and e-wallets (BCA, Mandiri Livin', BRImo, BNI, GoPay, OVO, DANA, ShopeePay) and queues them as pending drafts. Users can review, adjust category/amount, and confirm before recording.
+- 👤 **Offline Guest Mode & Privacy Shield:** Track finances 100% offline without mandatory account creation. Secure personal records with 6-digit PIN and local biometric authentication, with effortless cloud migration whenever ready.
 - 💵 **Comprehensive Cashflow Logging:** Record income and expenses effortlessly with custom categories, dates, remarks, and receipt photo attachments.
 - 🎯 **Dedicated Savings Goals:** Set targets for emergency funds, gadgets, or dream vacations. Make step-by-step deposits and track progress percentages in real time.
 - 📊 **Category Budgeting:** Set hard monthly limits per spending category. Visual progress bars alert you before overspending occurs.

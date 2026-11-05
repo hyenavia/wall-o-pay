@@ -4,6 +4,18 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.32] - 2026-11-05
+
+### Changed
+- **Web Landing Page Modernization & App Feature Parity:**
+  - **Accurate Feature Grid (8 Cards):** Balanced the features section into an even 8-card grid representing real in-app capabilities (Offline-First & Guest Mode, Rapid 5-Second Logging & Mini Calculator, Multi-Account & Wallets, Smart 50/30/20 Budgets, Debts & Split Bills, Goals Linked to Wallets, Visual Insights & Export, and Signature Botanical Forest theme).
+  - **Removed Legacy Inbox Reference:** Purged legacy references to the removed background notification auto-track inbox across `docs/index.html` and `README.md`.
+  - **3-Block Rupiah Phone Mockup:** Redesigned the Hero mobile preview to reflect the contemporary 3-Block Home architecture (Balance Inflow/Outflow, Daily Budget Pulse, and Recent Activities) with localized Rupiah (`Rp`) currency formatting and tabular figures.
+  - **Dynamic Interactive Showcase:** Upgraded the Showcase section so switching tabs between Dashboard, Transactions, Budgets, and Savings Goals dynamically renders dedicated rich visual UI previews.
+  - **Version Consistency & Anti-Downgrade Guard:** Synchronized version markers across the landing page and updated `fetchLatestReleaseVersion()` in `docs/script.js` to ensure older GitHub API releases do not downgrade the current build version.
+
+---
+
 ## [1.11.31] - 2026-11-05
 
 ### Added

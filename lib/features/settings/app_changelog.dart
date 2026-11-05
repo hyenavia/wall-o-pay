@@ -41,10 +41,24 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.31',
+      version: '1.11.32',
       dateEn: 'November 5, 2026',
       dateId: '5 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Landing Page Modernization & Feature Parity: Overhauled docs landing page with an 8-card feature matrix, dynamic showcase previews for all tabs, 3-block Rupiah mobile mockup, and rate-limit guard.',
+          textId:
+              'Modernisasi Landing Page & Sinkronisasi Fitur: Memperbarui landing page docs dengan matriks 8 kartu fitur riil, preview showcase dinamis per tab, mockup HP Rupiah 3-blok, dan proteksi versi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.31',
+      dateEn: 'November 5, 2026',
+      dateId: '5 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.added,

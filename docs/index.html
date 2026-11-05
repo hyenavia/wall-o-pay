@@ -42,7 +42,7 @@
       <a href="#" class="brand">
         <img src="images/logo.png" alt="Wall o' Pay Logo" class="brand-icon">
         <span class="brand-name">Wall o' Pay</span>
-        <span class="brand-tag app-version-tag">v1.11.30</span>
+        <span class="brand-tag app-version-tag">v1.11.32</span>
       </a>
 
       <ul class="nav-links" id="nav-links">
@@ -70,7 +70,7 @@
         <div class="hero-content">
           <div class="hero-badge">
             <span class="badge-pulse"></span>
-            <span><span class="app-version-tag">v1.11.31</span> • Latest Stable Release</span>
+            <span><span class="app-version-tag">v1.11.32</span> • Latest Stable Release</span>
           </div>
 
           <h1 class="hero-title">
@@ -85,7 +85,7 @@
           <div class="hero-actions">
             <a href="https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk" class="btn btn-primary" id="hero-cta-download">
               <span>📥</span>
-              <span id="hero-download-text">Download APK (v1.11.31)</span>
+              <span id="hero-download-text">Download APK (v1.11.32)</span>
             </a>
             <a href="#showcase" class="btn btn-secondary">
               <span>📱</span>
@@ -115,7 +115,7 @@
             <div class="float-icon icon-income">📈</div>
             <div class="float-text">
               <span class="float-label">Monthly Inflow</span>
-              <span class="float-val">+$8,500.00</span>
+              <span class="float-val">+Rp 8.500.000</span>
             </div>
           </div>
 
@@ -141,40 +141,32 @@
               <!-- Balance Card -->
               <div class="screen-balance-card">
                 <div class="balance-card-title">Total Net Balance</div>
-                <div class="balance-card-amount">$12,850.00</div>
+                <div class="balance-card-amount">Rp 12.850.000</div>
                 <div class="balance-card-stats">
                   <div class="stat-pill">
                     Inflow
-                    <span style="color: #6EE7B7;">+$8,500.00</span>
+                    <span style="color: #6EE7B7;">+Rp 8.500.000</span>
                   </div>
                   <div class="stat-pill">
                     Outflow
-                    <span style="color: #FCA5A5;">-$3,150.00</span>
+                    <span style="color: #FCA5A5;">-Rp 3.150.000</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Quick Actions -->
-              <div class="screen-quick-actions">
-                <button class="quick-action-btn">
-                  <div class="quick-action-icon">➕</div>
-                  <span>Add Tx</span>
-                </button>
-                <button class="quick-action-btn">
-                  <div class="quick-action-icon">📊</div>
-                  <span>Budgets</span>
-                </button>
-                <button class="quick-action-btn">
-                  <div class="quick-action-icon">🎯</div>
-                  <span>Goals</span>
-                </button>
-                <button class="quick-action-btn">
-                  <div class="quick-action-icon">📤</div>
-                  <span>Export</span>
-                </button>
+              <!-- Block 2: Daily Budget Pulse Card -->
+              <div class="screen-pulse-card">
+                <div class="pulse-header">
+                  <span class="pulse-title">Daily Budget Pulse</span>
+                  <span class="pulse-badge">Safe</span>
+                </div>
+                <div class="pulse-amount">Rp 145.000 <span class="pulse-sub">/ day remaining</span></div>
+                <div class="pulse-track">
+                  <div class="pulse-fill" style="width: 38%;"></div>
+                </div>
               </div>
 
-              <!-- Recent Transactions List -->
+              <!-- Block 3: Recent Transactions List -->
               <div class="screen-section-title">
                 <span>Recent Activities</span>
                 <a href="#showcase">View All</a>
@@ -189,7 +181,7 @@
                       <div class="tx-cat">Primary Income • Today</div>
                     </div>
                   </div>
-                  <div class="tx-amount tx-income">+$8,500.00</div>
+                  <div class="tx-amount tx-income">+Rp 8.500.000</div>
                 </div>
 
                 <div class="mock-tx-item">
@@ -200,7 +192,7 @@
                       <div class="tx-cat">Food & Dining • Yesterday</div>
                     </div>
                   </div>
-                  <div class="tx-amount tx-expense">-$14.50</div>
+                  <div class="tx-amount tx-expense">-Rp 28.000</div>
                 </div>
 
                 <div class="mock-tx-item">
@@ -208,10 +200,10 @@
                     <div class="tx-icon-box">🛒</div>
                     <div>
                       <div class="tx-name">Monthly Groceries</div>
-                      <div class="tx-cat">Household Essentials • Oct 25</div>
+                      <div class="tx-cat">Household Essentials • Nov 02</div>
                     </div>
                   </div>
-                  <div class="tx-amount tx-expense">-$185.00</div>
+                  <div class="tx-amount tx-expense">-Rp 450.000</div>
                 </div>
               </div>
             </div>
@@ -322,39 +314,45 @@
           </div>
 
           <div class="feature-card">
+            <div class="feature-icon-wrapper">👤</div>
+            <h3 class="feature-title">Offline Guest Mode & Privacy Shield</h3>
+            <p class="feature-text">Jump straight into tracking finances 100% offline without creating an account. Protect your records with 6-digit PIN and local biometric unlock.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">📝</div>
+            <h3 class="feature-title">Rapid 5-Second Logging & Mini Calculator</h3>
+            <p class="feature-text">Log expenses swiftly with dynamic categories, built-in math operators, transfer admin fee tracking, and receipt photo attachments.</p>
+          </div>
+
+          <div class="feature-card">
             <div class="feature-icon-wrapper">📊</div>
-            <h3 class="feature-title">Smart Category Budgets</h3>
-            <p class="feature-text">Set monthly spending caps per expense category. Monitor your remaining allowance with visual progress indicators before overspending.</p>
+            <h3 class="feature-title">Smart Category Budgets & 50/30/20</h3>
+            <p class="feature-text">Set monthly spending caps with adaptive progress indicators, rollover balances, and daily budget pulse alerts before overspending.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">🤝</div>
+            <h3 class="feature-title">Debts, Split Bills & Due Reminders</h3>
+            <p class="feature-text">Track who owes whom, record partial or full debt payments, split bills with friends in one tap, and get automated due reminders.</p>
           </div>
 
           <div class="feature-card">
             <div class="feature-icon-wrapper">🎯</div>
             <h3 class="feature-title">Dedicated Savings Goals</h3>
-            <p class="feature-text">Create dedicated funds for emergency stashes, gadgets, or travel. Make gradual deposits and watch your goals come to life.</p>
+            <p class="feature-text">Create milestone funds for emergency stashes, gadgets, or travel. Deposit funds gradually and track progress percentages in real time.</p>
           </div>
 
           <div class="feature-card">
             <div class="feature-icon-wrapper">📈</div>
-            <h3 class="feature-title">Visual Insights & Analytics</h3>
-            <p class="feature-text">Understand where every penny goes with insightful interactive pie diagrams and fl_chart spending trends.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">☁️</div>
-            <h3 class="feature-title">Flexible Cloud Sync</h3>
-            <p class="feature-text">Enjoy full anonymity with 100% offline local storage, or link Firebase Auth to securely back up and migrate records across devices.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">🔔</div>
-            <h3 class="feature-title">Auto-Track Transaction Inbox</h3>
-            <p class="feature-text">Listens to banking and e-wallet push notifications in background. Transactions wait in a review inbox so you can confirm or edit before saving.</p>
+            <h3 class="feature-title">Visual Insights & Multi-Format Reports</h3>
+            <p class="feature-text">Understand spending habits with interactive pie charts and trend graphs. Export printable PDF financial statements, CSV, or JSON backups.</p>
           </div>
 
           <div class="feature-card">
             <div class="feature-icon-wrapper">🌿</div>
-            <h3 class="feature-title">Signature Botanical Forest</h3>
-            <p class="feature-text">An exclusive, hand-curated aesthetic blending atmospheric Night Pine charcoal, Velvet Forest surfaces, and calming Sage accents for a distinct, distraction-free financial journey.</p>
+            <h3 class="feature-title">Botanical Forest & Multi-Account</h3>
+            <p class="feature-text">An exclusive palette blending Night Pine charcoal and Sage accents. Manage Bank, E-Wallet, and Cash accounts with effortless reconciliation.</p>
           </div>
         </div>
       </div>
@@ -387,15 +385,30 @@
             </ul>
           </div>
 
-          <div class="showcase-visual-preview">
-            <div style="background: var(--bg-surface); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <span style="font-weight: 700; color: var(--primary);">Wall o' Pay Demo View</span>
-                <span style="font-size: 0.75rem; background: var(--primary-container); color: var(--primary); padding: 0.2rem 0.5rem; border-radius: 6px;">Live Native Engine</span>
+          <div class="showcase-visual-preview" id="showcase-visual">
+            <div class="preview-box">
+              <div class="preview-box-header">
+                <span class="preview-box-title"><span>🏠</span> Instant Financial Health</span>
+                <span class="preview-box-badge">Live Dashboard</span>
               </div>
-              <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
-                Engineered with Riverpod State Management and Material 3, guaranteeing smooth 60 FPS transitions when inspecting history or adding new entries.
-              </p>
+              <div class="screen-balance-card" style="margin-bottom: 0;">
+                <div class="balance-card-title">Total Net Balance</div>
+                <div class="balance-card-amount">Rp 12.850.000</div>
+                <div class="balance-card-stats">
+                  <div class="stat-pill">Inflow<span style="color: #6EE7B7;">+Rp 8.500.000</span></div>
+                  <div class="stat-pill">Outflow<span style="color: #FCA5A5;">-Rp 3.150.000</span></div>
+                </div>
+              </div>
+              <div class="preview-row-item">
+                <div class="preview-item-left">
+                  <span class="preview-item-icon">⚡</span>
+                  <div>
+                    <div class="preview-item-name">Daily Budget Pulse</div>
+                    <div class="preview-item-cat">Safe to Spend</div>
+                  </div>
+                </div>
+                <div class="preview-item-amount" style="color: var(--income);">Rp 145.000 / day</div>
+              </div>
             </div>
           </div>
         </div>
@@ -432,7 +445,7 @@
               <div class="specs-list">
                 <div class="specs-item">
                   <span class="specs-label">App Version</span>
-                  <span class="specs-val" id="specs-version-val">v1.11.30 (Release)</span>
+                  <span class="specs-val" id="specs-version-val">v1.11.32 (Release)</span>
                 </div>
                 <div class="specs-item">
                   <span class="specs-label">File Size</span>

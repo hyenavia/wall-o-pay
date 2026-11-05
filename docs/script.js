@@ -2,50 +2,187 @@
  * Wall o' Pay - Landing Page Interactive Logic (Full English)
  */
 
-const APP_VERSION = "1.11.31";
+const APP_VERSION = "1.11.32";
+
+// Helper to compare semver strings (e.g. "1.11.32" vs "v1.11.21")
+function isVersionGreater(v1, v2) {
+  const clean = v => v.replace(/^v/, "").split(".").map(n => parseInt(n, 10) || 0);
+  const a = clean(v1);
+  const b = clean(v2);
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const numA = a[i] || 0;
+    const numB = b[i] || 0;
+    if (numA > numB) return true;
+    if (numA < numB) return false;
+  }
+  return false;
+}
 
 // Showcase Tabs Data (Full English)
 const showcaseData = {
   beranda: {
     title: "Instant Financial Dashboard",
-    desc: "View your total balance, monthly inflows and outflows, recent activities, and quick-action shortcuts in one clean interface.",
+    desc: "View your total balance, monthly inflows and outflows, recent activities, and daily budget pulse in one clean 3-block interface.",
     bullets: [
-      "Gradient forest balance card with quick financial summary",
-      "Instant deposit, expense, and transaction filters",
-      "Recent activity feed pulled directly from local SQLite"
-    ]
+      "Gradient forest balance card with net cashflow summary",
+      "Real-time Daily Budget Pulse showing safe-to-spend allowance",
+      "Recent activity feed pulled directly from local SQLite with zero lag"
+    ],
+    previewHtml: `
+      <div class="preview-box">
+        <div class="preview-box-header">
+          <span class="preview-box-title"><span>🏠</span> Instant Financial Health</span>
+          <span class="preview-box-badge">Live Dashboard</span>
+        </div>
+        <div class="screen-balance-card" style="margin-bottom: 0;">
+          <div class="balance-card-title">Total Net Balance</div>
+          <div class="balance-card-amount">Rp 12.850.000</div>
+          <div class="balance-card-stats">
+            <div class="stat-pill">Inflow<span style="color: #6EE7B7;">+Rp 8.500.000</span></div>
+            <div class="stat-pill">Outflow<span style="color: #FCA5A5;">-Rp 3.150.000</span></div>
+          </div>
+        </div>
+        <div class="preview-row-item">
+          <div class="preview-item-left">
+            <span class="preview-item-icon">⚡</span>
+            <div>
+              <div class="preview-item-name">Daily Budget Pulse</div>
+              <div class="preview-item-cat">Safe to Spend</div>
+            </div>
+          </div>
+          <div class="preview-item-amount" style="color: var(--income);">Rp 145.000 / day</div>
+        </div>
+      </div>
+    `
   },
   transaksi: {
-    title: "Detailed & Fast Transaction Logging",
-    desc: "Record every expense with rich metadata. Attach custom categories, custom dates, memos, and receipt photos with ease.",
+    title: "Rapid 5-Second Transaction Logging",
+    desc: "Record every expense with rich metadata. Attach custom categories, custom dates, memos, mini calculator arithmetic, transfer admin fees, and receipt photos with ease.",
     bullets: [
       "Dynamic categories with custom badges and icons",
-      "Attach receipt photos directly from camera or device storage",
+      "Transfer Admin Fee tracking & built-in math calculation",
       "Real-time search query filtering and date range filters"
-    ]
+    ],
+    previewHtml: `
+      <div class="preview-box">
+        <div class="preview-box-header">
+          <span class="preview-box-title"><span>📝</span> Fast Cashflow Records</span>
+          <span class="preview-box-badge">5-Second Input</span>
+        </div>
+        <div class="preview-chip-group">
+          <span class="preview-filter-chip">All</span>
+          <span class="preview-filter-chip active">Expenses</span>
+          <span class="preview-filter-chip">Incomes</span>
+          <span class="preview-filter-chip">Transfers</span>
+        </div>
+        <div class="preview-row-item">
+          <div class="preview-item-left">
+            <span class="preview-item-icon">🛒</span>
+            <div>
+              <div class="preview-item-name">Supermarket Groceries</div>
+              <div class="preview-item-cat">Needs • Receipt Attached 📸</div>
+            </div>
+          </div>
+          <div class="preview-item-amount" style="color: var(--expense);">-Rp 250.000</div>
+        </div>
+        <div class="preview-row-item">
+          <div class="preview-item-left">
+            <span class="preview-item-icon">💳</span>
+            <div>
+              <div class="preview-item-name">BCA ➔ ShopeePay</div>
+              <div class="preview-item-cat">Transfer • Admin Fee: Rp 1.000</div>
+            </div>
+          </div>
+          <div class="preview-item-amount" style="color: var(--primary);">Rp 100.000</div>
+        </div>
+      </div>
+    `
   },
   anggaran: {
-    title: "Category Monthly Budgets",
-    desc: "Set spending caps for groceries, transport, or utilities. Visual progress bars notify you as you approach designated limits.",
+    title: "Category Monthly Budgets & 50/30/20",
+    desc: "Set spending caps for groceries, transport, or lifestyle expenses. Visual progress bars notify you as you approach designated limits with rollover support.",
     bullets: [
-      "Adaptive color progress bars (Green -> Amber -> Red)",
+      "Adaptive color progress bars (Green ➔ Amber ➔ Red)",
       "Automatic calculation of daily remaining allowance",
-      "Adjust and tune budget limits anytime without friction"
-    ]
+      "50/30/20 Needs, Wants, and Savings budget pools"
+    ],
+    previewHtml: `
+      <div class="preview-box">
+        <div class="preview-box-header">
+          <span class="preview-box-title"><span>📊</span> Monthly Budget Allocations</span>
+          <span class="preview-box-badge">50 / 30 / 20</span>
+        </div>
+        <div class="preview-progress-block">
+          <div class="preview-progress-label">
+            <span class="preview-item-name">🍲 Food & Dining</span>
+            <span class="preview-item-cat">Rp 1.450.000 / Rp 2.000.000 (72%)</span>
+          </div>
+          <div class="preview-track-bg">
+            <div class="preview-track-fill" style="width: 72%; background: var(--income);"></div>
+          </div>
+        </div>
+        <div class="preview-progress-block">
+          <div class="preview-progress-label">
+            <span class="preview-item-name">🚗 Transportation</span>
+            <span class="preview-item-cat" style="color: #F59E0B;">Rp 480.000 / Rp 500.000 (96%)</span>
+          </div>
+          <div class="preview-track-bg">
+            <div class="preview-track-fill" style="width: 96%; background: #F59E0B;"></div>
+          </div>
+        </div>
+        <div class="preview-progress-block">
+          <div class="preview-progress-label">
+            <span class="preview-item-name">☕ Coffee & Hangout</span>
+            <span class="preview-item-cat">Rp 120.000 / Rp 400.000 (30%)</span>
+          </div>
+          <div class="preview-track-bg">
+            <div class="preview-track-fill" style="width: 30%; background: var(--primary);"></div>
+          </div>
+        </div>
+      </div>
+    `
   },
   tabungan: {
-    title: "Dedicated Savings Goals",
-    desc: "Bring your financial dreams to life step-by-step. Set emergency funds, new devices, or vacations, and deposit funds whenever ready.",
+    title: "Dedicated Savings Goals & Debts",
+    desc: "Bring your financial dreams to life step-by-step. Set emergency funds or new device milestones, and manage debts or split bills with friends seamlessly.",
     bullets: [
-      "Motivating percentage progress trackers",
-      "Estimated completion date predictions based on contributions",
-      "Transparent deposit history for each individual goal"
-    ]
+      "Motivating percentage progress trackers linked to real accounts",
+      "Debts & Split Bills tracking with automated due date alerts",
+      "Estimated completion date predictions based on deposits"
+    ],
+    previewHtml: `
+      <div class="preview-box">
+        <div class="preview-box-header">
+          <span class="preview-box-title"><span>🎯</span> Savings Goals & Debts</span>
+          <span class="preview-box-badge">Milestones</span>
+        </div>
+        <div class="preview-progress-block">
+          <div class="preview-progress-label">
+            <span class="preview-item-name">🛡️ Emergency Stash</span>
+            <span class="preview-item-cat" style="color: var(--income);">Rp 15.000.000 / Rp 20.000.000 (75%)</span>
+          </div>
+          <div class="preview-track-bg">
+            <div class="preview-track-fill" style="width: 75%; background: var(--income);"></div>
+          </div>
+        </div>
+        <div class="preview-row-item">
+          <div class="preview-item-left">
+            <span class="preview-item-icon">🤝</span>
+            <div>
+              <div class="preview-item-name">Split Bill - Lunch with Sarah</div>
+              <div class="preview-item-cat">Sarah owes you • Due tomorrow</div>
+            </div>
+          </div>
+          <div class="preview-item-amount" style="color: var(--income);">+Rp 65.000</div>
+        </div>
+      </div>
+    `
   }
 };
 
 function setupShowcaseTabs() {
   const tabs = document.querySelectorAll(".showcase-tab-btn");
+  const visual = document.getElementById("showcase-visual");
   tabs.forEach(tab => {
     tab.addEventListener("click", () => {
       tabs.forEach(t => t.classList.remove("active"));
@@ -64,6 +201,10 @@ function setupShowcaseTabs() {
           li.innerHTML = '<span class="check-icon">✓</span> ' + b;
           list.appendChild(li);
         });
+
+        if (visual && data.previewHtml) {
+          visual.innerHTML = data.previewHtml;
+        }
       }
     });
   });
@@ -85,8 +226,21 @@ function setupMobileNav() {
   }
 }
 
-// Fetch latest release tag from GitHub API to keep web badges dynamically up-to-date
+// Fetch latest release tag from GitHub API without downgrading local build version
 function fetchLatestReleaseVersion() {
+  // Apply local version as baseline
+  document.querySelectorAll(".app-version-tag").forEach(el => {
+    el.textContent = `v${APP_VERSION}`;
+  });
+  const heroDownloadText = document.getElementById("hero-download-text");
+  if (heroDownloadText) {
+    heroDownloadText.textContent = `Download APK (v${APP_VERSION})`;
+  }
+  const specsVersion = document.getElementById("specs-version-val");
+  if (specsVersion) {
+    specsVersion.textContent = `v${APP_VERSION} (Release)`;
+  }
+
   fetch("https://api.github.com/repos/hyenavia/wall-o-pay/releases/latest")
     .then(res => {
       if (!res.ok) throw new Error("GitHub API unavailable or rate-limited");
@@ -95,21 +249,22 @@ function fetchLatestReleaseVersion() {
     .then(data => {
       if (data.tag_name) {
         const tag = data.tag_name;
-        document.querySelectorAll(".app-version-tag").forEach(el => {
-          el.textContent = tag;
-        });
-        const heroDownloadText = document.getElementById("hero-download-text");
-        if (heroDownloadText) {
-          heroDownloadText.textContent = `Download APK (${tag})`;
-        }
-        const specsVersion = document.getElementById("specs-version-val");
-        if (specsVersion) {
-          specsVersion.textContent = `${tag} (Release)`;
+        // Only update if GitHub tag is strictly newer than current local version
+        if (isVersionGreater(tag, APP_VERSION)) {
+          document.querySelectorAll(".app-version-tag").forEach(el => {
+            el.textContent = tag;
+          });
+          if (heroDownloadText) {
+            heroDownloadText.textContent = `Download APK (${tag})`;
+          }
+          if (specsVersion) {
+            specsVersion.textContent = `${tag} (Release)`;
+          }
         }
       }
     })
     .catch(() => {
-      // Graceful fallback to baked-in APP_VERSION
+      // Graceful fallback to local APP_VERSION
     });
 }
 
