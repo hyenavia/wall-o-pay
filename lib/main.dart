@@ -1,3 +1,9 @@
+/// Titik masuk utama (entry point) aplikasi Wall o' Pay.
+/// Menginisialisasi binding Flutter, format tanggal lokal, zona waktu,
+/// notifikasi lokal, preferensi bahasa, Firebase, kunci PIN, dan versi aplikasi
+/// sebelum menjalankan widget utama di dalam [ProviderScope].
+library;
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +20,7 @@ import 'data/prefs.dart';
 import 'data/update_checker.dart';
 import 'firebase_options.dart';
 
+/// Fungsi utama yang dieksekusi pertama kali saat aplikasi dibuka.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

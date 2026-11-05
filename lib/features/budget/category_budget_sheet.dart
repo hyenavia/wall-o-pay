@@ -1,3 +1,7 @@
+/// Bottom sheet interaktif untuk memindahkan kategori ke pilar anggaran lain
+/// (Kebutuhan, Keinginan, atau Tabungan) serta menetapkan batas anggaran spesifik per kategori.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

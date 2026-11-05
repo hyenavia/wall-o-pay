@@ -1,3 +1,7 @@
+/// Pengelolaan profil pengguna (nickname dan foto profil Base64) yang disimpan per akun
+/// di perangkat lokal dan disinkronkan ke Cloud Firestore.
+library;
+
 import 'dart:convert';
 import 'dart:typed_data';
 

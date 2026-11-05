@@ -1,3 +1,7 @@
+/// Pengelolaan aturan anggaran metode 50/30/20 ([BudgetBucket]: Needs, Wants, Savings)
+/// maupun alokasi nominal kustom per periode, lengkap dengan sinkronisasi Cloud Firestore.
+library;
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';

@@ -1,3 +1,7 @@
+/// Layanan notifikasi lokal Android untuk pengingat pencatatan harian,
+/// peringatan pemakaian anggaran (80% & 100%), serta pengingat jatuh tempo utang-piutang.
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';

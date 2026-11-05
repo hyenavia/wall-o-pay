@@ -1,9 +1,20 @@
+/// Definisi skema tabel database lokal Drift (SQLite) beserta tipe enum pendukung.
+/// Seluruh tabel menggunakan [SyncColumns] agar siap disinkronkan dua arah dengan Cloud Firestore.
+library;
+
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
+/// Jenis transaksi keuangan: pemasukan (`income`), pengeluaran (`expense`), atau pindah dana (`transfer`).
 enum TxType { income, expense, transfer }
+
+/// Frekuensi pengulangan untuk jadwal transaksi berulang (`RecurringRules`).
 enum RecurFrequency { daily, weekly, monthly }
+
+/// Klasifikasi sifat pengeluaran: kebutuhan pokok (`need`) atau keinginan (`want`).
 enum NeedWant { need, want }
+
+/// Arah pencatatan utang-piutang: dipinjamkan ke orang lain (`lent`/piutang) atau meminjam dari orang (`borrowed`/utang).
 enum DebtDirection { lent, borrowed }
 
 /// ID unik (UUID) supaya aman disinkronkan antar perangkat nanti.
@@ -17,6 +28,7 @@ mixin SyncColumns on Table {
   DateTimeColumn get deletedAt => dateTime().nullable()();
 }
 
+/// Tabel kategori transaksi (Makanan, Transportasi, Gaji, Transfer, dll.).
 class Categories extends Table with SyncColumns {
   TextColumn get name => text().withLength(min: 1, max: 50)();
   TextColumn get type => textEnum<TxType>()();
@@ -27,6 +39,7 @@ class Categories extends Table with SyncColumns {
   Set<Column> get primaryKey => {id};
 }
 
+/// Tabel akun/dompet penyimpanan uang (Bank Konvensional, Bank Digital, E-Wallet, atau Tunai).
 @DataClassName('Wallet')
 class Wallets extends Table with SyncColumns {
   TextColumn get name => text().withLength(min: 1, max: 50)();
@@ -39,6 +52,7 @@ class Wallets extends Table with SyncColumns {
   Set<Column> get primaryKey => {id};
 }
 
+/// Tabel catatan transaksi utama (pemasukan, pengeluaran, maupun transfer antar dompet).
 @TableIndex(name: 'tx_date_idx', columns: {#date, #deletedAt})
 @TableIndex(name: 'tx_category_idx', columns: {#categoryId, #deletedAt})
 @TableIndex(name: 'tx_wallet_idx', columns: {#walletId, #deletedAt})
@@ -61,6 +75,7 @@ class Transactions extends Table with SyncColumns {
   Set<Column> get primaryKey => {id};
 }
 
+/// Tabel batas anggaran spesifik per kategori pada satu periode (`monthKey`).
 @TableIndex(name: 'budgets_month_idx', columns: {#monthKey, #deletedAt})
 class Budgets extends Table with SyncColumns {
   TextColumn get categoryId => text().references(Categories, #id)();
@@ -73,6 +88,7 @@ class Budgets extends Table with SyncColumns {
   Set<Column> get primaryKey => {id};
 }
 
+/// Tabel target tabungan impian (`SavingsGoals`) beserta progres dana yang sudah terkumpul.
 class SavingsGoals extends Table with SyncColumns {
   TextColumn get name => text().withLength(min: 1, max: 80)();
   IntColumn get targetAmount => integer()();
@@ -83,6 +99,7 @@ class SavingsGoals extends Table with SyncColumns {
   Set<Column> get primaryKey => {id};
 }
 
+/// Tabel jadwal transaksi berulang otomatis (uang saku rutin, sewa kos, langganan bulanan).
 @DataClassName('RecurringRule')
 class RecurringRules extends Table with SyncColumns {
   TextColumn get title => text().withLength(min: 1, max: 100)();

@@ -1,3 +1,7 @@
+/// Kumpulan aksi fungsional pada halaman Pengaturan ([SettingsActions]), mencakup
+/// unggah/pulihkan cloud manual, keluar akun (logout), hapus data lokal, dan hapus akun permanen.
+library;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

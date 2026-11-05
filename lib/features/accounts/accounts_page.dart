@@ -1,3 +1,8 @@
+/// Modul pengelolaan akun & dompet (Bank Konvensional, Bank Digital, E-Wallet, dan Tunai),
+/// termasuk kartu ringkasan di Beranda ([AccountsSummaryCard]), halaman daftar akun ([AccountsPage]),
+/// serta form tambah/edit dan transfer antar akun.
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';

@@ -1,3 +1,7 @@
+/// Provider status koneksi Firebase, pemantau status login pengguna ([authStateProvider]),
+/// serta pengelolaan status Mode Tamu offline ([SkipAuth]).
+library;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

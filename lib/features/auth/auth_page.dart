@@ -1,3 +1,7 @@
+/// Halaman autentikasi pengguna ([AuthPage]) untuk masuk menggunakan email/username,
+/// mendaftar akun baru, mereset kata sandi, atau masuk dalam Mode Tamu (offline).
+library;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

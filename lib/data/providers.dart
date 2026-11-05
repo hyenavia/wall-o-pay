@@ -1,3 +1,7 @@
+/// Kumpulan provider Riverpod utama untuk mengakses database lokal, periode aktif,
+/// status sensor saldo, kategori, transaksi, serta perhitungan saldo dompet secara reaktif.
+library;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,6 +10,7 @@ import 'app_database.dart';
 import 'prefs.dart';
 import 'tables.dart';
 
+/// Provider singleton untuk koneksi database SQLite lokal ([AppDatabase]).
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
   ref.onDispose(db.close);

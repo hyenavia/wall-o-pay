@@ -1,3 +1,7 @@
+/// Halaman pengelolaan target tabungan impian ([GoalsPage]), penambahan dana tabungan,
+/// dan riwayat target yang telah tercapai.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,6 +14,7 @@ import '../../data/app_database.dart';
 import '../../data/providers.dart';
 import '../../data/tables.dart' show TxType;
 
+/// Halaman daftar target tabungan aktif dan selesai.
 class GoalsPage extends ConsumerWidget {
   const GoalsPage({super.key});
 

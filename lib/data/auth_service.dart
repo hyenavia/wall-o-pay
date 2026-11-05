@@ -1,9 +1,14 @@
+/// Layanan autentikasi pengguna dengan Firebase Auth dan pemetaan username unik di Cloud Firestore,
+/// termasuk fitur pendaftaran, login (via email atau username), reset sandi, dan hapus akun permanen.
+library;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import 'cloud_sync.dart';
 
+/// Exception khusus untuk kesalahan autentikasi yang dikenali oleh aplikasi (misal username sudah dipakai).
 class AuthFailure implements Exception {
   const AuthFailure(this.code);
 

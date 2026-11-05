@@ -1,3 +1,7 @@
+/// Modal bottom sheet "Tentang Wall o' Pay" ([AboutWallOPaySheet]) yang menampilkan
+/// informasi versi, filosofi desain Botanical Forest, fitur utama, dan tautan repositori.
+library;
+
 import 'package:flutter/material.dart';
 
 import '../../core/l10n.dart';

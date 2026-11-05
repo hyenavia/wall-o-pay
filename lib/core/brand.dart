@@ -1,3 +1,6 @@
+/// Komponen identitas visual brand Wall o' Pay: logo ([BrandMark]) dan layar pembuka ([SplashPage]).
+library;
+
 import 'package:flutter/material.dart';
 
 import 'l10n.dart';
@@ -22,6 +25,7 @@ class BrandMark extends StatelessWidget {
   }
 }
 
+/// Painter gelombang halus berwarna sage di bagian bawah layar splash.
 class _WavePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -45,6 +49,7 @@ class _WavePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+/// Layar sambutan awal (splash screen) dengan logo dan slogan aplikasi.
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
 

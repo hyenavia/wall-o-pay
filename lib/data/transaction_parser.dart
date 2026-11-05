@@ -1,3 +1,6 @@
+/// Utilitas ekstraksi informasi transaksi otomatis dari teks notifikasi atau resi bank/e-wallet.
+library;
+
 import 'tables.dart';
 
 /// Parser utilitas teks untuk mendeteksi nominal, sumber aplikasi, dan kategori dari teks yang dibagikan pengguna.

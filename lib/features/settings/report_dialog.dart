@@ -1,3 +1,7 @@
+/// Dialog pemilihan rentang waktu (periode ini, periode lalu, atau rentang tanggal kustom)
+/// untuk mengekspor dan membagikan laporan keuangan berformat PDF.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

@@ -4,6 +4,15 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.38] - 2026-11-05
+
+### Added
+- **Comprehensive Architecture Guide (`ARCHITECTURE.md`) & Codebase Documentation:**
+  - Created `ARCHITECTURE.md` mapping the entire `lib/` directory (`core/`, `data/`, `features/`), reactive data flow (Flutter UI ↔ Riverpod ↔ Drift SQLite ↔ Firebase Cloud Sync), startup gate pipeline, and core financial formulas.
+  - Added library-level and class/function-level Bahasa Indonesia docstrings (`///`) across all modules in `lib/` to support learning and long-term maintenance.
+
+---
+
 ## [1.11.37] - 2026-11-05
 
 ### Changed

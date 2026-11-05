@@ -1,3 +1,7 @@
+/// Kamus terjemahan tambahan Bahasa Indonesia untuk modul akun, transaksi berulang,
+/// utang-piutang, penguncian PIN, dan analitik.
+library;
+
 /// Terjemahan Indonesia untuk fitur tambahan (akun, berulang, utang, kunci PIN, dll.).
 const Map<String, String> idExtra = {
   'A gentle nudge to log your spending.': 'Pengingat lembut untuk mencatat pengeluaranmu.',

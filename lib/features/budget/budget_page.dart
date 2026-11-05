@@ -1,3 +1,7 @@
+/// Halaman utama pengelolaan anggaran ([BudgetPage]) yang menampilkan total anggaran periode,
+/// ringkasan metode 50/30/20 (atau alokasi kustom), informasi rollover, dan kartu tiga pilar anggaran.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,6 +18,7 @@ import 'budget_pillar_card.dart';
 import 'category_budget_sheet.dart';
 import 'total_budget_dialog.dart';
 
+/// Widget halaman tab Anggaran (Budget) pada navigasi utama.
 class BudgetPage extends ConsumerWidget {
   const BudgetPage({super.key});
 

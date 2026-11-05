@@ -1,7 +1,12 @@
+/// Model dan perhitungan rentang periode keuangan ([PeriodType.monthly] atau [PeriodType.weekly]),
+/// termasuk dukungan tanggal gajian kustom (`firstDayOfMonth`) dan hari awal minggu (`firstDayOfWeek`).
+library;
+
 import 'package:intl/intl.dart';
 
 import 'l10n.dart';
 
+/// Jenis siklus periode pengelolaan keuangan: bulanan atau mingguan.
 enum PeriodType { monthly, weekly }
 
 int _daysBetween(DateTime a, DateTime b) => DateTime.utc(b.year, b.month, b.day)
@@ -43,12 +48,15 @@ class Period {
       ? DateTime(start.year, start.month + 1, start.day)
       : DateTime(start.year, start.month, start.day + 7);
 
+  /// Menggeser periode maju atau mundur sebanyak [n] bulan/minggu.
   Period shift(int n) => type == PeriodType.monthly
       ? Period(type, DateTime(start.year, start.month + n, start.day))
       : Period(type, DateTime(start.year, start.month, start.day + 7 * n));
 
+  /// Memeriksa apakah tanggal [d] berada di dalam rentang periode ini.
   bool contains(DateTime d) => !d.isBefore(start) && d.isBefore(end);
 
+  /// Bernilai `true` jika hari ini berada di dalam periode ini.
   bool get isCurrent => contains(DateTime.now());
 
   /// Sisa hari termasuk hari ini (bermakna untuk periode yang sedang berjalan).

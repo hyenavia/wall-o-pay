@@ -1,3 +1,7 @@
+/// Peta ikon dan daftar warna standar untuk kategori pemasukan/pengeluaran.
+/// Disimpan sebagai kunci string dan nilai integer warna agar mudah disimpan di SQLite & Firestore.
+library;
+
 import 'package:flutter/material.dart';
 
 /// Ikon kategori disimpan sebagai kunci teks di database.
@@ -31,6 +35,7 @@ const Map<String, IconData> categoryIcons = {
   'more': Icons.more_horiz,
 };
 
+/// Mengambil [IconData] berdasarkan kunci string [key], atau ikon default jika tidak ditemukan.
 IconData iconFor(String key) => categoryIcons[key] ?? Icons.category;
 
 /// Pilihan warna untuk kategori.

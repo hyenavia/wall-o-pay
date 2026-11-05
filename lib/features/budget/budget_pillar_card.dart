@@ -1,3 +1,7 @@
+/// Komponen kartu visual untuk menampilkan satu pilar anggaran (Needs, Wants, atau Savings)
+/// beserta daftar kategori pengeluaran yang tergabung di dalamnya.
+library;
+
 import 'package:flutter/material.dart';
 
 import '../../core/format.dart';

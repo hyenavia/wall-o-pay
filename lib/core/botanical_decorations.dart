@@ -1,3 +1,7 @@
+/// Kumpulan [CustomPainter] untuk menggambar ornamen dedaunan dan efek cahaya (glow)
+/// bertema Botanical Forest pada header, kartu sorotan (HeroCard), dan latar belakang halaman.
+library;
+
 import 'package:flutter/material.dart';
 import 'theme.dart';
 

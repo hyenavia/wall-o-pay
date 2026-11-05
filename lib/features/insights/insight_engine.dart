@@ -1,3 +1,8 @@
+/// Mesin kalkulasi analitik deterministik ([InsightEngine]) yang mengolah daftar transaksi
+/// menjadi ringkasan metrik ([InsightSummary]), perincian kategori ([CategoryInsight]),
+/// titik grafik ([ChartPoint]), serta kartu wawasan pintar ([SmartInsightItem]).
+library;
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -92,6 +97,7 @@ class SmartInsightItem {
   final String? badge;
 }
 
+/// Kelas statis pengolah data transaksi menjadi metrik statistik dan rekomendasi keuangan.
 class InsightEngine {
   static InsightSummary computeSummary({
     required List<TransactionEntry> currentTxs,

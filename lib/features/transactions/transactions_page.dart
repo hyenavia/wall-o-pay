@@ -1,3 +1,7 @@
+/// Halaman daftar riwayat transaksi ([TransactionsPage]) yang dilengkapi fitur pencarian SQL langsung,
+/// filter tipe transaksi, filter dompet/rekening, filter kategori, dan filter rentang tanggal kustom.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,6 +16,7 @@ import '../../data/tables.dart' show TxType;
 import 'transaction_form.dart';
 import 'transaction_tile.dart';
 
+/// Widget halaman tab Transaksi (Transactions) pada navigasi utama.
 class TransactionsPage extends ConsumerStatefulWidget {
   const TransactionsPage({super.key});
 

@@ -1,3 +1,7 @@
+/// Halaman analitik keuangan ([InsightsPage]) dengan 3 tab (Ringkasan, Kategori, dan Tren)
+/// untuk mengevaluasi pola pengeluaran, rasio tabungan, dan perbandingan antar periode.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

@@ -1,3 +1,7 @@
+/// Provider Riverpod tambahan untuk fitur lanjutan: alias akun/dompet, transaksi berulang,
+/// utang-piutang, template, pencarian SQL langsung, dan perhitungan rollover anggaran.
+library;
+
 import 'package:flutter/material.dart' show DateTimeRange;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

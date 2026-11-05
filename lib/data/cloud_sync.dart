@@ -1,3 +1,7 @@
+/// Layanan sinkronisasi dua arah otomatis (real-time & latar belakang) antara Drift SQLite lokal
+/// dan Cloud Firestore, termasuk penanganan pergantian akun dan pemulihan saat internet aktif kembali.
+library;
+
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';

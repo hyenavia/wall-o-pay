@@ -1,3 +1,7 @@
+/// Layanan keamanan kunci aplikasi menggunakan PIN 6 digit (SHA-256 + salt acak),
+/// jeda kunci otomatis (auto-lock timeout), sinkronisasi PIN antar perangkat, dan Privacy Shield (`FLAG_SECURE`).
+library;
+
 import 'dart:convert';
 import 'dart:math';
 
@@ -8,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// Model state untuk status penguncian PIN aplikasi, jeda waktu kunci otomatis, dan perisai privasi layar.
 class AppLockState {
   const AppLockState({
     this.enabled = false,

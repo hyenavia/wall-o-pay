@@ -1,3 +1,7 @@
+/// Halaman pengaturan keamanan ([SecurityPage]) untuk mengaktifkan kunci PIN 6 digit,
+/// mengatur batas waktu kunci otomatis, mengganti PIN, dan mengaktifkan Privacy Shield.
+library;
+
 import 'package:flutter/material.dart';
 
 import '../../core/l10n.dart';
@@ -5,6 +9,7 @@ import '../../core/widgets.dart';
 import '../../data/lock.dart';
 import 'lock_screen.dart';
 
+/// Widget halaman Pengaturan Keamanan aplikasi.
 class SecurityPage extends StatelessWidget {
   const SecurityPage({super.key});
 

@@ -1,3 +1,7 @@
+/// Komponen kalkulator mini berbentuk bottom sheet untuk membantu pengguna
+/// menghitung nominal transaksi (+, -, ×, ÷) sebelum dimasukkan ke form.
+library;
+
 import 'package:flutter/material.dart';
 
 import 'format.dart';
@@ -22,6 +26,7 @@ Future<int?> showCalculatorSheet(
   );
 }
 
+/// Widget utama kalkulator mini yang menyimpan state angka input dan operasi aritmatika.
 class CalculatorSheet extends StatefulWidget {
   const CalculatorSheet({super.key, this.initialValue});
 

@@ -1,3 +1,7 @@
+/// Gerbang penguncian layar ([LockGate]), papan tombol PIN ([PinPad]),
+/// layar pembuka kunci ([LockScreen]), serta dialog pembuatan/verifikasi PIN 6 digit.
+library;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

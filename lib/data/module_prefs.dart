@@ -1,3 +1,6 @@
+/// Pengelolaan preferensi modul fitur aplikasi yang dapat diaktifkan atau dinonaktifkan oleh pengguna.
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'prefs.dart';

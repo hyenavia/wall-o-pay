@@ -1,3 +1,7 @@
+/// Gerbang pemeriksaan status pengenalan awal ([OnboardingGate]) untuk pengguna baru
+/// sekaligus pemicu tugas latar belakang (transaksi berulang & jadwal pengingat harian).
+library;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

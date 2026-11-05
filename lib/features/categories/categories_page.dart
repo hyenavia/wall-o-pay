@@ -1,3 +1,6 @@
+/// Halaman dan form pengelolaan daftar kategori pengeluaran serta pemasukan ([CategoriesPage]).
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,6 +11,7 @@ import '../../data/app_database.dart';
 import '../../data/providers.dart';
 import '../../data/tables.dart' show TxType;
 
+/// Halaman bertab untuk melihat, menambah, dan mengubah kategori Pengeluaran maupun Pemasukan.
 class CategoriesPage extends StatelessWidget {
   const CategoriesPage({super.key});
 

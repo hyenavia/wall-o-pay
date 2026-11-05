@@ -1,3 +1,7 @@
+/// Data riwayat pembaruan versi aplikasi ([AppChangelog]) dalam dua bahasa (EN/ID)
+/// beserta komponen bottom sheet penampil catatan rilis di dalam aplikasi.
+library;
+
 import 'package:flutter/material.dart';
 
 import '../../core/l10n.dart';
@@ -41,10 +45,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.37',
+      version: '1.11.38',
       dateEn: 'November 5, 2026',
       dateId: '5 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added comprehensive ARCHITECTURE.md developer guide and Bahasa Indonesia docstrings across the entire codebase.',
+          textId: 'Menambahkan panduan arsitektur lengkap (ARCHITECTURE.md) dan penjelasan dokumentasi kode di seluruh modul aplikasi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.37',
+      dateEn: 'November 5, 2026',
+      dateId: '5 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

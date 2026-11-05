@@ -1,3 +1,7 @@
+/// Pengelolaan preferensi fitur anggaran & pengingat (rollover sisa anggaran,
+/// peringatan anggaran 80%/100%, serta jadwal pengingat harian).
+library;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

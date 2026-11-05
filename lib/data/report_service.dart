@@ -1,3 +1,6 @@
+/// Layanan pembuatan dokumen laporan keuangan berformat PDF dan pembagiannya ke aplikasi lain.
+library;
+
 import 'dart:io';
 
 import 'package:flutter/material.dart' show DateTimeRange;

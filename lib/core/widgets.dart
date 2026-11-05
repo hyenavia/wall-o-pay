@@ -1,3 +1,7 @@
+/// Kumpulan komponen UI bersama (reusable widgets) yang dipakai di seluruh fitur,
+/// seperti AppBar melengkung (`pageAppBar`), `AppCard`, `HeroCard`, `PeriodSwitcher`, dan `UserAvatar`.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -118,6 +122,7 @@ Color budgetColor(double ratio, ColorScheme scheme) {
   return scheme.primary;
 }
 
+/// Kartu kontainer standar dengan sudut membulat dan garis tepi halus sesuai tema.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -197,6 +202,7 @@ class HeroCard extends StatelessWidget {
   }
 }
 
+/// Lencana ikon persegi membulat dengan latar belakang berwarna transparan untuk kategori.
 class CategoryBadge extends StatelessWidget {
   const CategoryBadge({
     super.key,
@@ -223,6 +229,7 @@ class CategoryBadge extends StatelessWidget {
   }
 }
 
+/// Indikator bilah progres horizontal dengan ujung membulat (0.0 sampai 1.0).
 class AppProgressBar extends StatelessWidget {
   const AppProgressBar({
     super.key,
@@ -252,6 +259,7 @@ class AppProgressBar extends StatelessWidget {
   }
 }
 
+/// Chip pilihan bergaya kapsul (stadium) untuk filter kategori, dompet, atau tipe transaksi.
 class AppChip extends StatelessWidget {
   const AppChip({
     super.key,
@@ -285,6 +293,7 @@ class AppChip extends StatelessWidget {
   }
 }
 
+/// Judul bagian (section) dengan opsi tombol aksi di sisi kanan.
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
     super.key,
@@ -469,6 +478,7 @@ class UserAvatar extends ConsumerWidget {
   }
 }
 
+/// Tampilan informasi sederhana (ikon + pesan teks) saat daftar masih kosong.
 class EmptyState extends StatelessWidget {
   const EmptyState({super.key, required this.icon, required this.message});
 

@@ -1,3 +1,7 @@
+/// Komponen kartu indikator kesehatan keuangan harian ([DailyFinancialPulseCard]) di halaman Beranda,
+/// menghitung kuota belanja harian aman dan tingkat kewaspadaan ([DailyHealthTier]).
+library;
+
 import 'package:flutter/material.dart';
 
 import '../../core/format.dart';

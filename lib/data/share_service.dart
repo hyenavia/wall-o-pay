@@ -1,3 +1,7 @@
+/// Layanan penerima kiriman teks atau gambar bukti transaksi (Share Intent) dari aplikasi eksternal
+/// melalui MethodChannel Android, lalu mengarahkannya ke form input transaksi.
+library;
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,6 +12,7 @@ import 'lock.dart';
 import 'transaction_parser.dart';
 import '../features/transactions/transaction_form.dart';
 
+/// Kelas penghubung penerima data Share Intent Android dengan antarmuka form transaksi.
 class ShareService {
   static const _channel = MethodChannel('com.example.wall_o_pay/share');
   static Map<String, dynamic>? _pendingShareData;

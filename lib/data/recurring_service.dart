@@ -1,3 +1,6 @@
+/// Layanan perhitungan tanggal jatuh tempo dan pencatatan otomatis untuk jadwal transaksi berulang.
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

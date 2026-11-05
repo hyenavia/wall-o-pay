@@ -1,3 +1,7 @@
+/// Konfigurasi sistem desain visual Wall o' Pay (Botanical Forest),
+/// mencakup token warna ([AppColors]) dan konfigurasi Material 3 ([buildTheme]).
+library;
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -22,6 +26,7 @@ class AppColors {
   static const expenseOnDark = Color(0xFFFCA5A5);
 }
 
+/// Mengaktifkan fitur `tabularFigures` pada seluruh gaya teks agar digit angka memiliki lebar seragam.
 TextTheme _applyTabularFigures(TextTheme textTheme) {
   const tabular = [FontFeature.tabularFigures()];
   return textTheme.copyWith(
@@ -43,6 +48,7 @@ TextTheme _applyTabularFigures(TextTheme textTheme) {
   );
 }
 
+/// Membangun objek [ThemeData] Material 3 dengan palet gelap Botanical Forest.
 ThemeData buildTheme([Brightness brightness = Brightness.dark]) {
   final scheme = const ColorScheme.dark().copyWith(
     primary: AppColors.sage,

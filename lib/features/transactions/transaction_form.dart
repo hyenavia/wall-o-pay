@@ -1,3 +1,8 @@
+/// Form bottom sheet untuk menambah atau mengubah transaksi ([TransactionForm]),
+/// mendukung pemasukan, pengeluaran, dan transfer antar dompet, lengkap dengan template cepat,
+/// kalkulator mini, lampiran foto struk, dan label Kebutuhan/Keinginan.
+library;
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -43,6 +48,7 @@ Future<void> showTransactionForm(
   );
 }
 
+/// Widget form input/edit transaksi di dalam modal bottom sheet.
 class TransactionForm extends ConsumerStatefulWidget {
   const TransactionForm({
     super.key,

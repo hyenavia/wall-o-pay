@@ -2,7 +2,7 @@
  * Wall o' Pay - Landing Page Interactive Logic (Full English)
  */
 
-const APP_VERSION = "1.11.37";
+const APP_VERSION = "1.11.38";
 
 // Helper to compare semver strings (e.g. "1.11.32" vs "v1.11.21")
 function isVersionGreater(v1, v2) {

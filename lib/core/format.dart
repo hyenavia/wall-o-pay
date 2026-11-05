@@ -1,3 +1,7 @@
+/// Utilitas pemformatan mata uang Rupiah, pemisah ribuan pada input angka,
+/// label tanggal/waktu sesuai bahasa aktif, serta teks sapaan waktu.
+library;
+
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
@@ -9,17 +13,22 @@ final NumberFormat _rupiah =
     NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 final NumberFormat _thousands = NumberFormat.decimalPattern('id_ID');
 
+/// Mengubah nilai integer menjadi teks mata uang Rupiah (contoh: `15000` -> `"Rp 15.000"`).
 String rupiah(int value) => _rupiah.format(value);
 
+/// Format tanggal lengkap dengan nama hari singkat (contoh: `"Kam, 5 Nov 2026"`).
 String dateLabel(DateTime d) =>
     DateFormat('EEE, d MMM yyyy', AppLocale.code).format(d);
 
+/// Format tanggal ringkas tanpa nama hari (contoh: `"5 Nov 2026"`).
 String shortDate(DateTime d) =>
     DateFormat('d MMM yyyy', AppLocale.code).format(d);
 
+/// Format tanggal beserta jam dan menit (contoh: `"5 Nov 2026, 14:30"`).
 String dateTimeLabel(DateTime d) =>
     DateFormat('d MMM yyyy, HH:mm', AppLocale.code).format(d);
 
+/// Format jam dan menit saja (contoh: `"14:30"`).
 String timeLabel(DateTime d) => DateFormat('HH:mm', AppLocale.code).format(d);
 
 /// "Today, 12 Apr 2025", "Yesterday, 11 Apr 2025", atau "Fri, 10 Apr 2025".
@@ -33,6 +42,7 @@ String dayHeader(DateTime d) {
   return dateLabel(d);
 }
 
+/// Menghasilkan sapaan sesuai jam lokal (Pagi, Siang, Sore, atau Malam) dalam bahasa aktif.
 String greeting([int? hour]) {
   final h = hour ?? DateTime.now().hour;
   if (AppLocale.code == 'id') {

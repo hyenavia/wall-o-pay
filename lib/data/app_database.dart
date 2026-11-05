@@ -1,3 +1,8 @@
+/// Database lokal utama aplikasi menggunakan Drift (SQLite) dengan prinsip Offline-First.
+/// Menangani migrasi skema, pengisian data bawaan (seed), operasi CRUD dengan soft-delete (`deletedAt`),
+/// ekspor/impor cadangan JSON, serta pemetaan sinkronisasi dua arah ([SyncTable]).
+library;
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter/foundation.dart';
@@ -59,6 +64,7 @@ class SyncTable {
   final Future<bool> Function(Map<String, dynamic> json) applyRemote;
 }
 
+/// Kelas utama database SQLite lokal yang mengelola seluruh tabel data keuangan pengguna.
 @DriftDatabase(tables: [Categories, Wallets, Transactions, Budgets, SavingsGoals, RecurringRules, Debts, TxTemplates])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])

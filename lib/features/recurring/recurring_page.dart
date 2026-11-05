@@ -1,3 +1,7 @@
+/// Halaman pengelolaan jadwal transaksi berulang dan langganan ([RecurringPage]),
+/// mendukung frekuensi harian, mingguan, dan bulanan.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,6 +14,7 @@ import '../../data/providers.dart';
 import '../../data/recurring_service.dart';
 import '../../data/tables.dart';
 
+/// Widget halaman daftar jadwal transaksi berulang beserta dialog tambah/ubah jadwal.
 class RecurringPage extends ConsumerWidget {
   const RecurringPage({super.key});
 

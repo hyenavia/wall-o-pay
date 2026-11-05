@@ -1,3 +1,7 @@
+/// Layanan ekspor riwayat transaksi ke format CSV (kompatibel Excel) serta ekspor/impor
+/// berkas cadangan penuh berformat JSON melalui menu bagikan (Share) sistem.
+library;
+
 import 'dart:convert';
 import 'dart:io';
 

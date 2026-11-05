@@ -1,3 +1,7 @@
+/// Kumpulan widget grafik visual berbasis `fl_chart` untuk halaman Insight,
+/// meliputi diagram lingkaran kategori ([ExpensePieChart]) dan grafik batang tren ([TrendBarChart]).
+library;
+
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';

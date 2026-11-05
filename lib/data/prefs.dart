@@ -1,3 +1,7 @@
+/// Pengelolaan preferensi tampilan dan siklus periode pengguna (tema, bahasa,
+/// tipe periode bulanan/mingguan, hari awal minggu, dan tanggal gajian) beserta sinkronisasi cloud.
+library;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

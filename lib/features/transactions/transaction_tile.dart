@@ -1,3 +1,7 @@
+/// Komponen baris item transaksi ([TransactionTile]) yang digunakan pada daftar transaksi
+/// di halaman Beranda maupun halaman Riwayat Transaksi.
+library;
+
 import 'package:flutter/material.dart';
 
 import '../../core/format.dart';

@@ -1,3 +1,7 @@
+/// Halaman Pengaturan utama ([SettingsPage]) yang memuat kartu profil, preferensi periode & bahasa,
+/// pengingat notifikasi, keamanan PIN, sinkronisasi cloud, ekspor/impor berkas, dan informasi aplikasi.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,6 +30,7 @@ import '../../data/lock.dart';
 import '../security/security_page.dart';
 import 'settings_actions.dart';
 
+/// Widget halaman Pengaturan aplikasi.
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 

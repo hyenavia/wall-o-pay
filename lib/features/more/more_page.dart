@@ -1,3 +1,6 @@
+/// Halaman menu Fitur Lainnya ([MorePage]) yang menjadi pusat navigasi menuju seluruh modul aplikasi.
+library;
+
 import 'package:flutter/material.dart';
 
 import '../../core/l10n.dart';

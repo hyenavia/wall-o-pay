@@ -1,3 +1,7 @@
+/// Dialog pengaturan total anggaran periode dengan pilihan mode Standar 50/30/20
+/// atau mode Alokasi Nominal Kustom untuk masing-masing pilar.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

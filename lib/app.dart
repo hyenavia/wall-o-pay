@@ -1,3 +1,7 @@
+/// Konfigurasi root aplikasi (`MaterialApp`), gerbang autentikasi (`AuthGate`),
+/// serta kerangka navigasi utama 4 tab (`HomeShell`).
+library;
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -27,6 +31,8 @@ import 'features/security/lock_screen.dart';
 import 'features/transactions/transaction_form.dart';
 import 'features/transactions/transactions_page.dart';
 
+/// Widget root `MaterialApp` yang mengatur tema Botanical Forest, bahasa aktif,
+/// dan delegasi lokalisasi aplikasi.
 class WallOPayApp extends ConsumerWidget {
   const WallOPayApp({super.key});
 
@@ -141,6 +147,9 @@ class AuthGate extends ConsumerWidget {
   }
 }
 
+/// Kerangka utama aplikasi setelah pengguna melewati autentikasi, kunci PIN, dan onboarding.
+/// Menyediakan navigasi bawah 4 tab (Home, Transactions, Budget, Insight), tombol tambah transaksi,
+/// serta memantau siklus hidup aplikasi (lifecycle) untuk sinkronisasi otomatis dan pengingat.
 class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
 

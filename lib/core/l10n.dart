@@ -1,3 +1,7 @@
+/// Sistem lokalisasi dua bahasa (Inggris & Indonesia) untuk seluruh teks antarmuka.
+/// Menyediakan extension `context.tr('Key')` untuk widget dan fungsi global `trG('Key')` untuk service.
+library;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 

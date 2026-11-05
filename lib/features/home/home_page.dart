@@ -1,3 +1,7 @@
+/// Halaman Beranda utama ([HomePage]) yang menampilkan sapaan profil, kartu saldo & arus kas periode,
+/// indikator Daily Financial Pulse, pintasan cepat, ringkasan dompet, dan transaksi terbaru.
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -26,6 +30,7 @@ import '../../data/budget_rule.dart';
 import '../../data/cloud_sync.dart';
 import '../../data/update_checker.dart';
 
+/// Widget halaman tab Beranda (Home) pada navigasi utama aplikasi.
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 

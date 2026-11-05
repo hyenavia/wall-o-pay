@@ -1,3 +1,7 @@
+/// Halaman pencatatan buku utang-piutang ([DebtsPage]), pelunasan bertahap,
+/// serta kalkulator pembagian tagihan patungan bersama teman (`showSplitSheet`).
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,6 +16,7 @@ import '../../data/notifications.dart';
 import '../../data/providers.dart';
 import '../../data/tables.dart' show DebtDirection, TxType;
 
+/// Halaman utama fitur Utang & Patungan (Piutangku vs Utangku).
 class DebtsPage extends ConsumerStatefulWidget {
   const DebtsPage({super.key});
 

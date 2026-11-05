@@ -1,3 +1,7 @@
+/// Layanan pencadangan (backup) dan pemulihan (restore) manual ke Cloud Firestore
+/// berdasarkan perbandingan waktu pembaruan (`updatedAt`).
+library;
+
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart'

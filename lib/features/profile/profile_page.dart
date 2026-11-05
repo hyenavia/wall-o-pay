@@ -1,3 +1,6 @@
+/// Halaman pengaturan profil pengguna ([ProfilePage]) untuk mengganti foto profil dan nama panggilan (nickname).
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,6 +10,7 @@ import '../../core/widgets.dart';
 import '../../data/cloud.dart';
 import '../../data/profile.dart';
 
+/// Widget halaman Profil untuk mengelola avatar dan nama sapaan pengguna.
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 

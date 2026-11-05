@@ -1,3 +1,7 @@
+/// Halaman alur pengenalan awal 4 langkah ([OnboardingPage]) untuk mengatur tipe periode,
+/// saldo kas awal, jadwal uang saku/pemasukan rutin, dan anggaran kategori pertama.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
