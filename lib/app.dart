@@ -245,12 +245,12 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
           icon: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.deepForest.withValues(alpha: 0.1),
+              color: AppColors.sage.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: const Icon(
               Icons.exit_to_app_rounded,
-              color: AppColors.deepForest,
+              color: AppColors.sage,
               size: 32,
             ),
           ),
@@ -277,6 +277,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
               onPressed: () => Navigator.of(ctx).pop(true),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.deepForest,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
               ),

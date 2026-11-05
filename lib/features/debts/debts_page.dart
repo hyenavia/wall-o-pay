@@ -45,12 +45,13 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
         icon: const Icon(Icons.add),
         label: Text(context.tr('Add debt')),
       ),
-      body: debtsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Text(context.tr('Could not load data: {error}', {'error': e})),
-        ),
-        data: (all) {
+      body: BotanicalBackgroundSheet(
+        child: debtsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(
+            child: Text(context.tr('Could not load data: {error}', {'error': e})),
+          ),
+          data: (all) {
           int remaining(DebtDirection d) => all
               .where((x) => x.direction == d)
               .fold<int>(0, (s, x) => s + (x.amount - x.paidAmount));
@@ -119,6 +120,7 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
             ],
           );
         },
+      ),
       ),
     );
   }

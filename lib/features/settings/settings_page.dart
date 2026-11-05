@@ -52,11 +52,24 @@ class SettingsPage extends ConsumerWidget {
         ? context.tr('No cloud backup yet.')
         : context.tr('Last backup {date}', {'date': dateTimeLabel(lastSyncTime)});
 
+    Widget iconBadge(IconData icon, Color color) {
+      return Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.14),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: color, size: 20),
+      );
+    }
+
     return Scaffold(
       appBar: pageAppBar(context, title: Text(context.tr('Settings'))),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-        children: [
+      body: BotanicalBackgroundSheet(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 48),
+          children: [
           AppCard(
             padding: const EdgeInsets.all(14),
             onTap: () => Navigator.push(
@@ -271,19 +284,28 @@ class SettingsPage extends ConsumerWidget {
             child: Column(
               children: [
                 SwitchListTile(
-                  secondary: const Icon(Icons.redo),
-                  title: Text(context.tr('Carry over unused budget')),
+                  secondary: iconBadge(Icons.redo_rounded, AppColors.income),
+                  title: Text(
+                    context.tr('Carry over unused budget'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
                   subtitle: Text(
                     context.tr('Leftover budget from the previous period is added to the next one.'),
+                    style: TextStyle(fontSize: 12, color: muted),
                   ),
                   value: features.rollover,
                   onChanged: featuresCtl.setRollover,
                 ),
+                const Divider(height: 1, indent: 68),
                 SwitchListTile(
-                  secondary: const Icon(Icons.notifications_active_outlined),
-                  title: Text(context.tr('Budget alerts')),
+                  secondary: iconBadge(Icons.notifications_active_outlined, AppColors.warning),
+                  title: Text(
+                    context.tr('Budget alerts'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
                   subtitle: Text(
                     context.tr('Get notified when a category reaches 80% and 100% of its budget.'),
+                    style: TextStyle(fontSize: 12, color: muted),
                   ),
                   value: features.budgetAlerts,
                   onChanged: (v) async {
@@ -298,11 +320,16 @@ class SettingsPage extends ConsumerWidget {
                     featuresCtl.setBudgetAlerts(v);
                   },
                 ),
+                const Divider(height: 1, indent: 68),
                 SwitchListTile(
-                  secondary: const Icon(Icons.alarm),
-                  title: Text(context.tr('Daily reminder')),
+                  secondary: iconBadge(Icons.alarm_rounded, const Color(0xFF60A5FA)),
+                  title: Text(
+                    context.tr('Daily reminder'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
                   subtitle: Text(
                     context.tr('A gentle nudge to log your spending.'),
+                    style: TextStyle(fontSize: 12, color: muted),
                   ),
                   value: features.dailyReminder,
                   onChanged: (v) async {
@@ -321,13 +348,20 @@ class SettingsPage extends ConsumerWidget {
                     );
                   },
                 ),
-                if (features.dailyReminder)
+                if (features.dailyReminder) ...[
+                  const Divider(height: 1, indent: 68),
                   ListTile(
-                    leading: const SizedBox(width: 24),
-                    title: Text(context.tr('Reminder time')),
+                    leading: iconBadge(Icons.schedule_rounded, AppColors.sage),
+                    title: Text(
+                      context.tr('Reminder time'),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
                     trailing: Text(
                       features.reminderTime.format(context),
-                      style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.sage,
+                      ),
                     ),
                     onTap: () async {
                       final picked = await showTimePicker(
@@ -343,6 +377,7 @@ class SettingsPage extends ConsumerWidget {
                       }
                     },
                   ),
+                ],
               ],
             ),
           ),
@@ -359,14 +394,22 @@ class SettingsPage extends ConsumerWidget {
               return AppCard(
                 padding: EdgeInsets.zero,
                 child: ListTile(
-                  leading: const Icon(Icons.lock_outline_rounded),
-                  title: Text(context.tr('App PIN Lock')),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: iconBadge(
+                    Icons.lock_outline_rounded,
+                    lockState.enabled ? AppColors.income : AppColors.sage,
+                  ),
+                  title: Text(
+                    context.tr('App PIN Lock'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
                   subtitle: Text(
                     lockState.enabled
                         ? context.tr('Active • Timeout: {time}', {'time': timeoutLabel})
                         : context.tr('Protect your financial data with a 6-digit PIN.'),
+                    style: TextStyle(fontSize: 12, color: muted),
                   ),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute<void>(builder: (_) => const SecurityPage()),
@@ -589,9 +632,17 @@ class SettingsPage extends ConsumerWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.file_upload_outlined),
-                  title: Text(context.tr('Export backup file (JSON)')),
-                  subtitle: Text(context.tr('Save or share a copy of all your data.')),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: iconBadge(Icons.file_upload_outlined, AppColors.income),
+                  title: Text(
+                    context.tr('Export backup file (JSON)'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                  subtitle: Text(
+                    context.tr('Save or share a copy of all your data.'),
+                    style: TextStyle(fontSize: 12, color: muted),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
                   onTap: () => SettingsActions.runAction(context, () async {
                     final prefs = ref.read(appPrefsProvider.notifier).exportPreferences();
                     final budget = ref.read(budgetRuleProvider.notifier).exportConfig();
@@ -602,10 +653,19 @@ class SettingsPage extends ConsumerWidget {
                     return trG('Backup file ready to share.');
                   }),
                 ),
+                const Divider(height: 1, indent: 68),
                 ListTile(
-                  leading: const Icon(Icons.file_download_outlined),
-                  title: Text(context.tr('Import backup file (JSON)')),
-                  subtitle: Text(context.tr('Merges a backup file into this device.')),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: iconBadge(Icons.file_download_outlined, const Color(0xFF60A5FA)),
+                  title: Text(
+                    context.tr('Import backup file (JSON)'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                  subtitle: Text(
+                    context.tr('Merges a backup file into this device.'),
+                    style: TextStyle(fontSize: 12, color: muted),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
                   onTap: () async {
                     final ok = await SettingsActions.confirm(
                       context,
@@ -637,19 +697,31 @@ class SettingsPage extends ConsumerWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.category_outlined),
-                  title: Text(context.tr('Manage categories')),
-                  trailing: const Icon(Icons.chevron_right),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: iconBadge(Icons.category_outlined, const Color(0xFFA78BFA)),
+                  title: Text(
+                    context.tr('Manage categories'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute<void>(builder: (_) => const CategoriesPage()),
                   ),
                 ),
-                const Divider(height: 1),
+                const Divider(height: 1, indent: 68),
                 ListTile(
-                  leading: const Icon(Icons.table_view_outlined),
-                  title: Text(context.tr('Export transactions (CSV)')),
-                  subtitle: Text(context.tr('Open in Excel or Google Sheets.')),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: iconBadge(Icons.table_view_outlined, AppColors.sage),
+                  title: Text(
+                    context.tr('Export transactions (CSV)'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                  subtitle: Text(
+                    context.tr('Open in Excel or Google Sheets.'),
+                    style: TextStyle(fontSize: 12, color: muted),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
                   onTap: () => SettingsActions.runAction(context, () async {
                     await ExportService(ref.read(databaseProvider)).shareCsv();
                     return trG('CSV file ready to share.');
@@ -665,19 +737,30 @@ class SettingsPage extends ConsumerWidget {
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.logout),
-                    title: Text(context.tr('Log out')),
-                    subtitle: Text(user.email ?? ''),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    leading: iconBadge(Icons.logout_rounded, AppColors.warning),
+                    title: Text(
+                      context.tr('Log out'),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    ),
+                    subtitle: Text(
+                      user.email ?? '',
+                      style: TextStyle(fontSize: 12, color: muted),
+                    ),
                     onTap: () => SettingsActions.signOut(context, ref),
                   ),
-                  const Divider(height: 1, indent: 56),
+                  const Divider(height: 1, indent: 68),
                   ListTile(
-                    leading: const Icon(Icons.person_remove_outlined, color: AppColors.expense),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    leading: iconBadge(Icons.person_remove_outlined, AppColors.expense),
                     title: Text(
                       context.tr('Delete Account & Data'),
-                      style: const TextStyle(color: AppColors.expense, fontWeight: FontWeight.w600),
+                      style: const TextStyle(color: AppColors.expenseOnDark, fontWeight: FontWeight.w600, fontSize: 14),
                     ),
-                    subtitle: Text(context.tr('Permanently delete your account and all data.')),
+                    subtitle: Text(
+                      context.tr('Permanently delete your account and all data.'),
+                      style: TextStyle(fontSize: 12, color: muted),
+                    ),
                     onTap: () => SettingsActions.deleteAccount(context, ref),
                   ),
                 ],
@@ -691,27 +774,34 @@ class SettingsPage extends ConsumerWidget {
                 children: [
                   if (ready) ...[
                     ListTile(
-                      leading: const Icon(Icons.logout_rounded),
-                      title: Text(context.tr('Exit Guest Mode')),
-                      subtitle: Text(context.tr('Return to the login screen.')),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      leading: iconBadge(Icons.logout_rounded, AppColors.warning),
+                      title: Text(
+                        context.tr('Exit Guest Mode'),
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                      ),
+                      subtitle: Text(
+                        context.tr('Return to the login screen.'),
+                        style: TextStyle(fontSize: 12, color: muted),
+                      ),
                       onTap: () => SettingsActions.exitGuestMode(context, ref),
                     ),
-                    const Divider(height: 1, indent: 56),
+                    const Divider(height: 1, indent: 68),
                   ],
                   ListTile(
-                    leading: const Icon(
-                      Icons.delete_forever_outlined,
-                      color: AppColors.expense,
-                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    leading: iconBadge(Icons.delete_forever_outlined, AppColors.expense),
                     title: Text(
                       context.tr('Erase Local Guest Data'),
                       style: const TextStyle(
-                        color: AppColors.expense,
+                        color: AppColors.expenseOnDark,
                         fontWeight: FontWeight.w600,
+                        fontSize: 14,
                       ),
                     ),
                     subtitle: Text(
                       context.tr('Permanently delete all local data on this device.'),
+                      style: TextStyle(fontSize: 12, color: muted),
                     ),
                     onTap: () => SettingsActions.eraseGuestData(context, ref),
                   ),
@@ -725,18 +815,32 @@ class SettingsPage extends ConsumerWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.info_outline_rounded),
-                  title: Text(context.tr('About Wall o\' Pay')),
-                  subtitle: Text(context.tr('Philosophy, brand lore & app details')),
-                  trailing: const Icon(Icons.chevron_right),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: iconBadge(Icons.info_outline_rounded, AppColors.sage),
+                  title: Text(
+                    context.tr('About Wall o\' Pay'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                  subtitle: Text(
+                    context.tr('Philosophy, brand lore & app details'),
+                    style: TextStyle(fontSize: 12, color: muted),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
                   onTap: () => showAboutWallOPaySheet(context),
                 ),
-                const Divider(height: 1),
+                const Divider(height: 1, indent: 68),
                 ListTile(
-                  leading: const Icon(Icons.system_update_alt_rounded),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: iconBadge(
+                    Icons.system_update_alt_rounded,
+                    updateInfo != null ? AppColors.warning : AppColors.income,
+                  ),
                   title: Row(
                     children: [
-                      Text(context.tr('Check for Updates')),
+                      Text(
+                        context.tr('Check for Updates'),
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                      ),
                       if (updateInfo != null) ...[
                         const SizedBox(width: 8),
                         Container(
@@ -762,11 +866,12 @@ class SettingsPage extends ConsumerWidget {
                         ? 'v${UpdateCheckerService.currentVersion} ➔ v${updateInfo.latestVersion} (${context.tr('Update Available!')})'
                         : 'Wall o\' Pay v${UpdateCheckerService.currentVersion} • Latest Release',
                     style: TextStyle(
-                      color: updateInfo != null ? const Color(0xFFE65100) : null,
+                      fontSize: 12,
+                      color: updateInfo != null ? const Color(0xFFE65100) : muted,
                       fontWeight: updateInfo != null ? FontWeight.w700 : null,
                     ),
                   ),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
                   onTap: () {
                     if (updateInfo != null) {
                       UpdateCheckerService.showUpdateDialog(context, updateInfo);
@@ -781,24 +886,36 @@ class SettingsPage extends ConsumerWidget {
                     }
                   },
                 ),
-                const Divider(height: 1),
+                const Divider(height: 1, indent: 68),
                 ListTile(
-                  leading: const Icon(Icons.history_edu_rounded),
-                  title: Text(context.tr('Version Changelog')),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: iconBadge(Icons.history_edu_rounded, const Color(0xFF60A5FA)),
+                  title: Text(
+                    context.tr('Version Changelog'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
                   subtitle: Text(
                     context.tr(
                       'See what\'s new in v{version} and past releases',
                       {'version': UpdateCheckerService.currentVersion},
                     ),
+                    style: TextStyle(fontSize: 12, color: muted),
                   ),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
                   onTap: () => showAppChangelogSheet(context),
                 ),
-                const Divider(height: 1),
+                const Divider(height: 1, indent: 68),
                 ListTile(
-                  leading: const Icon(Icons.feedback_outlined),
-                  title: Text(context.tr('Send Feedback')),
-                  subtitle: Text(context.tr('Help us improve with your suggestions & bug reports.')),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  leading: iconBadge(Icons.feedback_outlined, const Color(0xFFA78BFA)),
+                  title: Text(
+                    context.tr('Send Feedback'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                  subtitle: Text(
+                    context.tr('Help us improve with your suggestions & bug reports.'),
+                    style: TextStyle(fontSize: 12, color: muted),
+                  ),
                   trailing: const Icon(Icons.open_in_new_rounded, size: 18),
                   onTap: () {
                     final isIndonesian = prefs.localeCode == 'id';
@@ -812,6 +929,7 @@ class SettingsPage extends ConsumerWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

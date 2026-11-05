@@ -6,6 +6,7 @@ import '../data/app_database.dart';
 import '../data/prefs.dart';
 import '../data/profile.dart';
 import '../data/providers.dart';
+import 'botanical_decorations.dart';
 import 'format.dart';
 import 'l10n.dart';
 import 'period.dart';
@@ -35,6 +36,12 @@ PreferredSizeWidget pageAppBar(
         .textTheme
         .titleLarge
         ?.copyWith(fontWeight: FontWeight.w800, color: Colors.white),
+    flexibleSpace: const IgnorePointer(
+      child: CustomPaint(
+        size: Size.infinite,
+        painter: BotanicalCanopyPainter(opacity: 0.10),
+      ),
+    ),
     bottom: _SheetEdge(childHeight: bottomHeight, child: bottom),
   );
 }
@@ -156,7 +163,7 @@ class HeroCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: padding,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColors.deepForest,
         borderRadius: BorderRadius.circular(24),
@@ -168,9 +175,23 @@ class HeroCard extends StatelessWidget {
           ),
         ],
       ),
-      child: DefaultTextStyle.merge(
-        style: const TextStyle(color: Colors.white),
-        child: child,
+      child: Stack(
+        children: [
+          const Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: BotanicalHeroCardPainter(),
+              ),
+            ),
+          ),
+          Padding(
+            padding: padding,
+            child: DefaultTextStyle.merge(
+              style: const TextStyle(color: Colors.white),
+              child: child,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -637,3 +658,29 @@ void showUndoSnackBar({
     ),
   );
 }
+
+/// Container dengan latar belakang botanical ambient (glow & daun lembut)
+/// untuk lembar konten di bawah header.
+class BotanicalBackgroundSheet extends StatelessWidget {
+  const BotanicalBackgroundSheet({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        const Positioned.fill(
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: BotanicalBackgroundPainter(),
+            ),
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+}
+

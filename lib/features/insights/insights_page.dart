@@ -44,12 +44,13 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
         bottom: const Center(child: PeriodSwitcher(onDark: true)),
         bottomHeight: 44,
       ),
-      body: currentTxsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Text(context.tr('Could not load data: {error}', {'error': e})),
-        ),
-        data: (currentTxs) {
+      body: BotanicalBackgroundSheet(
+        child: currentTxsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(
+            child: Text(context.tr('Could not load data: {error}', {'error': e})),
+          ),
+          data: (currentTxs) {
           final prevTxs = prevTxsAsync.value ?? const <TransactionEntry>[];
           final trendTxs = trendTxsAsync.value ?? const <TransactionEntry>[];
 
@@ -384,7 +385,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
           }
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
             children: [
               SizedBox(
                 width: double.infinity,
@@ -404,6 +405,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
             ],
           );
         },
+      ),
       ),
     );
   }

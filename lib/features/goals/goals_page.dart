@@ -20,12 +20,13 @@ class GoalsPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: pageAppBar(context, title: Text(context.tr('Goals'))),
-      body: goalsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Text(context.tr('Could not load data: {error}', {'error': e})),
-        ),
-        data: (goals) {
+      body: BotanicalBackgroundSheet(
+        child: goalsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(
+            child: Text(context.tr('Could not load data: {error}', {'error': e})),
+          ),
+          data: (goals) {
           final active = goals.where((g) => g.currentAmount < g.targetAmount).toList();
           final done = goals.where((g) => g.currentAmount >= g.targetAmount).toList();
 
@@ -106,6 +107,7 @@ class GoalsPage extends ConsumerWidget {
             ],
           );
         },
+      ),
       ),
     );
   }

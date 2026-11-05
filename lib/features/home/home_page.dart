@@ -6,13 +6,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
 import '../../core/theme.dart';
+import '../../core/botanical_decorations.dart';
 import '../../core/l10n.dart';
 import '../../core/period.dart';
 import '../../core/widgets.dart';
 import '../../data/profile.dart';
 import '../../data/providers.dart';
+import '../../data/app_database.dart' show Wallet;
 import '../../data/tables.dart' show TxType;
 
+import '../accounts/accounts_page.dart';
 import '../profile/profile_page.dart';
 import '../settings/settings_page.dart';
 import '../more/more_page.dart';
@@ -54,19 +57,32 @@ class HomePage extends ConsumerWidget {
       backgroundColor: AppColors.deepForest,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              _HomeHeader(
-                name: name,
-                onProfile: openProfile,
-                onMore: openMore,
-                onSettings: openSettings,
+        child: Stack(
+          children: [
+            const Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 140,
+              child: IgnorePointer(
+                child: CustomPaint(
+                  painter: BotanicalCanopyPainter(opacity: 0.10),
+                ),
               ),
-              Expanded(
-                child: _Sheet(
-                  child: txAsync.when(
+            ),
+            SafeArea(
+              bottom: false,
+              child: Column(
+                children: [
+                  _HomeHeader(
+                    name: name,
+                    onProfile: openProfile,
+                    onMore: openMore,
+                    onSettings: openSettings,
+                  ),
+                  Expanded(
+                    child: _Sheet(
+                      child: txAsync.when(
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (e, _) => Center(
                       child: Text(context.tr('Could not load data: {error}', {'error': e})),
@@ -120,7 +136,7 @@ class HomePage extends ConsumerWidget {
                           ]);
                         },
                         child: ListView(
-                          padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+                          padding: const EdgeInsets.fromLTRB(20, 18, 20, 96),
                           children: [
                             if (updateInfo != null) ...[
                               _UpdateBannerCard(
@@ -195,6 +211,8 @@ class HomePage extends ConsumerWidget {
               ),
             ],
           ),
+        ),
+          ],
         ),
       ),
     );
@@ -305,21 +323,33 @@ class _Sheet extends StatelessWidget {
         color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      child: ShaderMask(
-        shaderCallback: (Rect bounds) {
-          return const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.transparent,
-              Colors.white,
-              Colors.white,
-            ],
-            stops: [0.0, 0.028, 1.0],
-          ).createShader(bounds);
-        },
-        blendMode: BlendMode.dstIn,
-        child: child,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          const Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: BotanicalBackgroundPainter(),
+              ),
+            ),
+          ),
+          ShaderMask(
+            shaderCallback: (Rect bounds) {
+              return const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.white,
+                  Colors.white,
+                ],
+                stops: [0.0, 0.028, 1.0],
+              ).createShader(bounds);
+            },
+            blendMode: BlendMode.dstIn,
+            child: child,
+          ),
+        ],
       ),
     );
   }
@@ -347,6 +377,7 @@ class _BalanceCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final isSurplus = periodFlow >= 0;
     final hidden = ref.watch(hideBalanceProvider);
+    final wallets = ref.watch(walletsProvider).value ?? const [];
 
     Widget blurred(Widget child) => hidden
         ? ClipRect(child: ImageFiltered(imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), child: child))
@@ -359,11 +390,37 @@ class _BalanceCard extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  context.tr('Total Balance'),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w600,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const AccountsPage()),
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              context.tr('Total Balance'),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.chevron_right_rounded,
+                            size: 18,
+                            color: Colors.white70,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -467,9 +524,160 @@ class _BalanceCard extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: 10),
+          _AccountsQuickBar(wallets: wallets),
         ],
       ),
     );
+  }
+}
+
+class _AccountsQuickBar extends StatelessWidget {
+  const _AccountsQuickBar({required this.wallets});
+
+  final List<Wallet> wallets;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const AccountsPage()),
+        ),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.08),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              if (wallets.isEmpty) ...[
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.add,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.tr('Add accounts & wallets'),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ] else ...[
+                _buildStackedAvatars(),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _buildSummary(context),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+              const Icon(
+                Icons.chevron_right_rounded,
+                size: 16,
+                color: Colors.white70,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStackedAvatars() {
+    const avatarSize = 22.0;
+    const overlap = 14.0;
+    final displayed = wallets.take(3).toList();
+    final extra = wallets.length - displayed.length;
+    final totalBadges = displayed.length + (extra > 0 ? 1 : 0);
+    final width = avatarSize + (totalBadges - 1) * overlap;
+
+    return SizedBox(
+      width: width,
+      height: avatarSize,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          for (int i = 0; i < displayed.length; i++)
+            Positioned(
+              left: i * overlap,
+              child: Container(
+                width: avatarSize,
+                height: avatarSize,
+                decoration: BoxDecoration(
+                  color: Color(displayed[i].colorValue),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.deepForest, width: 1.5),
+                ),
+                child: Icon(
+                  accountIcon(displayed[i].type),
+                  size: 11,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          if (extra > 0)
+            Positioned(
+              left: displayed.length * overlap,
+              child: Container(
+                width: avatarSize,
+                height: avatarSize,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.25),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppColors.deepForest, width: 1.5),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '+$extra',
+                  style: const TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  String _buildSummary(BuildContext context) {
+    final count = wallets.length;
+    final countLabel = count == 1
+        ? context.tr('1 Account')
+        : context.tr('{count} Accounts', {'count': count});
+    final names = wallets.take(2).map((w) => context.tr(w.name)).join(', ');
+    final suffix = count > 2 ? '...' : '';
+    return '$countLabel · $names$suffix';
   }
 }
 

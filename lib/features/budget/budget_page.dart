@@ -37,15 +37,16 @@ class BudgetPage extends ConsumerWidget {
         bottom: const Center(child: PeriodSwitcher(onDark: true)),
         bottomHeight: 44,
       ),
-      body: catsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Text(context.tr('Could not load data: {error}', {'error': e})),
-        ),
-        data: (all) {
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-            children: [
+      body: BotanicalBackgroundSheet(
+        child: catsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(
+            child: Text(context.tr('Could not load data: {error}', {'error': e})),
+          ),
+          data: (all) {
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
+              children: [
               const SizedBox(height: 6),
 
               // ===============================================================
@@ -365,6 +366,7 @@ class BudgetPage extends ConsumerWidget {
             ],
           );
         },
+      ),
       ),
     );
   }

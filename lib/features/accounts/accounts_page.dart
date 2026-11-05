@@ -249,12 +249,13 @@ class AccountsPage extends ConsumerWidget {
         icon: const Icon(Icons.add),
         label: Text(context.tr('Add account')),
       ),
-      body: accountsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Text(context.tr('Could not load data: {error}', {'error': e})),
-        ),
-        data: (accounts) {
+      body: BotanicalBackgroundSheet(
+        child: accountsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(
+            child: Text(context.tr('Could not load data: {error}', {'error': e})),
+          ),
+          data: (accounts) {
           const categoryOrder = ['bank', 'digital', 'ewallet', 'cash'];
           final grouped = <String, List<Wallet>>{
             for (final cat in categoryOrder) cat: <Wallet>[],
@@ -417,6 +418,7 @@ class AccountsPage extends ConsumerWidget {
             ],
           );
         },
+      ),
       ),
     );
   }

@@ -281,37 +281,70 @@ class DailyFinancialPulseCard extends StatelessWidget {
             const SizedBox(height: 14),
             Divider(color: scheme.onSurface.withValues(alpha: 0.08), height: 1),
             const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  budgetTitle != null ? context.tr(budgetTitle!) : context.tr('Period Budget'),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: scheme.onSurface,
+            () {
+              final isOver = budgetSpent > totalBudget;
+              final pct = (budgetSpent * 100 / totalBudget).round();
+              final overAmount = budgetSpent - totalBudget;
+              final statusColor = isOver
+                  ? AppColors.expenseOnDark
+                  : ((budgetSpent / totalBudget) >= 0.85 ? AppColors.warning : AppColors.sage);
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        budgetTitle != null ? context.tr(budgetTitle!) : context.tr('Period Budget'),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: scheme.onSurface,
+                        ),
+                      ),
+                      Text(
+                        isOver
+                            ? context.tr('{pct}% used (Over by {amount})', {
+                                'pct': pct,
+                                'amount': rupiah(overAmount),
+                              })
+                            : context.tr('{pct}% used', {'pct': pct}),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: statusColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Text(
-                  context.tr('{spent} of {total}', {
-                    'spent': rupiah(budgetSpent),
-                    'total': rupiah(totalBudget),
-                  }),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: muted,
-                    fontSize: 11,
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        context.tr('{spent} of {total}', {
+                          'spent': rupiah(budgetSpent),
+                          'total': rupiah(totalBudget),
+                        }),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: muted,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            AppProgressBar(
-              value: (budgetSpent / totalBudget).clamp(0.0, 1.0),
-              color: budgetSpent >= totalBudget
-                  ? const Color(0xFFD65D5D)
-                  : ((budgetSpent / totalBudget) >= 0.85 ? AppColors.warning : AppColors.sage),
-              backgroundColor: scheme.surfaceContainerHighest,
-              height: 6,
-            ),
+                  const SizedBox(height: 8),
+                  AppProgressBar(
+                    value: (budgetSpent / totalBudget).clamp(0.0, 1.0),
+                    color: isOver
+                        ? AppColors.expense
+                        : ((budgetSpent / totalBudget) >= 0.85 ? AppColors.warning : AppColors.sage),
+                    backgroundColor: scheme.surfaceContainerHighest,
+                    height: 6,
+                  ),
+                ],
+              );
+            }(),
           ] else if (onSetBudget != null) ...[
             const SizedBox(height: 10),
             Row(

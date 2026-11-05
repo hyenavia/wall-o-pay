@@ -41,10 +41,106 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '1.11.32',
+      version: '1.11.37',
       dateEn: 'November 5, 2026',
       dateId: '5 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Polished Settings page with colorful rounded icon badges and aligned dividers across all sections.',
+          textId: 'Mempercantik halaman Pengaturan dengan lencana ikon berwarna dan garis pemisah rapi di seluruh bagian.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.36',
+      dateEn: 'November 5, 2026',
+      dateId: '5 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Restructured More Features page into 3 functional category cards with colorful icon badges.',
+          textId: 'Menata ulang halaman Fitur Lainnya menjadi 3 kartu kategori fungsional dengan lencana ikon berwarna.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Unified botanical ambient background across More, Accounts, Settings, Debts, and Goals pages.',
+          textId: 'Menyeragamkan background botani ke halaman Fitur Lainnya, Akun, Pengaturan, Utang, dan Impian.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.35',
+      dateEn: 'November 5, 2026',
+      dateId: '5 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Increased bottom scroll padding to 96px across all pages so FAB never obstructs content.',
+          textId: 'Menaikkan padding bawah daftar menjadi 96px agar tombol + tidak menutupi kartu atau konten.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Applied botanical background glow and subtle leaf contours to Transactions, Budget, and Insights.',
+          textId: 'Menerapkan pendaran background botani dan siluet daun halus ke halaman Transaksi, Anggaran, dan Wawasan.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Enhanced over-budget indicator with explicit excess amount and high-contrast color.',
+          textId: 'Memperjelas indikator anggaran terlampaui dengan nominal kelebihan yang eksplisit dan warna kontras.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Polished exit application confirmation dialog theme contrast.',
+          textId: 'Menyempurnakan kontras tema dialog konfirmasi keluar aplikasi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.34',
+      dateEn: 'November 5, 2026',
+      dateId: '5 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added subtle botanical foliage canopy to headers across all pages and home.',
+          textId: 'Menambahkan siluet kanopi daun botani di header seluruh halaman dan beranda.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Refined Total Balance card with subtle emerald aurora glow and topographic contour rings.',
+          textId: 'Menyempurnakan kartu Total Saldo dengan pendaran aurora emerald dan garis kontur topografi halus.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Enhanced main background with ambient emerald glow and delicate leaf contours.',
+          textId: 'Mempercantik background utama dengan pendaran emerald lembut dan siluet daun tipis.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.33',
+      dateEn: 'November 5, 2026',
+      dateId: '5 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Balance Card Accounts Shortcut & Quick Preview Bar: Tappable Total Balance header with chevron indicator and an interactive compact bar showing active account avatars and summary beneath the cashflow card.',
+          textId:
+              'Shortcut & Bar Ringkas Akun di Kartu Saldo: Judul Total Saldo interaktif dengan ikon panah serta bar ringkas berisi avatar akun aktif dan ringkasan yang langsung membuka halaman Akun & Rekening.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.32',
+      dateEn: 'November 5, 2026',
+      dateId: '5 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.changed,

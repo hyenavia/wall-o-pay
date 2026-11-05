@@ -82,42 +82,43 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         ),
         bottomHeight: 44,
       ),
-      body: txAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Text(context.tr('Could not load data: {error}', {'error': e})),
-        ),
-        data: (txs) {
-          final shown = txs.where((t) {
-            if (!isSearching && _filter != null && t.type != _filter) return false;
-            if (_selectedWalletId != null &&
-                t.walletId != _selectedWalletId &&
-                t.toWalletId != _selectedWalletId) {
-              return false;
+      body: BotanicalBackgroundSheet(
+        child: txAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(
+            child: Text(context.tr('Could not load data: {error}', {'error': e})),
+          ),
+          data: (txs) {
+            final shown = txs.where((t) {
+              if (!isSearching && _filter != null && t.type != _filter) return false;
+              if (_selectedWalletId != null &&
+                  t.walletId != _selectedWalletId &&
+                  t.toWalletId != _selectedWalletId) {
+                return false;
+              }
+              if (_selectedCategoryId != null && t.categoryId != _selectedCategoryId) {
+                return false;
+              }
+              return true;
+            }).toList();
+
+            final totalIncome = shown
+                .where((t) => t.type == TxType.income)
+                .fold<int>(0, (a, t) => a + t.amount);
+            final totalExpense = shown
+                .where((t) => t.type == TxType.expense)
+                .fold<int>(0, (a, t) => a + t.amount);
+
+            // Kelompokkan per hari (urutan sudah dari terbaru).
+            final groups = <DateTime, List<TransactionEntry>>{};
+            for (final t in shown) {
+              final day = DateTime(t.date.year, t.date.month, t.date.day);
+              groups.putIfAbsent(day, () => []).add(t);
             }
-            if (_selectedCategoryId != null && t.categoryId != _selectedCategoryId) {
-              return false;
-            }
-            return true;
-          }).toList();
 
-          final totalIncome = shown
-              .where((t) => t.type == TxType.income)
-              .fold<int>(0, (a, t) => a + t.amount);
-          final totalExpense = shown
-              .where((t) => t.type == TxType.expense)
-              .fold<int>(0, (a, t) => a + t.amount);
-
-          // Kelompokkan per hari (urutan sudah dari terbaru).
-          final groups = <DateTime, List<TransactionEntry>>{};
-          for (final t in shown) {
-            final day = DateTime(t.date.year, t.date.month, t.date.day);
-            groups.putIfAbsent(day, () => []).add(t);
-          }
-
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-            children: [
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 96),
+              children: [
               TextField(
                 onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
                 decoration: appInput(
@@ -408,6 +409,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             ],
           );
         },
+      ),
       ),
     );
   }

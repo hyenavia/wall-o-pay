@@ -76,6 +76,9 @@ const Map<String, String> _en = {
   'Kesehatan': 'Health',
   'Lainnya': 'Other',
   'Transfer': 'Transfer',
+  '1 Akun': '1 Account',
+  '{count} Akun': '{count} Accounts',
+  'Tambah akun & rekening': 'Add accounts & wallets',
 };
 
 const Map<String, String> _id = {
@@ -531,6 +534,7 @@ const Map<String, String> _id = {
   '{n} days left': '{n} hari lagi',
   '{n} months left': '{n} bulan lagi',
   '{pct}% used': '{pct}% terpakai',
+  '{pct}% used (Over by {amount})': '{pct}% terpakai (Lewat {amount})',
   '{spent} of {total}': '{spent} dari {total}',
   'Pending Transactions': 'Transaksi Menunggu Konfirmasi',
   'Detected Transaction': 'Transaksi Terdeteksi',
@@ -744,5 +748,11 @@ const Map<String, String> _id = {
   'Local guest data erased.': 'Data tamu lokal berhasil dihapus.',
   'You are in Guest mode. Your profile is saved locally on this device.': 'Kamu sedang dalam Mode Tamu. Profilmu tersimpan secara lokal di perangkat ini.',
   'In Guest mode without an account, resetting a forgotten PIN will erase all local data on this device for security.': 'Dalam Mode Tamu tanpa akun, mereset PIN yang terlupa akan menghapus seluruh data lokal di perangkat ini demi keamanan.',
+  '1 Account': '1 Akun',
+  '{count} Accounts': '{count} Akun',
+  'Add accounts & wallets': 'Tambah akun & rekening',
+  'Money & Wallets': 'Keuangan & Dompet',
+  'Planning & Goals': 'Perencanaan & Impian',
+  'Tools & Settings': 'Alat & Pengaturan',
 };
 

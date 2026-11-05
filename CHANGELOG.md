@@ -4,6 +4,60 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.37] - 2026-11-05
+
+### Changed
+- **Settings Page Colorful Icon Badges & Divider Alignment:**
+  - Upgraded all list tiles and switches across `SettingsPage` (**Budget & reminders**, **Security**, **Manual Backup & Export**, **Data**, **Account**, and **About & Support**) with rounded color-coded icon badges (`iconBadge`) and aligned dividers (`indent: 68`) to match the modern visual aesthetic of `MorePage`.
+
+---
+
+## [1.11.36] - 2026-11-05
+
+### Changed
+- **More Features Page Architecture & Visual Upgrade:**
+  - Redesigned `MorePage` into 3 categorized functional cards: **Money & Wallets** (Accounts, Transfer, Debts), **Planning & Goals** (Budget, Savings Goals, Recurring), and **Tools & Settings** (Categories, PDF Report, Settings).
+  - Enhanced list tiles with rounded container badges, curated category icon tinting, and dividers for improved visual hierarchy.
+- **Full-Spectrum Botanical Ambient Background across All Sub-Pages:**
+  - Extended `BotanicalBackgroundSheet` to `MorePage`, `AccountsPage`, `SettingsPage`, `DebtsPage`, and `GoalsPage`, ensuring unified botanical depth and emerald glow throughout the entire application navigation.
+
+---
+
+## [1.11.35] - 2026-11-05
+
+### Changed
+- **Bottom FAB Scroll Spacing & Listview Padding Polish:**
+  - Increased bottom scroll padding on primary feeds (Home, Transactions, Budget, and Insights) from `24-32px` to `96px` so the docked center `+` Floating Action Button never obscures the bottom-most list items or daily allowance status.
+- **Global Botanical Ambient Background Across All Tabs:**
+  - Wrapped content sheets in `TransactionsPage`, `BudgetPage`, and `InsightsPage` with `BotanicalBackgroundSheet`, ensuring consistent soft emerald radial glow and ambient leaf contours across all tabs.
+- **Budget Pulse Card Over-Budget Clarity:**
+  - Redesigned period budget tracker in `DailyFinancialPulseCard` with high-contrast `AppColors.expenseOnDark` color coding and explicit deficit amount labeling (`{pct}% used (Over by {amount})` / `{pct}% terpakai (Lewat {amount})`), eliminating guesswork when limits are exceeded.
+- **App Exit Dialog Theme Polish:**
+  - Refined app exit confirmation dialog styling with `AppColors.sage` icon accent and crisp white button typography, improving visibility on dark surfaces.
+
+---
+
+## [1.11.34] - 2026-11-05
+
+### Added
+- **Signature Botanical Forest Canopy & Watermark Effects:**
+  - Added vector-based botanical foliage decorations rendered with zero-overhead `CustomPainter`:
+    - **Header Canopy:** Rendered subtle curving leaves and stem silhouettes (`BotanicalCanopyPainter`) in the app bar across all sub-pages and the home header.
+    - **Balance Card Ambient Glow & Contour Texture:** Replaced literal leaf watermark inside `HeroCard` with an elegant, modern emerald aurora radial glow and delicate circular growth/topographic contour rings (`BotanicalHeroCardPainter`), keeping numeric figures crisp and readable.
+    - **Background Glow & Ambient Silhouettes:** Enhanced the main sheet background (`BotanicalBackgroundPainter`) with a gentle emerald radial glow and ultra-low opacity leaf accents.
+
+---
+
+## [1.11.33] - 2026-11-05
+
+### Added
+- **Home Balance Card Accounts Shortcut & Quick Preview Bar:**
+  - Added an interactive navigation affordance to the **Total Balance** title with a trailing chevron icon `›`, allowing users to open the Accounts & Wallets page directly with one tap.
+  - Added a compact **Accounts Quick Bar** immediately beneath the Income and Expense metrics on the home card. Displays overlapping color-coded avatar icons for active accounts, an account count summary with primary wallet names, and a quick shortcut into Account Management. If no accounts are set up yet, presents a clean, tap-to-add action button.
+  - Added bilingual localization strings (`1 Account` / `1 Akun`, `{count} Accounts` / `{count} Akun`, `Add accounts & wallets` / `Tambah akun & rekening`) in both English and Indonesian.
+
+---
+
 ## [1.11.32] - 2026-11-05
 
 ### Changed
