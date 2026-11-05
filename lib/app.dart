@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/brand.dart';
 import 'core/l10n.dart';
 import 'core/theme.dart';
+import 'core/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'data/cloud.dart';
 import 'data/cloud_sync.dart';
@@ -35,6 +36,7 @@ class WallOPayApp extends ConsumerWidget {
 
     return MaterialApp(
       title: "Wall o' Pay",
+      scaffoldMessengerKey: rootScaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       theme: buildTheme(),
@@ -87,17 +89,20 @@ class _RootState extends State<_Root> {
   }
 }
 
-/// Aplikasi hanya bisa dipakai setelah login atau daftar.
+/// Aplikasi bisa dipakai setelah login/daftar atau melalui Mode Tamu (offline).
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ready = ref.watch(firebaseReadyProvider);
+    final skip = ref.watch(skipAuthProvider);
     if (!ready) {
-      final skip = ref.watch(skipAuthProvider);
       return skip
-          ? const LockGate(child: OnboardingGate(child: HomeShell()))
+          ? const LockGate(
+              key: ValueKey('guest'),
+              child: OnboardingGate(child: HomeShell()),
+            )
           : FirebaseMissingPage(
               onContinue: () => ref.read(skipAuthProvider.notifier).skip(),
             );
@@ -105,11 +110,33 @@ class AuthGate extends ConsumerWidget {
 
     final auth = ref.watch(authStateProvider);
     return auth.when(
-      loading: () => const SplashPage(),
-      error: (e, _) => const AuthPage(),
-      data: (user) => user == null
-          ? const AuthPage()
-          : LockGate(key: ValueKey(user.uid), child: const OnboardingGate(child: HomeShell())),
+      loading: () => skip
+          ? const LockGate(
+              key: ValueKey('guest'),
+              child: OnboardingGate(child: HomeShell()),
+            )
+          : const SplashPage(),
+      error: (e, _) => skip
+          ? const LockGate(
+              key: ValueKey('guest'),
+              child: OnboardingGate(child: HomeShell()),
+            )
+          : const AuthPage(),
+      data: (user) {
+        if (user != null) {
+          return LockGate(
+            key: ValueKey(user.uid),
+            child: const OnboardingGate(child: HomeShell()),
+          );
+        }
+        if (skip) {
+          return const LockGate(
+            key: ValueKey('guest'),
+            child: OnboardingGate(child: HomeShell()),
+          );
+        }
+        return const AuthPage();
+      },
     );
   }
 }

@@ -239,6 +239,7 @@ class SettingsActions {
 
       final prefs = ref.read(sharedPreferencesProvider);
       await prefs.remove('current_sync_user_id');
+      await ref.read(skipAuthProvider.notifier).reset();
 
       await FirebaseAuth.instance.signOut();
 
@@ -390,6 +391,7 @@ class SettingsActions {
 
       final prefs = ref.read(sharedPreferencesProvider);
       await prefs.remove('current_sync_user_id');
+      await ref.read(skipAuthProvider.notifier).reset();
       if (userUid != null) {
         await prefs.remove('onboarding_done_$userUid');
       }
@@ -416,6 +418,84 @@ class SettingsActions {
     } catch (e) {
       if (context.mounted) {
         Navigator.of(context).pop(); // dismiss loading
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.expense,
+            content: Text(context.tr('Error: {error}', {'error': e})),
+          ),
+        );
+      }
+    }
+  }
+
+  static Future<void> exitGuestMode(BuildContext context, WidgetRef ref) async {
+    final ok = await confirm(
+      context,
+      title: context.tr('Exit Guest Mode?'),
+      message: context.tr(
+        'You will return to the login screen. Your local data stays on this device unless erased.',
+      ),
+      action: context.tr('Exit Guest Mode'),
+    );
+    if (!ok) return;
+    await ref.read(skipAuthProvider.notifier).reset();
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).popUntil((r) => r.isFirst);
+    }
+  }
+
+  static Future<void> eraseGuestData(BuildContext context, WidgetRef ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          ctx.tr('Erase Local Guest Data?'),
+          style: const TextStyle(
+            color: AppColors.expense,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(ctx.tr(
+          'Warning: All local transactions, budgets, wallets, and settings recorded in Guest mode on this device will be permanently erased.',
+        )),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(ctx.tr('Cancel')),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.expense),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(ctx.tr('Erase All Data')),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+
+    try {
+      await ref.read(databaseProvider).resetAllData();
+      await ref.read(profileProvider.notifier).clearLocal(ProfileController.guestId);
+      await ref.read(budgetRuleProvider.notifier).clearLocal();
+      await Lock.instance.clearLocal('guest');
+      try {
+        await NotificationService.instance.cancelDailyReminder();
+      } catch (_) {}
+      final prefs = ref.read(sharedPreferencesProvider);
+      await prefs.remove('onboarding_done_local');
+      await ref.read(skipAuthProvider.notifier).reset();
+
+      if (context.mounted) {
+        Navigator.of(context, rootNavigator: true).popUntil((r) => r.isFirst);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: AppColors.income,
+            content: Text(context.tr('Local guest data erased.')),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: AppColors.expense,

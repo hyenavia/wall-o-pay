@@ -231,6 +231,26 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
     state = _loadFromPrefs(uid);
   }
 
+  /// Migrasikan konfigurasi anggaran lokal (mode tamu) ke akun pengguna baru.
+  Future<void> migrateGuestToUser(String uid) async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    for (final base in [_kTotalPools, _kCategoryBuckets, _kCustomAllocations]) {
+      final guestVal = prefs.getString(base);
+      final userKey = '${base}_$uid';
+      if (guestVal != null && prefs.getString(userKey) == null) {
+        await prefs.setString(userKey, guestVal);
+      }
+      await prefs.remove(base);
+    }
+    final guestUpdated = prefs.getInt(_kUpdated);
+    final userUpdatedKey = '${_kUpdated}_$uid';
+    if (guestUpdated != null && prefs.getInt(userUpdatedKey) == null) {
+      await prefs.setInt(userUpdatedKey, guestUpdated);
+    }
+    await prefs.remove(_kUpdated);
+    state = _loadFromPrefs(uid);
+  }
+
   /// Bersihkan data anggaran lokal saat logout.
   Future<void> clearLocal([String? uid]) async {
     final prefs = ref.read(sharedPreferencesProvider);
@@ -343,6 +363,76 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
       await prefs.setInt(_key(_kUpdated, uid), now);
     } catch (e) {
       debugPrint('[BudgetRule] Error uploading to cloud: $e');
+    }
+  }
+
+  /// Ekspor konfigurasi aturan anggaran ke dalam Map untuk backup JSON.
+  Map<String, dynamic> exportConfig() {
+    return {
+      'totalPools': state.totalPools,
+      'categoryBuckets': state.categoryBuckets.map((k, v) => MapEntry(k, v.name)),
+      'customAllocations': state.customAllocations,
+    };
+  }
+
+  /// Impor konfigurasi aturan anggaran dari file backup JSON.
+  Future<void> importConfig(Map<String, dynamic> data) async {
+    final effectiveUid = _uid();
+    final prefs = ref.read(sharedPreferencesProvider);
+
+    final pools = <String, int>{};
+    if (data['totalPools'] is Map) {
+      for (final e in (data['totalPools'] as Map).entries) {
+        if (e.value is num) pools[e.key.toString()] = (e.value as num).toInt();
+      }
+    }
+
+    final buckets = <String, BudgetBucket>{};
+    if (data['categoryBuckets'] is Map) {
+      for (final e in (data['categoryBuckets'] as Map).entries) {
+        final bucket = BudgetBucket.values.firstWhere(
+          (b) => b.name == e.value,
+          orElse: () => BudgetBucket.wants,
+        );
+        buckets[e.key.toString()] = bucket;
+      }
+    }
+
+    final customAlloc = <String, Map<String, int>>{};
+    if (data['customAllocations'] is Map) {
+      for (final e in (data['customAllocations'] as Map).entries) {
+        if (e.value is Map) {
+          final inner = <String, int>{};
+          for (final sub in (e.value as Map).entries) {
+            if (sub.value is num) inner[sub.key.toString()] = (sub.value as num).toInt();
+          }
+          customAlloc[e.key.toString()] = inner;
+        }
+      }
+    }
+
+    state = BudgetRuleState(
+      totalPools: pools,
+      categoryBuckets: buckets,
+      customAllocations: customAlloc,
+    );
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final poolsJson = jsonEncode(pools);
+    final bucketsJson = jsonEncode(buckets.map((k, v) => MapEntry(k, v.name)));
+    final allocJson = jsonEncode(customAlloc);
+
+    await prefs.setString(_kTotalPools, poolsJson);
+    await prefs.setString(_kCategoryBuckets, bucketsJson);
+    await prefs.setString(_kCustomAllocations, allocJson);
+    await prefs.setInt(_kUpdated, now);
+
+    if (effectiveUid != null) {
+      await prefs.setString(_key(_kTotalPools, effectiveUid), poolsJson);
+      await prefs.setString(_key(_kCategoryBuckets, effectiveUid), bucketsJson);
+      await prefs.setString(_key(_kCustomAllocations, effectiveUid), allocJson);
+      await prefs.setInt(_key(_kUpdated, effectiveUid), now);
+      uploadToCloud(effectiveUid);
     }
   }
 

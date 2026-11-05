@@ -140,7 +140,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               subtitle: Text(context.tr('Email')),
             ),
           Text(
-            context.tr('Your username is used to log in and cannot be changed.'),
+            context.tr(
+              user == null
+                  ? 'You are in Guest mode. Your profile is saved locally on this device.'
+                  : 'Your username is used to log in and cannot be changed.',
+            ),
             style: theme.textTheme.bodySmall?.copyWith(color: muted),
           ),
           const SizedBox(height: 20),

@@ -441,8 +441,14 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       ),
     );
     if (ok != true) return;
-    await ref.read(databaseProvider).deleteTransaction(widget.entry!.id);
+    final id = widget.entry!.id;
+    final db = ref.read(databaseProvider);
+    await db.deleteTransaction(id);
     if (mounted) Navigator.pop(context);
+    showUndoSnackBar(
+      message: trG('Transaction deleted'),
+      onUndo: () => db.restoreTransaction(id),
+    );
   }
 
   @override

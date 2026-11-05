@@ -4,6 +4,37 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.31] - 2026-11-05
+
+### Added
+- **Undo Delete via Floating SnackBar:**
+  - Added an **"Undo (Urungkan)"** action to floating SnackBars shown immediately after deleting transactions, transfer entries, debt records, or savings goals. Tapping Undo promptly restores the soft-deleted item and its reactive balance calculations without manual re-entry.
+- **Budget & Payday Settings in JSON Backup:**
+  - Included app preferences (payday `firstDayOfMonth`, period type, rollover, and alert flags) and 50/30/20 budget pool configurations (`BudgetRuleConfig` & category buckets) in the `.json` backup file.
+  - Guest mode users migrating between devices now preserve their customized payday cycle and budget allocations alongside their SQLite data.
+  - Fully backward-compatible with legacy backup files.
+
+---
+
+## [1.11.30] - 2026-11-05
+
+### Changed
+- **Side-by-Side Debug & Release Builds:**
+  - Added `applicationIdSuffix = ".debug"` and a dedicated `Wall o' Pay (Debug)` app label for Android debug builds so developers can install and test debug builds alongside the production release APK on the same device without signature conflicts (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`) or overwriting production local SQLite data.
+
+---
+
+## [1.11.29] - 2026-11-04
+
+### Added
+- **Offline Guest Mode (Pure Local Mode):**
+  - Added a **"Continue as Guest"** option on the authentication screen, allowing users to jump straight into tracking cashflow 100% offline on-device without creating a Firebase account.
+  - Enabled local Guest profile customization (nickname & avatar photo) and local 6-digit PIN protection.
+  - Added seamless Guest-to-Account data migration when registering a new account, plus a smart conflict prompt (**Merge Data** vs. **Use Cloud Only**) when signing into an existing account from Guest mode.
+  - Updated **Settings** for Guest sessions with a dedicated **Sign In / Create Account** card, **Exit Guest Mode**, and **Erase Local Guest Data** controls.
+
+---
+
 ## [1.11.28] - 2026-11-04
 
 ### Added

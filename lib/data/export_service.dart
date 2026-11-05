@@ -38,15 +38,24 @@ class ExportService {
     await _share('wall_o_pay_transactions_${_stamp()}.csv', buf.toString());
   }
 
-  Future<void> shareBackup() async {
-    final data = await _db.exportBackup();
+  Future<void> shareBackup({
+    Map<String, dynamic>? preferences,
+    Map<String, dynamic>? budgetConfig,
+  }) async {
+    final data = await _db.exportBackup(
+      preferences: preferences,
+      budgetConfig: budgetConfig,
+    );
     final json = const JsonEncoder.withIndent('  ').convert(data);
     await _share('wall_o_pay_backup_${_stamp()}.json', json);
   }
 
   /// Pilih file backup JSON dari penyimpanan, lalu gabungkan ke data lokal.
   /// Mengembalikan pesan hasil untuk ditampilkan ke pengguna.
-  Future<String> importBackupFile() async {
+  Future<String> importBackupFile({
+    Future<void> Function(Map<String, dynamic> preferences)? onImportPreferences,
+    Future<void> Function(Map<String, dynamic> budgetConfig)? onImportBudgetConfig,
+  }) async {
     final file = await openFile();
     if (file == null) return trG('Import cancelled.');
     try {
@@ -55,7 +64,17 @@ class ExportService {
         throw const FormatException("This is not a Wall o' Pay backup file.");
       }
       final n = await _db.importBackup(data);
-      if (n == 0) return trG('Backup file read. Nothing new to add.');
+      var configImported = false;
+      if (data['preferences'] is Map<String, dynamic>) {
+        await onImportPreferences?.call(data['preferences'] as Map<String, dynamic>);
+        configImported = true;
+      }
+      if (data['budgetConfig'] is Map<String, dynamic>) {
+        await onImportBudgetConfig?.call(data['budgetConfig'] as Map<String, dynamic>);
+        configImported = true;
+      }
+      if (n == 0 && !configImported) return trG('Backup file read. Nothing new to add.');
+      if (n == 0 && configImported) return trG('Settings and budget configuration imported.');
       return n == 1
           ? trG('Imported 1 item from the backup file.')
           : trG('Imported {n} items from the backup file.', {'n': n});

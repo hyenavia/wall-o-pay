@@ -18,6 +18,7 @@ class ProfileState {
 /// Nickname dan foto profil, disimpan per akun di perangkat.
 /// Ikut tercadangkan saat pengguna menekan tombol backup cloud.
 class ProfileController extends Notifier<ProfileState> {
+  static const guestId = 'guest';
   static const _timeout = Duration(seconds: 30);
 
   String _nickKey(String uid) => 'nickname_$uid';
@@ -27,20 +28,20 @@ class ProfileController extends Notifier<ProfileState> {
   @override
   ProfileState build() {
     final user = ref.watch(currentUserProvider);
-    if (user == null) return const ProfileState();
+    final uid = user?.uid ?? guestId;
     final p = ref.read(sharedPreferencesProvider);
-    final b64 = p.getString(_photoKey(user.uid));
+    final b64 = p.getString(_photoKey(uid));
     return ProfileState(
-      nickname: p.getString(_nickKey(user.uid)),
+      nickname: p.getString(_nickKey(uid)),
       photo: b64 == null ? null : base64Decode(b64),
     );
   }
 
   String? get _uid => ref.read(currentUserProvider)?.uid;
+  String get _effectiveUid => _uid ?? guestId;
 
   Future<void> setNickname(String value) async {
-    final uid = _uid;
-    if (uid == null) return;
+    final uid = _effectiveUid;
     final p = ref.read(sharedPreferencesProvider);
     final nick = value.trim();
     if (nick.isEmpty) {
@@ -50,12 +51,13 @@ class ProfileController extends Notifier<ProfileState> {
     }
     await p.setInt(_updatedKey(uid), DateTime.now().millisecondsSinceEpoch);
     state = ProfileState(nickname: nick.isEmpty ? null : nick, photo: state.photo);
-    ref.read(autoSyncServiceProvider).schedulePush();
+    if (_uid != null) {
+      ref.read(autoSyncServiceProvider).schedulePush();
+    }
   }
 
   Future<void> setPhoto(Uint8List? bytes) async {
-    final uid = _uid;
-    if (uid == null) return;
+    final uid = _effectiveUid;
     final p = ref.read(sharedPreferencesProvider);
     if (bytes == null) {
       await p.remove(_photoKey(uid));
@@ -64,7 +66,9 @@ class ProfileController extends Notifier<ProfileState> {
     }
     await p.setInt(_updatedKey(uid), DateTime.now().millisecondsSinceEpoch);
     state = ProfileState(nickname: state.nickname, photo: bytes);
-    ref.read(autoSyncServiceProvider).schedulePush();
+    if (_uid != null) {
+      ref.read(autoSyncServiceProvider).schedulePush();
+    }
   }
 
   DocumentReference<Map<String, dynamic>> _doc(String uid) => FirebaseFirestore
@@ -104,15 +108,41 @@ class ProfileController extends Notifier<ProfileState> {
     );
   }
 
+  /// Migrasikan profil mode tamu ke akun pengguna saat mendaftar/menautkan akun.
+  Future<void> migrateGuestToUser(String uid) async {
+    final p = ref.read(sharedPreferencesProvider);
+    final guestNick = p.getString(_nickKey(guestId));
+    final guestPhoto = p.getString(_photoKey(guestId));
+    final guestUpdated = p.getInt(_updatedKey(guestId));
+
+    if (guestNick != null && p.getString(_nickKey(uid)) == null) {
+      await p.setString(_nickKey(uid), guestNick);
+    }
+    if (guestPhoto != null && p.getString(_photoKey(uid)) == null) {
+      await p.setString(_photoKey(uid), guestPhoto);
+    }
+    if (guestUpdated != null && p.getInt(_updatedKey(uid)) == null) {
+      await p.setInt(_updatedKey(uid), guestUpdated);
+    }
+
+    await p.remove(_nickKey(guestId));
+    await p.remove(_photoKey(guestId));
+    await p.remove(_updatedKey(guestId));
+
+    final b64 = p.getString(_photoKey(uid));
+    state = ProfileState(
+      nickname: p.getString(_nickKey(uid)),
+      photo: b64 == null ? null : base64Decode(b64),
+    );
+  }
+
   /// Bersihkan data profil lokal saat logout atau hapus akun.
   Future<void> clearLocal([String? uid]) async {
-    final effectiveUid = uid ?? _uid;
+    final effectiveUid = uid ?? _effectiveUid;
     final p = ref.read(sharedPreferencesProvider);
-    if (effectiveUid != null) {
-      await p.remove(_nickKey(effectiveUid));
-      await p.remove(_photoKey(effectiveUid));
-      await p.remove(_updatedKey(effectiveUid));
-    }
+    await p.remove(_nickKey(effectiveUid));
+    await p.remove(_photoKey(effectiveUid));
+    await p.remove(_updatedKey(effectiveUid));
     state = const ProfileState();
   }
 }

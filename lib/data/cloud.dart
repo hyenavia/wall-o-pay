@@ -25,7 +25,7 @@ final usernameProvider = Provider<String?>((ref) {
   return (name == null || name.isEmpty) ? null : name;
 });
 
-/// Untuk mode darurat/offline tanpa Firebase: lanjut memakai aplikasi tanpa akun.
+/// Status mode tamu (offline lokal tanpa akun Firebase).
 class SkipAuth extends Notifier<bool> {
   static const _kKey = 'pref_skip_auth';
 
@@ -39,6 +39,12 @@ class SkipAuth extends Notifier<bool> {
     state = true;
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setBool(_kKey, true);
+  }
+
+  Future<void> reset() async {
+    state = false;
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.remove(_kKey);
   }
 }
 

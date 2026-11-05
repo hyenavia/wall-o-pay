@@ -4,7 +4,13 @@ import 'package:flutter/material.dart';
 import '../../core/brand.dart';
 import '../../core/l10n.dart';
 import '../../core/theme.dart';
+import '../../data/budget_rule.dart';
+import '../../data/cloud.dart';
 import '../../data/lock.dart';
+import '../../data/prefs.dart';
+import '../../data/profile.dart';
+import '../../data/providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Membungkus aplikasi: terkunci saat dibuka (jika PIN aktif),
 /// dan terkunci kembali setelah ditinggalkan di latar belakang sesuai batas waktu.
@@ -184,16 +190,16 @@ class PinPad extends StatelessWidget {
 }
 
 /// Layar pembuka kunci PIN utama aplikasi.
-class LockScreen extends StatefulWidget {
+class LockScreen extends ConsumerStatefulWidget {
   const LockScreen({super.key, required this.onUnlock});
 
   final VoidCallback onUnlock;
 
   @override
-  State<LockScreen> createState() => _LockScreenState();
+  ConsumerState<LockScreen> createState() => _LockScreenState();
 }
 
-class _LockScreenState extends State<LockScreen> {
+class _LockScreenState extends ConsumerState<LockScreen> {
   String pin = '';
   String? msg;
   int fails = 0;
@@ -228,12 +234,15 @@ class _LockScreenState extends State<LockScreen> {
   }
 
   Future<void> _forgot() async {
+    final isGuest = ref.read(currentUserProvider) == null;
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(context.tr('Forgot PIN?')),
         content: Text(context.tr(
-          'Forgot PIN? For security, you can log out to reset your PIN.',
+          isGuest
+              ? 'In Guest mode without an account, resetting a forgotten PIN will erase all local data on this device for security.'
+              : 'Forgot PIN? For security, you can log out to reset your PIN.',
         )),
         actions: [
           TextButton(
@@ -243,17 +252,28 @@ class _LockScreenState extends State<LockScreen> {
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.expense),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(context.tr('Log Out')),
+            child: Text(context.tr(isGuest ? 'Erase All Data' : 'Log Out')),
           ),
         ],
       ),
     );
 
     if (ok == true) {
-      await Lock.instance.disable();
-      try {
-        await FirebaseAuth.instance.signOut();
-      } catch (_) {}
+      if (isGuest) {
+        try {
+          await ref.read(databaseProvider).resetAllData();
+          await ref.read(profileProvider.notifier).clearLocal(ProfileController.guestId);
+          await ref.read(budgetRuleProvider.notifier).clearLocal();
+          await Lock.instance.clearLocal('guest');
+          await ref.read(sharedPreferencesProvider).remove('onboarding_done_local');
+          await ref.read(skipAuthProvider.notifier).reset();
+        } catch (_) {}
+      } else {
+        await Lock.instance.disable();
+        try {
+          await FirebaseAuth.instance.signOut();
+        } catch (_) {}
+      }
       widget.onUnlock();
     }
   }

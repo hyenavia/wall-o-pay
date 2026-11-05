@@ -53,6 +53,7 @@ class AutoSyncService {
 
   bool _isApplyingRemote = false;
   bool _isSyncing = false;
+  bool discardGuestDataOnNextLogin = false;
   Timer? _debounceTimer;
   final List<StreamSubscription> _subscriptions = [];
   String? _currentUid;
@@ -82,11 +83,28 @@ class AutoSyncService {
         debugPrint('[AutoSync] Account switch or new session ($lastUid -> $uid). Preparing local data...');
         if (lastUid != null) {
           await _db.resetAllData();
+        } else if (discardGuestDataOnNextLogin) {
+          discardGuestDataOnNextLogin = false;
+          await _db.resetAllData();
+          await _ref.read(profileProvider.notifier).clearLocal(ProfileController.guestId);
+          await _ref.read(budgetRuleProvider.notifier).clearLocal();
+          await Lock.instance.clearLocal('guest');
+          await prefs.remove('onboarding_done_local');
+        } else {
+          await _ref.read(profileProvider.notifier).migrateGuestToUser(uid);
+          await _ref.read(budgetRuleProvider.notifier).migrateGuestToUser(uid);
+          await Lock.instance.migrateGuestToUser(uid);
+          if (prefs.getBool('onboarding_done_local') == true) {
+            await prefs.setBool('onboarding_done_$uid', true);
+            await prefs.remove('onboarding_done_local');
+          }
         }
         _ref.read(appPrefsProvider.notifier).loadForUser(uid);
         _ref.read(budgetRuleProvider.notifier).loadForUser(uid);
         await Lock.instance.syncWithCloud(uid);
       }
+      discardGuestDataOnNextLogin = false;
+      await _ref.read(skipAuthProvider.notifier).reset();
       await prefs.setString('current_sync_user_id', uid);
     } catch (e) {
       debugPrint('[AutoSync] Error during account switch check: $e');

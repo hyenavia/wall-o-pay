@@ -563,6 +563,16 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  /// Mengembalikan transaksi yang di-soft-delete.
+  Future<void> restoreTransaction(String id) async {
+    await (update(transactions)..where((t) => t.id.equals(id))).write(
+      TransactionsCompanion(
+        deletedAt: const Value(null),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   // ---------- Anggaran ----------
 
   Stream<List<Budget>> watchBudgets(String monthKey) {
@@ -672,6 +682,16 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  /// Mengembalikan target tabungan yang di-soft-delete.
+  Future<void> restoreSavingsGoal(String id) async {
+    await (update(savingsGoals)..where((g) => g.id.equals(id))).write(
+      SavingsGoalsCompanion(
+        deletedAt: const Value(null),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   // ---------- Laporan & Cadangan ----------
 
   Future<List<Category>> allCategories() => select(categories).get();
@@ -697,11 +717,16 @@ class AppDatabase extends _$AppDatabase {
   }
 
   /// Seluruh isi database (termasuk yang ditandai terhapus) dalam bentuk JSON.
-  Future<Map<String, dynamic>> exportBackup() async {
+  Future<Map<String, dynamic>> exportBackup({
+    Map<String, dynamic>? preferences,
+    Map<String, dynamic>? budgetConfig,
+  }) async {
     return {
       'app': 'wall_o_pay',
       'version': 1,
       'exportedAt': DateTime.now().toIso8601String(),
+      'preferences': ?preferences,
+      'budgetConfig': ?budgetConfig,
       'categories':
           (await select(categories).get()).map((r) => r.toJson()).toList(),
       'wallets':
@@ -1067,6 +1092,16 @@ class AppDatabase extends _$AppDatabase {
     await (update(debts)..where((x) => x.id.equals(id))).write(
       DebtsCompanion(
         deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Mengembalikan catatan utang yang di-soft-delete.
+  Future<void> restoreDebt(String id) async {
+    await (update(debts)..where((x) => x.id.equals(id))).write(
+      DebtsCompanion(
+        deletedAt: const Value(null),
         updatedAt: Value(DateTime.now()),
       ),
     );

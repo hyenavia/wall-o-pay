@@ -598,3 +598,42 @@ class EmptyStateCard extends StatelessWidget {
     );
   }
 }
+
+
+/// GlobalKey untuk root ScaffoldMessenger agar SnackBar dapat dipanggil secara konsisten
+/// dari mana saja, termasuk setelah modal/bottom sheet ditutup.
+final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
+/// Tampilkan SnackBar floating dengan tombol aksi "Urungkan (Undo)".
+void showUndoSnackBar({
+  BuildContext? context,
+  required String message,
+  required Future<void> Function() onUndo,
+  Duration duration = const Duration(seconds: 4),
+}) {
+  final messenger = rootScaffoldMessengerKey.currentState ??
+      (context != null && context.mounted ? ScaffoldMessenger.maybeOf(context) : null);
+  if (messenger == null) return;
+  messenger.hideCurrentSnackBar();
+  messenger.showSnackBar(
+    SnackBar(
+      content: Text(message),
+      duration: duration,
+      action: SnackBarAction(
+        label: trG('Undo'),
+        textColor: AppColors.sage,
+        onPressed: () async {
+          await onUndo();
+          messenger.hideCurrentSnackBar();
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(trG('Item restored')),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        },
+      ),
+    ),
+  );
+}

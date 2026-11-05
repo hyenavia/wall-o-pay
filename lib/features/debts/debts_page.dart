@@ -338,8 +338,14 @@ class _DebtDetail extends ConsumerWidget {
             icon: const Icon(Icons.delete_outline),
             label: Text(context.tr('Delete')),
             onPressed: () async {
-              await ref.read(databaseProvider).deleteDebt(debt.id);
+              final id = debt.id;
+              final db = ref.read(databaseProvider);
+              await db.deleteDebt(id);
               if (context.mounted) Navigator.pop(context);
+              showUndoSnackBar(
+                message: trG('Debt deleted'),
+                onUndo: () => db.restoreDebt(id),
+              );
             },
           ),
         ],

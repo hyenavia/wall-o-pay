@@ -41,10 +41,66 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '1.11.31',
+      dateEn: 'November 5, 2026',
+      dateId: '5 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Undo Delete via Floating SnackBar: Promptly undo accidental deletion of transactions, transfer entries, debt records, or savings goals right from an interactive SnackBar without losing data.',
+          textId:
+              'Urungkan Hapus via SnackBar: Kembalikan transaksi, transfer, catatan utang, atau target tabungan yang terhapus secara instan lewat tombol "Urungkan" tanpa kehilangan data.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Settings & Payday in JSON Backup: JSON export files now back up app preferences (payday cycle, rollover, reminders) and 50/30/20 budget pools, keeping Guest mode migrations completely intact.',
+          textId:
+              'Pengaturan & Gajian di Backup JSON: Ekspor file JSON kini menyertakan preferensi (tanggal gajian, rollover, pengingat) dan aturan anggaran 50/30/20, aman untuk migrasi pengguna Mode Tamu.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.30',
+      dateEn: 'November 5, 2026',
+      dateId: '5 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Side-by-Side Debug & Release Builds: Debug builds now use a separate package ID (.debug) and "Wall o\' Pay (Debug)" label so both Debug and Release apps can coexist on the same phone.',
+          textId:
+              'Instalasi Berdampingan Debug & Release: Build debug kini memakai ID paket terpisah (.debug) dan label "Wall o\' Pay (Debug)" sehingga aplikasi Debug dan Release bisa terpasang bersamaan di satu HP.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '1.11.29',
+      dateEn: 'November 4, 2026',
+      dateId: '4 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Offline Guest Mode: Continue without an account to track finances 100% offline on your device, complete with local profile & PIN lock support.',
+          textId:
+              'Mode Tamu Offline: Lanjut tanpa akun untuk mencatat keuangan 100% offline di perangkatmu, lengkap dengan profil lokal & kunci PIN.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Seamless Account Linking: Upgrade from Guest Mode to a cloud account anytime with automatic local data migration or cloud-only restore choice.',
+          textId:
+              'Penautan Akun Mulus: Beralih dari Mode Tamu ke akun cloud kapan saja dengan migrasi data lokal otomatis atau opsi pemulihan cloud saja.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '1.11.28',
       dateEn: 'November 4, 2026',
       dateId: '4 November 2026',
-      isCurrent: true,
       changes: [
         ChangeItem(
           type: ChangeType.added,

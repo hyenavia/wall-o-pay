@@ -442,7 +442,14 @@ class AccountsPage extends ConsumerWidget {
         ],
       ),
     );
-    if (ok == true) await ref.read(databaseProvider).deleteTransaction(id);
+    if (ok == true) {
+      final db = ref.read(databaseProvider);
+      await db.deleteTransaction(id);
+      showUndoSnackBar(
+        message: trG('Transaction deleted'),
+        onUndo: () => db.restoreTransaction(id),
+      );
+    }
   }
 }
 

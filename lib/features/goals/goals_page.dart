@@ -234,7 +234,13 @@ class _GoalCard extends ConsumerWidget {
                   } else if (v == 'withdraw') {
                     await _handleFunds(context, ref, false);
                   } else if (v == 'delete') {
-                    await ref.read(databaseProvider).deleteSavingsGoal(goal.id);
+                    final id = goal.id;
+                    final db = ref.read(databaseProvider);
+                    await db.deleteSavingsGoal(id);
+                    showUndoSnackBar(
+                      message: trG('Savings goal deleted'),
+                      onUndo: () => db.restoreSavingsGoal(id),
+                    );
                   }
                 },
                 itemBuilder: (_) => [

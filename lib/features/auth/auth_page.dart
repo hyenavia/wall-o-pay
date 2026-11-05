@@ -7,11 +7,16 @@ import '../../core/l10n.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/auth_service.dart';
+import '../../data/cloud.dart';
+import '../../data/cloud_sync.dart';
 import '../../data/prefs.dart';
+import '../../data/providers.dart';
 
-/// Layar pertama: masuk (dengan email atau username) atau daftar akun baru.
+/// Layar pertama: masuk (dengan email atau username), daftar akun baru, atau lanjut sebagai tamu.
 class AuthPage extends ConsumerStatefulWidget {
-  const AuthPage({super.key});
+  const AuthPage({super.key, this.initialRegister = false});
+
+  final bool initialRegister;
 
   @override
   ConsumerState<AuthPage> createState() => _AuthPageState();
@@ -24,7 +29,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
   final _password = TextEditingController();
   final _auth = AuthService();
 
-  bool _register = false;
+  late bool _register = widget.initialRegister;
   bool _busy = false;
   bool _hidePassword = true;
   String? _error;
@@ -37,6 +42,39 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     _email.dispose();
     _password.dispose();
     super.dispose();
+  }
+
+  /// Jika pengguna memiliki transaksi lokal dari Mode Tamu lalu login ke akun yang sudah ada,
+  /// tanyakan apakah ingin menggabungkan data tamu atau memakai data cloud saja.
+  Future<bool?> _askGuestDataChoice() async {
+    final lastUid = ref.read(sharedPreferencesProvider).getString('current_sync_user_id');
+    if (lastUid != null) return true;
+    final hasTx = await ref.read(databaseProvider).hasAnyTransaction();
+    if (!hasTx || !mounted) return true;
+
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(ctx.tr('Keep Guest Data?')),
+        content: Text(ctx.tr(
+          'You have local transactions recorded in Guest mode. Would you like to merge them into your account, or replace them with your cloud backup?',
+        )),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, null),
+            child: Text(ctx.tr('Cancel')),
+          ),
+          OutlinedButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(ctx.tr('Use Cloud Only')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(ctx.tr('Merge Data')),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _submit() async {
@@ -66,11 +104,20 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       return;
     }
 
+    var discardGuest = false;
+    if (!_register) {
+      final keep = await _askGuestDataChoice();
+      if (keep == null) return;
+      discardGuest = !keep;
+    }
+
     setState(() {
       _busy = true;
       _error = null;
       _info = null;
     });
+    final syncService = ref.read(autoSyncServiceProvider);
+    syncService.discardGuestDataOnNextLogin = discardGuest;
     try {
       if (_register) {
         await _auth.signUp(
@@ -81,12 +128,18 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       } else {
         await _auth.signIn(_identifier.text, password);
       }
-      // Berhasil: AuthGate otomatis berpindah ke aplikasi.
+      await ref.read(skipAuthProvider.notifier).reset();
+      if (mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context, rootNavigator: true).popUntil((r) => r.isFirst);
+      }
     } on AuthFailure catch (e) {
+      syncService.discardGuestDataOnNextLogin = false;
       if (mounted) setState(() => _error = _message(e.code));
     } on FirebaseException catch (e) {
+      syncService.discardGuestDataOnNextLogin = false;
       if (mounted) setState(() => _error = _message(e.code));
     } catch (e) {
+      syncService.discardGuestDataOnNextLogin = false;
       if (mounted) {
         setState(() => _error = context.tr('Something went wrong: {error}', {'error': e}));
       }
@@ -153,6 +206,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     final muted = theme.colorScheme.onSurface.withValues(alpha: 0.65);
     final localeCode = ref.watch(appPrefsProvider.select((p) => p.localeCode));
     final prefs = ref.read(appPrefsProvider.notifier);
+    final canPop = Navigator.of(context).canPop();
 
     return Scaffold(
       body: SafeArea(
@@ -161,6 +215,14 @@ class _AuthPageState extends ConsumerState<AuthPage> {
           children: [
             Row(
               children: [
+                if (canPop) ...[
+                  IconButton(
+                    tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                    onPressed: _busy ? null : () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.arrow_back_rounded),
+                  ),
+                  const SizedBox(width: 4),
+                ],
                 const BrandMark(size: 52),
                 const Spacer(),
                 SegmentedButton<String>(
@@ -277,6 +339,48 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                 ),
               ],
             ),
+            if (!canPop) ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      context.tr('or'),
+                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                    ),
+                  ),
+                  Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: _busy
+                    ? null
+                    : () => ref.read(skipAuthProvider.notifier).skip(),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  side: BorderSide(color: theme.colorScheme.outlineVariant),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                icon: const Icon(Icons.person_outline_rounded, size: 20),
+                label: Text(
+                  context.tr('Continue as Guest'),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                context.tr(
+                  '100% offline on this device. You can link an account anytime.',
+                ),
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(color: muted),
+              ),
+            ],
           ],
         ),
       ),

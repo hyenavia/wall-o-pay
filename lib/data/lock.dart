@@ -291,6 +291,27 @@ class Lock {
     }
   }
 
+  /// Migrasikan PIN lokal mode tamu ke akun pengguna saat menautkan akun.
+  Future<void> migrateGuestToUser(String uid) async {
+    final p = _p;
+    if (p == null) return;
+    final guestHash = p.getString(_k('hash', 'guest'));
+    final guestSalt = p.getString(_k('salt', 'guest'));
+    if (guestHash != null &&
+        guestSalt != null &&
+        p.getString(_k('hash', uid)) == null) {
+      await p.setString(_k('hash', uid), guestHash);
+      await p.setString(_k('salt', uid), guestSalt);
+      final guestDelay = p.getInt(_k('delay', 'guest'));
+      if (guestDelay != null) await p.setInt(_k('delay', uid), guestDelay);
+      final guestAt = p.getInt(_k('updatedAt', 'guest'));
+      if (guestAt != null) await p.setInt(_k('updatedAt', uid), guestAt);
+    }
+    await clearLocal('guest');
+    _activeUid = uid;
+    _emit();
+  }
+
   /// Bersihkan data PIN lokal pengguna tertentu saat wipe data.
   Future<void> clearLocal([String? uid]) async {
     final targetUid = uid ?? _currentUid;
@@ -298,7 +319,7 @@ class Lock {
     await _p?.remove(_k('hash', targetUid));
     await _p?.remove(_k('delay', targetUid));
     await _p?.remove(_k('updatedAt', targetUid));
-    if (_activeUid == targetUid) {
+    if ((_activeUid ?? 'guest') == targetUid) {
       _emit();
     }
   }

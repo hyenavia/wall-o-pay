@@ -256,6 +256,95 @@ class AppPrefsController extends Notifier<AppPrefs> {
     }
   }
 
+  /// Ekspor pengaturan fungsional ke dalam Map untuk backup JSON.
+  Map<String, dynamic> exportPreferences() {
+    final feat = ref.read(featurePrefsProvider);
+    final hide = ref.read(hideBalanceProvider);
+    return {
+      'themeMode': state.themeMode.name,
+      'localeCode': state.localeCode,
+      'periodType': state.periodType.name,
+      'firstDayOfWeek': state.firstDayOfWeek,
+      'firstDayOfMonth': state.firstDayOfMonth,
+      'rollover': feat.rollover,
+      'budgetAlerts': feat.budgetAlerts,
+      'dailyReminder': feat.dailyReminder,
+      'reminderHour': feat.reminderHour,
+      'reminderMinute': feat.reminderMinute,
+      'hideBalance': hide,
+    };
+  }
+
+  /// Impor pengaturan fungsional dari file backup JSON.
+  Future<void> importPreferences(Map<String, dynamic> data) async {
+    final uid = _uid();
+    final p = ref.read(sharedPreferencesProvider);
+
+    final themeStr = data['themeMode'] as String?;
+    final theme = switch (themeStr) {
+      'light' => ThemeMode.light,
+      'dark' => ThemeMode.dark,
+      _ => ThemeMode.system,
+    };
+    final locale = (data['localeCode'] as String? ?? 'en') == 'id' ? 'id' : 'en';
+    final periodStr = data['periodType'] as String?;
+    final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
+    final firstDay = (data['firstDayOfWeek'] as num?)?.toInt() ?? DateTime.monday;
+    final firstDayMonth = (data['firstDayOfMonth'] as num?)?.toInt() ?? 1;
+
+    AppLocale.code = locale;
+    state = AppPrefs(
+      themeMode: theme,
+      localeCode: locale,
+      periodType: period,
+      firstDayOfWeek: firstDay,
+      firstDayOfMonth: firstDayMonth,
+    );
+
+    await p.setString(_kTheme, theme.name);
+    await p.setString(_kLocale, locale);
+    await p.setString(_kPeriod, period.name);
+    await p.setInt(_kFirstDayOfWeek, firstDay);
+    await p.setInt(_kFirstDayOfMonth, firstDayMonth);
+    if (uid != null) {
+      await p.setString(_k(_kTheme, uid), theme.name);
+      await p.setString(_k(_kLocale, uid), locale);
+      await p.setString(_k(_kPeriod, uid), period.name);
+      await p.setInt(_k(_kFirstDayOfWeek, uid), firstDay);
+      await p.setInt(_k(_kFirstDayOfMonth, uid), firstDayMonth);
+      final now = DateTime.now().millisecondsSinceEpoch;
+      await p.setInt(_k(_kUpdated, uid), now);
+    }
+
+    final rollover = data['rollover'] as bool?;
+    final budgetAlerts = data['budgetAlerts'] as bool?;
+    final dailyReminder = data['dailyReminder'] as bool?;
+    final reminderHour = (data['reminderHour'] as num?)?.toInt();
+    final reminderMinute = (data['reminderMinute'] as num?)?.toInt();
+
+    ref.read(featurePrefsProvider.notifier).applyRemote(
+      rollover: rollover,
+      budgetAlerts: budgetAlerts,
+      dailyReminder: dailyReminder,
+      reminderHour: reminderHour,
+      reminderMinute: reminderMinute,
+    );
+
+    if (dailyReminder != null) {
+      final hour = reminderHour ?? ref.read(featurePrefsProvider).reminderHour;
+      final min = reminderMinute ?? ref.read(featurePrefsProvider).reminderMinute;
+      await NotificationService.instance.syncReminder(
+        enabled: dailyReminder,
+        time: TimeOfDay(hour: hour, minute: min),
+      );
+    }
+
+    final hide = data['hideBalance'] as bool?;
+    if (hide != null) {
+      await ref.read(hideBalanceProvider.notifier).set(hide);
+    }
+  }
+
   Future<void> setThemeMode(ThemeMode mode) async {
     state = state.copyWith(themeMode: mode);
     final p = ref.read(sharedPreferencesProvider);

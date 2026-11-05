@@ -6,6 +6,7 @@ import '../../core/l10n.dart';
 import '../../core/period.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import '../../data/budget_rule.dart';
 import '../../data/cloud.dart';
 import '../../data/cloud_backup.dart';
 import '../../data/cloud_sync.dart';
@@ -18,6 +19,7 @@ import '../../data/prefs.dart';
 import '../../data/profile.dart';
 import '../../data/providers.dart';
 import '../../data/update_checker.dart';
+import '../auth/auth_page.dart';
 import '../categories/categories_page.dart';
 import '../profile/profile_page.dart';
 import '../../data/lock.dart';
@@ -70,13 +72,21 @@ class SettingsPage extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        name ?? context.tr('Profile'),
+                        name ??
+                            (user == null
+                                ? context.tr('Guest')
+                                : context.tr('Profile')),
                         style: theme.textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.w800),
                       ),
                       if (username != null)
                         Text('@$username',
-                            style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+                            style: theme.textTheme.bodySmall?.copyWith(color: muted))
+                      else if (user == null)
+                        Text(
+                          context.tr('Guest Mode • Offline local storage'),
+                          style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                        ),
                     ],
                   ),
                 ),
@@ -384,7 +394,63 @@ class SettingsPage extends ConsumerWidget {
                       'Run "flutterfire configure" in the project, then restart the app to enable login and cloud backup.',
                     )),
                   )
-                else ...[
+                else if (user == null) ...[
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.sage.withValues(alpha: 0.16),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.cloud_off_outlined,
+                          color: AppColors.sage,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.tr('Guest Mode (Offline)'),
+                              style: theme.textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              context.tr(
+                                'Your records are stored locally on this device. Sign in or create an account to back up and sync across devices.',
+                              ),
+                              style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        visualDensity: VisualDensity.compact,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      icon: const Icon(Icons.login_rounded, size: 18),
+                      label: Text(context.tr('Sign In / Create Account')),
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(builder: (_) => const AuthPage()),
+                      ),
+                    ),
+                  ),
+                ] else ...[
                   Row(
                     children: [
                       Container(
@@ -527,7 +593,12 @@ class SettingsPage extends ConsumerWidget {
                   title: Text(context.tr('Export backup file (JSON)')),
                   subtitle: Text(context.tr('Save or share a copy of all your data.')),
                   onTap: () => SettingsActions.runAction(context, () async {
-                    await ExportService(ref.read(databaseProvider)).shareBackup();
+                    final prefs = ref.read(appPrefsProvider.notifier).exportPreferences();
+                    final budget = ref.read(budgetRuleProvider.notifier).exportConfig();
+                    await ExportService(ref.read(databaseProvider)).shareBackup(
+                      preferences: prefs,
+                      budgetConfig: budget,
+                    );
                     return trG('Backup file ready to share.');
                   }),
                 ),
@@ -547,8 +618,12 @@ class SettingsPage extends ConsumerWidget {
                     if (ok && context.mounted) {
                       await SettingsActions.runAction(
                         context,
-                        () => ExportService(ref.read(databaseProvider))
-                            .importBackupFile(),
+                        () => ExportService(ref.read(databaseProvider)).importBackupFile(
+                          onImportPreferences: (p) =>
+                              ref.read(appPrefsProvider.notifier).importPreferences(p),
+                          onImportBudgetConfig: (b) =>
+                              ref.read(budgetRuleProvider.notifier).importConfig(b),
+                        ),
                       );
                     }
                   },
@@ -604,6 +679,41 @@ class SettingsPage extends ConsumerWidget {
                     ),
                     subtitle: Text(context.tr('Permanently delete your account and all data.')),
                     onTap: () => SettingsActions.deleteAccount(context, ref),
+                  ),
+                ],
+              ),
+            ),
+          ] else if (user == null) ...[
+            SectionHeader(title: context.tr('Account')),
+            AppCard(
+              padding: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  if (ready) ...[
+                    ListTile(
+                      leading: const Icon(Icons.logout_rounded),
+                      title: Text(context.tr('Exit Guest Mode')),
+                      subtitle: Text(context.tr('Return to the login screen.')),
+                      onTap: () => SettingsActions.exitGuestMode(context, ref),
+                    ),
+                    const Divider(height: 1, indent: 56),
+                  ],
+                  ListTile(
+                    leading: const Icon(
+                      Icons.delete_forever_outlined,
+                      color: AppColors.expense,
+                    ),
+                    title: Text(
+                      context.tr('Erase Local Guest Data'),
+                      style: const TextStyle(
+                        color: AppColors.expense,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: Text(
+                      context.tr('Permanently delete all local data on this device.'),
+                    ),
+                    onTap: () => SettingsActions.eraseGuestData(context, ref),
                   ),
                 ],
               ),
