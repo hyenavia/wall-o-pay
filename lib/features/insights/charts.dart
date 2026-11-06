@@ -111,6 +111,10 @@ class TrendBarChart extends StatelessWidget {
     }
     final maxValue = [...income, ...expense].fold<int>(0, math.max);
     const hidden = AxisTitles(sideTitles: SideTitles(showTitles: false));
+    final colors = context.themeColors;
+    final isCyber = context.isCyberpunk;
+    final incColor = isCyber ? colors.income : AppColors.income;
+    final expColor = isCyber ? colors.expense : AppColors.expense;
 
     return Column(
       children: [
@@ -149,13 +153,13 @@ class TrendBarChart extends StatelessWidget {
                     barRods: [
                       BarChartRodData(
                         toY: income[i].toDouble(),
-                        color: AppColors.income,
+                        color: incColor,
                         width: 9,
                         borderRadius: BorderRadius.circular(2),
                       ),
                       BarChartRodData(
                         toY: expense[i].toDouble(),
-                        color: AppColors.expense,
+                        color: expColor,
                         width: 9,
                         borderRadius: BorderRadius.circular(2),
                       ),
@@ -169,9 +173,9 @@ class TrendBarChart extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _Dot(color: AppColors.income, label: context.tr('Income')),
+            _Dot(color: incColor, label: context.tr('Income')),
             const SizedBox(width: 16),
-            _Dot(color: AppColors.expense, label: context.tr('Expense')),
+            _Dot(color: expColor, label: context.tr('Expense')),
           ],
         ),
       ],
@@ -224,6 +228,7 @@ class _PeriodExpenseBarChartState extends State<PeriodExpenseBarChart> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = context.themeColors;
     final maxAmount = widget.points.fold<int>(0, (m, p) => math.max(m, p.amount));
     final maxY = maxAmount == 0 ? 10000.0 : (maxAmount * 1.25).toDouble();
 
@@ -275,8 +280,8 @@ class _PeriodExpenseBarChartState extends State<PeriodExpenseBarChart> {
                       children: [
                         TextSpan(
                           text: rupiah(rod.toY.toInt()),
-                          style: const TextStyle(
-                            color: AppColors.sage,
+                          style: TextStyle(
+                            color: colors.isCyberpunk ? colors.primary : AppColors.sage,
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                           ),
@@ -323,9 +328,9 @@ class _PeriodExpenseBarChartState extends State<PeriodExpenseBarChart> {
                       BarChartRodData(
                         toY: widget.points[i].amount.toDouble(),
                         color: _touchedIndex == i
-                            ? AppColors.deepForest
+                            ? (colors.isCyberpunk ? colors.secondaryNeon : AppColors.deepForest)
                             : (widget.points[i].amount > 0
-                                ? AppColors.sage
+                                ? colors.primary
                                 : scheme.outlineVariant.withValues(alpha: 0.5)),
                         width: widget.points.length > 7 ? 14 : 20,
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),

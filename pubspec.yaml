@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.11.38+74
+version: 2.0.0+75
 
 environment:
   sdk: ^3.13.7
@@ -56,6 +56,8 @@ dependencies:
   flutter_local_notifications: 18.0.1
   timezone: ^0.10.0
   pdf: ^3.11.1
+  local_auth: ^3.0.2
+  flutter_secure_storage: ^11.2.0
 
 dev_dependencies:
   flutter_test:
@@ -75,17 +77,17 @@ flutter_launcher_icons:
   android: true
   ios: true
   remove_alpha_ios: true
-  image_path: "assets/images/logo.png"
-  adaptive_icon_background: "#11392E"
-  adaptive_icon_foreground: "assets/images/logo_foreground.png"
+  image_path: "assets/images/logo_hybrid.png"
+  adaptive_icon_background: "#080912"
+  adaptive_icon_foreground: "assets/images/logo_hybrid_foreground.png"
   web:
     generate: true
-    image_path: "assets/images/logo.png"
-    background_color: "#11392E"
-    theme_color: "#11392E"
+    image_path: "assets/images/logo_hybrid.png"
+    background_color: "#080912"
+    theme_color: "#080912"
   windows:
     generate: true
-    image_path: "assets/images/logo.png"
+    image_path: "assets/images/logo_hybrid.png"
     icon_size: 48
 
 # For information on the generic Dart part of this file, see the
@@ -100,6 +102,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/logo.png
+    - assets/images/logo_cyberpunk.png
+    - assets/images/logo_hybrid.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

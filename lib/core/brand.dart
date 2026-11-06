@@ -3,10 +3,11 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'botanical_decorations.dart';
 import 'l10n.dart';
 import 'theme.dart';
 
-/// Logo Wall o' Pay (gambar dari assets/images/logo.png).
+/// Logo Wall o' Pay (gambar dari assets/images/logo.png atau logo_cyberpunk.png).
 class BrandMark extends StatelessWidget {
   const BrandMark({super.key, this.size = 40});
 
@@ -14,8 +15,9 @@ class BrandMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCyber = context.isCyberpunk;
     return Image.asset(
-      'assets/images/logo.png',
+      isCyber ? 'assets/images/logo_cyberpunk.png' : 'assets/images/logo.png',
       width: size,
       height: size,
       cacheWidth: (size * 3).round(),
@@ -56,11 +58,21 @@ class SplashPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isCyber = context.isCyberpunk;
+    final colors = context.themeColors;
+
     return Scaffold(
-      backgroundColor: AppColors.ivory,
+      backgroundColor: isCyber ? colors.bg : AppColors.ivory,
       body: Stack(
         children: [
-          Positioned.fill(child: CustomPaint(painter: _WavePainter())),
+          if (!isCyber)
+            Positioned.fill(child: CustomPaint(painter: _WavePainter()))
+          else
+            const Positioned.fill(
+              child: IgnorePointer(
+                child: CustomPaint(painter: CyberCanopyPainter()),
+              ),
+            ),
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -71,14 +83,16 @@ class SplashPage extends StatelessWidget {
                   "Wall o' Pay",
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: AppColors.ink,
+                    color: isCyber ? colors.textPrimary : AppColors.ink,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   context.tr('Your money, under your control.'),
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.ink.withValues(alpha: 0.65),
+                    color: isCyber
+                        ? colors.textMuted
+                        : AppColors.ink.withValues(alpha: 0.65),
                   ),
                 ),
               ],

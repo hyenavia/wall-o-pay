@@ -1,5 +1,6 @@
 /// Halaman pengaturan keamanan ([SecurityPage]) untuk mengaktifkan kunci PIN 6 digit,
-/// mengatur batas waktu kunci otomatis, mengganti PIN, dan mengaktifkan Privacy Shield.
+/// autentikasi biometrik (Fingerprint / Face Unlock), mengatur batas waktu kunci otomatis,
+/// mengganti PIN, dan mengaktifkan Privacy Shield.
 library;
 
 import 'package:flutter/material.dart';
@@ -10,14 +11,40 @@ import '../../data/lock.dart';
 import 'lock_screen.dart';
 
 /// Widget halaman Pengaturan Keamanan aplikasi.
-class SecurityPage extends StatelessWidget {
+class SecurityPage extends StatefulWidget {
   const SecurityPage({super.key});
+
+  @override
+  State<SecurityPage> createState() => _SecurityPageState();
+}
+
+class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    Lock.instance.refreshBiometricSupport();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && !Lock.instance.isAuthenticatingBiometric) {
+      Lock.instance.refreshBiometricSupport();
+    }
+  }
 
   Future<void> _toggle(BuildContext context, bool on) async {
     if (on) {
       final pin = await createPin(context);
       if (pin != null) {
         await Lock.instance.setPin(pin);
+        await Lock.instance.refreshBiometricSupport();
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(context.tr('PIN lock enabled.'))),
@@ -37,6 +64,29 @@ class SecurityPage extends StatelessWidget {
     }
   }
 
+  Future<void> _toggleBiometric(BuildContext context, bool on) async {
+    final ok = await Lock.instance.setBiometric(
+      on,
+      localizedReason: context.tr('Verify your identity to enable Biometric Unlock'),
+    );
+    if (!context.mounted) return;
+    if (ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.tr(on ? 'Biometric unlock enabled.' : 'Biometric unlock disabled.'),
+          ),
+        ),
+      );
+    } else if (on) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.tr('Biometric verification failed or canceled.')),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -47,6 +97,20 @@ class SecurityPage extends StatelessWidget {
       body: ValueListenableBuilder<AppLockState>(
         valueListenable: Lock.instance.state,
         builder: (context, st, _) {
+          final bioTitle = st.isFaceOnly
+              ? context.tr('Face Unlock')
+              : st.isFingerprintOnly
+                  ? context.tr('Fingerprint Unlock')
+                  : context.tr('Biometric Unlock');
+
+          final bioSubtitle = !st.biometricAvailable
+              ? context.tr('No fingerprint or face biometrics enrolled on this device.')
+              : st.isFaceOnly
+                  ? context.tr('Unlock the app quickly using Face Unlock alongside your PIN.')
+                  : st.isFingerprintOnly
+                      ? context.tr('Unlock the app quickly using your fingerprint alongside your PIN.')
+                      : context.tr('Unlock the app quickly using fingerprint or face recognition alongside your PIN.');
+
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
             children: [
@@ -68,6 +132,28 @@ class SecurityPage extends StatelessWidget {
                       onChanged: (v) => _toggle(context, v),
                     ),
                     if (st.enabled) ...[
+                      const Divider(height: 28),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        secondary: Icon(
+                          st.isFaceOnly ? Icons.face_rounded : Icons.fingerprint_rounded,
+                          color: st.biometricEnabled
+                              ? theme.colorScheme.primary
+                              : muted,
+                        ),
+                        title: Text(
+                          bioTitle,
+                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        subtitle: Text(
+                          bioSubtitle,
+                          style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                        ),
+                        value: st.biometricEnabled,
+                        onChanged: st.biometricAvailable
+                            ? (v) => _toggleBiometric(context, v)
+                            : null,
+                      ),
                       const Divider(height: 28),
                       Text(
                         context.tr('Auto-lock timeout'),

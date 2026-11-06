@@ -24,11 +24,13 @@ PreferredSizeWidget pageAppBar(
   Widget? bottom,
   double bottomHeight = 0,
 }) {
+  final colors = context.themeColors;
+  final isCyber = colors.isCyberpunk;
   return AppBar(
     title: title,
     actions: actions,
     centerTitle: false,
-    backgroundColor: AppColors.deepForest,
+    backgroundColor: colors.heroBackground,
     foregroundColor: Colors.white,
     surfaceTintColor: Colors.transparent,
     elevation: 0,
@@ -40,12 +42,17 @@ PreferredSizeWidget pageAppBar(
         .textTheme
         .titleLarge
         ?.copyWith(fontWeight: FontWeight.w800, color: Colors.white),
-    flexibleSpace: const IgnorePointer(
-      child: CustomPaint(
-        size: Size.infinite,
-        painter: BotanicalCanopyPainter(opacity: 0.10),
-      ),
-    ),
+    flexibleSpace: isCyber
+        ? null
+        : const IgnorePointer(
+            child: RepaintBoundary(
+              child: CustomPaint(
+                size: Size.infinite,
+                isComplex: true,
+                painter: BotanicalCanopyPainter(opacity: 0.10),
+              ),
+            ),
+          ),
     bottom: _SheetEdge(childHeight: bottomHeight, child: bottom),
   );
 }
@@ -138,22 +145,43 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Material(
-      color: scheme.surface,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
+    final isCyber = context.isCyberpunk;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: scheme.outlineVariant),
+        border: Border.all(
+          color: isCyber
+              ? const Color(0xFF00F0FF).withValues(alpha: 0.28)
+              : scheme.outlineVariant,
+          width: 1.0,
+        ),
+        boxShadow: isCyber
+            ? [
+                BoxShadow(
+                  color: const Color(0xFF00F0FF).withValues(alpha: 0.10),
+                  blurRadius: 16,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 3),
+                ),
+              ]
+            : null,
       ),
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(padding: padding, child: child),
+      child: Material(
+        color: Colors.transparent,
+        clipBehavior: Clip.antiAlias,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(padding: padding, child: child),
+        ),
       ),
     );
   }
 }
 
-/// Kartu hijau tua untuk saldo, total anggaran, dan sorotan lain.
+/// Kartu sorotan (HeroCard) untuk saldo, total anggaran, dan sorotan utama.
 class HeroCard extends StatelessWidget {
   const HeroCard({
     super.key,
@@ -166,26 +194,58 @@ class HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
+    final isCyber = colors.isCyberpunk;
+
     return Container(
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: AppColors.deepForest,
+        color: colors.heroBackground,
+        gradient: isCyber
+            ? const LinearGradient(
+                colors: [Color(0xFF13172E), Color(0xFF101326), Color(0xFF1A102B)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
         borderRadius: BorderRadius.circular(24),
+        border: isCyber
+            ? Border.all(
+                color: const Color(0xFF00F0FF).withValues(alpha: 0.50),
+                width: 1.4,
+              )
+            : null,
         boxShadow: [
           BoxShadow(
-            color: AppColors.deepForest.withValues(alpha: 0.25),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+            color: isCyber
+                ? const Color(0xFF00F0FF).withValues(alpha: 0.30)
+                : AppColors.deepForest.withValues(alpha: 0.25),
+            blurRadius: isCyber ? 22 : 18,
+            spreadRadius: isCyber ? -1 : 0,
+            offset: const Offset(0, 6),
           ),
+          if (isCyber)
+            BoxShadow(
+              color: const Color(0xFFFF2A6D).withValues(alpha: 0.16),
+              blurRadius: 28,
+              spreadRadius: -4,
+              offset: const Offset(0, 10),
+            ),
         ],
       ),
       child: Stack(
         children: [
-          const Positioned.fill(
+          Positioned.fill(
             child: IgnorePointer(
-              child: CustomPaint(
-                painter: BotanicalHeroCardPainter(),
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  key: ValueKey('heroCard_$isCyber'),
+                  isComplex: true,
+                  painter: isCyber
+                      ? const CyberHeroCardPainter()
+                      : const BotanicalHeroCardPainter(),
+                ),
               ),
             ),
           ),
@@ -217,12 +277,28 @@ class CategoryBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCyber = context.isCyberpunk;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.16),
+        color: color.withValues(alpha: isCyber ? 0.22 : 0.16),
         borderRadius: BorderRadius.circular(size * 0.3),
+        border: isCyber
+            ? Border.all(
+                color: color.withValues(alpha: 0.45),
+                width: 1.2,
+              )
+            : null,
+        boxShadow: isCyber
+            ? [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
       ),
       child: Icon(icon, color: color, size: size * 0.5),
     );
@@ -400,7 +476,20 @@ class PeriodTypeToggle extends ConsumerWidget {
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: theme.colorScheme.outlineVariant),
+            border: Border.all(
+              color: context.isCyberpunk
+                  ? const Color(0xFF00F0FF).withValues(alpha: 0.35)
+                  : theme.colorScheme.outlineVariant,
+            ),
+            boxShadow: context.isCyberpunk
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF00F0FF).withValues(alpha: 0.12),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -455,13 +544,13 @@ class UserAvatar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
-    final photo = ref.watch(profileProvider.select((s) => s.photo));
+    final photoImage = ref.watch(profileProvider.select((s) => s.photoImage));
     final name = ref.watch(displayNameProvider) ?? '?';
     final avatar = CircleAvatar(
       radius: size / 2,
       backgroundColor: scheme.primaryContainer,
-      backgroundImage: photo == null ? null : MemoryImage(photo),
-      child: photo == null
+      backgroundImage: photoImage,
+      child: photoImage == null
           ? Text(
               (name.isEmpty ? '?' : String.fromCharCode(name.runes.first)).toUpperCase(),
               style: TextStyle(
@@ -584,6 +673,10 @@ class EmptyStateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
+    final isCyber = colors.isCyberpunk;
+    final displayIcon = isCyber && icon == Icons.eco_outlined ? Icons.electric_bolt_rounded : icon;
+
     return HeroCard(
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
       child: Column(
@@ -592,10 +685,24 @@ class EmptyStateCard extends StatelessWidget {
             width: 72,
             height: 72,
             decoration: BoxDecoration(
-              color: AppColors.sage.withValues(alpha: 0.22),
+              color: colors.primary.withValues(alpha: 0.22),
               shape: BoxShape.circle,
+              border: isCyber
+                  ? Border.all(
+                      color: colors.primary.withValues(alpha: 0.60),
+                      width: 1.5,
+                    )
+                  : null,
+              boxShadow: isCyber
+                  ? [
+                      BoxShadow(
+                        color: colors.primary.withValues(alpha: 0.35),
+                        blurRadius: 16,
+                      ),
+                    ]
+                  : null,
             ),
-            child: Icon(icon, size: 38, color: AppColors.sage),
+            child: Icon(displayIcon, size: 38, color: colors.primary),
           ),
           const SizedBox(height: 16),
           Text(
@@ -617,8 +724,8 @@ class EmptyStateCard extends StatelessWidget {
             FilledButton(
               onPressed: onAction,
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.sage,
-                foregroundColor: AppColors.deepForest,
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
                 minimumSize: const Size.fromHeight(48),
               ),
               child: Text(actionLabel!),
@@ -653,7 +760,7 @@ void showUndoSnackBar({
       duration: duration,
       action: SnackBarAction(
         label: trG('Undo'),
-        textColor: AppColors.sage,
+        textColor: context != null ? Theme.of(context).colorScheme.primary : AppColors.sage,
         onPressed: () async {
           await onUndo();
           messenger.hideCurrentSnackBar();
@@ -669,7 +776,7 @@ void showUndoSnackBar({
   );
 }
 
-/// Container dengan latar belakang botanical ambient (glow & daun lembut)
+/// Container dengan latar belakang ambient (daun lembut untuk Botanical, grid & glow orbs untuk Cyberpunk)
 /// untuk lembar konten di bawah header.
 class BotanicalBackgroundSheet extends StatelessWidget {
   const BotanicalBackgroundSheet({super.key, required this.child});
@@ -678,16 +785,21 @@ class BotanicalBackgroundSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCyber = context.isCyberpunk;
     return Stack(
       fit: StackFit.expand,
       children: [
-        const Positioned.fill(
-          child: IgnorePointer(
-            child: CustomPaint(
-              painter: BotanicalBackgroundPainter(),
+        if (!isCyber)
+          const Positioned.fill(
+            child: IgnorePointer(
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  isComplex: true,
+                  painter: BotanicalBackgroundPainter(),
+                ),
+              ),
             ),
           ),
-        ),
         child,
       ],
     );

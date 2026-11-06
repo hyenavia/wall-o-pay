@@ -2,7 +2,7 @@
  * Wall o' Pay - Landing Page Interactive Logic (Full English)
  */
 
-const APP_VERSION = "1.11.38";
+const APP_VERSION = "2.0.0";
 
 // Helper to compare semver strings (e.g. "1.11.32" vs "v1.11.21")
 function isVersionGreater(v1, v2) {
@@ -24,7 +24,7 @@ const showcaseData = {
     title: "Instant Financial Dashboard",
     desc: "View your total balance, monthly inflows and outflows, recent activities, and daily budget pulse in one clean 3-block interface.",
     bullets: [
-      "Gradient forest balance card with net cashflow summary",
+      "Gradient balance card with net cashflow summary",
       "Real-time Daily Budget Pulse showing safe-to-spend allowance",
       "Recent activity feed pulled directly from local SQLite with zero lag"
     ],
@@ -177,8 +177,158 @@ const showcaseData = {
         </div>
       </div>
     `
+  },
+  tema: {
+    title: "Dual Aesthetics: Botanical & Pure Cyberpunk",
+    desc: "Transform the app's visual atmosphere instantly. Switch between serene Botanical Forest (Lush Emerald & Sage) and electric Pure Cyberpunk (Night City Obsidian, Electric Cyan & Edgerunner Yellow).",
+    bullets: [
+      "Signature Botanical Forest: Calming night pine, emerald curves & soothing sage",
+      "Pure Cyberpunk: High-contrast Electric Cyan, Matrix Mint, Laser Pink & Edgerunner Yellow",
+      "Dynamic typography with Google Fonts Rajdhani and custom glowing vector accents"
+    ],
+    previewHtml: `
+      <div class="preview-box">
+        <div class="preview-box-header">
+          <span class="preview-box-title"><span>🎨</span> Dual Visual Identity</span>
+          <span class="preview-box-badge">v2.0 Exclusive</span>
+        </div>
+        <div class="preview-chip-group" style="margin-bottom: 0.75rem;">
+          <span class="preview-filter-chip" id="demo-chip-botanical" style="cursor: pointer;">🌿 Botanical Forest</span>
+          <span class="preview-filter-chip" id="demo-chip-cyberpunk" style="cursor: pointer;">⚡ Pure Cyberpunk</span>
+        </div>
+        <div class="screen-balance-card" style="margin-bottom: 0.75rem;">
+          <div class="balance-card-title">Active Aesthetic Engine</div>
+          <div class="balance-card-amount">Instant Transformation</div>
+          <div class="balance-card-stats">
+            <div class="stat-pill">Botanical<span style="color: #6EE7B7;">Forest Emerald</span></div>
+            <div class="stat-pill">Cyberpunk<span style="color: #00F0FF;">Neon Cyan</span></div>
+          </div>
+        </div>
+        <div class="preview-row-item">
+          <div class="preview-item-left">
+            <span class="preview-item-icon">💡</span>
+            <div>
+              <div class="preview-item-name">Click chips above to toggle page theme live!</div>
+              <div class="preview-item-cat">Experience the landing page in either aesthetic</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+  keamanan: {
+    title: "Universal Biometrics & Hardware Keystore",
+    desc: "Your financial privacy is fortified with hardware-backed encryption. Unlock instantaneously using your device's Fingerprint scanner or Face Recognition, backed by key-stretched PBKDF2 HMAC-SHA256.",
+    bullets: [
+      "Universal Biometric Unlock (Fingerprint & Face Recognition) via local_auth",
+      "Hardware-backed secret storage via Android Keystore & iOS Keychain",
+      "2,048-iteration salted HMAC-SHA256 PIN hashing with persistent brute-force lockout"
+    ],
+    previewHtml: `
+      <div class="preview-box">
+        <div class="preview-box-header">
+          <span class="preview-box-title"><span>🛡️</span> Hardware Security Vault</span>
+          <span class="preview-box-badge">Encrypted</span>
+        </div>
+        <div class="preview-row-item" style="border-left: 3px solid var(--primary); padding-left: 0.75rem; margin-bottom: 0.5rem;">
+          <div class="preview-item-left">
+            <span class="preview-item-icon">👆</span>
+            <div>
+              <div class="preview-item-name">Biometric Quick Trigger</div>
+              <div class="preview-item-cat">Fingerprint & Face ID Enabled</div>
+            </div>
+          </div>
+          <div class="preview-item-amount" style="color: var(--income);">Active ✓</div>
+        </div>
+        <div class="preview-row-item" style="border-left: 3px solid var(--accent); padding-left: 0.75rem; margin-bottom: 0.5rem;">
+          <div class="preview-item-left">
+            <span class="preview-item-icon">🔐</span>
+            <div>
+              <div class="preview-item-name">Encrypted Keystore Storage</div>
+              <div class="preview-item-cat">FlutterSecureStorage (Hardware-Backed)</div>
+            </div>
+          </div>
+          <div class="preview-item-amount" style="color: var(--primary);">Secured</div>
+        </div>
+        <div class="preview-row-item" style="border-left: 3px solid var(--warning); padding-left: 0.75rem;">
+          <div class="preview-item-left">
+            <span class="preview-item-icon">⏳</span>
+            <div>
+              <div class="preview-item-name">Anti Brute-Force Lockout</div>
+              <div class="preview-item-cat">Exponential 30s ➔ 120s ➔ 300s Backoff</div>
+            </div>
+          </div>
+          <div class="preview-item-amount" style="color: var(--warning);">Protected</div>
+        </div>
+      </div>
+    `
   }
 };
+
+// Theme Switcher Logic
+const THEME_STORAGE_KEY = "wall_o_pay_landing_theme";
+
+function applyTheme(theme) {
+  const isCyber = theme === "cyberpunk";
+  const themeName = isCyber ? "cyberpunk" : "botanical";
+  document.documentElement.setAttribute("data-theme", themeName);
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, themeName);
+  } catch (_) {}
+
+  // Update navbar theme toggle button
+  const toggleText = document.getElementById("theme-toggle-text");
+  const toggleAction = document.getElementById("theme-toggle-action");
+  const brandLogo = document.getElementById("brand-logo-img");
+  const footerLogo = document.getElementById("footer-logo-img");
+  const compThemeIcon = document.getElementById("comp-theme-icon");
+
+  if (toggleText) {
+    toggleText.textContent = isCyber ? "Pure Cyberpunk" : "Botanical Forest";
+  }
+  if (toggleAction) {
+    toggleAction.textContent = isCyber ? "Switch 🌿" : "Switch ⚡";
+  }
+  if (compThemeIcon) {
+    compThemeIcon.textContent = isCyber ? "⚡" : "🌿";
+  }
+  if (brandLogo) {
+    brandLogo.src = isCyber ? "images/logo_cyberpunk.png" : "images/logo.png";
+  }
+  if (footerLogo) {
+    footerLogo.src = isCyber ? "images/logo_cyberpunk.png" : "images/logo.png";
+  }
+
+  // Update showcase demo chips if present
+  const chipBotanical = document.getElementById("demo-chip-botanical");
+  const chipCyberpunk = document.getElementById("demo-chip-cyberpunk");
+  if (chipBotanical && chipCyberpunk) {
+    if (isCyber) {
+      chipBotanical.classList.remove("active");
+      chipCyberpunk.classList.add("active");
+    } else {
+      chipCyberpunk.classList.remove("active");
+      chipBotanical.classList.add("active");
+    }
+  }
+}
+
+function setupThemeToggle() {
+  let savedTheme = "botanical";
+  try {
+    savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || "botanical";
+  } catch (_) {}
+  applyTheme(savedTheme);
+
+  const toggleBtn = document.getElementById("theme-toggle-btn");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme");
+      const next = current === "cyberpunk" ? "botanical" : "cyberpunk";
+      applyTheme(next);
+    });
+  }
+}
 
 function setupShowcaseTabs() {
   const tabs = document.querySelectorAll(".showcase-tab-btn");
@@ -204,6 +354,22 @@ function setupShowcaseTabs() {
 
         if (visual && data.previewHtml) {
           visual.innerHTML = data.previewHtml;
+        }
+
+        // Attach interactive chip handlers for 'tema' tab
+        if (key === "tema") {
+          const chipBot = document.getElementById("demo-chip-botanical");
+          const chipCyber = document.getElementById("demo-chip-cyberpunk");
+          const current = document.documentElement.getAttribute("data-theme");
+          if (chipBot && chipCyber) {
+            if (current === "cyberpunk") {
+              chipCyber.classList.add("active");
+            } else {
+              chipBot.classList.add("active");
+            }
+            chipBot.addEventListener("click", () => applyTheme("botanical"));
+            chipCyber.addEventListener("click", () => applyTheme("cyberpunk"));
+          }
         }
       }
     });
@@ -270,12 +436,7 @@ function fetchLatestReleaseVersion() {
 
 // Init on DOM ready
 document.addEventListener("DOMContentLoaded", () => {
-  // Enforce Wall o' Pay signature theme & clear any legacy theme preference
-  try {
-    localStorage.removeItem("wall_o_pay_theme");
-  } catch (_) {}
-  document.documentElement.setAttribute("data-theme", "signature");
-
+  setupThemeToggle();
   setupShowcaseTabs();
   setupMobileNav();
   fetchLatestReleaseVersion();

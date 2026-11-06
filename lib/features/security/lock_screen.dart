@@ -55,21 +55,26 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (Lock.instance.isAuthenticatingBiometric) return;
     final st = Lock.instance.state.value;
     if (state == AppLifecycleState.paused) {
       leftAt = DateTime.now();
     }
-    if (state == AppLifecycleState.resumed && st.enabled && leftAt != null && !locked) {
-      final timeout = st.delayMin == 0
-          ? const Duration(seconds: 3)
-          : Duration(minutes: st.delayMin);
-      if (DateTime.now().difference(leftAt!) >= timeout) {
-        if (mounted) {
-          try {
-            Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
-          } catch (_) {}
-          Lock.instance.isLocked.value = true;
-          setState(() => locked = true);
+    if (state == AppLifecycleState.resumed) {
+      final previousLeftAt = leftAt;
+      leftAt = null;
+      if (st.enabled && previousLeftAt != null && !locked) {
+        final timeout = st.delayMin == 0
+            ? const Duration(seconds: 3)
+            : Duration(minutes: st.delayMin);
+        if (DateTime.now().difference(previousLeftAt) >= timeout) {
+          if (mounted) {
+            try {
+              Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+            } catch (_) {}
+            Lock.instance.isLocked.value = true;
+            setState(() => locked = true);
+          }
         }
       }
     }
@@ -94,18 +99,24 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
   }
 }
 
-/// Papan tombol angka PIN dengan indikator 6 titik.
+/// Papan tombol angka PIN dengan indikator 6 titik dan tombol biometrik opsional.
 class PinPad extends StatelessWidget {
   const PinPad({
     super.key,
     required this.value,
     required this.onChanged,
     this.length = 6,
+    this.onBiometricTap,
+    this.biometricIcon = Icons.fingerprint_rounded,
+    this.biometricTooltip,
   });
 
   final String value;
   final ValueChanged<String> onChanged;
   final int length;
+  final VoidCallback? onBiometricTap;
+  final IconData biometricIcon;
+  final String? biometricTooltip;
 
   Widget _key(Widget child, VoidCallback? tap) => Padding(
         padding: const EdgeInsets.all(6),
@@ -180,7 +191,19 @@ class PinPad extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(width: 84, height: 84),
+            onBiometricTap != null
+                ? _key(
+                    Tooltip(
+                      message: biometricTooltip ?? '',
+                      child: Icon(
+                        biometricIcon,
+                        color: const Color(0xFF6EE7B7),
+                        size: 28,
+                      ),
+                    ),
+                    onBiometricTap,
+                  )
+                : const SizedBox(width: 84, height: 84),
             _digit(0),
             _key(
               const Icon(Icons.backspace_outlined, color: Colors.white, size: 22),
@@ -206,12 +229,35 @@ class LockScreen extends ConsumerStatefulWidget {
 class _LockScreenState extends ConsumerState<LockScreen> {
   String pin = '';
   String? msg;
-  int fails = 0;
-  DateTime? until;
+  bool _autoPrompted = false;
+
+  String _lockoutMessage(BuildContext context) {
+    final sec = Lock.instance.remainingLockoutSeconds;
+    if (sec > 0) {
+      return context.tr(
+        'Please wait {seconds}s before trying again.',
+        {'seconds': sec},
+      );
+    }
+    return context.tr('Please wait before trying again.');
+  }
+
+  Future<void> _tryBiometric() async {
+    if (Lock.instance.isLockedOut) {
+      setState(() => msg = _lockoutMessage(context));
+      return;
+    }
+    final ok = await Lock.instance.authenticateBiometric(
+      localizedReason: context.tr('Verify your identity to unlock Wall o\' Pay'),
+    );
+    if (ok && mounted) {
+      widget.onUnlock();
+    }
+  }
 
   void _changed(String v) {
-    if (until != null && DateTime.now().isBefore(until!)) {
-      setState(() => msg = context.tr('Please wait before trying again.'));
+    if (Lock.instance.isLockedOut) {
+      setState(() => msg = _lockoutMessage(context));
       return;
     }
     setState(() {
@@ -225,15 +271,11 @@ class _LockScreenState extends ConsumerState<LockScreen> {
       return;
     }
 
-    fails++;
     setState(() {
       pin = '';
-      msg = context.tr('Incorrect PIN. Try again.');
-      if (fails >= 5) {
-        until = DateTime.now().add(const Duration(seconds: 30));
-        fails = 0;
-        msg = context.tr('Please wait before trying again.');
-      }
+      msg = Lock.instance.isLockedOut
+          ? _lockoutMessage(context)
+          : context.tr('Incorrect PIN. Try again.');
     });
   }
 
@@ -284,74 +326,107 @@ class _LockScreenState extends ConsumerState<LockScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.deepForest,
-              Color(0xFF0F241A),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const BrandMark(size: 64),
-                  const SizedBox(height: 12),
-                  const Text(
-                    "Wall o' Pay",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    context.tr('Enter your 6-digit PIN'),
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  PinPad(value: pin, onChanged: _changed),
-                  SizedBox(
-                    height: 44,
-                    child: msg == null
-                        ? null
-                        : Center(
-                            child: Text(
-                              msg!,
-                              style: const TextStyle(
-                                color: Color(0xFFFFB3C7),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
+    return ValueListenableBuilder<AppLockState>(
+      valueListenable: Lock.instance.state,
+      builder: (context, st, _) {
+        if (st.biometricEnabled && !_autoPrompted) {
+          _autoPrompted = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _tryBiometric();
+          });
+        }
+        final promptText = !st.biometricEnabled
+            ? context.tr('Enter your 6-digit PIN')
+            : st.isFaceOnly
+                ? context.tr('Enter 6-digit PIN or use Face Unlock')
+                : st.isFingerprintOnly
+                    ? context.tr('Enter 6-digit PIN or scan fingerprint')
+                    : context.tr('Enter 6-digit PIN or use biometric');
+
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: context.isCyberpunk
+                    ? const [
+                        Color(0xFF13172E),
+                        Color(0xFF080912),
+                      ]
+                    : const [
+                        AppColors.deepForest,
+                        Color(0xFF0F241A),
+                      ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const BrandMark(size: 64),
+                      const SizedBox(height: 12),
+                      const Text(
+                        "Wall o' Pay",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        promptText,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      PinPad(
+                        value: pin,
+                        onChanged: _changed,
+                        onBiometricTap: st.biometricEnabled ? _tryBiometric : null,
+                        biometricIcon: st.isFaceOnly
+                            ? Icons.face_rounded
+                            : Icons.fingerprint_rounded,
+                        biometricTooltip: context.tr('Unlock with Biometric'),
+                      ),
+                      SizedBox(
+                        height: 44,
+                        child: msg == null
+                            ? null
+                            : Center(
+                                child: Text(
+                                  msg!,
+                                  style: const TextStyle(
+                                    color: Color(0xFFFFB3C7),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
+                      ),
+                      TextButton(
+                        onPressed: _forgot,
+                        child: Text(
+                          context.tr('Forgot PIN?'),
+                          style: const TextStyle(color: Colors.white70),
+                        ),
+                      ),
+                    ],
                   ),
-                  TextButton(
-                    onPressed: _forgot,
-                    child: Text(
-                      context.tr('Forgot PIN?'),
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -373,6 +448,16 @@ class _PinFlowState extends State<_PinFlow> {
   String? msg;
 
   void _changed(String v) {
+    if (!widget.create && Lock.instance.isLockedOut) {
+      final sec = Lock.instance.remainingLockoutSeconds;
+      setState(() {
+        msg = context.tr(
+          'Please wait {seconds}s before trying again.',
+          {'seconds': sec},
+        );
+      });
+      return;
+    }
     setState(() {
       pin = v;
       msg = null;
@@ -383,9 +468,15 @@ class _PinFlowState extends State<_PinFlow> {
       if (Lock.instance.verify(v)) {
         Navigator.pop(context, true);
       } else {
+        final sec = Lock.instance.remainingLockoutSeconds;
         setState(() {
           pin = '';
-          msg = context.tr('Incorrect PIN. Try again.');
+          msg = Lock.instance.isLockedOut
+              ? context.tr(
+                  'Please wait {seconds}s before trying again.',
+                  {'seconds': sec},
+                )
+              : context.tr('Incorrect PIN. Try again.');
         });
       }
     } else if (first == null) {
@@ -414,12 +505,17 @@ class _PinFlowState extends State<_PinFlow> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              AppColors.deepForest,
-              Color(0xFF0F241A),
-            ],
+            colors: context.isCyberpunk
+                ? const [
+                    Color(0xFF13172E),
+                    Color(0xFF080912),
+                  ]
+                : const [
+                    AppColors.deepForest,
+                    Color(0xFF0F241A),
+                  ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

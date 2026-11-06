@@ -50,7 +50,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi fallback jika native method channel gagal membaca PackageManager.
-  static const fallbackVersion = '1.11.38';
+  static const fallbackVersion = '2.0.0';
   static String _resolvedVersion = fallbackVersion;
 
   /// Versi aplikasi saat ini. Dinamis dibaca dari native PackageManager Android atau fallback.
@@ -252,12 +252,12 @@ class UpdateCheckerService {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.deepForest.withValues(alpha: 0.1),
+                  color: (ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest).withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.rocket_launch_rounded,
-                  color: AppColors.deepForest,
+                  color: ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest,
                   size: 26,
                 ),
               ),
@@ -349,7 +349,8 @@ class UpdateCheckerService {
               icon: const Icon(Icons.download_rounded, size: 18),
               label: Text(ctx.tr('Update Now')),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.deepForest,
+                backgroundColor: ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest,
+                foregroundColor: ctx.isCyberpunk ? ctx.themeColors.onPrimary : Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

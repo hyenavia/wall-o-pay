@@ -116,6 +116,27 @@ jobs:
         if: steps.check_release.outputs.exists == 'false'
         run: flutter pub get
 
+      - name: Configure Release Signing (from GitHub Secrets if available)
+        if: steps.check_release.outputs.exists == 'false'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEY_STORE_PASSWORD" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > android/app/release-keystore.jks
+            cat <<EOF > android/key.properties
+          storePassword=$KEY_STORE_PASSWORD
+          keyPassword=${KEY_PASSWORD:-$KEY_STORE_PASSWORD}
+          keyAlias=${KEY_ALIAS:-upload}
+          storeFile=release-keystore.jks
+          EOF
+            echo "Release signing configured from GitHub Secrets."
+          else
+            echo "GitHub signing secrets not set; using fallback signing config."
+          fi
+
       - name: Build Release APK
         if: steps.check_release.outputs.exists == 'false'
         run: |

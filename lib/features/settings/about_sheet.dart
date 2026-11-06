@@ -28,6 +28,7 @@ class AboutWallOPaySheet extends StatelessWidget {
     final isIndonesian = AppLocale.code == 'id';
     final mutedColor = theme.colorScheme.onSurface.withValues(alpha: 0.65);
     final borderColor = theme.colorScheme.outlineVariant.withValues(alpha: 0.4);
+    final colors = context.themeColors;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
@@ -100,7 +101,7 @@ class AboutWallOPaySheet extends StatelessWidget {
                               borderRadius: BorderRadius.circular(22),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.deepForest.withValues(alpha: 0.25),
+                                  color: (context.isCyberpunk ? colors.primary : AppColors.deepForest).withValues(alpha: 0.25),
                                   blurRadius: 18,
                                   offset: const Offset(0, 6),
                                 ),
@@ -108,7 +109,7 @@ class AboutWallOPaySheet extends StatelessWidget {
                             ),
                             clipBehavior: Clip.antiAlias,
                             child: Image.asset(
-                              'assets/images/logo.png',
+                              context.isCyberpunk ? 'assets/images/logo_cyberpunk.png' : 'assets/images/logo.png',
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -125,18 +126,18 @@ class AboutWallOPaySheet extends StatelessWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                             decoration: BoxDecoration(
-                              color: AppColors.sage.withValues(alpha: 0.2),
+                              color: colors.primary.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: AppColors.sage.withValues(alpha: 0.35),
+                                color: colors.primary.withValues(alpha: 0.35),
                               ),
                             ),
                             child: Text(
                               'v${UpdateCheckerService.currentVersion} • Release',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.sage,
+                                color: colors.primary,
                               ),
                             ),
                           ),
@@ -158,18 +159,18 @@ class AboutWallOPaySheet extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.sage.withValues(alpha: 0.08),
+                        color: colors.primary.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: AppColors.sage.withValues(alpha: 0.25),
+                          color: colors.primary.withValues(alpha: 0.25),
                         ),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.format_quote_rounded,
-                            color: AppColors.sage,
+                            color: colors.primary,
                             size: 28,
                           ),
                           const SizedBox(width: 10),
@@ -194,10 +195,10 @@ class AboutWallOPaySheet extends StatelessWidget {
                     // Section: Brand Lore & Philosophy
                     Text(
                       context.tr('Brand Lore & Philosophy'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.sage,
+                        color: colors.primary,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -224,11 +225,13 @@ class AboutWallOPaySheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     _LoreCard(
-                      icon: Icons.eco_outlined,
-                      title: context.tr('The Growing Sprout'),
-                      description: context.tr(
-                        'Reframing "Pay" into "Pay yourself first"—every dollar budgeted and saved is a seed nurtured to flourish over time.',
-                      ),
+                      icon: context.isCyberpunk ? Icons.offline_bolt_rounded : Icons.eco_outlined,
+                      title: context.isCyberpunk ? context.tr('The Overclock Sprout') : context.tr('The Growing Sprout'),
+                      description: context.isCyberpunk
+                          ? context.tr('Every credit budgeted and saved is fuel injected into your personal wealth engine.')
+                          : context.tr(
+                              'Reframing "Pay" into "Pay yourself first"—every dollar budgeted and saved is a seed nurtured to flourish over time.',
+                            ),
                       borderColor: borderColor,
                     ),
                     const SizedBox(height: 10),
@@ -242,11 +245,13 @@ class AboutWallOPaySheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     _LoreCard(
-                      icon: Icons.forest_outlined,
-                      title: context.tr('The Botanical Sanctuary'),
-                      description: context.tr(
-                        'An organic, tranquil environment inspired by the deep forest, replacing aggressive corporate fintech with mindful peace.',
-                      ),
+                      icon: context.isCyberpunk ? Icons.electric_bolt_rounded : Icons.forest_outlined,
+                      title: context.isCyberpunk ? context.tr('The Edgerunners Grid') : context.tr('The Botanical Sanctuary'),
+                      description: context.isCyberpunk
+                          ? context.tr('High-contrast neon cyberspace inspired by Night City, built for maximum tactical focus and financial mastery.')
+                          : context.tr(
+                              'An organic, tranquil environment inspired by the deep forest, replacing aggressive corporate fintech with mindful peace.',
+                            ),
                       borderColor: borderColor,
                     ),
                     const SizedBox(height: 24),
@@ -254,10 +259,10 @@ class AboutWallOPaySheet extends StatelessWidget {
                     // Section: Core Principles
                     Text(
                       context.tr('Core Principles'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.sage,
+                        color: colors.primary,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -281,10 +286,10 @@ class AboutWallOPaySheet extends StatelessWidget {
                     // Section: App Information & Actions
                     Text(
                       context.tr('App Information'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.sage,
+                        color: colors.primary,
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -328,8 +333,8 @@ class AboutWallOPaySheet extends StatelessWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.sage,
-                              side: BorderSide(color: AppColors.sage.withValues(alpha: 0.4)),
+                              foregroundColor: colors.primary,
+                              side: BorderSide(color: colors.primary.withValues(alpha: 0.4)),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -350,8 +355,8 @@ class AboutWallOPaySheet extends StatelessWidget {
                         Expanded(
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.sage,
-                              foregroundColor: AppColors.ink,
+                              backgroundColor: colors.primary,
+                              foregroundColor: colors.onPrimary,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -412,10 +417,10 @@ class _LoreCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.sage.withValues(alpha: 0.18),
+              color: (context.isCyberpunk ? context.themeColors.primary : AppColors.sage).withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: AppColors.sage, size: 20),
+            child: Icon(icon, color: context.isCyberpunk ? context.themeColors.primary : AppColors.sage, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -463,7 +468,7 @@ class _PrincipleRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: AppColors.sage, size: 20),
+        Icon(icon, color: context.isCyberpunk ? context.themeColors.primary : AppColors.sage, size: 20),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
@@ -523,15 +528,15 @@ class _MetaRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
-                  color: isLink ? AppColors.sage : null,
+                  color: isLink ? (context.isCyberpunk ? context.themeColors.primary : AppColors.sage) : null,
                 ),
               ),
               if (isLink) ...[
                 const SizedBox(width: 4),
-                const Icon(
+                Icon(
                   Icons.open_in_new_rounded,
                   size: 14,
-                  color: AppColors.sage,
+                  color: context.isCyberpunk ? context.themeColors.primary : AppColors.sage,
                 ),
               ],
             ],

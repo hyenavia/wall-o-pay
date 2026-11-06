@@ -180,6 +180,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = context.themeColors;
     final muted = scheme.onSurface.withValues(alpha: 0.6);
 
     return SafeArea(
@@ -192,7 +193,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
             // Header
             Row(
               children: [
-                const Icon(Icons.calculate_outlined, color: AppColors.sage, size: 22),
+                Icon(Icons.calculate_outlined, color: colors.primary, size: 22),
                 const SizedBox(width: 8),
                 Text(
                   context.tr('Calculator'),
@@ -268,16 +269,16 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: '÷',
                       onPressed: () => _onOperator('÷'),
-                      color: AppColors.deepForest.withValues(alpha: 0.25),
-                      textColor: AppColors.sage,
+                      color: colors.heroBackground.withValues(alpha: 0.25),
+                      textColor: colors.primary,
                       isOperator: true,
                     ),
                     const SizedBox(width: 8),
                     _calcBtn(
                       label: '×',
                       onPressed: () => _onOperator('×'),
-                      color: AppColors.deepForest.withValues(alpha: 0.25),
-                      textColor: AppColors.sage,
+                      color: colors.heroBackground.withValues(alpha: 0.25),
+                      textColor: colors.primary,
                       isOperator: true,
                     ),
                   ],
@@ -296,8 +297,8 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: '-',
                       onPressed: () => _onOperator('-'),
-                      color: AppColors.deepForest.withValues(alpha: 0.25),
-                      textColor: AppColors.sage,
+                      color: colors.heroBackground.withValues(alpha: 0.25),
+                      textColor: colors.primary,
                       isOperator: true,
                     ),
                   ],
@@ -316,8 +317,8 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: '+',
                       onPressed: () => _onOperator('+'),
-                      color: AppColors.deepForest.withValues(alpha: 0.25),
-                      textColor: AppColors.sage,
+                      color: colors.heroBackground.withValues(alpha: 0.25),
+                      textColor: colors.primary,
                       isOperator: true,
                     ),
                   ],
@@ -336,7 +337,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: '=',
                       onPressed: _onEquals,
-                      color: AppColors.deepForest,
+                      color: colors.heroBackground,
                       textColor: Colors.white,
                       isOperator: true,
                     ),
@@ -352,7 +353,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: '000',
                       onPressed: _onTripleZero,
-                      textColor: AppColors.sage,
+                      textColor: colors.primary,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -362,8 +363,8 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                         child: FilledButton.icon(
                           onPressed: _onApply,
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.sage,
-                            foregroundColor: AppColors.deepForest,
+                            backgroundColor: colors.primary,
+                            foregroundColor: colors.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),

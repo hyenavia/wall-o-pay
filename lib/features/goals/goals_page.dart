@@ -67,10 +67,14 @@ class GoalsPage extends ConsumerWidget {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: AppColors.sage.withValues(alpha: 0.25),
+                        color: (context.isCyberpunk ? context.themeColors.primary : AppColors.sage).withValues(alpha: 0.25),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.eco_outlined, color: AppColors.sage, size: 34),
+                      child: Icon(
+                        context.isCyberpunk ? Icons.rocket_launch_rounded : Icons.eco_outlined,
+                        color: context.isCyberpunk ? context.themeColors.primary : AppColors.sage,
+                        size: 34,
+                      ),
                     ),
                   ],
                 ),

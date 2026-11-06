@@ -58,20 +58,29 @@ class HomePage extends ConsumerWidget {
           MaterialPageRoute<void>(builder: (_) => const SettingsPage()),
         );
 
+    final colors = context.themeColors;
+    final isCyber = colors.isCyberpunk;
+
     return Scaffold(
-      backgroundColor: AppColors.deepForest,
+      backgroundColor: colors.heroBackground,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
         child: Stack(
           children: [
-            const Positioned(
+            Positioned(
               top: 0,
               left: 0,
               right: 0,
               height: 140,
               child: IgnorePointer(
-                child: CustomPaint(
-                  painter: BotanicalCanopyPainter(opacity: 0.10),
+                child: RepaintBoundary(
+                  child: CustomPaint(
+                    key: ValueKey('homeCanopy_$isCyber'),
+                    isComplex: true,
+                    painter: isCyber
+                        ? const CyberCanopyPainter()
+                        : const BotanicalCanopyPainter(opacity: 0.10),
+                  ),
                 ),
               ),
             ),
@@ -182,17 +191,19 @@ class HomePage extends ConsumerWidget {
                             ),
                             const SizedBox(height: 16),
                             SectionHeader(
-                              title: context.tr('Recent Transactions'),
-                              actionLabel: context.tr('See All'),
+                              title: context.tr(isCyber ? 'LEDGER STREAM // RECENT' : 'Recent Transactions'),
+                              actionLabel: context.tr(isCyber ? 'ALL PACKETS' : 'See All'),
                               onAction: () => ref.read(tabIndexProvider.notifier).set(1),
                             ),
                             if (txs.isEmpty)
                               EmptyStateCard(
-                                title: context.tr('Start recording your first transaction!'),
-                                subtitle: context.tr(
-                                  'Every small transaction brings you closer to your financial goals.',
-                                ),
-                                actionLabel: context.tr('Add transaction'),
+                                title: context.tr(isCyber
+                                    ? 'LEDGER EMPTY, CHOOM!'
+                                    : 'Start recording your first transaction!'),
+                                subtitle: context.tr(isCyber
+                                    ? 'No transaction packets detected on this node. Transmit your first credit log!'
+                                    : 'Every small transaction brings you closer to your financial goals.'),
+                                actionLabel: context.tr(isCyber ? '+ TRANSMIT LOG' : 'Add transaction'),
                                 onAction: () => showTransactionForm(context),
                               )
                             else
@@ -243,6 +254,20 @@ class _HomeHeader extends ConsumerWidget {
     final theme = Theme.of(context);
     final sync = ref.watch(syncStateProvider);
 
+    final isCyber = context.isCyberpunk;
+    String effectiveGreeting() {
+      if (!isCyber) return greeting();
+      final h = DateTime.now().hour;
+      final isId = AppLocale.code == 'id';
+      if (h >= 5 && h < 11) {
+        return isId ? 'WAKE UP, CHOOM // GRID AKTIF' : 'WAKE UP, CHOOM // NIGHT CITY AM';
+      } else if (h >= 11 && h < 18) {
+        return isId ? 'NETRUNNER ONLINE // TRAFIK TINGGI' : 'NETRUNNER ONLINE // GRID ACTIVE';
+      } else {
+        return isId ? 'NIGHT CITY MEMANGGIL // AFTER HOURS' : 'NIGHT CITY CALLS // AFTER HOURS';
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 10, 8, 20),
       child: Row(
@@ -259,12 +284,13 @@ class _HomeHeader extends ConsumerWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        greeting(),
+                        effectiveGreeting(),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white70,
-                          fontWeight: FontWeight.w500,
+                          color: isCyber ? const Color(0xFF00F0FF).withValues(alpha: 0.90) : Colors.white70,
+                          fontWeight: isCyber ? FontWeight.w700 : FontWeight.w500,
+                          letterSpacing: isCyber ? 0.6 : 0.0,
                         ),
                       ),
                     ),
@@ -322,37 +348,50 @@ class _Sheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = Theme.of(context).scaffoldBackgroundColor;
+    final isCyber = context.isCyberpunk;
     return Container(
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: bgColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const Positioned.fill(
+          Positioned.fill(
             child: IgnorePointer(
-              child: CustomPaint(
-                painter: BotanicalBackgroundPainter(),
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  key: ValueKey('homeSheet_$isCyber'),
+                  isComplex: true,
+                  painter: isCyber
+                      ? const CyberBackgroundPainter()
+                      : const BotanicalBackgroundPainter(),
+                ),
               ),
             ),
           ),
-          ShaderMask(
-            shaderCallback: (Rect bounds) {
-              return const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Colors.white,
-                  Colors.white,
-                ],
-                stops: [0.0, 0.028, 1.0],
-              ).createShader(bounds);
-            },
-            blendMode: BlendMode.dstIn,
-            child: child,
+          child,
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 18,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      bgColor,
+                      bgColor.withValues(alpha: 0.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -380,6 +419,7 @@ class _BalanceCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isCyber = context.isCyberpunk;
     final isSurplus = periodFlow >= 0;
     final hidden = ref.watch(hideBalanceProvider);
     final wallets = ref.watch(walletsProvider).value ?? const [];
@@ -409,10 +449,11 @@ class _BalanceCard extends ConsumerWidget {
                         children: [
                           Flexible(
                             child: Text(
-                              context.tr('Total Balance'),
+                              context.tr(isCyber ? 'TOTAL CREDITS (EDDIES)' : 'Total Balance'),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: Colors.white70,
                                 fontWeight: FontWeight.w600,
+                                letterSpacing: isCyber ? 0.6 : 0.0,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -467,51 +508,62 @@ class _BalanceCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  isSurplus ? Icons.trending_up_rounded : Icons.trending_down_rounded,
-                  size: 15,
-                  color: isSurplus ? AppColors.incomeOnDark : AppColors.expenseOnDark,
+          Builder(
+            builder: (ctx) {
+              final c = ctx.themeColors;
+              final isCyber = ctx.isCyberpunk;
+              final flowColor = isSurplus
+                  ? (isCyber ? c.income : AppColors.incomeOnDark)
+                  : (isCyber ? c.expense : AppColors.expenseOnDark);
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: isCyber ? flowColor.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                  border: isCyber ? Border.all(color: flowColor.withValues(alpha: 0.35)) : null,
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  '$periodLabel: ',
-                  style: const TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w500),
-                ),
-                blurred(
-                  Text(
-                    isSurplus ? '+${rupiah(periodFlow)}' : rupiah(periodFlow),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: isSurplus ? AppColors.incomeOnDark : AppColors.expenseOnDark,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isSurplus ? Icons.trending_up_rounded : Icons.trending_down_rounded,
+                      size: 15,
+                      color: flowColor,
                     ),
-                  ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '$periodLabel: ',
+                      style: const TextStyle(fontSize: 12, color: Colors.white70, fontWeight: FontWeight.w500),
+                    ),
+                    blurred(
+                      Text(
+                        isSurplus ? '+${rupiah(periodFlow)}' : rupiah(periodFlow),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          color: flowColor,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
           const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: isCyber ? const Color(0xFF0D1022).withValues(alpha: 0.7) : Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(16),
+              border: isCyber ? Border.all(color: const Color(0xFF00F0FF).withValues(alpha: 0.20)) : null,
             ),
             child: Row(
               children: [
                 Expanded(
                   child: _FlowTile(
-                    icon: Icons.arrow_downward,
-                    label: context.tr('Income'),
+                    icon: isCyber ? Icons.arrow_downward_rounded : Icons.arrow_downward,
+                    label: context.tr(isCyber ? 'CREDIT INFLOW' : 'Income'),
                     value: rupiah(income),
                     blurred: hidden,
                   ),
@@ -520,8 +572,8 @@ class _BalanceCard extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _FlowTile(
-                    icon: Icons.arrow_upward,
-                    label: context.tr('Expense'),
+                    icon: isCyber ? Icons.arrow_upward_rounded : Icons.arrow_upward,
+                    label: context.tr(isCyber ? 'BURN RATE' : 'Expense'),
                     value: rupiah(expense),
                     blurred: hidden,
                   ),
@@ -554,10 +606,14 @@ class _AccountsQuickBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.06),
+            color: context.isCyberpunk
+                ? const Color(0xFF0D1022).withValues(alpha: 0.6)
+                : Colors.white.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: context.isCyberpunk
+                  ? const Color(0xFF00F0FF).withValues(alpha: 0.20)
+                  : Colors.white.withValues(alpha: 0.08),
               width: 1,
             ),
           ),
@@ -589,7 +645,7 @@ class _AccountsQuickBar extends StatelessWidget {
                   ),
                 ),
               ] else ...[
-                _buildStackedAvatars(),
+                _buildStackedAvatars(context),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -616,7 +672,7 @@ class _AccountsQuickBar extends StatelessWidget {
     );
   }
 
-  Widget _buildStackedAvatars() {
+  Widget _buildStackedAvatars(BuildContext context) {
     const avatarSize = 22.0;
     const overlap = 14.0;
     final displayed = wallets.take(3).toList();
@@ -639,7 +695,7 @@ class _AccountsQuickBar extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Color(displayed[i].colorValue),
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.deepForest, width: 1.5),
+                  border: Border.all(color: context.themeColors.heroBackground, width: 1.5),
                 ),
                 child: Icon(
                   accountIcon(displayed[i].type),
@@ -657,7 +713,7 @@ class _AccountsQuickBar extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.25),
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.deepForest, width: 1.5),
+                  border: Border.all(color: context.themeColors.heroBackground, width: 1.5),
                 ),
                 alignment: Alignment.center,
                 child: Text(
@@ -718,8 +774,12 @@ class _FlowTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label,
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70)),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+              ),
               blurred
                   ? ClipRect(child: ImageFiltered(imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), child: valueWidget))
                   : valueWidget,
@@ -744,21 +804,32 @@ class _UpdateBannerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
+    final isCyber = colors.isCyberpunk;
+
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [
-            AppColors.deepForest,
-            Color(0xFF2C5A47),
+            colors.heroBackground,
+            isCyber ? const Color(0xFF1E2240) : const Color(0xFF2C5A47),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
+        border: isCyber
+            ? Border.all(
+                color: const Color(0xFF00F0FF).withValues(alpha: 0.40),
+                width: 1.2,
+              )
+            : null,
         boxShadow: [
           BoxShadow(
-            color: AppColors.deepForest.withValues(alpha: 0.28),
-            blurRadius: 16,
+            color: isCyber
+                ? const Color(0xFF00F0FF).withValues(alpha: 0.28)
+                : AppColors.deepForest.withValues(alpha: 0.28),
+            blurRadius: isCyber ? 20 : 16,
             offset: const Offset(0, 6),
           ),
         ],
@@ -836,8 +907,8 @@ class _UpdateBannerCard extends StatelessWidget {
                         children: [
                           Text(
                             'v${info.currentVersion} ➔ v${info.latestVersion}',
-                            style: const TextStyle(
-                              color: AppColors.incomeOnDark,
+                            style: TextStyle(
+                              color: context.isCyberpunk ? context.themeColors.income : AppColors.incomeOnDark,
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                             ),
@@ -854,16 +925,16 @@ class _UpdateBannerCard extends StatelessWidget {
                               children: [
                                 Text(
                                   context.tr('Update Now'),
-                                  style: const TextStyle(
-                                    color: AppColors.deepForest,
+                                  style: TextStyle(
+                                    color: colors.heroBackground,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w800,
                                   ),
                                 ),
                                 const SizedBox(width: 4),
-                                const Icon(
+                                Icon(
                                   Icons.arrow_forward_rounded,
-                                  color: AppColors.deepForest,
+                                  color: colors.heroBackground,
                                   size: 13,
                                 ),
                               ],

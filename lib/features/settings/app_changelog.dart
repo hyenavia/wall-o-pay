@@ -45,10 +45,37 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '2.0.0',
+      dateEn: 'November 6, 2026',
+      dateId: '6 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'A New Era of Wall o\' Pay: Introduced Cyberpunk Neo-Tokyo theme alongside Botanical Garden with OLED midnight canvas, neon telemetry glowing accents, and hybrid brand identity.',
+          textId: 'Era Baru Wall o\' Pay: Menghadirkan tema Cyberpunk Neo-Tokyo mendampingi Botanical Garden dengan kanvas OLED gelap pekat, aksen telemetri neon menyala, dan identitas brand hibrida.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Added universal Biometric Unlock (Fingerprint & Face Unlock) alongside the 6-digit PIN and migrated PIN secrets to hardware-backed Android Keystore / iOS Keychain.',
+          textId: 'Menambahkan Buka Kunci Biometrik universal (Sidik Jari & Pengenalan Wajah) mendampingi PIN 6 digit serta memindahkan enkripsi PIN ke Android Keystore / iOS Keychain.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Hardened app security with 2,048-iteration HMAC-SHA256 PIN hashing, persistent exponential brute-force lockout, automatic cleanup of export & receipt files on logout, and strict Firestore rules.',
+          textId: 'Memperkuat keamanan dengan hashing PIN 2.048 iterasi HMAC-SHA256, penalti brute-force persisten, pembersihan otomatis file ekspor & struk saat logout, serta aturan Firestore ketat.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Major 60/120 FPS UI performance upgrade: GPU RepaintBoundary caching on all custom painters, removed full-screen ShaderMask saveLayer on Home, and lazy SliverList rendering on Transactions.',
+          textId: 'Peningkatan performa UI 60/120 FPS (anti nge-frame): caching GPU RepaintBoundary pada seluruh dekorasi latar, penghapusan ShaderMask berat di Beranda, serta rendering SliverList hemat memori di Riwayat Transaksi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '1.11.38',
       dateEn: 'November 5, 2026',
       dateId: '5 November 2026',
-      isCurrent: true,
       changes: [
         ChangeItem(
           type: ChangeType.added,
@@ -1020,17 +1047,23 @@ class AppChangelogSheet extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(20, 14, 16, 12),
                 child: Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.deepForest.withValues(alpha: 0.12),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.history_edu_rounded,
-                        color: AppColors.deepForest,
-                        size: 24,
-                      ),
+                    Builder(
+                      builder: (ctx) {
+                        final isCyber = ctx.isCyberpunk;
+                        final iconCol = isCyber ? ctx.themeColors.primary : AppColors.deepForest;
+                        return Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: iconCol.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.history_edu_rounded,
+                            color: iconCol,
+                            size: 24,
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -1100,6 +1133,8 @@ class _ReleaseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurface.withValues(alpha: 0.6);
+    final isCyber = context.isCyberpunk;
+    final primaryCol = isCyber ? context.themeColors.primary : AppColors.deepForest;
 
     return Container(
       decoration: BoxDecoration(
@@ -1107,7 +1142,7 @@ class _ReleaseCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: release.isCurrent
-              ? AppColors.deepForest.withValues(alpha: 0.4)
+              ? primaryCol.withValues(alpha: 0.45)
               : theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
           width: release.isCurrent ? 1.5 : 1.0,
         ),
@@ -1122,7 +1157,7 @@ class _ReleaseCard extends StatelessWidget {
                 'v${release.version}',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: release.isCurrent ? AppColors.deepForest : null,
+                  color: release.isCurrent ? primaryCol : null,
                 ),
               ),
               const SizedBox(width: 8),
@@ -1130,13 +1165,13 @@ class _ReleaseCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: AppColors.deepForest,
+                    color: primaryCol,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     isIndonesian ? 'TERBARU' : 'LATEST',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: isCyber ? const Color(0xFF080912) : Colors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.5,

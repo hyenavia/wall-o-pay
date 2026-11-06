@@ -63,10 +63,10 @@ Future<void> showTotalBudgetDialog(
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.deepForest.withValues(alpha: 0.1),
+                    color: (ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest).withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.calculate_outlined, color: AppColors.deepForest),
+                  child: Icon(Icons.calculate_outlined, color: ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -150,19 +150,19 @@ Future<void> showTotalBudgetDialog(
                       child: Column(
                         children: [
                           _previewRow(
-                            BudgetBucket.needs.color,
+                            BudgetBucket.needs.colorIn(ctx),
                             context.tr('Needs (50%)'),
                             rupiah(stdNeeds),
                           ),
                           const Divider(height: 12),
                           _previewRow(
-                            BudgetBucket.wants.color,
+                            BudgetBucket.wants.colorIn(ctx),
                             context.tr('Wants (30%)'),
                             rupiah(stdWants),
                           ),
                           const Divider(height: 12),
                           _previewRow(
-                            BudgetBucket.savings.color,
+                            BudgetBucket.savings.colorIn(ctx),
                             context.tr('Savings & Goals (20%)'),
                             rupiah(stdSavings),
                           ),
@@ -173,7 +173,7 @@ Future<void> showTotalBudgetDialog(
                     // Input Kustom Nominal (Tabungan, Kebutuhan, Keinginan)
                     Text(
                       context.tr('Savings Allocation'),
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: BudgetBucket.savings.color),
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: BudgetBucket.savings.colorIn(ctx)),
                     ),
                     const SizedBox(height: 4),
                     TextField(
@@ -184,7 +184,7 @@ Future<void> showTotalBudgetDialog(
                         hintText: '100000',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         filled: true,
-                        fillColor: BudgetBucket.savings.color.withValues(alpha: 0.08),
+                        fillColor: BudgetBucket.savings.colorIn(ctx).withValues(alpha: 0.08),
                       ),
                       onChanged: (_) => setState(() {}),
                     ),
@@ -215,7 +215,7 @@ Future<void> showTotalBudgetDialog(
 
                     Text(
                       context.tr('Needs Allocation'),
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: BudgetBucket.needs.color),
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: BudgetBucket.needs.colorIn(ctx)),
                     ),
                     const SizedBox(height: 4),
                     TextField(
@@ -226,7 +226,7 @@ Future<void> showTotalBudgetDialog(
                         hintText: '350000',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         filled: true,
-                        fillColor: BudgetBucket.needs.color.withValues(alpha: 0.08),
+                        fillColor: BudgetBucket.needs.colorIn(ctx).withValues(alpha: 0.08),
                       ),
                       onChanged: (_) => setState(() {}),
                     ),
@@ -234,7 +234,7 @@ Future<void> showTotalBudgetDialog(
 
                     Text(
                       context.tr('Wants Allocation'),
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: BudgetBucket.wants.color),
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: BudgetBucket.wants.colorIn(ctx)),
                     ),
                     const SizedBox(height: 4),
                     TextField(
@@ -245,7 +245,7 @@ Future<void> showTotalBudgetDialog(
                         hintText: '150000',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         filled: true,
-                        fillColor: BudgetBucket.wants.color.withValues(alpha: 0.08),
+                        fillColor: BudgetBucket.wants.colorIn(ctx).withValues(alpha: 0.08),
                       ),
                       onChanged: (_) => setState(() {}),
                     ),
@@ -256,7 +256,7 @@ Future<void> showTotalBudgetDialog(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
                         color: remainingToAllocate == 0
-                            ? AppColors.deepForest.withValues(alpha: 0.1)
+                            ? (ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest).withValues(alpha: 0.1)
                             : Colors.amber.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -267,7 +267,9 @@ Future<void> showTotalBudgetDialog(
                                 ? Icons.check_circle_outline
                                 : Icons.info_outline,
                             size: 16,
-                            color: remainingToAllocate == 0 ? AppColors.deepForest : Colors.amber[800],
+                            color: remainingToAllocate == 0
+                                ? (ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest)
+                                : Colors.amber[800],
                           ),
                           const SizedBox(width: 8),
                           Expanded(
@@ -280,7 +282,9 @@ Future<void> showTotalBudgetDialog(
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: remainingToAllocate == 0 ? AppColors.deepForest : Colors.amber[900],
+                                color: remainingToAllocate == 0
+                                    ? (ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest)
+                                    : Colors.amber[900],
                               ),
                             ),
                           ),
@@ -298,7 +302,8 @@ Future<void> showTotalBudgetDialog(
               ),
               FilledButton(
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.deepForest,
+                  backgroundColor: ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest,
+                  foregroundColor: ctx.isCyberpunk ? ctx.themeColors.onPrimary : Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () async {

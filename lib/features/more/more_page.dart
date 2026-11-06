@@ -60,6 +60,10 @@ class MorePage extends StatelessWidget {
           MaterialPageRoute<void>(builder: (_) => page),
         );
 
+    final colors = context.themeColors;
+    final isCyber = colors.isCyberpunk;
+    final primaryBadge = isCyber ? colors.primary : AppColors.sage;
+
     return Scaffold(
       appBar: pageAppBar(context, title: Text(context.tr('More Features'))),
       body: BotanicalBackgroundSheet(
@@ -73,7 +77,7 @@ class MorePage extends StatelessWidget {
                 children: [
                   tile(
                     Icons.account_balance_wallet_outlined,
-                    AppColors.sage,
+                    primaryBadge,
                     context.tr('Accounts'),
                     context.tr('Cash, bank, and e-wallet balances'),
                     () => open(const AccountsPage()),
@@ -81,7 +85,7 @@ class MorePage extends StatelessWidget {
                   const Divider(height: 1, indent: 68),
                   tile(
                     Icons.swap_horiz_rounded,
-                    AppColors.income,
+                    isCyber ? colors.income : AppColors.income,
                     context.tr('Transfer balance'),
                     context.tr('Move money between accounts and wallets'),
                     () => showTransactionForm(context, initialType: TxType.transfer),
@@ -89,7 +93,7 @@ class MorePage extends StatelessWidget {
                   const Divider(height: 1, indent: 68),
                   tile(
                     Icons.handshake_outlined,
-                    AppColors.warning,
+                    isCyber ? colors.warning : AppColors.warning,
                     context.tr('Debts & splits'),
                     context.tr('Who owes whom, and splitting bills'),
                     () => open(const DebtsPage()),
@@ -105,7 +109,7 @@ class MorePage extends StatelessWidget {
                 children: [
                   tile(
                     Icons.pie_chart_outline_rounded,
-                    AppColors.income,
+                    isCyber ? colors.income : AppColors.income,
                     context.tr('Budget'),
                     context.tr('Set monthly or weekly spending limits per category.'),
                     () => open(const BudgetPage()),
@@ -113,7 +117,7 @@ class MorePage extends StatelessWidget {
                   const Divider(height: 1, indent: 68),
                   tile(
                     Icons.flag_outlined,
-                    AppColors.sage,
+                    primaryBadge,
                     context.tr('Goals'),
                     context.tr('Savings goals and progress'),
                     () => open(const GoalsPage()),

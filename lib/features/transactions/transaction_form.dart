@@ -545,7 +545,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 label: context.tr('Amount'),
                 prefixText: 'Rp ',
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.calculate_outlined, color: AppColors.sage),
+                  icon: Icon(Icons.calculate_outlined, color: context.themeColors.primary),
                   tooltip: context.tr('Calculator'),
                   onPressed: _openCalculator,
                 ),
@@ -644,8 +644,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                       padding: EdgeInsets.zero,
                     ),
                     onPressed: () => setState(() => _showAdminFee = true),
-                    icon: const Icon(Icons.add_circle_outline, size: 16, color: AppColors.sage),
-                    label: Text(context.tr('+ Add admin fee'), style: const TextStyle(color: AppColors.sage, fontSize: 13)),
+                    icon: Icon(Icons.add_circle_outline, size: 16, color: context.themeColors.primary),
+                    label: Text(context.tr('+ Add admin fee'), style: TextStyle(color: context.themeColors.primary, fontSize: 13)),
                   ),
                 )
               else ...[
@@ -761,7 +761,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: _showMoreDetails
-                        ? AppColors.deepForest.withValues(alpha: 0.4)
+                        ? context.themeColors.heroBackground.withValues(alpha: 0.4)
                         : Colors.transparent,
                   ),
                 ),
@@ -771,7 +771,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     Icon(
                       _showMoreDetails ? Icons.expand_less : Icons.tune_rounded,
                       size: 18,
-                      color: AppColors.sage,
+                      color: context.themeColors.primary,
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -779,7 +779,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                           ? context.tr('Hide extra details')
                           : context.tr('More details (Date, note, receipt...)'),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.sage,
+                        color: context.themeColors.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -895,7 +895,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   decoration: BoxDecoration(
                     color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.deepForest.withValues(alpha: 0.3)),
+                    border: Border.all(color: context.themeColors.borderOutline),
                   ),
                   child: Row(
                     children: [
@@ -924,14 +924,14 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                               onTap: () => _showReceiptPreview(context, _receiptPath!),
                               child: Text(
                                 context.tr('Tap to preview'),
-                                style: theme.textTheme.bodySmall?.copyWith(color: AppColors.deepForest),
+                                style: theme.textTheme.bodySmall?.copyWith(color: context.themeColors.primary),
                               ),
                             ),
                           ],
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete_outline, color: AppColors.expense),
+                        icon: Icon(Icons.delete_outline, color: context.themeColors.expense),
                         tooltip: context.tr('Remove receipt'),
                         onPressed: () => setState(() => _receiptPath = null),
                       ),
@@ -978,15 +978,16 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
             ],
             if (_error != null) ...[
               const SizedBox(height: 12),
-              Text(_error!, style: const TextStyle(color: AppColors.expense)),
+              Text(_error!, style: TextStyle(color: context.themeColors.expense)),
             ],
             const SizedBox(height: 20),
             FilledButton(
               onPressed: _save,
               style: FilledButton.styleFrom(
                 backgroundColor: _type == TxType.transfer
-                    ? const Color(0xFF00897B)
-                    : (_type == TxType.income ? AppColors.income : AppColors.expense),
+                    ? (context.isCyberpunk ? context.themeColors.secondaryNeon : const Color(0xFF00897B))
+                    : (_type == TxType.income ? context.themeColors.income : context.themeColors.expense),
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
@@ -1029,10 +1030,10 @@ class _QuickAmountChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: AppColors.sage,
+              color: context.themeColors.primary,
             ),
           ),
         ),

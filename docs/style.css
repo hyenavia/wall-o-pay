@@ -3,7 +3,7 @@
    Signature Botanical Forest (Unified Theme)
    ========================================================================== */
 
-:root, [data-theme="signature"], [data-theme="dark"] {
+:root, [data-theme="signature"], [data-theme="dark"], [data-theme="botanical"] {
   /* Color Palette - Signature Botanical Forest (Lush Emerald Depth) */
   --primary: #A9C5B1;                 /* Signature Sage (AppColors.sage) */
   --primary-hover: #C5DBCB;           /* Hover Mint */
@@ -19,6 +19,7 @@
   --income: #2E8B57;                  /* Sea Green */
   --expense: #E55353;                 /* Botanical Coral */
   --warning: #E8A33D;                 /* Warm Amber */
+  --secondary-neon: #A9C5B1;          /* Sage Accent */
   
   --bg-page: #121D17;                 /* Lush Botanical Night Pine */
   --bg-surface: #1E3026;              /* Elevated Velvet Emerald Card Surface */
@@ -51,6 +52,46 @@
 
   --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+}
+
+[data-theme="cyberpunk"] {
+  /* Color Palette - Pure Cyberpunk (Edgerunners Edition) */
+  --primary: #00F0FF;                 /* Electric Cyan */
+  --primary-hover: #5DF5FF;           /* Luminous Cyan Hover */
+  --primary-light: #13172E;           /* Midnight Cyan Tint Container */
+  --primary-container: #13172E;       /* Hero Surface Container */
+  --on-primary: #080912;              /* Night City Obsidian Contrast */
+  
+  --secondary: #13172E;               /* Deep Midnight */
+  --secondary-light: #121528;         /* Card Surface */
+  --secondary-dark: #00F0FF;          /* Electric Cyan Highlight */
+  
+  --accent: #FCEE0A;                  /* Edgerunner Yellow (FAB / Accent) */
+  --income: #00FF9D;                  /* Matrix Mint */
+  --expense: #FF2A6D;                 /* Laser Pink */
+  --warning: #FCEE0A;                 /* Cyber Yellow */
+  --secondary-neon: #B829FF;          /* Electric Violet */
+  
+  --bg-page: #080912;                 /* Night City Obsidian */
+  --bg-surface: #121528;              /* Card Surface */
+  --bg-surface-elevated: #191E38;     /* Elevated Container */
+  --bg-card: rgba(18, 21, 40, 0.94);  /* Cyber Glassmorphism */
+  
+  --border: #232946;                  /* Cyber Dark Indigo Border */
+  --border-subtle: rgba(0, 240, 255, 0.22);
+  --border-focus: rgba(0, 240, 255, 0.65);
+  
+  --text-main: #F0F6FF;               /* High-contrast cyber ice white */
+  --text-muted: #7C86A6;              /* Slate Blue Muted */
+  --text-subtle: #4D5675;             /* Deep Cyber Navy Muted */
+  --text-inverse: #080912;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.75);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.88);
+  --shadow-glow: 0 0 36px rgba(0, 240, 255, 0.28);
+
+  --font-display: 'Rajdhani', 'Outfit', sans-serif;
 }
 
 /* ==========================================================================
@@ -231,26 +272,55 @@ section {
   gap: 0.75rem;
 }
 
+.theme-toggle-btn,
 .theme-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--primary);
-  background: rgba(35, 75, 59, 0.35);
+  color: var(--text-main);
+  background: var(--bg-surface-elevated);
   border: 1px solid var(--border);
-  padding: 0.38rem 0.8rem;
+  padding: 0.38rem 0.85rem;
   border-radius: var(--radius-full);
   letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  user-select: none;
+  text-decoration: none;
 }
 
-.theme-badge .badge-dot {
-  width: 6px;
-  height: 6px;
+.theme-toggle-btn:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 16px var(--shadow-glow);
+  transform: translateY(-1px);
+}
+
+.theme-toggle-btn .badge-dot {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent);
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle-btn .theme-chip-action {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--primary);
+  font-weight: 700;
+  border: 1px solid var(--border-subtle);
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle-btn:hover .theme-chip-action {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
 }
 
 .btn-nav-download {
@@ -780,37 +850,6 @@ section {
 .section-desc {
   font-size: 1.05rem;
   color: var(--text-muted);
-}
-
-/* ==========================================================================
-   Brand Banner Section
-   ========================================================================== */
-
-.banner-section {
-  padding: 1.5rem 0 3.5rem;
-}
-
-.banner-card {
-  position: relative;
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-  background: var(--bg-surface);
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
-}
-
-.banner-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.6);
-  border-color: rgba(169, 197, 177, 0.25);
-}
-
-.banner-img {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
 }
 
 /* ==========================================================================
@@ -1535,4 +1574,207 @@ section {
   color: var(--primary);
   letter-spacing: 0.05em;
   text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Cyberpunk Edgerunners Mode - Enhanced Visual Overrides
+   ========================================================================== */
+
+[data-theme="cyberpunk"] .glow-1 {
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.28) 0%, rgba(8, 9, 18, 0) 70%);
+}
+
+[data-theme="cyberpunk"] .glow-2 {
+  background: radial-gradient(circle, rgba(255, 42, 109, 0.20) 0%, rgba(8, 9, 18, 0) 70%);
+}
+
+[data-theme="cyberpunk"] .glow-3 {
+  background: radial-gradient(circle, rgba(252, 238, 10, 0.16) 0%, rgba(8, 9, 18, 0) 70%);
+}
+
+[data-theme="cyberpunk"] .gradient-text {
+  background: linear-gradient(135deg, #00F0FF 0%, #FCEE0A 52%, #FF2A6D 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="cyberpunk"] .hero-title,
+[data-theme="cyberpunk"] .section-title,
+[data-theme="cyberpunk"] .download-title,
+[data-theme="cyberpunk"] .balance-card-amount,
+[data-theme="cyberpunk"] .pulse-amount,
+[data-theme="cyberpunk"] .specs-title {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+
+[data-theme="cyberpunk"] .hero-badge {
+  background: rgba(0, 240, 255, 0.1);
+  border-color: rgba(0, 240, 255, 0.4);
+  color: #00F0FF;
+}
+
+[data-theme="cyberpunk"] .hero-badge .badge-pulse {
+  background: #00F0FF;
+  box-shadow: 0 0 10px #00F0FF;
+}
+
+[data-theme="cyberpunk"] .brand-tag {
+  background: rgba(0, 240, 255, 0.12);
+  color: #00F0FF;
+  border: 1px solid rgba(0, 240, 255, 0.35);
+}
+
+[data-theme="cyberpunk"] .theme-toggle-btn {
+  border-color: rgba(0, 240, 255, 0.35);
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.15);
+}
+
+[data-theme="cyberpunk"] .theme-toggle-btn .badge-dot {
+  background: #FCEE0A;
+  box-shadow: 0 0 10px #FCEE0A;
+}
+
+[data-theme="cyberpunk"] .theme-toggle-btn .theme-chip-action {
+  color: #FCEE0A;
+  border-color: rgba(252, 238, 10, 0.3);
+}
+
+[data-theme="cyberpunk"] .theme-toggle-btn:hover .theme-chip-action {
+  background: #FCEE0A;
+  color: #080912;
+  border-color: #FCEE0A;
+}
+
+[data-theme="cyberpunk"] .phone-frame {
+  border-color: #121528;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 40px rgba(0, 240, 255, 0.16);
+}
+
+[data-theme="cyberpunk"] .screen-balance-card {
+  background: linear-gradient(135deg, #13172E 0%, #1A102B 100%);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.15);
+}
+
+[data-theme="cyberpunk"] .screen-pulse-card {
+  background: rgba(18, 21, 40, 0.95);
+  border-color: rgba(0, 240, 255, 0.3);
+}
+
+[data-theme="cyberpunk"] .screen-pulse-card .pulse-badge {
+  background: rgba(0, 255, 157, 0.15);
+  color: #00FF9D;
+  border: 1px solid rgba(0, 255, 157, 0.3);
+}
+
+[data-theme="cyberpunk"] .screen-pulse-card .pulse-fill {
+  background: linear-gradient(90deg, #00F0FF, #00FF9D);
+}
+
+[data-theme="cyberpunk"] .phone-card-float {
+  background: rgba(18, 21, 40, 0.92);
+  border-color: rgba(0, 240, 255, 0.3);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.12);
+}
+
+[data-theme="cyberpunk"] .feature-card {
+  background: rgba(18, 21, 40, 0.8);
+  border-color: rgba(35, 41, 70, 0.8);
+}
+
+[data-theme="cyberpunk"] .feature-card:hover {
+  border-color: rgba(0, 240, 255, 0.5);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 24px rgba(0, 240, 255, 0.18);
+}
+
+[data-theme="cyberpunk"] .feature-icon-wrapper {
+  background: rgba(0, 240, 255, 0.12);
+  border-color: rgba(0, 240, 255, 0.25);
+}
+
+[data-theme="cyberpunk"] .showcase-content-card {
+  background: rgba(18, 21, 40, 0.9);
+  border-color: rgba(0, 240, 255, 0.3);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 240, 255, 0.12);
+}
+
+[data-theme="cyberpunk"] .showcase-tab-btn {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+[data-theme="cyberpunk"] .showcase-tab-btn.active {
+  background: rgba(0, 240, 255, 0.15);
+  color: #00F0FF;
+  border-color: rgba(0, 240, 255, 0.6);
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.2);
+}
+
+[data-theme="cyberpunk"] .btn-primary {
+  background: #00F0FF;
+  color: #080912;
+  font-weight: 800;
+  box-shadow: 0 8px 24px rgba(0, 240, 255, 0.35);
+}
+
+[data-theme="cyberpunk"] .btn-primary:hover {
+  background: #5DF5FF;
+  box-shadow: 0 12px 30px rgba(0, 240, 255, 0.55);
+}
+
+[data-theme="cyberpunk"] .btn-download-main {
+  background: #00F0FF;
+  color: #080912;
+  font-weight: 800;
+  box-shadow: 0 12px 32px rgba(0, 240, 255, 0.35);
+}
+
+[data-theme="cyberpunk"] .btn-download-main:hover {
+  background: #5DF5FF;
+  box-shadow: 0 16px 40px rgba(0, 240, 255, 0.6);
+}
+
+[data-theme="cyberpunk"] .btn-nav-download {
+  background: #00F0FF;
+  color: #080912;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0, 240, 255, 0.3);
+}
+
+[data-theme="cyberpunk"] .btn-nav-download:hover {
+  background: #5DF5FF;
+  box-shadow: 0 6px 18px rgba(0, 240, 255, 0.5);
+}
+
+[data-theme="cyberpunk"] .download-card-wrapper {
+  background: linear-gradient(135deg, rgba(19, 23, 46, 0.95) 0%, rgba(8, 9, 18, 0.98) 100%);
+  border-color: rgba(0, 240, 255, 0.35);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 240, 255, 0.16);
+}
+
+[data-theme="cyberpunk"] .download-specs-card {
+  background: rgba(18, 21, 40, 0.85);
+  border-color: rgba(0, 240, 255, 0.3);
+}
+
+[data-theme="cyberpunk"] .install-step-card {
+  background: rgba(18, 21, 40, 0.85);
+  border-color: rgba(35, 41, 70, 0.8);
+}
+
+[data-theme="cyberpunk"] .install-step-card:hover {
+  border-color: rgba(0, 240, 255, 0.4);
+}
+
+[data-theme="cyberpunk"] .comp-table th.highlight-col,
+[data-theme="cyberpunk"] .comp-table td.highlight-col {
+  background: rgba(0, 240, 255, 0.08);
+  border-left-color: rgba(0, 240, 255, 0.25);
+  border-right-color: rgba(0, 240, 255, 0.25);
+}
+
+[data-theme="cyberpunk"] .lore-quote-card {
+  background: linear-gradient(135deg, rgba(19, 23, 46, 0.75) 0%, rgba(8, 9, 18, 0.95) 100%);
+  border-color: rgba(0, 240, 255, 0.25);
 }

@@ -4,6 +4,41 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-11-06
+
+### 🌟 A New Era of Wall o' Pay (Major Milestone Release)
+Version 2.0 marks the start of a new chapter for Wall o' Pay — bringing a complete dual-design identity with the **Cyberpunk Neo-Tokyo** theme, hardware-backed **Universal Biometric Unlock**, key-stretched security architecture, and high-framerate 60/120 FPS rendering across all screens.
+
+### Added
+- **Dual Visual Identity & Cyberpunk Neo-Tokyo Theme:**
+  - Introduced the **Cyberpunk Neo-Tokyo** theme as a first-class visual experience alongside the organic **Botanical Garden** theme.
+  - Deep OLED midnight canvas (`#0D0F18`), high-voltage cyan accents (`#00F0FF`), and neon telemetry glowing cards.
+  - Added custom circuit canopy canvases, grid painters, and futuristic brand badges.
+  - Designed the **Hybrid App Identity** uniting botanical leaf motifs with glowing cyber circuits across launcher icons and web showcase assets.
+- **Universal Biometric Unlock (Fingerprint & Face Recognition):**
+  - Integrated device-level biometric authentication (`local_auth`) seamlessly alongside the 6-digit App PIN Lock, automatically adapting to devices with Fingerprint only, Face Unlock only, or both.
+  - Added automatic biometric prompt on `LockScreen` launch and a dedicated biometric quick-trigger button on `PinPad`.
+  - Added **Biometric Unlock** toggle in `SecurityPage` with hardware enrollment verification and per-account local persistence.
+- **Hardware-Backed Secret Isolation (`FlutterSecureStorage`):**
+  - Migrated PIN hashes, salts, and lockout states out of plaintext storage into Android Keystore (`EncryptedSharedPreferences`) and iOS Keychain with seamless automatic migration for existing accounts.
+- **Firestore Security Rules (`firestore.rules`):**
+  - Implemented strict owner-only access controls for `/users/{uid}` and all financial subcollections, restricting `/usernames/{username}` against unauthenticated bulk enumeration.
+
+### Changed
+- **Security Hardening & Anti-Data-Leakage Architecture:**
+  - **Key-Stretched PIN Hashing (`v2` HMAC-SHA256):** Upgraded PIN hashing from single-pass SHA-256 to 2,048-iteration salted HMAC-SHA256 with seamless on-unlock auto-upgrade from legacy `v1` hashes.
+  - **Persistent Brute-Force PIN Lockout:** Moved PIN failure tracking and lockout timers (`30s` -> `120s` -> `300s` exponential backoff) into persistent encrypted storage (`Lock`) so lockouts cannot be bypassed by force-closing the app.
+  - **Sensitive File Purge on Logout / Data Reset:** `AppDatabase.resetAllData()`, `ExportService`, and `ReportService` now automatically delete local receipt image attachments, `shared_receipts`, and temporary `.csv`/`.json`/`.pdf` export files after sharing or logging out.
+  - **Android Backup & Signing Protection:** Disabled unencrypted OS auto-backup (`android:allowBackup="false"`) in `AndroidManifest.xml`, untracked release signing credentials from Git (`key.properties` & `*.jks`), and added GitHub Secrets support to `.github/workflows/release.yml`.
+- **60/120 FPS Rendering & Scroll Performance Optimization:**
+  - Fixed `shouldRepaint` on all 6 custom decorative painters (`BotanicalCanopyPainter`, `BotanicalHeroCardPainter`, `BotanicalBackgroundPainter`, `CyberHeroCardPainter`, `CyberCanopyPainter`, `CyberBackgroundPainter`) and wrapped static vector canvases in `RepaintBoundary` (`isComplex: true`) to eliminate redundant GPU rasterization on every frame.
+  - Replaced full-screen `ShaderMask(blendMode: BlendMode.dstIn)` on `HomePage` with a lightweight top fade overlay, eliminating offscreen `saveLayer` frame drops during scrolling.
+  - Converted `TransactionsPage` to lazy `CustomScrollView` + `SliverList.builder` with 150ms search input debounce and cached `MemoryImage` avatar providers in `ProfileState`.
+- **Modernized Landing Page & Interactive Documentation (`docs/`):**
+  - Updated showcase to demonstrate the dual design language (Cyberpunk & Botanical) with live preview cards, direct download links, and synchronized specifications.
+
+---
+
 ## [1.11.38] - 2026-11-05
 
 ### Added

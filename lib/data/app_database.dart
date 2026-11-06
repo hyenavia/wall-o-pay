@@ -3,9 +3,12 @@
 /// ekspor/impor cadangan JSON, serta pemetaan sinkronisasi dua arah ([SyncTable]).
 library;
 
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'tables.dart';
 
@@ -770,8 +773,21 @@ class AppDatabase extends _$AppDatabase {
     return applied;
   }
 
-  /// Hapus semua data di perangkat ini, lalu isi ulang kategori bawaan.
+  /// Hapus semua data di perangkat ini (termasuk file gambar struk & cache ekspor sementara),
+  /// lalu isi ulang kategori bawaan.
   Future<void> resetAllData() async {
+    final receiptPaths = <String>{};
+    try {
+      final rows = await (select(transactions)
+            ..where((t) => t.receiptPath.isNotNull()))
+          .get();
+      for (final r in rows) {
+        if (r.receiptPath != null && r.receiptPath!.isNotEmpty) {
+          receiptPaths.add(r.receiptPath!);
+        }
+      }
+    } catch (_) {}
+
     await transaction(() async {
       await delete(transactions).go();
       await delete(budgets).go();
@@ -793,6 +809,41 @@ class AppDatabase extends _$AppDatabase {
       await _seedCategories();
       await _seedWallets();
     });
+
+    await _purgeLocalSensitiveFiles(receiptPaths);
+  }
+
+  Future<void> _purgeLocalSensitiveFiles(Set<String> receiptPaths) async {
+    if (kIsWeb) return;
+    for (final path in receiptPaths) {
+      try {
+        final f = File(path);
+        if (await f.exists()) await f.delete();
+      } catch (_) {}
+    }
+    try {
+      final supportDir = await getApplicationSupportDirectory();
+      final sharedReceiptsDir = Directory('${supportDir.path}/shared_receipts');
+      if (await sharedReceiptsDir.exists()) {
+        await sharedReceiptsDir.delete(recursive: true);
+      }
+    } catch (_) {}
+    try {
+      final tempDir = await getTemporaryDirectory();
+      if (await tempDir.exists()) {
+        await for (final entity in tempDir.list()) {
+          final name = entity.uri.pathSegments.lastWhere(
+            (s) => s.isNotEmpty,
+            orElse: () => '',
+          );
+          if (entity is File && name.startsWith('wall_o_pay_')) {
+            try {
+              await entity.delete();
+            } catch (_) {}
+          }
+        }
+      }
+    } catch (_) {}
   }
 
   // ---------- Sinkronisasi cloud ----------

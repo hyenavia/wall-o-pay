@@ -171,9 +171,15 @@ class ReportService {
     final stamp = DateFormat('yyyyMMdd').format(range.start);
     final file = File('${dir.path}/wall_o_pay_report_$stamp.pdf');
     await file.writeAsBytes(bytes);
-    await SharePlus.instance.share(
-      ShareParams(files: [XFile(file.path)], subject: 'Wall o\' Pay report'),
-    );
+    try {
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)], subject: 'Wall o\' Pay report'),
+      );
+    } finally {
+      try {
+        if (await file.exists()) await file.delete();
+      } catch (_) {}
+    }
   }
 
 }

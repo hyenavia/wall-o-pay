@@ -45,8 +45,11 @@ class BudgetPillarCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = context.themeColors;
+    final isCyber = context.isCyberpunk;
+    final bucketColor = bucket.colorIn(context);
     final isOver = allocated > 0 && spent > allocated;
-    final color = isOver ? AppColors.expense : bucket.color;
+    final color = isOver ? (isCyber ? colors.expense : AppColors.expense) : bucketColor;
 
     return AppCard(
       padding: EdgeInsets.zero,
@@ -64,10 +67,10 @@ class BudgetPillarCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: bucket.color.withValues(alpha: 0.12),
+                        color: bucketColor.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(bucket.icon, color: bucket.color, size: 22),
+                      child: Icon(bucket.icon, color: bucketColor, size: 22),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -179,15 +182,17 @@ class BudgetPillarCard extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.sage.withValues(alpha: 0.15),
+                            color: isCyber
+                                ? colors.primary.withValues(alpha: 0.15)
+                                : AppColors.sage.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             '+${rupiah(cCarry)}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.deepForest,
+                              color: isCyber ? colors.primary : AppColors.deepForest,
                             ),
                           ),
                         ),

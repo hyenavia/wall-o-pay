@@ -117,6 +117,27 @@ void main() {
       await Lock.instance.loadForUser(null);
     });
 
+    test('Lock enforces persistent brute-force lockout after 5 failed PIN attempts', () async {
+      await Lock.instance.load();
+      await Lock.instance.setPin('123456');
+      expect(Lock.instance.isLockedOut, isFalse);
+
+      for (var i = 0; i < 4; i++) {
+        expect(Lock.instance.verify('000000'), isFalse);
+        expect(Lock.instance.isLockedOut, isFalse);
+      }
+
+      // 5th wrong attempt triggers 30s lockout persisted in SharedPreferences
+      expect(Lock.instance.verify('000000'), isFalse);
+      expect(Lock.instance.isLockedOut, isTrue);
+      expect(Lock.instance.remainingLockoutSeconds, greaterThan(0));
+      // Even the correct PIN is rejected while locked out
+      expect(Lock.instance.verify('123456'), isFalse);
+
+      await Lock.instance.clearLocal('guest');
+      expect(Lock.instance.isLockedOut, isFalse);
+    });
+
     testWidgets('AuthPage shows Continue as Guest button and activates skipAuth',
         (tester) async {
       final container = ProviderContainer(

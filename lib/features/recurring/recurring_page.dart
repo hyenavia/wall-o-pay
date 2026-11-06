@@ -64,7 +64,10 @@ class RecurringPage extends ConsumerWidget {
                     ),
                     const SizedBox(height: 20),
                     FilledButton.icon(
-                      style: FilledButton.styleFrom(backgroundColor: AppColors.deepForest),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: context.themeColors.heroBackground,
+                        foregroundColor: Colors.white,
+                      ),
                       icon: const Icon(Icons.add, size: 18),
                       label: Text(context.tr('Add Schedule')),
                       onPressed: () => _showAddOrEditDialog(context, ref),
@@ -82,7 +85,9 @@ class RecurringPage extends ConsumerWidget {
             itemBuilder: (ctx, i) {
               final r = rules[i];
               final cat = cats[r.categoryId];
-              final catColor = cat != null ? Color(cat.colorValue) : AppColors.sage;
+              final catColor = cat != null
+                  ? Color(cat.colorValue)
+                  : (ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.sage);
               final wallet = r.walletId != null ? walletMap[r.walletId] : null;
 
               String freqText = switch (r.frequency) {
@@ -124,7 +129,9 @@ class RecurringPage extends ConsumerWidget {
                                 style: TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 14,
-                                  color: r.type == TxType.income ? AppColors.income : AppColors.expense,
+                                  color: r.type == TxType.income
+                                      ? (ctx.isCyberpunk ? ctx.themeColors.income : AppColors.income)
+                                      : (ctx.isCyberpunk ? ctx.themeColors.expense : AppColors.expense),
                                 ),
                               ),
                             ],
@@ -192,7 +199,7 @@ class RecurringPage extends ConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.deepForest,
+        backgroundColor: context.themeColors.heroBackground,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: Text(context.tr('Add Schedule')),
@@ -410,7 +417,10 @@ class _RecurringFormSheetState extends ConsumerState<_RecurringFormSheet> {
               width: double.infinity,
               height: 48,
               child: FilledButton(
-                style: FilledButton.styleFrom(backgroundColor: AppColors.deepForest),
+                style: FilledButton.styleFrom(
+                  backgroundColor: context.themeColors.heroBackground,
+                  foregroundColor: Colors.white,
+                ),
                 onPressed: () async {
                   final title = _titleCtl.text.trim();
                   final amount = parseAmount(_amountCtl.text);

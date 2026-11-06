@@ -48,20 +48,23 @@ TextTheme _applyTabularFigures(TextTheme textTheme) {
   );
 }
 
-/// Membangun objek [ThemeData] Material 3 dengan palet gelap Botanical Forest.
-ThemeData buildTheme([Brightness brightness = Brightness.dark]) {
+/// Membangun objek [ThemeData] Material 3 dengan palet gelap Botanical Forest atau Cyberpunk Edgerunners.
+ThemeData buildTheme([String preset = 'botanical']) {
+  final isCyber = preset == 'cyberpunk';
+  final colors = isCyber ? AppThemeColors.cyberpunk : AppThemeColors.botanical;
+
   final scheme = const ColorScheme.dark().copyWith(
-    primary: AppColors.sage,
-    onPrimary: AppColors.ink,
-    primaryContainer: AppColors.deepForest,
+    primary: colors.primary,
+    onPrimary: colors.onPrimary,
+    primaryContainer: colors.heroBackground,
     onPrimaryContainer: Colors.white,
-    secondary: AppColors.sage,
-    onSecondary: AppColors.ink,
-    surface: AppColors.cardSurface,
-    onSurface: const Color(0xFFE9EFEA),
-    surfaceContainerHighest: AppColors.surfaceContainer,
-    outline: AppColors.borderOutline,
-    outlineVariant: AppColors.borderOutline,
+    secondary: isCyber ? colors.secondaryNeon : colors.primary,
+    onSecondary: colors.onPrimary,
+    surface: colors.cardSurface,
+    onSurface: colors.textPrimary,
+    surfaceContainerHighest: colors.surfaceContainer,
+    outline: colors.borderOutline,
+    outlineVariant: colors.borderOutline,
   );
 
   final base = ThemeData(
@@ -70,70 +73,229 @@ ThemeData buildTheme([Brightness brightness = Brightness.dark]) {
     colorScheme: scheme,
   );
 
+  final fontTheme = isCyber
+      ? GoogleFonts.rajdhaniTextTheme(base.textTheme)
+      : GoogleFonts.plusJakartaSansTextTheme(base.textTheme);
+
   final styledTextTheme = _applyTabularFigures(
-    GoogleFonts.plusJakartaSansTextTheme(base.textTheme).apply(
-      bodyColor: const Color(0xFFE9EFEA),
-      displayColor: const Color(0xFFE9EFEA),
+    fontTheme.apply(
+      bodyColor: colors.textPrimary,
+      displayColor: colors.textPrimary,
     ),
   );
 
   return base.copyWith(
-    scaffoldBackgroundColor: AppColors.bg,
-    cardColor: AppColors.cardSurface,
-    canvasColor: AppColors.cardSurface,
-    dialogTheme: const DialogThemeData(backgroundColor: AppColors.cardSurface),
+    scaffoldBackgroundColor: colors.bg,
+    cardColor: colors.cardSurface,
+    canvasColor: colors.cardSurface,
+    dialogTheme: DialogThemeData(backgroundColor: colors.cardSurface),
     textTheme: styledTextTheme,
-    appBarTheme: const AppBarTheme(
+    extensions: [colors],
+    appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
       elevation: 0,
       scrolledUnderElevation: 0,
-      iconTheme: IconThemeData(color: Color(0xFFE9EFEA)),
+      iconTheme: IconThemeData(color: colors.textPrimary),
       titleTextStyle: TextStyle(
-        color: Color(0xFFE9EFEA),
+        color: colors.textPrimary,
         fontSize: 18,
         fontWeight: FontWeight.w700,
       ),
     ),
-    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: AppColors.cardSurface,
-      selectedItemColor: AppColors.sage,
-      unselectedItemColor: Color(0xFF7E9687),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: isCyber ? const Color(0xFF0D1021) : colors.cardSurface,
+      selectedItemColor: colors.primary,
+      unselectedItemColor: colors.textMuted,
     ),
-    bottomSheetTheme: const BottomSheetThemeData(
-      backgroundColor: AppColors.cardSurface,
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: colors.cardSurface,
       surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
     ),
     popupMenuTheme: PopupMenuThemeData(
-      color: AppColors.surfaceContainer,
+      color: colors.surfaceContainer,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      textStyle: const TextStyle(color: Color(0xFFE9EFEA)),
+      textStyle: TextStyle(color: colors.textPrimary),
     ),
     snackBarTheme: SnackBarThemeData(
-      backgroundColor: AppColors.surfaceContainer,
-      contentTextStyle: const TextStyle(color: Color(0xFFE9EFEA)),
+      backgroundColor: colors.surfaceContainer,
+      contentTextStyle: TextStyle(color: colors.textPrimary),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       behavior: SnackBarBehavior.floating,
     ),
-    floatingActionButtonTheme: const FloatingActionButtonThemeData(
-      backgroundColor: AppColors.sage,
-      foregroundColor: AppColors.ink,
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: colors.fabBackground,
+      foregroundColor: colors.fabForeground,
       elevation: 3,
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size(64, 48),
-        backgroundColor: AppColors.sage,
-        foregroundColor: AppColors.ink,
+        backgroundColor: colors.primary,
+        foregroundColor: colors.onPrimary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        textStyle: GoogleFonts.plusJakartaSans(
-          fontWeight: FontWeight.w700,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        ),
+        textStyle: isCyber
+            ? GoogleFonts.rajdhani(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                letterSpacing: 0.5,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              )
+            : GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.w700,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
       ),
     ),
   );
+}
+
+/// Token warna dinamis yang mendukung tema Botanical Forest dan Cyberpunk Edgerunners.
+@immutable
+class AppThemeColors extends ThemeExtension<AppThemeColors> {
+  const AppThemeColors({
+    required this.isCyberpunk,
+    required this.bg,
+    required this.cardSurface,
+    required this.surfaceContainer,
+    required this.borderOutline,
+    required this.primary,
+    required this.onPrimary,
+    required this.heroBackground,
+    required this.fabBackground,
+    required this.fabForeground,
+    required this.income,
+    required this.expense,
+    required this.warning,
+    required this.secondaryNeon,
+    required this.textPrimary,
+    required this.textMuted,
+  });
+
+  final bool isCyberpunk;
+  final Color bg;
+  final Color cardSurface;
+  final Color surfaceContainer;
+  final Color borderOutline;
+  final Color primary;
+  final Color onPrimary;
+  final Color heroBackground;
+  final Color fabBackground;
+  final Color fabForeground;
+  final Color income;
+  final Color expense;
+  final Color warning;
+  final Color secondaryNeon;
+  final Color textPrimary;
+  final Color textMuted;
+
+  static const botanical = AppThemeColors(
+    isCyberpunk: false,
+    bg: AppColors.bg,
+    cardSurface: AppColors.cardSurface,
+    surfaceContainer: AppColors.surfaceContainer,
+    borderOutline: AppColors.borderOutline,
+    primary: AppColors.sage,
+    onPrimary: AppColors.ink,
+    heroBackground: AppColors.deepForest,
+    fabBackground: AppColors.sage,
+    fabForeground: AppColors.ink,
+    income: AppColors.incomeOnDark,
+    expense: AppColors.expenseOnDark,
+    warning: AppColors.warning,
+    secondaryNeon: AppColors.sage,
+    textPrimary: Color(0xFFE9EFEA),
+    textMuted: Color(0xFF7E9687),
+  );
+
+  static const cyberpunk = AppThemeColors(
+    isCyberpunk: true,
+    bg: Color(0xFF080912),
+    cardSurface: Color(0xFF121528),
+    surfaceContainer: Color(0xFF191E38),
+    borderOutline: Color(0xFF232946),
+    primary: Color(0xFF00F0FF),
+    onPrimary: Color(0xFF080912),
+    heroBackground: Color(0xFF13172E),
+    fabBackground: Color(0xFFFCEE0A),
+    fabForeground: Color(0xFF080912),
+    income: Color(0xFF00FF9D),
+    expense: Color(0xFFFF2A6D),
+    warning: Color(0xFFFCEE0A),
+    secondaryNeon: Color(0xFFB829FF),
+    textPrimary: Color(0xFFF0F6FF),
+    textMuted: Color(0xFF7C86A6),
+  );
+
+  @override
+  AppThemeColors copyWith({
+    bool? isCyberpunk,
+    Color? bg,
+    Color? cardSurface,
+    Color? surfaceContainer,
+    Color? borderOutline,
+    Color? primary,
+    Color? onPrimary,
+    Color? heroBackground,
+    Color? fabBackground,
+    Color? fabForeground,
+    Color? income,
+    Color? expense,
+    Color? warning,
+    Color? secondaryNeon,
+    Color? textPrimary,
+    Color? textMuted,
+  }) {
+    return AppThemeColors(
+      isCyberpunk: isCyberpunk ?? this.isCyberpunk,
+      bg: bg ?? this.bg,
+      cardSurface: cardSurface ?? this.cardSurface,
+      surfaceContainer: surfaceContainer ?? this.surfaceContainer,
+      borderOutline: borderOutline ?? this.borderOutline,
+      primary: primary ?? this.primary,
+      onPrimary: onPrimary ?? this.onPrimary,
+      heroBackground: heroBackground ?? this.heroBackground,
+      fabBackground: fabBackground ?? this.fabBackground,
+      fabForeground: fabForeground ?? this.fabForeground,
+      income: income ?? this.income,
+      expense: expense ?? this.expense,
+      warning: warning ?? this.warning,
+      secondaryNeon: secondaryNeon ?? this.secondaryNeon,
+      textPrimary: textPrimary ?? this.textPrimary,
+      textMuted: textMuted ?? this.textMuted,
+    );
+  }
+
+  @override
+  AppThemeColors lerp(ThemeExtension<AppThemeColors>? other, double t) {
+    if (other is! AppThemeColors) return this;
+    return AppThemeColors(
+      isCyberpunk: t < 0.5 ? isCyberpunk : other.isCyberpunk,
+      bg: Color.lerp(bg, other.bg, t) ?? bg,
+      cardSurface: Color.lerp(cardSurface, other.cardSurface, t) ?? cardSurface,
+      surfaceContainer: Color.lerp(surfaceContainer, other.surfaceContainer, t) ?? surfaceContainer,
+      borderOutline: Color.lerp(borderOutline, other.borderOutline, t) ?? borderOutline,
+      primary: Color.lerp(primary, other.primary, t) ?? primary,
+      onPrimary: Color.lerp(onPrimary, other.onPrimary, t) ?? onPrimary,
+      heroBackground: Color.lerp(heroBackground, other.heroBackground, t) ?? heroBackground,
+      fabBackground: Color.lerp(fabBackground, other.fabBackground, t) ?? fabBackground,
+      fabForeground: Color.lerp(fabForeground, other.fabForeground, t) ?? fabForeground,
+      income: Color.lerp(income, other.income, t) ?? income,
+      expense: Color.lerp(expense, other.expense, t) ?? expense,
+      warning: Color.lerp(warning, other.warning, t) ?? warning,
+      secondaryNeon: Color.lerp(secondaryNeon, other.secondaryNeon, t) ?? secondaryNeon,
+      textPrimary: Color.lerp(textPrimary, other.textPrimary, t) ?? textPrimary,
+      textMuted: Color.lerp(textMuted, other.textMuted, t) ?? textMuted,
+    );
+  }
+}
+
+/// Helper extension untuk mengakses token warna tema dari [BuildContext].
+extension ThemeContextX on BuildContext {
+  AppThemeColors get themeColors =>
+      Theme.of(this).extension<AppThemeColors>() ?? AppThemeColors.botanical;
+  bool get isCyberpunk => themeColors.isCyberpunk;
 }

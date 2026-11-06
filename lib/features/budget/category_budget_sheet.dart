@@ -165,7 +165,8 @@ Future<void> showCategoryBudgetSheet(
                   width: double.infinity,
                   child: FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.deepForest,
+                      backgroundColor: ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest,
+                      foregroundColor: ctx.isCyberpunk ? ctx.themeColors.onPrimary : Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),

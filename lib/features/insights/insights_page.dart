@@ -52,329 +52,84 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
         child: currentTxsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(
-            child: Text(context.tr('Could not load data: {error}', {'error': e})),
+            child: Text(
+              context.tr('Could not load data: {error}', {'error': e}),
+            ),
           ),
           data: (currentTxs) {
-          final prevTxs = prevTxsAsync.value ?? const <TransactionEntry>[];
-          final trendTxs = trendTxsAsync.value ?? const <TransactionEntry>[];
+            final colors = context.themeColors;
+            final prevTxs = prevTxsAsync.value ?? const <TransactionEntry>[];
+            final trendTxs = trendTxsAsync.value ?? const <TransactionEntry>[];
 
-          int needTotal = 0;
-          int wantTotal = 0;
-          for (final t in currentTxs) {
-            if (t.type == TxType.expense) {
-              if (t.needWant == NeedWant.need) needTotal += t.amount;
-              if (t.needWant == NeedWant.want) wantTotal += t.amount;
+            int needTotal = 0;
+            int wantTotal = 0;
+            for (final t in currentTxs) {
+              if (t.type == TxType.expense) {
+                if (t.needWant == NeedWant.need) needTotal += t.amount;
+                if (t.needWant == NeedWant.want) wantTotal += t.amount;
+              }
             }
-          }
 
-          final summary = InsightEngine.computeSummary(
-            currentTxs: currentTxs,
-            prevTxs: prevTxs,
-          );
+            final summary = InsightEngine.computeSummary(
+              currentTxs: currentTxs,
+              prevTxs: prevTxs,
+            );
 
-          final categories = InsightEngine.computeCategories(
-            context: context,
-            currentTxs: currentTxs,
-            prevTxs: prevTxs,
-            categoryMap: cats,
-            totalExpense: summary.totalExpense,
-          );
+            final categories = InsightEngine.computeCategories(
+              context: context,
+              currentTxs: currentTxs,
+              prevTxs: prevTxs,
+              categoryMap: cats,
+              totalExpense: summary.totalExpense,
+            );
 
-          final chartPoints = InsightEngine.computeChartPoints(
-            currentTxs: currentTxs,
-            period: period,
-          );
+            final chartPoints = InsightEngine.computeChartPoints(
+              currentTxs: currentTxs,
+              period: period,
+            );
 
-          final smartInsights = InsightEngine.generateSmartInsights(
-            context: context,
-            summary: summary,
-            categories: categories,
-            currentTxs: currentTxs,
-            period: period,
-            categoryMap: cats,
-          );
+            final smartInsights = InsightEngine.generateSmartInsights(
+              context: context,
+              summary: summary,
+              categories: categories,
+              currentTxs: currentTxs,
+              period: period,
+              categoryMap: cats,
+            );
 
-          final periodLabel = isWeekly
-              ? context.tr('Weekly Summary')
-              : context.tr('Monthly Summary');
-          final prevPeriodName = isWeekly
-              ? context.tr('last week')
-              : context.tr('last month');
-          final trendTitle = isWeekly
-              ? context.tr('Last 6 Weeks Trend')
-              : context.tr('Last 6 Months Trend');
+            final periodLabel = isWeekly
+                ? context.tr('Weekly Summary')
+                : context.tr('Monthly Summary');
+            final prevPeriodName = isWeekly
+                ? context.tr('last week')
+                : context.tr('last month');
+            final trendTitle = isWeekly
+                ? context.tr('Last 6 Weeks Trend')
+                : context.tr('Last 6 Months Trend');
 
-          final List<Widget> content;
-          switch (_tab) {
-            case 1:
-              content = [
-                if (needTotal + wantTotal > 0) ...[
-                  SectionHeader(title: context.tr('Needs vs wants')),
-                  AppCard(
-                    child: _NeedsWantsCard(
-                      needTotal: needTotal,
-                      wantTotal: wantTotal,
+            final List<Widget> content;
+            switch (_tab) {
+              case 1:
+                content = [
+                  if (needTotal + wantTotal > 0) ...[
+                    SectionHeader(title: context.tr('Needs vs wants')),
+                    AppCard(
+                      child: _NeedsWantsCard(
+                        needTotal: needTotal,
+                        wantTotal: wantTotal,
+                      ),
                     ),
-                  ),
-                ],
-                SectionHeader(title: context.tr('Spending by category')),
-                if (categories.isEmpty)
-                  AppCard(child: Text(context.tr('No expenses in this period.')))
-                else
-                  AppCard(
-                    child: Column(
-                      children: [
-                        for (int i = 0; i < categories.length; i++)
-                          _TopCategoryRow(
-                            rank: i + 1,
-                            category: categories[i],
-                            prevPeriodName: prevPeriodName,
-                          ),
-                      ],
-                    ),
-                  ),
-                if (categories.isNotEmpty) ...[
-                  SectionHeader(title: context.tr('Expense Composition')),
-                  AppCard(
-                    child: ExpensePieChart(
-                      spent: {for (final c in categories) c.categoryId: c.amount},
-                      cats: cats,
-                    ),
-                  ),
-                ],
-              ];
-              break;
-            case 2:
-              content = [
-                SectionHeader(title: trendTitle),
-                AppCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.tr('Income vs Expense Comparison'),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurface.withValues(alpha: 0.65),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TrendBarChart(txs: trendTxs, period: period),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _TrendTable(txs: trendTxs, period: period),
-              ];
-              break;
-            default:
-              content = [
-                HeroCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            periodLabel,
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: Colors.white70,
-                              letterSpacing: 0.5,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: summary.isDeficit
-                                  ? AppColors.expense.withValues(alpha: 0.3)
-                                  : AppColors.sage.withValues(alpha: 0.25),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: summary.isDeficit
-                                    ? AppColors.expense.withValues(alpha: 0.6)
-                                    : AppColors.sage.withValues(alpha: 0.5),
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  summary.isDeficit
-                                      ? Icons.warning_rounded
-                                      : Icons.trending_up_rounded,
-                                  size: 14,
-                                  color: summary.isDeficit ? Colors.white : AppColors.sage,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  summary.isDeficit
-                                      ? context.tr('Deficit')
-                                      : context.tr('Surplus'),
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: summary.isDeficit ? Colors.white : AppColors.sage,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            '${summary.netBalance >= 0 ? '+' : ''}${rupiah(summary.netBalance)}',
-                            style: theme.textTheme.headlineMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        summary.totalIncome > 0 && !summary.isDeficit
-                            ? context.tr(
-                                '{pct}% of income left for savings',
-                                {'pct': summary.savingsRate.toStringAsFixed(1)},
-                              )
-                            : (summary.isDeficit
-                                ? context.tr('Spending exceeded income this period')
-                                : context.tr('Net difference between income and expenses')),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.75),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        height: 1,
-                        color: Colors.white.withValues(alpha: 0.12),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _SummarySubBox(
-                              label: context.tr('Income'),
-                              amount: rupiah(summary.totalIncome),
-                              icon: Icons.arrow_downward_rounded,
-                              iconColor: AppColors.income,
-                              bgColor: Colors.black.withValues(alpha: 0.18),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _SummarySubBox(
-                              label: context.tr('Expense'),
-                              amount: rupiah(summary.totalExpense),
-                              icon: Icons.arrow_upward_rounded,
-                              iconColor: AppColors.expense,
-                              bgColor: Colors.black.withValues(alpha: 0.18),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 14),
-                _PeriodComparisonCard(
-                  summary: summary,
-                  prevPeriodName: prevPeriodName,
-                  isWeekly: isWeekly,
-                ),
-                if (summary.isLowData) ...[
-                  const SizedBox(height: 20),
-                  _LowDataCard(
-                    onAddTransaction: () => showTransactionForm(context),
-                  ),
-                ] else ...[
-                  SectionHeader(
-                    title: isWeekly
-                        ? context.tr('Daily Expense Chart')
-                        : context.tr('Monthly Expense Chart'),
-                  ),
-                  AppCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              isWeekly
-                                  ? context.tr('7-day spending trend')
-                                  : context.tr('Weekly spending distribution'),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: scheme.onSurface.withValues(alpha: 0.65),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Text(
-                              rupiah(summary.totalExpense),
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.sage,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        PeriodExpenseBarChart(
-                          points: chartPoints,
-                          totalExpense: summary.totalExpense,
-                        ),
-                        const SizedBox(height: 10),
-                        Divider(color: scheme.outlineVariant.withValues(alpha: 0.4)),
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              isWeekly
-                                  ? context.tr('Daily average:')
-                                  : context.tr('Weekly average:'),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: scheme.onSurface.withValues(alpha: 0.6),
-                              ),
-                            ),
-                            Text(
-                              isWeekly
-                                  ? rupiah(summary.totalExpense ~/ 7)
-                                  : rupiah(summary.totalExpense ~/ (chartPoints.isEmpty ? 1 : chartPoints.length)),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (smartInsights.isNotEmpty) ...[
-                    SectionHeader(
-                      title: context.tr('Financial Insights'),
-                    ),
-                    for (final item in smartInsights)
-                      _SmartInsightCard(item: item),
                   ],
-                  SectionHeader(
-                    title: context.tr('Top Categories'),
-                  ),
+                  SectionHeader(title: context.tr('Spending by category')),
                   if (categories.isEmpty)
-                    AppCard(child: Text(context.tr('No expenses in this period.')))
+                    AppCard(
+                      child: Text(context.tr('No expenses in this period.')),
+                    )
                   else
                     AppCard(
                       child: Column(
                         children: [
-                          for (int i = 0; i < categories.length && i < 3; i++)
+                          for (int i = 0; i < categories.length; i++)
                             _TopCategoryRow(
                               rank: i + 1,
                               category: categories[i],
@@ -383,33 +138,333 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                         ],
                       ),
                     ),
-                ],
-              ];
-              break;
-          }
-
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
-            children: [
-              SizedBox(
-                width: double.infinity,
-                child: SegmentedButton<int>(
-                  showSelectedIcon: false,
-                  segments: [
-                    ButtonSegment(value: 0, label: Text(context.tr('Overview'))),
-                    ButtonSegment(value: 1, label: Text(context.tr('Categories'))),
-                    ButtonSegment(value: 2, label: Text(context.tr('Trend'))),
+                  if (categories.isNotEmpty) ...[
+                    SectionHeader(title: context.tr('Expense Composition')),
+                    AppCard(
+                      child: ExpensePieChart(
+                        spent: {
+                          for (final c in categories) c.categoryId: c.amount,
+                        },
+                        cats: cats,
+                      ),
+                    ),
                   ],
-                  selected: {_tab},
-                  onSelectionChanged: (s) => setState(() => _tab = s.first),
+                ];
+                break;
+              case 2:
+                content = [
+                  SectionHeader(title: trendTitle),
+                  AppCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.tr('Income vs Expense Comparison'),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurface.withValues(alpha: 0.65),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TrendBarChart(txs: trendTxs, period: period),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _TrendTable(txs: trendTxs, period: period),
+                ];
+                break;
+              default:
+                content = [
+                  HeroCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              periodLabel,
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: Colors.white70,
+                                letterSpacing: 0.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: summary.isDeficit
+                                    ? (colors.isCyberpunk
+                                              ? colors.expense
+                                              : AppColors.expense)
+                                          .withValues(alpha: 0.3)
+                                    : (colors.isCyberpunk
+                                              ? colors.income
+                                              : AppColors.sage)
+                                          .withValues(alpha: 0.25),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: summary.isDeficit
+                                      ? (colors.isCyberpunk
+                                                ? colors.expense
+                                                : AppColors.expense)
+                                            .withValues(alpha: 0.6)
+                                      : (colors.isCyberpunk
+                                                ? colors.income
+                                                : AppColors.sage)
+                                            .withValues(alpha: 0.5),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    summary.isDeficit
+                                        ? Icons.warning_rounded
+                                        : Icons.trending_up_rounded,
+                                    size: 14,
+                                    color: summary.isDeficit
+                                        ? Colors.white
+                                        : (colors.isCyberpunk
+                                              ? colors.income
+                                              : AppColors.sage),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    summary.isDeficit
+                                        ? context.tr('Deficit')
+                                        : context.tr('Surplus'),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: summary.isDeficit
+                                          ? Colors.white
+                                          : (colors.isCyberpunk
+                                                ? colors.income
+                                                : AppColors.sage),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Text(
+                              '${summary.netBalance >= 0 ? '+' : ''}${rupiah(summary.netBalance)}',
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          summary.totalIncome > 0 && !summary.isDeficit
+                              ? context.tr(
+                                  '{pct}% of income left for savings',
+                                  {
+                                    'pct': summary.savingsRate.toStringAsFixed(
+                                      1,
+                                    ),
+                                  },
+                                )
+                              : (summary.isDeficit
+                                    ? context.tr(
+                                        'Spending exceeded income this period',
+                                      )
+                                    : context.tr(
+                                        'Net difference between income and expenses',
+                                      )),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.75),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          height: 1,
+                          color: Colors.white.withValues(alpha: 0.12),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _SummarySubBox(
+                                label: context.tr('Income'),
+                                amount: rupiah(summary.totalIncome),
+                                icon: Icons.arrow_downward_rounded,
+                                iconColor: AppColors.income,
+                                bgColor: Colors.black.withValues(alpha: 0.18),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _SummarySubBox(
+                                label: context.tr('Expense'),
+                                amount: rupiah(summary.totalExpense),
+                                icon: Icons.arrow_upward_rounded,
+                                iconColor: AppColors.expense,
+                                bgColor: Colors.black.withValues(alpha: 0.18),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  _PeriodComparisonCard(
+                    summary: summary,
+                    prevPeriodName: prevPeriodName,
+                    isWeekly: isWeekly,
+                  ),
+                  if (summary.isLowData) ...[
+                    const SizedBox(height: 20),
+                    _LowDataCard(
+                      onAddTransaction: () => showTransactionForm(context),
+                    ),
+                  ] else ...[
+                    SectionHeader(
+                      title: isWeekly
+                          ? context.tr('Daily Expense Chart')
+                          : context.tr('Monthly Expense Chart'),
+                    ),
+                    AppCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                isWeekly
+                                    ? context.tr('7-day spending trend')
+                                    : context.tr(
+                                        'Weekly spending distribution',
+                                      ),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: scheme.onSurface.withValues(
+                                    alpha: 0.65,
+                                  ),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                rupiah(summary.totalExpense),
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: colors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          PeriodExpenseBarChart(
+                            points: chartPoints,
+                            totalExpense: summary.totalExpense,
+                          ),
+                          const SizedBox(height: 10),
+                          Divider(
+                            color: scheme.outlineVariant.withValues(alpha: 0.4),
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                isWeekly
+                                    ? context.tr('Daily average:')
+                                    : context.tr('Weekly average:'),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: scheme.onSurface.withValues(
+                                    alpha: 0.6,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                isWeekly
+                                    ? rupiah(summary.totalExpense ~/ 7)
+                                    : rupiah(
+                                        summary.totalExpense ~/
+                                            (chartPoints.isEmpty
+                                                ? 1
+                                                : chartPoints.length),
+                                      ),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (smartInsights.isNotEmpty) ...[
+                      SectionHeader(title: context.tr('Financial Insights')),
+                      for (final item in smartInsights)
+                        _SmartInsightCard(item: item),
+                    ],
+                    SectionHeader(title: context.tr('Top Categories')),
+                    if (categories.isEmpty)
+                      AppCard(
+                        child: Text(context.tr('No expenses in this period.')),
+                      )
+                    else
+                      AppCard(
+                        child: Column(
+                          children: [
+                            for (int i = 0; i < categories.length && i < 3; i++)
+                              _TopCategoryRow(
+                                rank: i + 1,
+                                category: categories[i],
+                                prevPeriodName: prevPeriodName,
+                              ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ];
+                break;
+            }
+
+            return ListView(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<int>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                        value: 0,
+                        label: Text(context.tr('Overview')),
+                      ),
+                      ButtonSegment(
+                        value: 1,
+                        label: Text(context.tr('Categories')),
+                      ),
+                      ButtonSegment(value: 2, label: Text(context.tr('Trend'))),
+                    ],
+                    selected: {_tab},
+                    onSelectionChanged: (s) => setState(() => _tab = s.first),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              ...content,
-            ],
-          );
-        },
-      ),
+                const SizedBox(height: 12),
+                ...content,
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -517,10 +572,9 @@ class _PeriodComparisonCard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                context.tr(
-                  'No expense data in {prev} for trend comparison.',
-                  {'prev': prevPeriodName},
-                ),
+                context.tr('No expense data in {prev} for trend comparison.', {
+                  'prev': prevPeriodName,
+                }),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurface.withValues(alpha: 0.7),
                 ),
@@ -535,50 +589,71 @@ class _PeriodComparisonCard extends StatelessWidget {
     final isSame = summary.expenseDiff == 0;
     final pct = summary.expensePctChange?.abs().toStringAsFixed(1) ?? '0';
 
+    final colors = context.themeColors;
+    final isCyber = colors.isCyberpunk;
+
     final Color badgeColor = isSame
         ? Colors.grey
-        : (isLower ? AppColors.income : AppColors.expense);
+        : (isLower
+              ? (isCyber ? colors.income : AppColors.income)
+              : (isCyber ? colors.expense : AppColors.expense));
 
     final IconData badgeIcon = isSame
         ? Icons.horizontal_rule_rounded
         : (isLower ? Icons.trending_down_rounded : Icons.trending_up_rounded);
 
     final String title = isSame
-        ? context.tr('Spending exactly matches {prev}.', {'prev': prevPeriodName})
+        ? context.tr('Spending exactly matches {prev}.', {
+            'prev': prevPeriodName,
+          })
         : (isLower
-            ? context.tr(
-                'Spending down {pct}% ({diff} saved)',
-                {
+              ? context.tr('Spending down {pct}% ({diff} saved)', {
                   'pct': pct,
                   'diff': rupiah(summary.expenseDiff.abs()),
-                },
-              )
-            : context.tr(
-                'Spending up {pct}% (+{diff})',
-                {
+                })
+              : context.tr('Spending up {pct}% (+{diff})', {
                   'pct': pct,
                   'diff': rupiah(summary.expenseDiff),
-                },
-              ));
+                }));
 
     final String subtitle = isSame
-        ? context.tr('Total spending equals previous period ({amount}).', {'amount': rupiah(summary.totalExpense)})
+        ? context.tr('Total spending equals previous period ({amount}).', {
+            'amount': rupiah(summary.totalExpense),
+          })
         : (isLower
-            ? context.tr(
-                'Great! Your spending is more controlled than in {prev} ({amount}).',
-                {'prev': prevPeriodName, 'amount': rupiah(summary.prevTotalExpense)},
-              )
-            : context.tr(
-                'Spending increased compared to {prev} ({amount}).',
-                {'prev': prevPeriodName, 'amount': rupiah(summary.prevTotalExpense)},
-              ));
+              ? context.tr(
+                  'Great! Your spending is more controlled than in {prev} ({amount}).',
+                  {
+                    'prev': prevPeriodName,
+                    'amount': rupiah(summary.prevTotalExpense),
+                  },
+                )
+              : context.tr(
+                  'Spending increased compared to {prev} ({amount}).',
+                  {
+                    'prev': prevPeriodName,
+                    'amount': rupiah(summary.prevTotalExpense),
+                  },
+                ));
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: badgeColor.withValues(alpha: 0.1),
+        color: badgeColor.withValues(alpha: isCyber ? 0.14 : 0.10),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: badgeColor.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: badgeColor.withValues(alpha: isCyber ? 0.50 : 0.30),
+          width: isCyber ? 1.2 : 1.0,
+        ),
+        boxShadow: isCyber
+            ? [
+                BoxShadow(
+                  color: badgeColor.withValues(alpha: 0.16),
+                  blurRadius: 14,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -634,6 +709,7 @@ class _TopCategoryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = context.themeColors;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -648,7 +724,9 @@ class _TopCategoryRow extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: rank <= 3
-                      ? AppColors.deepForest.withValues(alpha: 0.2)
+                      ? (colors.isCyberpunk
+                            ? colors.primary.withValues(alpha: 0.18)
+                            : AppColors.deepForest.withValues(alpha: 0.2))
                       : scheme.outlineVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(6),
                 ),
@@ -657,7 +735,9 @@ class _TopCategoryRow extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: rank <= 3 ? AppColors.sage : scheme.onSurface.withValues(alpha: 0.6),
+                    color: rank <= 3
+                        ? colors.primary
+                        : scheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ),
@@ -703,7 +783,7 @@ class _TopCategoryRow extends StatelessWidget {
                       Text(
                         '${category.percentage.toStringAsFixed(1)}%',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.sage,
+                          color: colors.primary,
                           fontWeight: FontWeight.w600,
                           fontSize: 11,
                         ),
@@ -748,6 +828,25 @@ class _SmartInsightCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = context.themeColors;
+    final isCyber = colors.isCyberpunk;
+    final Color accent;
+    if (isCyber) {
+      if (item.accentColor == AppColors.sage) {
+        accent = colors.primary;
+      } else if (item.accentColor == AppColors.income) {
+        accent = colors.income;
+      } else if (item.accentColor == AppColors.warning) {
+        accent = colors.warning;
+      } else if (item.accentColor == AppColors.expense ||
+          item.accentColor == const Color(0xFFEF9A9A)) {
+        accent = colors.expense;
+      } else {
+        accent = item.accentColor;
+      }
+    } else {
+      accent = item.accentColor;
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -755,7 +854,21 @@ class _SmartInsightCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: scheme.outlineVariant),
+        border: Border.all(
+          color: isCyber
+              ? accent.withValues(alpha: 0.45)
+              : scheme.outlineVariant,
+          width: isCyber ? 1.2 : 1.0,
+        ),
+        boxShadow: isCyber
+            ? [
+                BoxShadow(
+                  color: accent.withValues(alpha: 0.18),
+                  blurRadius: 14,
+                  offset: const Offset(0, 3),
+                ),
+              ]
+            : null,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -763,10 +876,10 @@ class _SmartInsightCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: item.accentColor.withValues(alpha: 0.15),
+              color: accent.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(item.icon, color: item.accentColor, size: 22),
+            child: Icon(item.icon, color: accent, size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -786,9 +899,12 @@ class _SmartInsightCard extends StatelessWidget {
                     ),
                     if (item.badge != null)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
                         decoration: BoxDecoration(
-                          color: item.accentColor.withValues(alpha: 0.12),
+                          color: accent.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -796,7 +912,7 @@ class _SmartInsightCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: item.accentColor,
+                            color: accent,
                           ),
                         ),
                       ),
@@ -828,25 +944,57 @@ class _LowDataCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final colors = context.themeColors;
+    final isCyber = colors.isCyberpunk;
 
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: scheme.outlineVariant),
+        border: Border.all(
+          color: isCyber
+              ? colors.primary.withValues(alpha: 0.40)
+              : scheme.outlineVariant,
+          width: isCyber ? 1.2 : 1.0,
+        ),
+        boxShadow: isCyber
+            ? [
+                BoxShadow(
+                  color: colors.primary.withValues(alpha: 0.14),
+                  blurRadius: 16,
+                  offset: const Offset(0, 3),
+                ),
+              ]
+            : null,
       ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.deepForest.withValues(alpha: 0.15),
+              color: colors.primary.withValues(alpha: 0.15),
               shape: BoxShape.circle,
+              border: isCyber
+                  ? Border.all(
+                      color: colors.primary.withValues(alpha: 0.60),
+                      width: 1.5,
+                    )
+                  : null,
+              boxShadow: isCyber
+                  ? [
+                      BoxShadow(
+                        color: colors.primary.withValues(alpha: 0.35),
+                        blurRadius: 16,
+                      ),
+                    ]
+                  : null,
             ),
-            child: const Icon(
-              Icons.auto_awesome_rounded,
-              color: AppColors.sage,
+            child: Icon(
+              colors.isCyberpunk
+                  ? Icons.electric_bolt_rounded
+                  : Icons.auto_awesome_rounded,
+              color: colors.primary,
               size: 36,
             ),
           ),
@@ -875,7 +1023,7 @@ class _LowDataCard extends StatelessWidget {
             icon: const Icon(Icons.add, size: 18),
             label: Text(context.tr('Add transaction')),
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.deepForest,
+              backgroundColor: colors.heroBackground,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(
@@ -889,7 +1037,6 @@ class _LowDataCard extends StatelessWidget {
   }
 }
 
-
 class _NeedsWantsCard extends StatelessWidget {
   const _NeedsWantsCard({required this.needTotal, required this.wantTotal});
   final int needTotal;
@@ -902,25 +1049,61 @@ class _NeedsWantsCard extends StatelessWidget {
     final needPct = total == 0 ? 0 : ((needTotal / total) * 100).round();
     final wantPct = total == 0 ? 0 : 100 - needPct;
 
+    final isCyber = context.isCyberpunk;
+    final colors = context.themeColors;
+    final needColor = isCyber ? colors.primary : AppColors.sage;
+    final wantColor = isCyber ? colors.expense : const Color(0xFFEF9A9A);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(
-              children: [
-                const Icon(Icons.check_circle_outline, size: 16, color: AppColors.sage),
-                const SizedBox(width: 6),
-                Text('${context.tr('Needs')}: $needPct%', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-              ],
+            Flexible(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isCyber ? Icons.bolt_rounded : Icons.check_circle_outline,
+                    size: 16,
+                    color: needColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      '${context.tr('Needs')}: $needPct%',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            Row(
-              children: [
-                const Icon(Icons.favorite_border, size: 16, color: Color(0xFFEF9A9A)),
-                const SizedBox(width: 6),
-                Text('${context.tr('Wants')}: $wantPct%', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-              ],
+            const SizedBox(width: 8),
+            Flexible(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.favorite_border, size: 16, color: wantColor),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      '${context.tr('Wants')}: $wantPct%',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -932,12 +1115,12 @@ class _NeedsWantsCard extends StatelessWidget {
               if (needTotal > 0)
                 Expanded(
                   flex: needTotal,
-                  child: Container(height: 10, color: AppColors.sage),
+                  child: Container(height: 10, color: needColor),
                 ),
               if (wantTotal > 0)
                 Expanded(
                   flex: wantTotal,
-                  child: Container(height: 10, color: const Color(0xFFEF9A9A)),
+                  child: Container(height: 10, color: wantColor),
                 ),
             ],
           ),
@@ -946,8 +1129,20 @@ class _NeedsWantsCard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(rupiah(needTotal), style: theme.textTheme.bodySmall?.copyWith(color: AppColors.sage, fontWeight: FontWeight.bold)),
-            Text(rupiah(wantTotal), style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xFFEF9A9A), fontWeight: FontWeight.bold)),
+            Text(
+              rupiah(needTotal),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: needColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              rupiah(wantTotal),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: wantColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ],
@@ -972,32 +1167,44 @@ class _TrendTable extends StatelessWidget {
       child: Column(
         children: [
           for (final p in periods.reversed)
-            Builder(builder: (context) {
-              final inPeriod = txs.where((t) => p.contains(t.date));
-              final income = inPeriod
-                  .where((t) => t.type == TxType.income)
-                  .fold<int>(0, (a, t) => a + t.amount);
-              final expense = inPeriod
-                  .where((t) => t.type == TxType.expense)
-                  .fold<int>(0, (a, t) => a + t.amount);
-              return ListTile(
-                dense: true,
-                title: Text(p.label(),
-                    style: const TextStyle(fontWeight: FontWeight.w600)),
-                trailing: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text('+${rupiah(income)}',
-                        style: theme.textTheme.labelSmall
-                            ?.copyWith(color: AppColors.income, fontWeight: FontWeight.w700)),
-                    Text('-${rupiah(expense)}',
-                        style: theme.textTheme.labelSmall
-                            ?.copyWith(color: AppColors.expense, fontWeight: FontWeight.w700)),
-                  ],
-                ),
-              );
-            }),
+            Builder(
+              builder: (context) {
+                final inPeriod = txs.where((t) => p.contains(t.date));
+                final income = inPeriod
+                    .where((t) => t.type == TxType.income)
+                    .fold<int>(0, (a, t) => a + t.amount);
+                final expense = inPeriod
+                    .where((t) => t.type == TxType.expense)
+                    .fold<int>(0, (a, t) => a + t.amount);
+                return ListTile(
+                  dense: true,
+                  title: Text(
+                    p.label(),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '+${rupiah(income)}',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: AppColors.income,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        '-${rupiah(expense)}',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: AppColors.expense,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );

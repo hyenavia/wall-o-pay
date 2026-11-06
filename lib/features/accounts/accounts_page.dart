@@ -168,6 +168,8 @@ class _AccountCategoryHeader extends StatelessWidget {
       ),
     );
 
+    final primaryColor = theme.colorScheme.primary;
+
     return Padding(
       padding: const EdgeInsets.only(top: 22, bottom: 10),
       child: Row(
@@ -175,10 +177,10 @@ class _AccountCategoryHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: AppColors.sage.withValues(alpha: 0.14),
+              color: primaryColor.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 16, color: AppColors.sage),
+            child: Icon(icon, size: 16, color: primaryColor),
           ),
           const SizedBox(width: 10),
           Text(
@@ -191,13 +193,13 @@ class _AccountCategoryHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
             decoration: BoxDecoration(
-              color: AppColors.sage.withValues(alpha: 0.14),
+              color: primaryColor.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
               '$count',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: AppColors.sage,
+                color: primaryColor,
                 fontWeight: FontWeight.w800,
               ),
             ),

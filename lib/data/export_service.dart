@@ -93,8 +93,14 @@ class ExportService {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/$fileName');
     await file.writeAsString(content);
-    await SharePlus.instance.share(
-      ShareParams(files: [XFile(file.path)], subject: fileName),
-    );
+    try {
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)], subject: fileName),
+      );
+    } finally {
+      try {
+        if (await file.exists()) await file.delete();
+      } catch (_) {}
+    }
   }
 }

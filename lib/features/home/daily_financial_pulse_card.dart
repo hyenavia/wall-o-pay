@@ -65,32 +65,45 @@ class DailyFinancialPulseCard extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final muted = scheme.onSurface.withValues(alpha: 0.65);
+    final colors = context.themeColors;
+    final isCyber = context.isCyberpunk;
+    final safeColor = isCyber ? colors.primary : AppColors.sage;
+    final warningColor = isCyber ? colors.warning : AppColors.warning;
+    final limitColor = isCyber ? colors.expense : const Color(0xFFD65D5D);
 
     final currentTier = tier;
 
     final (statusColor, statusIcon, labelKey, titleKey, messageKey) = switch (currentTier) {
       DailyHealthTier.safe => (
-          AppColors.sage,
-          Icons.spa_rounded,
-          'Safe',
-          'Finances on Track',
-          txCount == 0
-              ? 'Ready for this period. Log expenses to track your daily pace.'
-              : 'Spending is well within limits. Keep up the mindful pace!',
+          safeColor,
+          isCyber ? Icons.memory_rounded : Icons.spa_rounded,
+          isCyber ? 'GRID STABLE' : 'Safe',
+          isCyber ? 'Cyber Telemetry Nominal' : 'Finances on Track',
+          isCyber
+              ? (txCount == 0
+                  ? 'Grid online. Ready for telemetry stream.'
+                  : 'Credit consumption optimal. Subroutines running smooth!')
+              : (txCount == 0
+                  ? 'Ready for this period. Log expenses to track your daily pace.'
+                  : 'Spending is well within limits. Keep up the mindful pace!'),
         ),
       DailyHealthTier.caution => (
-          AppColors.warning,
-          Icons.speed_rounded,
-          'Caution',
-          'Spending Pace is High',
-          'Today\'s spending has passed your daily quota. Balance it out tomorrow.',
+          warningColor,
+          isCyber ? Icons.electric_bolt_rounded : Icons.speed_rounded,
+          isCyber ? 'BANDWIDTH HIGH' : 'Caution',
+          isCyber ? 'Spending Velocity High' : 'Spending Pace is High',
+          isCyber
+              ? 'Daily burn rate has passed telemetry threshold. Balance it tomorrow.'
+              : 'Today\'s spending has passed your daily quota. Balance it out tomorrow.',
         ),
       DailyHealthTier.limit => (
-          const Color(0xFFD65D5D),
-          Icons.shield_outlined,
-          'Limit',
-          'Spending Limit Reached',
-          'Expenses have reached the period limit. Focus on essentials only.',
+          limitColor,
+          isCyber ? Icons.warning_amber_rounded : Icons.shield_outlined,
+          isCyber ? 'CORE OVERLOAD' : 'Limit',
+          isCyber ? 'Period Capacity Reached' : 'Spending Limit Reached',
+          isCyber
+              ? 'Period credit capacity reached. Limit output to vital nodes only.'
+              : 'Expenses have reached the period limit. Focus on essentials only.',
         ),
     };
 
@@ -106,14 +119,23 @@ class DailyFinancialPulseCard extends StatelessWidget {
         color: scheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: statusColor.withValues(alpha: 0.35),
-          width: 1.2,
+          color: statusColor.withValues(alpha: isCyber ? 0.50 : 0.35),
+          width: isCyber ? 1.4 : 1.2,
         ),
+        boxShadow: isCyber
+            ? [
+                BoxShadow(
+                  color: statusColor.withValues(alpha: 0.20),
+                  blurRadius: 18,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            statusColor.withValues(alpha: 0.12),
+            statusColor.withValues(alpha: isCyber ? 0.18 : 0.12),
             scheme.surface,
           ],
         ),
@@ -123,31 +145,50 @@ class DailyFinancialPulseCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: statusColor.withValues(alpha: 0.4)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(statusIcon, size: 14, color: statusColor),
-                    const SizedBox(width: 5),
-                    Text(
-                      context.tr(labelKey),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: statusColor,
-                        letterSpacing: 0.4,
+              Flexible(
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _showPhaseInfoSheet(context, isCyber),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: statusColor.withValues(alpha: 0.4)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(statusIcon, size: 14, color: statusColor),
+                          const SizedBox(width: 5),
+                          Flexible(
+                            child: Text(
+                              context.tr(labelKey),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: statusColor,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.info_outline_rounded,
+                            size: 13,
+                            color: statusColor.withValues(alpha: 0.8),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -159,6 +200,8 @@ class DailyFinancialPulseCard extends StatelessWidget {
                         : (daysLeft == 1
                             ? context.tr('1 day left')
                             : context.tr('{n} days left', {'n': daysLeft})),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: muted,
                       fontWeight: FontWeight.w600,
@@ -197,7 +240,7 @@ class DailyFinancialPulseCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        context.tr('Safe daily quota'),
+                        context.tr(isCyber ? 'Daily Bandwidth' : 'Safe daily quota'),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: muted,
                           fontSize: 11,
@@ -208,7 +251,7 @@ class DailyFinancialPulseCard extends StatelessWidget {
                         dailyAllowance > 0 ? rupiah(dailyAllowance) : '-',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: dailyAllowance > 0 ? AppColors.sage : muted,
+                          color: dailyAllowance > 0 ? safeColor : muted,
                         ),
                       ),
                     ],
@@ -227,7 +270,7 @@ class DailyFinancialPulseCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        context.tr('Spent today'),
+                        context.tr(isCyber ? 'Burned today' : 'Spent today'),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: muted,
                           fontSize: 11,
@@ -238,7 +281,7 @@ class DailyFinancialPulseCard extends StatelessWidget {
                         rupiah(todayExpense),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: isExceeded ? AppColors.warning : scheme.onSurface,
+                          color: isExceeded ? warningColor : scheme.onSurface,
                         ),
                       ),
                     ],
@@ -251,7 +294,7 @@ class DailyFinancialPulseCard extends StatelessWidget {
             const SizedBox(height: 12),
             AppProgressBar(
               value: quotaRatio,
-              color: isExceeded ? AppColors.warning : AppColors.sage,
+              color: isExceeded ? warningColor : (isCyber ? colors.primary : AppColors.sage),
               backgroundColor: scheme.surfaceContainerHighest,
               height: 6,
             ),
@@ -259,18 +302,27 @@ class DailyFinancialPulseCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  isExceeded
-                      ? context.tr('Quota exceeded')
-                      : context.tr('{pct}% of quota', {
-                          'pct': (todayExpense * 100 / dailyAllowance).round(),
-                        }),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: isExceeded ? AppColors.warning : muted,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 11,
+                Expanded(
+                  child: Text(
+                    isExceeded
+                        ? context.tr(isCyber ? 'Bandwidth exceeded' : 'Quota exceeded')
+                        : (isCyber
+                            ? context.tr('{pct}% bandwidth consumed', {
+                                'pct': (todayExpense * 100 / dailyAllowance).round(),
+                              })
+                            : context.tr('{pct}% of quota', {
+                                'pct': (todayExpense * 100 / dailyAllowance).round(),
+                              })),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: isExceeded ? warningColor : muted,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   rupiah(dailyAllowance),
                   style: theme.textTheme.bodySmall?.copyWith(
@@ -290,8 +342,8 @@ class DailyFinancialPulseCard extends StatelessWidget {
               final pct = (budgetSpent * 100 / totalBudget).round();
               final overAmount = budgetSpent - totalBudget;
               final statusColor = isOver
-                  ? AppColors.expenseOnDark
-                  : ((budgetSpent / totalBudget) >= 0.85 ? AppColors.warning : AppColors.sage);
+                  ? (isCyber ? colors.expense : AppColors.expenseOnDark)
+                  : ((budgetSpent / totalBudget) >= 0.85 ? warningColor : (isCyber ? colors.primary : AppColors.sage));
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -299,13 +351,20 @@ class DailyFinancialPulseCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        budgetTitle != null ? context.tr(budgetTitle!) : context.tr('Period Budget'),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: scheme.onSurface,
+                      Expanded(
+                        child: Text(
+                          budgetTitle != null
+                              ? context.tr(budgetTitle!)
+                              : context.tr(isCyber ? 'System Budget' : 'Period Budget'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: scheme.onSurface,
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Text(
                         isOver
                             ? context.tr('{pct}% used (Over by {amount})', {
@@ -341,8 +400,8 @@ class DailyFinancialPulseCard extends StatelessWidget {
                   AppProgressBar(
                     value: (budgetSpent / totalBudget).clamp(0.0, 1.0),
                     color: isOver
-                        ? AppColors.expense
-                        : ((budgetSpent / totalBudget) >= 0.85 ? AppColors.warning : AppColors.sage),
+                        ? (isCyber ? colors.expense : AppColors.expense)
+                        : ((budgetSpent / totalBudget) >= 0.85 ? warningColor : (isCyber ? colors.primary : AppColors.sage)),
                     backgroundColor: scheme.surfaceContainerHighest,
                     height: 6,
                   ),
@@ -369,6 +428,293 @@ class DailyFinancialPulseCard extends StatelessWidget {
               ],
             ),
           ],
+        ],
+      ),
+    );
+  }
+}
+
+void _showPhaseInfoSheet(BuildContext context, bool isCyber) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: isCyber ? const Color(0xFF0D1022) : null,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (ctx) => _PhaseInfoSheet(isCyber: isCyber),
+  );
+}
+
+class _PhaseInfoSheet extends StatelessWidget {
+  const _PhaseInfoSheet({required this.isCyber});
+
+  final bool isCyber;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final colors = context.themeColors;
+
+    final primaryAccent = isCyber ? colors.primary : AppColors.deepForest;
+    final primaryIcon = isCyber ? Icons.memory_rounded : Icons.spa_rounded;
+
+    final title = isCyber
+        ? context.tr('GRID TELEMETRY PROTOCOL')
+        : context.tr('Daily Financial Pulse Guide');
+    final subtitle = isCyber
+        ? context.tr('Active telemetry monitoring of your daily eddies & credit bandwidth, choom.')
+        : context.tr('Guide to the 3 daily spending phases to keep your finances healthy.');
+
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isCyber ? colors.primary.withValues(alpha: 0.4) : Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: primaryAccent.withValues(alpha: isCyber ? 0.2 : 0.15),
+                    borderRadius: BorderRadius.circular(14),
+                    border: isCyber
+                        ? Border.all(color: colors.primary.withValues(alpha: 0.5))
+                        : null,
+                    boxShadow: isCyber
+                        ? [
+                            BoxShadow(
+                              color: colors.primary.withValues(alpha: 0.25),
+                              blurRadius: 12,
+                            ),
+                          ]
+                        : null,
+                  ),
+                  child: Icon(primaryIcon, color: isCyber ? colors.primary : AppColors.sage, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: isCyber ? 0.6 : 0.0,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        subtitle,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurface.withValues(alpha: 0.7),
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            _PhaseDetailTile(
+              isCyber: isCyber,
+              color: isCyber ? colors.primary : AppColors.sage,
+              icon: isCyber ? Icons.memory_rounded : Icons.spa_rounded,
+              phaseBadge: isCyber ? context.tr('GRID STABLE') : context.tr('Safe'),
+              phaseTitle: isCyber
+                  ? context.tr('Phase 01 // Subroutines Nominal')
+                  : context.tr('Fase 1: Kondisi Finansial Aman'),
+              description: isCyber
+                  ? context.tr('Optimal eddies consumption well below daily bandwidth. Subroutines running smooth, choom!')
+                  : context.tr('Spending is well within limits. Keep up the mindful pace!'),
+              triggerNote: isCyber
+                  ? context.tr('TRIGGER: Burn rate < daily bandwidth & budget healthy.')
+                  : context.tr('Kondisi: Belanja harian < kuota aman & anggaran terjaga.'),
+            ),
+            const SizedBox(height: 12),
+            _PhaseDetailTile(
+              isCyber: isCyber,
+              color: isCyber ? colors.warning : AppColors.warning,
+              icon: isCyber ? Icons.electric_bolt_rounded : Icons.speed_rounded,
+              phaseBadge: isCyber ? context.tr('BANDWIDTH HIGH') : context.tr('Caution'),
+              phaseTitle: isCyber
+                  ? context.tr('Phase 02 // Velocity Warning')
+                  : context.tr('Fase 2: Laju Pengeluaran Meningkat'),
+              description: isCyber
+                  ? context.tr('Daily burn rate has passed telemetry threshold. Balance it tomorrow before core overloads!')
+                  : context.tr('Today\'s spending has passed your daily quota. Balance it out tomorrow.'),
+              triggerNote: isCyber
+                  ? context.tr('TRIGGER: Daily burn > bandwidth OR period capacity >= 85%.')
+                  : context.tr('Kondisi: Belanja harian > kuota ATAU terpakai >= 85%.'),
+            ),
+            const SizedBox(height: 12),
+            _PhaseDetailTile(
+              isCyber: isCyber,
+              color: isCyber ? colors.expense : const Color(0xFFD65D5D),
+              icon: isCyber ? Icons.warning_amber_rounded : Icons.shield_outlined,
+              phaseBadge: isCyber ? context.tr('CORE OVERLOAD') : context.tr('Limit'),
+              phaseTitle: isCyber
+                  ? context.tr('Phase 03 // Critical Capacity')
+                  : context.tr('Fase 3: Batas Anggaran Tercapai'),
+              description: isCyber
+                  ? context.tr('Period credit capacity reached. Limit output to vital nodes only, don\'t flatline!')
+                  : context.tr('Expenses have reached the period limit. Focus on essentials only.'),
+              triggerNote: isCyber
+                  ? context.tr('TRIGGER: Period budget exhausted (100%) OR balance <= 0.')
+                  : context.tr('Kondisi: Anggaran periode habis (100%) ATAU saldo minus.'),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: isCyber ? colors.primary : scheme.primary,
+                  foregroundColor: isCyber ? Colors.black : scheme.onPrimary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  isCyber ? context.tr('ACKNOWLEDGE // DISMISS') : context.tr('I Understand'),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: isCyber ? 0.8 : 0.0,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PhaseDetailTile extends StatelessWidget {
+  const _PhaseDetailTile({
+    required this.isCyber,
+    required this.color,
+    required this.icon,
+    required this.phaseBadge,
+    required this.phaseTitle,
+    required this.description,
+    required this.triggerNote,
+  });
+
+  final bool isCyber;
+  final Color color;
+  final IconData icon;
+  final String phaseBadge;
+  final String phaseTitle;
+  final String description;
+  final String triggerNote;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: color.withValues(alpha: isCyber ? 0.45 : 0.25),
+          width: isCyber ? 1.2 : 1.0,
+        ),
+        boxShadow: isCyber
+            ? [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.14),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: color.withValues(alpha: 0.4)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 12, color: color),
+                    const SizedBox(width: 4),
+                    Text(
+                      phaseBadge,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: color,
+                        letterSpacing: isCyber ? 0.5 : 0.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  phaseTitle,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            description,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurface.withValues(alpha: 0.8),
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              triggerNote,
+              style: TextStyle(
+                fontSize: 10,
+                color: color,
+                fontWeight: FontWeight.w600,
+                letterSpacing: isCyber ? 0.3 : 0.0,
+              ),
+            ),
+          ),
         ],
       ),
     );

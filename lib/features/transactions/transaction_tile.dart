@@ -100,8 +100,8 @@ class TransactionTile extends StatelessWidget {
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: isTransfer
-                        ? const Color(0xFF00897B)
-                        : (isIncome ? AppColors.income : AppColors.expense),
+                        ? (context.isCyberpunk ? context.themeColors.secondaryNeon : const Color(0xFF00897B))
+                        : (isIncome ? context.themeColors.income : context.themeColors.expense),
                   ),
                 ),
                 const SizedBox(height: 2),

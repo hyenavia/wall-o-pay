@@ -2,6 +2,8 @@
 /// filter tipe transaksi, filter dompet/rekening, filter kategori, dan filter rentang tanggal kustom.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,10 +28,28 @@ class TransactionsPage extends ConsumerStatefulWidget {
 
 class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   String _query = '';
+  Timer? _searchDebounce;
   TxType? _filter;
   DateTimeRange? _range;
   String? _selectedWalletId;
   String? _selectedCategoryId;
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 150), () {
+      if (!mounted) return;
+      final next = value.trim().toLowerCase();
+      if (_query != next) {
+        setState(() => _query = next);
+      }
+    });
+  }
 
   Future<void> _pickRange() async {
     final now = DateTime.now();
@@ -55,6 +75,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         .unwrapPrevious();
     final cats = ref.watch(categoryMapProvider);
     final wallets = ref.watch(walletMapProvider);
+    final colors = context.themeColors;
 
     return Scaffold(
       appBar: pageAppBar(
@@ -65,7 +86,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             tooltip: context.tr('Filter by date range'),
             icon: Icon(
               Icons.date_range,
-              color: _range == null ? null : AppColors.sage,
+              color: _range == null ? null : colors.primary,
             ),
             onPressed: _pickRange,
           ),
@@ -120,299 +141,325 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               final day = DateTime(t.date.year, t.date.month, t.date.day);
               groups.putIfAbsent(day, () => []).add(t);
             }
+            final groupEntries = groups.entries.toList(growable: false);
 
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 96),
-              children: [
-              TextField(
-                onChanged: (v) => setState(() => _query = v.trim().toLowerCase()),
-                decoration: appInput(
-                  context,
-                  hint: context.tr('Search transaction...'),
-                  prefixIcon: const Icon(Icons.search),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    for (final f in <(String, TxType?)>[
-                      (context.tr('All'), null),
-                      (context.tr('Expense'), TxType.expense),
-                      (context.tr('Income'), TxType.income),
-                      (context.tr('Transfer'), TxType.transfer),
-                    ])
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: AppChip(
-                          label: f.$1,
-                          selected: _filter == f.$2,
-                          onSelected: () => setState(() => _filter = f.$2),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    // Account filter button
-                    PopupMenuButton<String?>(
-                      tooltip: context.tr('Filter by account'),
-                      onSelected: (val) => setState(() => _selectedWalletId = val),
-                      itemBuilder: (context) => [
-                        PopupMenuItem<String?>(
-                          value: null,
-                          child: Text(context.tr('All Accounts')),
-                        ),
-                        for (final w in wallets.values)
-                          PopupMenuItem<String?>(
-                            value: w.id,
-                            child: Row(
-                              children: [
-                                if (w.id == _selectedWalletId)
-                                  const Icon(Icons.check, size: 16, color: AppColors.income)
-                                else
-                                  const SizedBox(width: 16),
-                                const SizedBox(width: 8),
-                                Text(w.name),
-                              ],
-                            ),
-                          ),
-                      ],
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: _selectedWalletId != null
-                              ? AppColors.deepForest.withValues(alpha: 0.18)
-                              : Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: _selectedWalletId != null
-                                ? AppColors.sage
-                                : Theme.of(context).colorScheme.outlineVariant,
+            return CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextField(
+                          onChanged: _onSearchChanged,
+                          decoration: appInput(
+                            context,
+                            hint: context.tr('Search transaction...'),
+                            prefixIcon: const Icon(Icons.search),
                           ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.account_balance_wallet_outlined,
-                              size: 15,
-                              color: _selectedWalletId != null
-                                  ? AppColors.sage
-                                  : Theme.of(context).colorScheme.onSurface,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _selectedWalletId == null
-                                  ? context.tr('All Accounts')
-                                  : (wallets[_selectedWalletId]?.name ?? context.tr('All Accounts')),
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w600,
-                                color: _selectedWalletId != null
-                                    ? AppColors.sage
-                                    : Theme.of(context).colorScheme.onSurface,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.arrow_drop_down,
-                              size: 16,
-                              color: _selectedWalletId != null
-                                  ? AppColors.sage
-                                  : Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    // Category filter button
-                    PopupMenuButton<String?>(
-                      tooltip: context.tr('Filter by category'),
-                      onSelected: (val) => setState(() => _selectedCategoryId = val),
-                      itemBuilder: (context) => [
-                        PopupMenuItem<String?>(
-                          value: null,
-                          child: Text(context.tr('All Categories')),
-                        ),
-                        for (final c in cats.values)
-                          PopupMenuItem<String?>(
-                            value: c.id,
-                            child: Row(
-                              children: [
-                                if (c.id == _selectedCategoryId)
-                                  const Icon(Icons.check, size: 16, color: AppColors.income)
-                                else
-                                  const SizedBox(width: 16),
-                                const SizedBox(width: 8),
-                                Text(c.name),
-                              ],
-                            ),
-                          ),
-                      ],
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: _selectedCategoryId != null
-                              ? AppColors.deepForest.withValues(alpha: 0.18)
-                              : Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: _selectedCategoryId != null
-                                ? AppColors.sage
-                                : Theme.of(context).colorScheme.outlineVariant,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.category_outlined,
-                              size: 15,
-                              color: _selectedCategoryId != null
-                                  ? AppColors.sage
-                                  : Theme.of(context).colorScheme.onSurface,
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              _selectedCategoryId == null
-                                  ? context.tr('All Categories')
-                                  : (cats[_selectedCategoryId]?.name ?? context.tr('All Categories')),
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w600,
-                                color: _selectedCategoryId != null
-                                    ? AppColors.sage
-                                    : Theme.of(context).colorScheme.onSurface,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.arrow_drop_down,
-                              size: 16,
-                              color: _selectedCategoryId != null
-                                  ? AppColors.sage
-                                  : Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (_selectedWalletId != null || _selectedCategoryId != null) ...[
-                      const SizedBox(width: 8),
-                      InkWell(
-                        onTap: () => setState(() {
-                          _selectedWalletId = null;
-                          _selectedCategoryId = null;
-                        }),
-                        borderRadius: BorderRadius.circular(20),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        const SizedBox(height: 12),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
                           child: Row(
-                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.close, size: 15, color: AppColors.expense),
-                              const SizedBox(width: 4),
-                              Text(
-                                context.tr('Clear filters'),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.expense,
-                                  fontWeight: FontWeight.w600,
+                              for (final f in <(String, TxType?)>[
+                                (context.tr('All'), null),
+                                (context.tr('Expense'), TxType.expense),
+                                (context.tr('Income'), TxType.income),
+                                (context.tr('Transfer'), TxType.transfer),
+                              ])
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: AppChip(
+                                    label: f.$1,
+                                    selected: _filter == f.$2,
+                                    onSelected: () => setState(() => _filter = f.$2),
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         ),
-                      ),
-                    ],
-                  ],
+                        const SizedBox(height: 10),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              // Account filter button
+                              PopupMenuButton<String?>(
+                                tooltip: context.tr('Filter by account'),
+                                onSelected: (val) => setState(() => _selectedWalletId = val),
+                                itemBuilder: (context) => [
+                                  PopupMenuItem<String?>(
+                                    value: null,
+                                    child: Text(context.tr('All Accounts')),
+                                  ),
+                                  for (final w in wallets.values)
+                                    PopupMenuItem<String?>(
+                                      value: w.id,
+                                      child: Row(
+                                        children: [
+                                          if (w.id == _selectedWalletId)
+                                            Icon(Icons.check, size: 16, color: context.themeColors.income)
+                                          else
+                                            const SizedBox(width: 16),
+                                          const SizedBox(width: 8),
+                                          Text(w.name),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: _selectedWalletId != null
+                                        ? colors.primary.withValues(alpha: 0.18)
+                                        : Theme.of(context).colorScheme.surface,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: _selectedWalletId != null
+                                          ? colors.primary
+                                          : Theme.of(context).colorScheme.outlineVariant,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.account_balance_wallet_outlined,
+                                        size: 15,
+                                        color: _selectedWalletId != null
+                                            ? colors.primary
+                                            : Theme.of(context).colorScheme.onSurface,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        _selectedWalletId == null
+                                            ? context.tr('All Accounts')
+                                            : (wallets[_selectedWalletId]?.name ?? context.tr('All Accounts')),
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: _selectedWalletId != null
+                                              ? colors.primary
+                                              : Theme.of(context).colorScheme.onSurface,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        Icons.arrow_drop_down,
+                                        size: 16,
+                                        color: _selectedWalletId != null
+                                            ? colors.primary
+                                            : Theme.of(context).colorScheme.onSurface,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              // Category filter button
+                              PopupMenuButton<String?>(
+                                tooltip: context.tr('Filter by category'),
+                                onSelected: (val) => setState(() => _selectedCategoryId = val),
+                                itemBuilder: (context) => [
+                                  PopupMenuItem<String?>(
+                                    value: null,
+                                    child: Text(context.tr('All Categories')),
+                                  ),
+                                  for (final c in cats.values)
+                                    PopupMenuItem<String?>(
+                                      value: c.id,
+                                      child: Row(
+                                        children: [
+                                          if (c.id == _selectedCategoryId)
+                                            Icon(Icons.check, size: 16, color: colors.income)
+                                          else
+                                            const SizedBox(width: 16),
+                                          const SizedBox(width: 8),
+                                          Text(c.name),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: _selectedCategoryId != null
+                                        ? colors.primary.withValues(alpha: 0.18)
+                                        : Theme.of(context).colorScheme.surface,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: _selectedCategoryId != null
+                                          ? colors.primary
+                                          : Theme.of(context).colorScheme.outlineVariant,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.category_outlined,
+                                        size: 15,
+                                        color: _selectedCategoryId != null
+                                            ? colors.primary
+                                            : Theme.of(context).colorScheme.onSurface,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        _selectedCategoryId == null
+                                            ? context.tr('All Categories')
+                                            : (cats[_selectedCategoryId]?.name ?? context.tr('All Categories')),
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: _selectedCategoryId != null
+                                              ? colors.primary
+                                              : Theme.of(context).colorScheme.onSurface,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        Icons.arrow_drop_down,
+                                        size: 16,
+                                        color: _selectedCategoryId != null
+                                            ? colors.primary
+                                            : Theme.of(context).colorScheme.onSurface,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              if (_selectedWalletId != null || _selectedCategoryId != null) ...[
+                                const SizedBox(width: 8),
+                                InkWell(
+                                  onTap: () => setState(() {
+                                    _selectedWalletId = null;
+                                    _selectedCategoryId = null;
+                                  }),
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.close, size: 15, color: context.themeColors.expense),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          context.tr('Clear filters'),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: context.themeColors.expense,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _SummaryTile(
+                                label: context.tr('Total Income'),
+                                value: rupiah(totalIncome),
+                                color: context.themeColors.income,
+                                icon: Icons.arrow_downward,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _SummaryTile(
+                                label: context.tr('Total Expense'),
+                                value: rupiah(totalExpense),
+                                color: context.themeColors.expense,
+                                icon: Icons.arrow_upward,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: _SummaryTile(
-                      label: context.tr('Total Income'),
-                      value: rupiah(totalIncome),
-                      color: AppColors.income,
-                      icon: Icons.arrow_downward,
+                if (txs.isEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
+                    sliver: SliverToBoxAdapter(
+                      child: isSearching
+                          ? EmptyState(
+                              icon: Icons.search_off,
+                              message: context.tr('No matching transactions.'),
+                            )
+                          : EmptyStateCard(
+                              title: context.tr('Start recording your first transaction!'),
+                              subtitle: context.tr(
+                                'Every small transaction brings you closer to your financial goals.',
+                              ),
+                              actionLabel: context.tr('Add transaction'),
+                              onAction: () => showTransactionForm(context),
+                            ),
+                    ),
+                  )
+                else if (shown.isEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(20, 48, 20, 96),
+                    sliver: SliverToBoxAdapter(
+                      child: EmptyState(
+                        icon: Icons.search_off,
+                        message: context.tr('No matching transactions.'),
+                      ),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
+                    sliver: SliverList.builder(
+                      itemCount: groupEntries.length,
+                      itemBuilder: (context, index) {
+                        final entry = groupEntries[index];
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 18, bottom: 8),
+                              child: Text(
+                                dayHeader(entry.key),
+                                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.65),
+                                    ),
+                              ),
+                            ),
+                            TransactionGroupCard(
+                              children: [
+                                for (final t in entry.value)
+                                  TransactionTile(
+                                    entry: t,
+                                    category: cats[t.categoryId],
+                                    wallet: t.walletId != null ? wallets[t.walletId!] : null,
+                                    toWallet: t.toWalletId != null ? wallets[t.toWalletId!] : null,
+                                    trailingNote: timeLabel(t.createdAt),
+                                    onTap: () => showTransactionForm(context, entry: t),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _SummaryTile(
-                      label: context.tr('Total Expense'),
-                      value: rupiah(totalExpense),
-                      color: AppColors.expense,
-                      icon: Icons.arrow_upward,
-                    ),
-                  ),
-                ],
-              ),
-              if (txs.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: isSearching
-                      ? EmptyState(
-                          icon: Icons.search_off,
-                          message: context.tr('No matching transactions.'),
-                        )
-                      : EmptyStateCard(
-                          title: context.tr('Start recording your first transaction!'),
-                          subtitle: context.tr(
-                            'Every small transaction brings you closer to your financial goals.',
-                          ),
-                          actionLabel: context.tr('Add transaction'),
-                          onAction: () => showTransactionForm(context),
-                        ),
-                )
-              else if (shown.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 48),
-                  child: EmptyState(
-                    icon: Icons.search_off,
-                    message: context.tr('No matching transactions.'),
-                  ),
-                )
-              else
-                for (final entry in groups.entries) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 18, bottom: 8),
-                    child: Text(
-                      dayHeader(entry.key),
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.65),
-                          ),
-                    ),
-                  ),
-                  TransactionGroupCard(
-                    children: [
-                      for (final t in entry.value)
-                        TransactionTile(
-                          entry: t,
-                          category: cats[t.categoryId],
-                          wallet: t.walletId != null ? wallets[t.walletId!] : null,
-                          toWallet: t.toWalletId != null ? wallets[t.toWalletId!] : null,
-                          trailingNote: timeLabel(t.createdAt),
-                          onTap: () => showTransactionForm(context, entry: t),
-                        ),
-                    ],
-                  ),
-                ],
-            ],
-          );
+              ],
+            );
         },
       ),
       ),

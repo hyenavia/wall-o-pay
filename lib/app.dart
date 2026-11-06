@@ -45,8 +45,8 @@ class WallOPayApp extends ConsumerWidget {
       scaffoldMessengerKey: rootScaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
-      theme: buildTheme(),
-      darkTheme: buildTheme(),
+      theme: buildTheme(prefs.themePreset),
+      darkTheme: buildTheme(prefs.themePreset),
       locale: Locale(prefs.localeCode),
       supportedLocales: AppLocale.supported,
       localizationsDelegates: [
@@ -216,6 +216,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     });
 
     final scheme = Theme.of(context).colorScheme;
+    final colors = context.themeColors;
     final index = ref.watch(tabIndexProvider);
     final notifier = ref.read(tabIndexProvider.notifier);
 
@@ -254,12 +255,12 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
           icon: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.sage.withValues(alpha: 0.15),
+              color: colors.primary.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.exit_to_app_rounded,
-              color: AppColors.sage,
+              color: colors.primary,
               size: 32,
             ),
           ),
@@ -285,7 +286,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
             FilledButton(
               onPressed: () => Navigator.of(ctx).pop(true),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.deepForest,
+                backgroundColor: colors.heroBackground,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
@@ -316,8 +317,8 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
         floatingActionButton: FloatingActionButton(
           tooltip: context.tr('Add transaction'),
           shape: const CircleBorder(),
-          backgroundColor: AppColors.sage,
-          foregroundColor: AppColors.ink,
+          backgroundColor: colors.fabBackground,
+          foregroundColor: colors.fabForeground,
           onPressed: () => showTransactionForm(context),
           child: const Icon(Icons.add, size: 28),
         ),
@@ -331,12 +332,31 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
           surfaceTintColor: Colors.transparent,
           child: Row(
             children: [
-              item(0, Icons.home_outlined, Icons.home, context.tr('Home')),
-              item(1, Icons.receipt_long_outlined, Icons.receipt_long,
-                  context.tr('Transactions')),
+              item(
+                0,
+                colors.isCyberpunk ? Icons.grid_view_outlined : Icons.home_outlined,
+                colors.isCyberpunk ? Icons.grid_view_rounded : Icons.home,
+                context.tr(colors.isCyberpunk ? 'GRID' : 'Home'),
+              ),
+              item(
+                1,
+                colors.isCyberpunk ? Icons.terminal_outlined : Icons.receipt_long_outlined,
+                colors.isCyberpunk ? Icons.terminal_rounded : Icons.receipt_long,
+                context.tr(colors.isCyberpunk ? 'LEDGER' : 'Transactions'),
+              ),
               const SizedBox(width: 64),
-              item(2, Icons.pie_chart_outline, Icons.pie_chart, context.tr('Budget')),
-              item(3, Icons.insights_outlined, Icons.insights, context.tr('Insight')),
+              item(
+                2,
+                Icons.pie_chart_outline,
+                Icons.pie_chart,
+                context.tr(colors.isCyberpunk ? 'BANDWIDTH' : 'Budget'),
+              ),
+              item(
+                3,
+                colors.isCyberpunk ? Icons.query_stats_rounded : Icons.insights_outlined,
+                colors.isCyberpunk ? Icons.query_stats_rounded : Icons.insights,
+                context.tr(colors.isCyberpunk ? 'TELEMETRY' : 'Insight'),
+              ),
             ],
           ),
         ),

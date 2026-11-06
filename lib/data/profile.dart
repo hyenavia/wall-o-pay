@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/painting.dart' show MemoryImage;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'cloud.dart';
@@ -13,10 +14,12 @@ import 'cloud_sync.dart';
 import 'prefs.dart';
 
 class ProfileState {
-  const ProfileState({this.nickname, this.photo});
+  ProfileState({this.nickname, this.photo})
+      : photoImage = photo == null ? null : MemoryImage(photo);
 
   final String? nickname;
   final Uint8List? photo;
+  final MemoryImage? photoImage;
 }
 
 /// Nickname dan foto profil, disimpan per akun di perangkat.
@@ -147,7 +150,7 @@ class ProfileController extends Notifier<ProfileState> {
     await p.remove(_nickKey(effectiveUid));
     await p.remove(_photoKey(effectiveUid));
     await p.remove(_updatedKey(effectiveUid));
-    state = const ProfileState();
+    state = ProfileState();
   }
 }
 

@@ -204,3 +204,204 @@ class BotanicalBackgroundPainter extends CustomPainter {
   bool shouldRepaint(covariant BotanicalBackgroundPainter oldDelegate) =>
       oldDelegate.color != color;
 }
+
+/// Painter ornamen sirkuit & grid Cyberpunk futuristik untuk [HeroCard].
+class CyberHeroCardPainter extends CustomPainter {
+  const CyberHeroCardPainter({
+    this.color = const Color(0xFF00F0FF),
+    this.opacity = 0.12,
+  });
+
+  final Color color;
+  final double opacity;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.width <= 0 || size.height <= 0) return;
+
+    final w = size.width;
+    final h = size.height;
+
+    // Grid garis halus
+    final gridPaint = Paint()
+      ..color = color.withValues(alpha: opacity * 0.45)
+      ..strokeWidth = 0.8
+      ..style = PaintingStyle.stroke;
+
+    const step = 22.0;
+    for (double x = 0; x < w; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, h), gridPaint);
+    }
+    for (double y = 0; y < h; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(w, y), gridPaint);
+    }
+
+    // Jalur circuit trace sudut kanan atas
+    final tracePaint = Paint()
+      ..color = color.withValues(alpha: opacity)
+      ..strokeWidth = 1.4
+      ..style = PaintingStyle.stroke;
+
+    final trace = Path()
+      ..moveTo(w, h * 0.2)
+      ..lineTo(w - 45, h * 0.2)
+      ..lineTo(w - 75, h * 0.45)
+      ..lineTo(w - 120, h * 0.45);
+    canvas.drawPath(trace, tracePaint);
+
+    final nodePaint = Paint()
+      ..color = color.withValues(alpha: opacity * 1.5)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(w - 120, h * 0.45), 2.5, nodePaint);
+
+    // Aksen sudut kiri bawah
+    final cornerPath = Path()
+      ..moveTo(0, h * 0.7)
+      ..lineTo(35, h * 0.7)
+      ..lineTo(55, h * 0.85)
+      ..lineTo(90, h * 0.85);
+    canvas.drawPath(cornerPath, tracePaint);
+    canvas.drawCircle(Offset(90, h * 0.85), 2.2, nodePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CyberHeroCardPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.opacity != opacity;
+}
+
+/// Painter aksen grid sirkuit untuk AppBar pada tema Cyberpunk (tanpa siluet daun).
+class CyberCanopyPainter extends CustomPainter {
+  const CyberCanopyPainter({
+    this.color = const Color(0xFF00F0FF),
+    this.magentaColor = const Color(0xFFFF2A6D),
+    this.opacity = 0.12,
+  });
+
+  final Color color;
+  final Color magentaColor;
+  final double opacity;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.width <= 0 || size.height <= 0) return;
+
+    final w = size.width;
+    final h = size.height;
+
+    final cyanStroke = Paint()
+      ..color = color.withValues(alpha: opacity)
+      ..strokeWidth = 1.2
+      ..style = PaintingStyle.stroke;
+
+    final magentaStroke = Paint()
+      ..color = magentaColor.withValues(alpha: opacity * 0.75)
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    // 1. Jalur trace sirkuit utama di sudut kanan atas
+    final trace1 = Path()
+      ..moveTo(w + 10, h * 0.2)
+      ..lineTo(w - 40, h * 0.2)
+      ..lineTo(w - 75, h * 0.55)
+      ..lineTo(w - 180, h * 0.55);
+    canvas.drawPath(trace1, cyanStroke);
+
+    // 2. Jalur paralel magenta
+    final trace2 = Path()
+      ..moveTo(w + 10, h * 0.35)
+      ..lineTo(w - 30, h * 0.35)
+      ..lineTo(w - 60, h * 0.70)
+      ..lineTo(w - 120, h * 0.70);
+    canvas.drawPath(trace2, magentaStroke);
+
+    // 3. Simpul LED cyber (terminal node)
+    final nodeCyan = Paint()
+      ..color = color.withValues(alpha: opacity * 2.2)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(w - 180, h * 0.55), 2.8, nodeCyan);
+
+    final nodeMagenta = Paint()
+      ..color = magentaColor.withValues(alpha: opacity * 2.2)
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(w - 120, h * 0.70), 2.2, nodeMagenta);
+
+    // 4. Bracket sudut futuristik di kanan atas
+    final bracket = Path()
+      ..moveTo(w - 15, 6)
+      ..lineTo(w - 6, 6)
+      ..lineTo(w - 6, 18);
+    canvas.drawPath(bracket, cyanStroke..strokeWidth = 1.8);
+  }
+
+  @override
+  bool shouldRepaint(covariant CyberCanopyPainter oldDelegate) =>
+      oldDelegate.color != color ||
+      oldDelegate.magentaColor != magentaColor ||
+      oldDelegate.opacity != opacity;
+}
+
+/// Painter latar belakang Cyberpunk (grid futuristik & ambient glow cyan-magenta, tanpa siluet daun).
+class CyberBackgroundPainter extends CustomPainter {
+  const CyberBackgroundPainter({
+    this.cyanColor = const Color(0xFF00F0FF),
+    this.magentaColor = const Color(0xFFFF2A6D),
+    this.gridOpacity = 0.04,
+  });
+
+  final Color cyanColor;
+  final Color magentaColor;
+  final double gridOpacity;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.width <= 0 || size.height <= 0) return;
+
+    final w = size.width;
+    final h = size.height;
+
+    // 1. Ambient Glow Orbs di sudut layar
+    final cyanGlowPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          cyanColor.withValues(alpha: 0.12),
+          cyanColor.withValues(alpha: 0.0),
+        ],
+      ).createShader(Rect.fromCircle(
+        center: Offset(w * 0.95, h * 0.12),
+        radius: w * 0.55,
+      ));
+    canvas.drawCircle(Offset(w * 0.95, h * 0.12), w * 0.55, cyanGlowPaint);
+
+    final magentaGlowPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          magentaColor.withValues(alpha: 0.07),
+          magentaColor.withValues(alpha: 0.0),
+        ],
+      ).createShader(Rect.fromCircle(
+        center: Offset(-w * 0.1, h * 0.65),
+        radius: w * 0.5,
+      ));
+    canvas.drawCircle(Offset(-w * 0.1, h * 0.65), w * 0.5, magentaGlowPaint);
+
+    // 2. Futuristic Cyber Grid (24px step)
+    final gridPaint = Paint()
+      ..color = cyanColor.withValues(alpha: gridOpacity)
+      ..strokeWidth = 0.7
+      ..style = PaintingStyle.stroke;
+
+    const step = 24.0;
+    for (double x = 0; x < w; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, h), gridPaint);
+    }
+    for (double y = 0; y < h; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(w, y), gridPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CyberBackgroundPainter oldDelegate) =>
+      oldDelegate.cyanColor != cyanColor ||
+      oldDelegate.magentaColor != magentaColor ||
+      oldDelegate.gridOpacity != gridOpacity;
+}

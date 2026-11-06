@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wall_o_pay/core/l10n.dart';
+import 'package:wall_o_pay/core/theme.dart';
 import 'package:wall_o_pay/features/home/daily_financial_pulse_card.dart';
 
 void main() {
@@ -115,6 +116,72 @@ void main() {
       expect(find.text('Safe daily quota'), findsOneWidget);
       expect(find.text('Spent today'), findsOneWidget);
       expect(find.text('40% of quota'), findsOneWidget);
+    });
+
+    testWidgets('Renders DailyFinancialPulseCard with Cyberpunk telemetry', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildTheme('cyberpunk'),
+          localizationsDelegates: const [AppStrings.delegate],
+          home: const Scaffold(
+            body: DailyFinancialPulseCard(
+              dailyAllowance: 100000,
+              todayExpense: 40000,
+              daysLeft: 10,
+              balance: 1000000,
+              totalBudget: 2000000,
+              budgetSpent: 500000,
+              txCount: 5,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('GRID STABLE'), findsOneWidget);
+      expect(find.text('Cyber Telemetry Nominal'), findsOneWidget);
+      expect(find.text('Daily Bandwidth'), findsOneWidget);
+      expect(find.text('Burned today'), findsOneWidget);
+      expect(find.text('40% bandwidth consumed'), findsOneWidget);
+
+      // Tap on the status badge to verify phase info sheet opens
+      await tester.tap(find.text('GRID STABLE'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('GRID TELEMETRY PROTOCOL'), findsOneWidget);
+      expect(find.text('Phase 01 // Subroutines Nominal'), findsOneWidget);
+      expect(find.text('Phase 02 // Velocity Warning'), findsOneWidget);
+      expect(find.text('Phase 03 // Critical Capacity'), findsOneWidget);
+      expect(find.text('ACKNOWLEDGE // DISMISS'), findsOneWidget);
+    });
+
+    testWidgets('Tapping status badge in Botanical opens Daily Financial Pulse Guide', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildTheme('botanical'),
+          localizationsDelegates: const [AppStrings.delegate],
+          home: const Scaffold(
+            body: DailyFinancialPulseCard(
+              dailyAllowance: 100000,
+              todayExpense: 40000,
+              daysLeft: 10,
+              balance: 1000000,
+              totalBudget: 2000000,
+              budgetSpent: 500000,
+              txCount: 5,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Safe'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Daily Financial Pulse Guide'), findsOneWidget);
+      expect(find.text('I Understand'), findsOneWidget);
     });
   });
 }

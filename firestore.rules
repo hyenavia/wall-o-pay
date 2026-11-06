@@ -1,0 +1,653 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// This security rules file assumes the following data structures:
+//
+// Collection: usernames
+// Document ID: {username} (lowercase alphanumeric, underscore, or dot, 3-20 chars)
+// Fields:
+//   - uid: string (required, immutable, must match request.auth.uid) - Firebase Auth UID
+//   - email: string (required, 3-254 chars, valid email format) - User email for username login lookup
+//   - username: string (required, 3-20 chars, lowercase matches {username}) - Display username
+//
+// Collection: users
+// Document ID: {uid} (matches Firebase Auth UID)
+// Fields:
+//   - username: string (required, 3-20 chars) - Account username
+//   - email: string (required, 3-254 chars, valid email format) - Account email
+//
+// Subcollection: users/{uid}/meta
+// Document ID: profile | security | budgetConfig | preferences | onboarding
+// Fields (by document):
+//   - profile:
+//       - nickname: string | null (optional, 0-100 chars)
+//       - photo: string | null (optional, Base64-encoded image string, 0-950000 chars)
+//       - updatedAt: number (required, >= 0)
+//   - security:
+//       - hash: string | null (optional, 1-256 chars) - SHA-256 PIN hash
+//       - salt: string | null (optional, 1-256 chars) - Base64Url random salt
+//       - delay: number (required, 0-1440) - Auto-lock timeout in minutes
+//       - updatedAt: number (required, >= 0)
+//   - budgetConfig:
+//       - totalPools: map (required, <= 500 entries) - Period key to total budget amount
+//       - categoryBuckets: map (required, <= 500 entries) - Category ID to bucket name
+//       - customAllocations: map (required, <= 500 entries) - Period key to custom bucket amounts
+//       - updatedAt: number (required, >= 0)
+//   - preferences:
+//       - themeMode: string | null (optional, 1-20 chars)
+//       - localeCode: string | null (optional, 2-10 chars)
+//       - periodType: string | null (optional, 1-20 chars)
+//       - firstDayOfWeek: number | null (optional, 1-7)
+//       - firstDayOfMonth: number | null (optional, 1-31)
+//       - themePreset: string | null (optional, 1-30 chars)
+//       - cyberpunkUnlocked: bool | null (optional)
+//       - rollover: bool | null (optional)
+//       - budgetAlerts: bool | null (optional)
+//       - dailyReminder: bool | null (optional)
+//       - reminderHour: number | null (optional, 0-23)
+//       - reminderMinute: number | null (optional, 0-59)
+//       - hideBalance: bool | null (optional)
+//       - onboardingDone: bool | null (optional)
+//       - updatedAt: number (required, >= 0)
+//   - onboarding:
+//       - done: bool | null (optional)
+//       - onboardingDone: bool | null (optional)
+//       - updatedAt: number | timestamp | null (optional)
+//
+// Subcollection: users/{uid}/categories/{docId}
+// Fields:
+//   - id: string (required, immutable, matches docId)
+//   - createdAt: number | timestamp (required)
+//   - updatedAt: number | timestamp (required)
+//   - deletedAt: number | timestamp | null (optional)
+//   - name: string (required, 1-100 chars)
+//   - type: string (required, 'income' | 'expense' | 'transfer')
+//   - icon: string (required, 1-60 chars)
+//   - colorValue: number (required)
+//
+// Subcollection: users/{uid}/wallets/{docId}
+// Fields:
+//   - id: string (required, immutable, matches docId)
+//   - createdAt: number | timestamp (required)
+//   - updatedAt: number | timestamp (required)
+//   - deletedAt: number | timestamp | null (optional)
+//   - name: string (required, 1-100 chars)
+//   - type: string (required, 1-40 chars)
+//   - initialBalance: number (required)
+//   - icon: string (required, 1-60 chars)
+//   - colorValue: number (required)
+//
+// Subcollection: users/{uid}/transactions/{docId}
+// Fields:
+//   - id: string (required, immutable, matches docId)
+//   - createdAt: number | timestamp (required)
+//   - updatedAt: number | timestamp (required)
+//   - deletedAt: number | timestamp | null (optional)
+//   - amount: number (required)
+//   - type: string (required, 'income' | 'expense' | 'transfer')
+//   - categoryId: string (required, 1-128 chars)
+//   - note: string (required, 0-2000 chars)
+//   - date: number | timestamp (required)
+//   - walletId: string | null (optional, 1-128 chars)
+//   - toWalletId: string | null (optional, 1-128 chars)
+//   - receiptPath: string | null (optional, 0-1024 chars)
+//   - needWant: string | null (optional, 'need' | 'want')
+//
+// Subcollection: users/{uid}/budgets/{docId}
+// Fields:
+//   - id: string (required, immutable, matches docId)
+//   - createdAt: number | timestamp (required)
+//   - updatedAt: number | timestamp (required)
+//   - deletedAt: number | timestamp | null (optional)
+//   - categoryId: string (required, 1-128 chars)
+//   - amount: number (required)
+//   - monthKey: string (required, 1-30 chars)
+//
+// Subcollection: users/{uid}/savingsGoals/{docId} (and legacy savings_goals)
+// Fields:
+//   - id: string (required, immutable, matches docId)
+//   - createdAt: number | timestamp (required)
+//   - updatedAt: number | timestamp (required)
+//   - deletedAt: number | timestamp | null (optional)
+//   - name: string (required, 1-150 chars)
+//   - targetAmount: number (required)
+//   - currentAmount: number (required)
+//   - targetDate: number | timestamp | null (optional)
+//
+// Subcollection: users/{uid}/recurringRules/{docId} (and legacy recurring_rules)
+// Fields:
+//   - id: string (required, immutable, matches docId)
+//   - createdAt: number | timestamp (required)
+//   - updatedAt: number | timestamp (required)
+//   - deletedAt: number | timestamp | null (optional)
+//   - title: string (required, 1-200 chars)
+//   - amount: number (required)
+//   - type: string (required, 'income' | 'expense' | 'transfer')
+//   - categoryId: string (required, 1-128 chars)
+//   - walletId: string | null (optional, 1-128 chars)
+//   - toWalletId: string | null (optional, 1-128 chars)
+//   - frequency: string (required, 'daily' | 'weekly' | 'monthly')
+//   - dayOfWeek: number | null (optional)
+//   - dayOfMonth: number | null (optional)
+//   - startDate: number | timestamp (required)
+//   - nextDueDate: number | timestamp (required)
+//   - lastGeneratedDate: number | timestamp | null (optional)
+//   - isActive: bool (required)
+//   - note: string (required, 0-2000 chars)
+//
+// Subcollection: users/{uid}/debts/{docId}
+// Fields:
+//   - id: string (required, immutable, matches docId)
+//   - createdAt: number | timestamp (required)
+//   - updatedAt: number | timestamp (required)
+//   - deletedAt: number | timestamp | null (optional)
+//   - person: string (required, 1-120 chars)
+//   - direction: string (required, 'lent' | 'borrowed')
+//   - amount: number (required)
+//   - paidAmount: number (required)
+//   - note: string (required, 0-2000 chars)
+//   - dueDate: number | timestamp | null (optional)
+//   - date: number | timestamp (required)
+//
+// Subcollection: users/{uid}/txTemplates/{docId} (and legacy tx_templates)
+// Fields:
+//   - id: string (required, immutable, matches docId)
+//   - createdAt: number | timestamp (required)
+//   - updatedAt: number | timestamp (required)
+//   - deletedAt: number | timestamp | null (optional)
+//   - name: string (required, 1-100 chars)
+//   - type: string (required, 'income' | 'expense' | 'transfer')
+//   - amount: number (required)
+//   - categoryId: string (required, 1-128 chars)
+//   - walletId: string | null (optional, 1-128 chars)
+//   - needWant: string | null (optional, 'need' | 'want')
+//   - note: string (required, 0-2000 chars)
+//
+// Subcollection: users/{uid}/pendingTransactions/{docId}
+// Fields:
+//   - id: string (required, immutable, matches docId)
+//   - createdAt: number | timestamp (required)
+//   - updatedAt: number | timestamp (required)
+//   - deletedAt: number | timestamp | null (optional)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    // Check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if user owns the resource (for user-owned documents)
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Check if user is owner based on document's uid field
+    function isDocOwner() {
+      return isAuthenticated() &&
+             resource != null &&
+             request.auth.uid == resource.data.uid;
+    }
+
+    // Verify UID hasn't been tampered with on create
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) ||
+             request.resource.data.uid == request.auth.uid;
+    }
+
+    // Ensure uid field is not modified on update
+    function uidNotModified() {
+      return !('uid' in request.resource.data) ||
+             request.resource.data.uid == resource.data.uid;
+    }
+
+    // Validate required fields exist
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    // Validate string length
+    function validStringLength(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+             request.resource.data[field].size() >= minLen &&
+             request.resource.data[field].size() <= maxLen;
+    }
+
+    // Validate email format
+    function isValidEmail(email) {
+      return email is string &&
+             email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // Validate that the document contains only the allowed fields
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // Validate that immutable fields have not changed during an update
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    // Validate optional or nullable string field with length constraints
+    function isOptionalOrNullString(data, field, minLen, maxLen) {
+      return !(field in data) ||
+             data[field] == null ||
+             (data[field] is string &&
+              data[field].size() >= minLen &&
+              data[field].size() <= maxLen);
+    }
+
+    // Validate optional or nullable boolean field
+    function isOptionalOrNullBool(data, field) {
+      return !(field in data) ||
+             data[field] == null ||
+             data[field] is bool;
+    }
+
+    // Validate epoch milliseconds (number) or Firestore timestamp
+    function isTimestampOrNumber(val) {
+      return val is number || val is timestamp;
+    }
+
+    // Validate optional or nullable epoch milliseconds (number) or Firestore timestamp
+    function isOptionalOrNullTimestampOrNumber(data, field) {
+      return !(field in data) ||
+             data[field] == null ||
+             isTimestampOrNumber(data[field]);
+    }
+
+    // Validate standard Drift SyncColumns (id, createdAt, updatedAt, deletedAt)
+    function hasValidSyncColumns(data, docId) {
+      return hasRequiredFields(['id', 'createdAt', 'updatedAt']) &&
+             data.id is string &&
+             data.id == docId &&
+             data.id.size() >= 1 &&
+             data.id.size() <= 128 &&
+             isTimestampOrNumber(data.createdAt) &&
+             isTimestampOrNumber(data.updatedAt) &&
+             isOptionalOrNullTimestampOrNumber(data, 'deletedAt');
+    }
+
+    // ===============================================================
+    // Domain Validators (Called in BOTH create and update)
+    // ===============================================================
+
+    function isValidUsernameMapping(data, usernameDocId) {
+      return hasOnlyAllowedFields(['uid', 'email', 'username']) &&
+             hasRequiredFields(['uid', 'email', 'username']) &&
+             data.uid is string &&
+             data.uid == request.auth.uid &&
+             data.uid.size() >= 1 &&
+             data.uid.size() <= 128 &&
+             validStringLength('email', 3, 254) &&
+             isValidEmail(data.email) &&
+             validStringLength('username', 3, 20) &&
+             data.username.matches('^[A-Za-z0-9_.]{3,20}$') &&
+             data.username.lower() == usernameDocId;
+    }
+
+    function isValidUserDoc(data) {
+      return hasOnlyAllowedFields(['username', 'email']) &&
+             hasRequiredFields(['username', 'email']) &&
+             validStringLength('username', 3, 20) &&
+             validStringLength('email', 3, 254) &&
+             isValidEmail(data.email);
+    }
+
+    function isValidMetaProfile(data) {
+      return hasOnlyAllowedFields(['nickname', 'photo', 'updatedAt']) &&
+             hasRequiredFields(['updatedAt']) &&
+             isOptionalOrNullString(data, 'nickname', 0, 100) &&
+             isOptionalOrNullString(data, 'photo', 0, 950000) &&
+             data.updatedAt is number &&
+             data.updatedAt >= 0;
+    }
+
+    function isValidMetaSecurity(data) {
+      return hasOnlyAllowedFields(['hash', 'salt', 'delay', 'updatedAt']) &&
+             hasRequiredFields(['delay', 'updatedAt']) &&
+             isOptionalOrNullString(data, 'hash', 1, 256) &&
+             isOptionalOrNullString(data, 'salt', 1, 256) &&
+             data.delay is number &&
+             data.delay >= 0 &&
+             data.delay <= 1440 &&
+             data.updatedAt is number &&
+             data.updatedAt >= 0;
+    }
+
+    function isValidMetaBudgetConfig(data) {
+      return hasOnlyAllowedFields(['totalPools', 'categoryBuckets', 'customAllocations', 'updatedAt']) &&
+             hasRequiredFields(['totalPools', 'categoryBuckets', 'customAllocations', 'updatedAt']) &&
+             data.totalPools is map &&
+             data.totalPools.size() <= 500 &&
+             data.categoryBuckets is map &&
+             data.categoryBuckets.size() <= 500 &&
+             data.customAllocations is map &&
+             data.customAllocations.size() <= 500 &&
+             data.updatedAt is number &&
+             data.updatedAt >= 0;
+    }
+
+    function isValidMetaPreferences(data) {
+      return hasOnlyAllowedFields([
+               'themeMode', 'localeCode', 'periodType',
+               'firstDayOfWeek', 'firstDayOfMonth',
+               'themePreset', 'cyberpunkUnlocked',
+               'rollover', 'budgetAlerts', 'dailyReminder',
+               'reminderHour', 'reminderMinute',
+               'hideBalance', 'onboardingDone', 'updatedAt'
+             ]) &&
+             hasRequiredFields(['updatedAt']) &&
+             isOptionalOrNullString(data, 'themeMode', 1, 20) &&
+             isOptionalOrNullString(data, 'localeCode', 2, 10) &&
+             isOptionalOrNullString(data, 'periodType', 1, 20) &&
+             (!('firstDayOfWeek' in data) || data.firstDayOfWeek == null || (data.firstDayOfWeek is number && data.firstDayOfWeek >= 1 && data.firstDayOfWeek <= 7)) &&
+             (!('firstDayOfMonth' in data) || data.firstDayOfMonth == null || (data.firstDayOfMonth is number && data.firstDayOfMonth >= 1 && data.firstDayOfMonth <= 31)) &&
+             isOptionalOrNullString(data, 'themePreset', 1, 30) &&
+             isOptionalOrNullBool(data, 'cyberpunkUnlocked') &&
+             isOptionalOrNullBool(data, 'rollover') &&
+             isOptionalOrNullBool(data, 'budgetAlerts') &&
+             isOptionalOrNullBool(data, 'dailyReminder') &&
+             (!('reminderHour' in data) || data.reminderHour == null || (data.reminderHour is number && data.reminderHour >= 0 && data.reminderHour <= 23)) &&
+             (!('reminderMinute' in data) || data.reminderMinute == null || (data.reminderMinute is number && data.reminderMinute >= 0 && data.reminderMinute <= 59)) &&
+             isOptionalOrNullBool(data, 'hideBalance') &&
+             isOptionalOrNullBool(data, 'onboardingDone') &&
+             data.updatedAt is number &&
+             data.updatedAt >= 0;
+    }
+
+    function isValidMetaOnboarding(data) {
+      return hasOnlyAllowedFields(['done', 'onboardingDone', 'updatedAt']) &&
+             isOptionalOrNullBool(data, 'done') &&
+             isOptionalOrNullBool(data, 'onboardingDone') &&
+             isOptionalOrNullTimestampOrNumber(data, 'updatedAt');
+    }
+
+    function isValidMetaDoc(metaDoc, data) {
+      return (metaDoc == 'profile' && isValidMetaProfile(data)) ||
+             (metaDoc == 'security' && isValidMetaSecurity(data)) ||
+             (metaDoc == 'budgetConfig' && isValidMetaBudgetConfig(data)) ||
+             (metaDoc == 'preferences' && isValidMetaPreferences(data)) ||
+             (metaDoc == 'onboarding' && isValidMetaOnboarding(data));
+    }
+
+    function isValidCategory(data, docId) {
+      return hasOnlyAllowedFields(['id', 'createdAt', 'updatedAt', 'deletedAt', 'name', 'type', 'icon', 'colorValue']) &&
+             hasValidSyncColumns(data, docId) &&
+             hasRequiredFields(['name', 'type', 'icon', 'colorValue']) &&
+             validStringLength('name', 1, 100) &&
+             data.type in ['income', 'expense', 'transfer'] &&
+             validStringLength('icon', 1, 60) &&
+             data.colorValue is number;
+    }
+
+    function isValidWallet(data, docId) {
+      return hasOnlyAllowedFields(['id', 'createdAt', 'updatedAt', 'deletedAt', 'name', 'type', 'initialBalance', 'icon', 'colorValue']) &&
+             hasValidSyncColumns(data, docId) &&
+             hasRequiredFields(['name', 'type', 'initialBalance', 'icon', 'colorValue']) &&
+             validStringLength('name', 1, 100) &&
+             validStringLength('type', 1, 40) &&
+             data.initialBalance is number &&
+             validStringLength('icon', 1, 60) &&
+             data.colorValue is number;
+    }
+
+    function isValidTransaction(data, docId) {
+      return hasOnlyAllowedFields([
+               'id', 'createdAt', 'updatedAt', 'deletedAt',
+               'amount', 'type', 'categoryId', 'note', 'date',
+               'walletId', 'toWalletId', 'receiptPath', 'needWant'
+             ]) &&
+             hasValidSyncColumns(data, docId) &&
+             hasRequiredFields(['amount', 'type', 'categoryId', 'note', 'date']) &&
+             data.amount is number &&
+             data.type in ['income', 'expense', 'transfer'] &&
+             validStringLength('categoryId', 1, 128) &&
+             validStringLength('note', 0, 2000) &&
+             isTimestampOrNumber(data.date) &&
+             isOptionalOrNullString(data, 'walletId', 1, 128) &&
+             isOptionalOrNullString(data, 'toWalletId', 1, 128) &&
+             isOptionalOrNullString(data, 'receiptPath', 0, 1024) &&
+             (!('needWant' in data) || data.needWant == null || data.needWant in ['need', 'want']);
+    }
+
+    function isValidBudget(data, docId) {
+      return hasOnlyAllowedFields(['id', 'createdAt', 'updatedAt', 'deletedAt', 'categoryId', 'amount', 'monthKey']) &&
+             hasValidSyncColumns(data, docId) &&
+             hasRequiredFields(['categoryId', 'amount', 'monthKey']) &&
+             validStringLength('categoryId', 1, 128) &&
+             data.amount is number &&
+             validStringLength('monthKey', 1, 30);
+    }
+
+    function isValidSavingsGoal(data, docId) {
+      return hasOnlyAllowedFields(['id', 'createdAt', 'updatedAt', 'deletedAt', 'name', 'targetAmount', 'currentAmount', 'targetDate']) &&
+             hasValidSyncColumns(data, docId) &&
+             hasRequiredFields(['name', 'targetAmount', 'currentAmount']) &&
+             validStringLength('name', 1, 150) &&
+             data.targetAmount is number &&
+             data.currentAmount is number &&
+             isOptionalOrNullTimestampOrNumber(data, 'targetDate');
+    }
+
+    function isValidRecurringRule(data, docId) {
+      return hasOnlyAllowedFields([
+               'id', 'createdAt', 'updatedAt', 'deletedAt',
+               'title', 'amount', 'type', 'categoryId',
+               'walletId', 'toWalletId', 'frequency',
+               'dayOfWeek', 'dayOfMonth', 'startDate',
+               'nextDueDate', 'lastGeneratedDate', 'isActive', 'note'
+             ]) &&
+             hasValidSyncColumns(data, docId) &&
+             hasRequiredFields(['title', 'amount', 'type', 'categoryId', 'frequency', 'startDate', 'nextDueDate', 'isActive', 'note']) &&
+             validStringLength('title', 1, 200) &&
+             data.amount is number &&
+             data.type in ['income', 'expense', 'transfer'] &&
+             validStringLength('categoryId', 1, 128) &&
+             isOptionalOrNullString(data, 'walletId', 1, 128) &&
+             isOptionalOrNullString(data, 'toWalletId', 1, 128) &&
+             data.frequency in ['daily', 'weekly', 'monthly'] &&
+             isOptionalOrNullTimestampOrNumber(data, 'dayOfWeek') &&
+             isOptionalOrNullTimestampOrNumber(data, 'dayOfMonth') &&
+             isTimestampOrNumber(data.startDate) &&
+             isTimestampOrNumber(data.nextDueDate) &&
+             isOptionalOrNullTimestampOrNumber(data, 'lastGeneratedDate') &&
+             data.isActive is bool &&
+             validStringLength('note', 0, 2000);
+    }
+
+    function isValidDebt(data, docId) {
+      return hasOnlyAllowedFields([
+               'id', 'createdAt', 'updatedAt', 'deletedAt',
+               'person', 'direction', 'amount', 'paidAmount',
+               'note', 'dueDate', 'date'
+             ]) &&
+             hasValidSyncColumns(data, docId) &&
+             hasRequiredFields(['person', 'direction', 'amount', 'paidAmount', 'note', 'date']) &&
+             validStringLength('person', 1, 120) &&
+             data.direction in ['lent', 'borrowed'] &&
+             data.amount is number &&
+             data.paidAmount is number &&
+             validStringLength('note', 0, 2000) &&
+             isOptionalOrNullTimestampOrNumber(data, 'dueDate') &&
+             isTimestampOrNumber(data.date);
+    }
+
+    function isValidTxTemplate(data, docId) {
+      return hasOnlyAllowedFields([
+               'id', 'createdAt', 'updatedAt', 'deletedAt',
+               'name', 'type', 'amount', 'categoryId',
+               'walletId', 'needWant', 'note'
+             ]) &&
+             hasValidSyncColumns(data, docId) &&
+             hasRequiredFields(['name', 'type', 'amount', 'categoryId', 'note']) &&
+             validStringLength('name', 1, 100) &&
+             data.type in ['income', 'expense', 'transfer'] &&
+             data.amount is number &&
+             validStringLength('categoryId', 1, 128) &&
+             isOptionalOrNullString(data, 'walletId', 1, 128) &&
+             (!('needWant' in data) || data.needWant == null || data.needWant in ['need', 'want']) &&
+             validStringLength('note', 0, 2000);
+    }
+
+    function isValidPendingTransaction(data, docId) {
+      return hasValidSyncColumns(data, docId) &&
+             data.keys().size() <= 25;
+    }
+
+    // ===============================================================
+    // Collection Rules: /usernames/{username}
+    // ===============================================================
+    match /usernames/{username} {
+      // Single-document lookup by exact username ID is required prior to authentication
+      // to resolve username -> email during sign-in/password-reset and check availability on sign-up.
+      allow get: if true;
+
+      // Prevent unauthenticated or cross-user enumeration/scraping of usernames and emails.
+      // Only allow authenticated users to query their own username reservations (.where('uid', isEqualTo: uid)).
+      allow list: if isAuthenticated() && resource.data.uid == request.auth.uid;
+
+      // Only the authenticated owner of the UID can reserve a username mapping.
+      allow create: if isAuthenticated() &&
+                       uidUnchanged() &&
+                       isValidUsernameMapping(request.resource.data, username);
+
+      // Only the existing owner can update their username mapping, and UID cannot be transferred.
+      allow update: if isDocOwner() &&
+                       uidNotModified() &&
+                       isValidUsernameMapping(request.resource.data, username);
+
+      // Only the owner of the username reservation can delete it (e.g., during account deletion).
+      allow delete: if isDocOwner();
+    }
+
+    // ===============================================================
+    // Collection Rules: /users/{uid} and User Subcollections
+    // ===============================================================
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid) && isValidUserDoc(request.resource.data);
+      allow update: if isOwner(uid) && isValidUserDoc(request.resource.data);
+      allow delete: if isOwner(uid);
+
+      // Metadata documents: profile, security, budgetConfig, preferences, onboarding
+      match /meta/{metaDoc} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidMetaDoc(metaDoc, request.resource.data);
+        allow update: if isOwner(uid) && isValidMetaDoc(metaDoc, request.resource.data);
+        allow delete: if isOwner(uid);
+      }
+
+      // Categories
+      match /categories/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidCategory(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidCategory(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
+      // Wallets
+      match /wallets/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidWallet(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidWallet(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
+      // Transactions
+      match /transactions/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidTransaction(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidTransaction(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
+      // Budgets
+      match /budgets/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidBudget(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidBudget(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
+      // Savings Goals (camelCase and legacy snake_case)
+      match /savingsGoals/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidSavingsGoal(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidSavingsGoal(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
+      match /savings_goals/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidSavingsGoal(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidSavingsGoal(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
+      // Recurring Rules (camelCase and legacy snake_case)
+      match /recurringRules/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidRecurringRule(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidRecurringRule(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
+      match /recurring_rules/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidRecurringRule(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidRecurringRule(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
+      // Debts
+      match /debts/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidDebt(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidDebt(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
+      // Transaction Templates (camelCase and legacy snake_case)
+      match /txTemplates/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidTxTemplate(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidTxTemplate(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
+      match /tx_templates/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidTxTemplate(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidTxTemplate(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
+      // Pending Transactions (auxiliary/legacy cleanup support)
+      match /pendingTransactions/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidPendingTransaction(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidPendingTransaction(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+    }
+
+    // ===============================================================
+    // Default Deny All Other Paths
+    // ===============================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
