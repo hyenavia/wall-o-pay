@@ -4,6 +4,13 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1] - 2026-11-07
+
+### Fixed
+- **Restored Authentic v1.11 Botanical Brand Launcher Icon:**
+  - Restored the original, authentic Botanical Forest brand icon artwork directly from version 1.11 (`v1.11.38`) across all platforms (Android, iOS, Web PWA, Windows, and Landing Page).
+  - Resolved root cause of shrinking home screen icons by removing `<inset android:inset="16%"/>` from `android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml`, restoring standard 1:1 full-canvas rendering without artificial scaling artifacts.
+
 ## [2.1.0] - 2026-11-07
 
 ### 🌟 Visual Polish, HUD Telemetry & Profile Studio (Minor Feature Release)

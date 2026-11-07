@@ -45,10 +45,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.1.0',
+      version: '2.1.1',
       dateEn: 'November 7, 2026',
       dateId: '7 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Restored Authentic v1.11 Botanical Brand Icon: Replaced all launcher and brand assets with the exact signature Botanical Forest artwork from v1.11, removing the 16% foreground inset in Android adaptive icon XML that caused home screen icons to shrink.',
+          textId: 'Kembalikan Ikon Botani Otentik v1.11: Mengembalikan seluruh aset ikon dan brand persis seperti versi 1.11, serta menghapus inset foreground 16% pada XML adaptive icon Android yang sebelumnya menyebabkan ikon mengecil di layar beranda.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.0',
+      dateEn: 'November 7, 2026',
+      dateId: '7 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,
