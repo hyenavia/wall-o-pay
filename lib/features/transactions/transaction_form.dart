@@ -94,11 +94,10 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     final isEdit = e != null;
     final now = DateTime.now();
     final isNotToday = e != null && (e.date.year != now.year || e.date.month != now.month || e.date.day != now.day);
-    final hasNote = (e?.note.isNotEmpty ?? false) || (widget.initialNote?.isNotEmpty ?? false);
     final hasReceipt = (e?.receiptPath != null) || (widget.initialReceiptPath != null);
     final hasNeedWant = e?.needWant != null;
 
-    _showMoreDetails = isEdit && (isNotToday || hasNote || hasReceipt || hasNeedWant);
+    _showMoreDetails = isEdit && (isNotToday || hasReceipt || hasNeedWant);
     _showAdminFee = false;
     _type = e?.type ?? widget.initialType ?? TxType.expense;
     _amount = TextEditingController(
@@ -209,7 +208,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       _categoryId = t.categoryId;
       _walletId = t.walletId ?? _walletId;
       _needWant = t.needWant;
-      if (t.note.isNotEmpty || t.needWant != null) {
+      if (t.needWant != null) {
         _showMoreDetails = true;
       }
       _error = null;
@@ -751,6 +750,12 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
             ],
 
             const SizedBox(height: 16),
+            TextField(
+              controller: _note,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: appInput(context, label: context.tr('Note (optional)')),
+            ),
+            const SizedBox(height: 14),
             InkWell(
               onTap: () => setState(() => _showMoreDetails = !_showMoreDetails),
               borderRadius: BorderRadius.circular(12),
@@ -777,7 +782,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     Text(
                       _showMoreDetails
                           ? context.tr('Hide extra details')
-                          : context.tr('More details (Date, note, receipt...)'),
+                          : context.tr('More details (Date, receipt...)'),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: context.themeColors.primary,
                         fontWeight: FontWeight.w600,
@@ -796,11 +801,6 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 title: Text(dateLabel(_date)),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: _pickDate,
-              ),
-              TextField(
-                controller: _note,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: appInput(context, label: context.tr('Note (optional)')),
               ),
               if (_type == TxType.expense) ...[
                 const SizedBox(height: 16),

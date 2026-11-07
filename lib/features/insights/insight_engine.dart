@@ -473,6 +473,40 @@ class InsightEngine {
       }
     }
 
+    // 7. Frequent Small Purchases ("Latte Factor" <= Rp 50.000, >= 3x)
+    const microThreshold = 50000;
+    final microTxs = expTxs.where((t) => t.amount > 0 && t.amount <= microThreshold).toList();
+    if (microTxs.length >= 3) {
+      final microTotal = microTxs.fold<int>(0, (sum, t) => sum + t.amount);
+      final microCatCounts = <String, int>{};
+      for (final t in microTxs) {
+        microCatCounts[t.categoryId] = (microCatCounts[t.categoryId] ?? 0) + 1;
+      }
+      String topMicroCatId = microCatCounts.keys.first;
+      int topMicroCount = 0;
+      microCatCounts.forEach((catId, count) {
+        if (count > topMicroCount) {
+          topMicroCount = count;
+          topMicroCatId = catId;
+        }
+      });
+      final topMicroCatName = context.tr(categoryMap[topMicroCatId]?.name ?? 'Uncategorized');
+      insights.add(SmartInsightItem(
+        title: context.tr('Frequent Small Purchases'),
+        description: context.tr(
+          'You made {count} small purchases (≤ Rp 50.000) totaling {amount}, mostly in {cat}.',
+          {
+            'count': '${microTxs.length}',
+            'amount': rupiah(microTotal),
+            'cat': topMicroCatName,
+          },
+        ),
+        icon: Icons.local_cafe_outlined,
+        accentColor: AppColors.warning,
+        badge: '${microTxs.length}x',
+      ));
+    }
+
     return insights;
   }
 }

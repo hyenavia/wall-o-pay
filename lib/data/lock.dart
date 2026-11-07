@@ -49,6 +49,7 @@ class Lock {
 
   final state = ValueNotifier<AppLockState>(const AppLockState());
   final isLocked = ValueNotifier<bool>(false);
+  final bypassForQuickAction = ValueNotifier<bool>(false);
   final _localAuth = LocalAuthentication();
   final _secureStorage = const FlutterSecureStorage();
   final Map<String, String> _secretCache = {};

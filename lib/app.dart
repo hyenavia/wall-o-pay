@@ -67,15 +67,17 @@ class _Root extends StatefulWidget {
 }
 
 class _RootState extends State<_Root> {
-  bool _ready = false;
+  bool _ready = ShareService.hasPendingShortcut;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer(const Duration(milliseconds: 450), () {
-      if (mounted) setState(() => _ready = true);
-    });
+    if (!_ready) {
+      _timer = Timer(const Duration(milliseconds: 450), () {
+        if (mounted) setState(() => _ready = true);
+      });
+    }
   }
 
   @override

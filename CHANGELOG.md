@@ -4,6 +4,20 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-11-07
+
+### Added
+- **Android Home Screen Quick Shortcuts:**
+  - Added dynamic launcher quick actions (**Add Expense**, **Add Income**, **Transfer Funds** in English & Indonesian) when long-pressing the Wall o' Pay home screen icon, opening `TransactionForm` immediately without splash delay or PIN/Biometric friction while keeping the underlying dashboard locked.
+- **Streamlined Note Field on Main Transaction Form:**
+  - Moved the **Note (optional)** input out of the collapsible *More details* section directly onto the primary `TransactionForm` for faster everyday logging.
+- **On-Demand Interactive Cashflow Calendar (`TransactionsPage`):**
+  - Added a toggleable Cashflow Calendar view in the Transactions tab header showing daily income and expense indicator dots across the active period, with one-tap date filtering and zero impact on initial page load.
+- **Smart Split Bill Wallet Integration (`DebtsPage`):**
+  - Enhanced the Split Bill sheet (`showSplitSheet`) with payment account (`Wallet`) selection and a toggle between recording **My share only** or **Full bill paid by me** as an expense transaction alongside friend debt entries.
+- **Frequent Small Purchases ("Latte Factor") Insight (`InsightEngine`):**
+  - Added deterministic detection for recurring micro-purchases (`<= Rp 50.000`, `>= 3x` per period) in the Insights tab, highlighting total accumulated spending and the dominant category.
+
 ## [2.1.2] - 2026-11-07
 
 ### Changed

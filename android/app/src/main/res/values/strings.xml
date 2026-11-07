@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Wall o\' Pay</string>
+    <string name="shortcut_expense_short">Add Expense</string>
+    <string name="shortcut_expense_long">Record New Expense</string>
+    <string name="shortcut_income_short">Add Income</string>
+    <string name="shortcut_income_long">Record New Income</string>
+    <string name="shortcut_transfer_short">Transfer</string>
+    <string name="shortcut_transfer_long">Transfer Between Wallets</string>
 </resources>

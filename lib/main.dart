@@ -17,6 +17,7 @@ import 'data/cloud.dart';
 import 'data/lock.dart';
 import 'data/notifications.dart';
 import 'data/prefs.dart';
+import 'data/share_service.dart';
 import 'data/update_checker.dart';
 import 'firebase_options.dart';
 
@@ -35,6 +36,7 @@ Future<void> main() async {
     initializeDateFormatting('en'),
     initializeDateFormatting('id'),
     NotificationService.instance.init(),
+    ShareService.preloadInitialData(),
     SharedPreferences.getInstance().then((p) => prefs = p),
     () async {
       try {

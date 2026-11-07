@@ -941,6 +941,15 @@ const Map<String, String> _id = {
   'Next due: {date}': 'Jatuh tempo berikutnya: {date}',
   'Active (PIN + Biometric) • Timeout: {time}': 'Aktif (PIN + Biometrik) • Jeda: {time}',
   'Please wait {seconds}s before trying again.': 'Mohon tunggu {seconds} detik sebelum mencoba lagi.',
+  'Cashflow Calendar': 'Kalender Arus Kas',
+  'Tap a date to filter': 'Ketuk tanggal untuk memfilter',
+  'My share only': 'Hanya bagianku',
+  'Full bill paid by me': 'Seluruh tagihan kubayar',
+  'Payment Account': 'Rekening Pembayaran',
+  'Frequent Small Purchases': 'Pengeluaran Kecil Berulang',
+  'You made {count} small purchases (≤ Rp 50.000) totaling {amount}, mostly in {cat}.':
+      'Anda melakukan {count} transaksi kecil (≤ Rp 50.000) dengan total {amount}, terbanyak di {cat}.',
+  'More details (Date, receipt...)': 'Detail tambahan (Tanggal, struk...)',
 };
 
 /// Kosakata Khusus Tema Cyberpunk (Edgerunners Style) - Bahasa Indonesia

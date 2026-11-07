@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:wall_o_pay/core/l10n.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -179,6 +180,73 @@ void main() {
       expect(trG('Trend'), 'Tren');
       expect(trG('Transfer Between Accounts'), 'Transfer Antar Akun');
       expect(trG('Balance'), 'Saldo');
+      expect(trG('Cashflow Calendar'), 'Kalender Arus Kas');
+      expect(trG('Frequent Small Purchases'), 'Pengeluaran Kecil Berulang');
+      expect(trG('My share only'), 'Hanya bagianku');
+      expect(trG('Full bill paid by me'), 'Seluruh tagihan kubayar');
+      expect(trG('Payment Account'), 'Rekening Pembayaran');
+    });
+
+    testWidgets('generateSmartInsights detects Frequent Small Purchases (Latte Factor)', (tester) async {
+      AppLocale.code = 'en';
+      final now = DateTime(2026, 11, 7);
+      final period = Period.containing(PeriodType.monthly, now);
+      final catMap = {
+        'cat-exp-food': Category(
+          id: 'cat-exp-food',
+          name: 'Food & Drinks',
+          type: TxType.expense,
+          icon: 'restaurant',
+          colorValue: 0xFFEF6C00,
+          createdAt: now,
+          updatedAt: now,
+        ),
+      };
+      final txs = [
+        for (int i = 0; i < 4; i++)
+          TransactionEntry(
+            id: 'm$i',
+            amount: 20000,
+            type: TxType.expense,
+            categoryId: 'cat-exp-food',
+            note: 'Coffee',
+            date: now,
+            createdAt: now,
+            updatedAt: now,
+          ),
+      ];
+
+      late List<SmartInsightItem> items;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) {
+              final summary = InsightEngine.computeSummary(currentTxs: txs, prevTxs: []);
+              final cats = InsightEngine.computeCategories(
+                context: context,
+                currentTxs: txs,
+                prevTxs: [],
+                categoryMap: catMap,
+                totalExpense: summary.totalExpense,
+              );
+              items = InsightEngine.generateSmartInsights(
+                context: context,
+                summary: summary,
+                categories: cats,
+                currentTxs: txs,
+                period: period,
+                categoryMap: catMap,
+              );
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      final latte = items.where((i) => i.title == 'Frequent Small Purchases').toList();
+      expect(latte.length, 1);
+      expect(latte.first.badge, '4x');
+      expect(latte.first.description, contains('Rp 80.000'));
     });
   });
 }

@@ -357,10 +357,14 @@ class _LockScreenState extends ConsumerState<LockScreen> {
     return ValueListenableBuilder<AppLockState>(
       valueListenable: Lock.instance.state,
       builder: (context, st, _) {
-        if (st.biometricEnabled && !_autoPrompted) {
+        if (st.biometricEnabled &&
+            !_autoPrompted &&
+            !Lock.instance.bypassForQuickAction.value) {
           _autoPrompted = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) _tryBiometric();
+            if (mounted && !Lock.instance.bypassForQuickAction.value) {
+              _tryBiometric();
+            }
           });
         }
         final promptText = !st.biometricEnabled

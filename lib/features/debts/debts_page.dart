@@ -614,7 +614,9 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
   final _friends = TextEditingController();
   final _note = TextEditingController();
   bool _recordMyShare = false;
+  bool _deductFullBill = false;
   String? _categoryId;
+  String? _walletId;
   String? _error;
 
   @override
@@ -657,10 +659,13 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
       );
     }
     if (_recordMyShare) {
+      final wallets = ref.read(walletsProvider).value ?? const <Wallet>[];
+      final targetWalletId = _walletId ?? (wallets.isNotEmpty ? wallets.first.id : null);
       await db.addTransaction(
-        amount: myShare,
+        amount: _deductFullBill ? total : myShare,
         type: TxType.expense,
         categoryId: _categoryId!,
+        walletId: targetWalletId,
         date: DateTime.now(),
         note: note,
       );
@@ -676,6 +681,8 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
           data: (l) => l.where((c) => c.type == TxType.expense).toList(),
           orElse: () => <Category>[],
         );
+    final wallets = ref.watch(walletsProvider).value ?? const <Wallet>[];
+    final effectiveWalletId = _walletId ?? (wallets.isNotEmpty ? wallets.first.id : null);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final total = parseAmount(_total.text);
     final names = _names;
@@ -736,7 +743,50 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
               onChanged: (v) => setState(() => _recordMyShare = v),
               title: Text(context.tr('Record my share as an expense')),
             ),
-            if (_recordMyShare)
+            if (_recordMyShare) ...[
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  AppChip(
+                    label: context.tr('My share only'),
+                    selected: !_deductFullBill,
+                    onSelected: () => setState(() => _deductFullBill = false),
+                  ),
+                  AppChip(
+                    label: context.tr('Full bill paid by me'),
+                    selected: _deductFullBill,
+                    onSelected: () => setState(() => _deductFullBill = true),
+                  ),
+                ],
+              ),
+              if (wallets.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(
+                  context.tr('Payment Account'),
+                  style: theme.textTheme.labelMedium?.copyWith(color: muted, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final w in wallets)
+                      AppChip(
+                        icon: iconFor(w.icon),
+                        label: context.tr(w.name),
+                        selected: effectiveWalletId == w.id,
+                        onSelected: () => setState(() => _walletId = w.id),
+                      ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 12),
+              Text(
+                context.tr('Category'),
+                style: theme.textTheme.labelMedium?.copyWith(color: muted, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 6),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -750,6 +800,7 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
                     ),
                 ],
               ),
+            ],
             if (_error != null) ...[
               const SizedBox(height: 12),
               Text(_error!, style: TextStyle(color: context.themeColors.expense)),

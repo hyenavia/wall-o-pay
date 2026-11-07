@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
 import '../../core/l10n.dart';
+import '../../core/period.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/app_database.dart';
@@ -33,6 +34,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   DateTimeRange? _range;
   String? _selectedWalletId;
   String? _selectedCategoryId;
+  bool _showCalendar = false;
+  DateTime? _selectedDay;
 
   @override
   void dispose() {
@@ -75,6 +78,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         .unwrapPrevious();
     final cats = ref.watch(categoryMapProvider);
     final wallets = ref.watch(walletMapProvider);
+    final period = ref.watch(selectedPeriodProvider);
     final colors = context.themeColors;
 
     return Scaffold(
@@ -82,6 +86,17 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         context,
         title: Text(context.tr('Transactions')),
         actions: [
+          IconButton(
+            tooltip: context.tr('Cashflow Calendar'),
+            icon: Icon(
+              Icons.calendar_month_rounded,
+              color: (_showCalendar || _selectedDay != null) ? colors.primary : null,
+            ),
+            onPressed: () => setState(() {
+              _showCalendar = !_showCalendar;
+              if (!_showCalendar) _selectedDay = null;
+            }),
+          ),
           IconButton(
             tooltip: context.tr('Filter by date range'),
             icon: Icon(
@@ -123,6 +138,12 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 return false;
               }
               if (_selectedCategoryId != null && t.categoryId != _selectedCategoryId) {
+                return false;
+              }
+              if (_selectedDay != null &&
+                  (t.date.year != _selectedDay!.year ||
+                      t.date.month != _selectedDay!.month ||
+                      t.date.day != _selectedDay!.day)) {
                 return false;
               }
               return true;
@@ -335,12 +356,15 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                   ),
                                 ),
                               ),
-                              if (_selectedWalletId != null || _selectedCategoryId != null) ...[
+                              if (_selectedWalletId != null ||
+                                  _selectedCategoryId != null ||
+                                  _selectedDay != null) ...[
                                 const SizedBox(width: 8),
                                 InkWell(
                                   onTap: () => setState(() {
                                     _selectedWalletId = null;
                                     _selectedCategoryId = null;
+                                    _selectedDay = null;
                                   }),
                                   borderRadius: BorderRadius.circular(20),
                                   child: Padding(
@@ -366,6 +390,25 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                             ],
                           ),
                         ),
+                        if (_showCalendar) ...[
+                          const SizedBox(height: 12),
+                          _CashflowCalendarCard(
+                            period: period,
+                            txs: txs,
+                            selectedDay: _selectedDay,
+                            onSelectDay: (day) => setState(() {
+                              if (_selectedDay != null &&
+                                  day != null &&
+                                  _selectedDay!.year == day.year &&
+                                  _selectedDay!.month == day.month &&
+                                  _selectedDay!.day == day.day) {
+                                _selectedDay = null;
+                              } else {
+                                _selectedDay = day;
+                              }
+                            }),
+                          ),
+                        ],
                         const SizedBox(height: 14),
                         Row(
                           children: [
@@ -516,6 +559,213 @@ class _SummaryTile extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Kartu kalender arus kas interaktif yang hanya di-render saat diaktifkan pengguna (on-demand).
+class _CashflowCalendarCard extends StatelessWidget {
+  const _CashflowCalendarCard({
+    required this.period,
+    required this.txs,
+    required this.selectedDay,
+    required this.onSelectDay,
+  });
+
+  final Period period;
+  final List<TransactionEntry> txs;
+  final DateTime? selectedDay;
+  final ValueChanged<DateTime?> onSelectDay;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = context.themeColors;
+    final isId = AppLocale.code == 'id';
+    final weekdays = isId
+        ? const ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min']
+        : const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    // Petakan total pemasukan & pengeluaran per tanggal di periode aktif
+    final dailyIncome = <DateTime, int>{};
+    final dailyExpense = <DateTime, int>{};
+    for (final t in txs) {
+      final d = DateTime(t.date.year, t.date.month, t.date.day);
+      if (t.type == TxType.income) {
+        dailyIncome[d] = (dailyIncome[d] ?? 0) + t.amount;
+      } else if (t.type == TxType.expense) {
+        dailyExpense[d] = (dailyExpense[d] ?? 0) + t.amount;
+      }
+    }
+
+    // Daftar seluruh hari dalam periode
+    final days = <DateTime>[];
+    var cursor = DateTime(period.start.year, period.start.month, period.start.day);
+    final end = DateTime(period.end.year, period.end.month, period.end.day);
+    while (cursor.isBefore(end)) {
+      days.add(cursor);
+      cursor = cursor.add(const Duration(days: 1));
+    }
+
+    final leadingEmpty = days.isEmpty ? 0 : (days.first.weekday - 1);
+    final totalCells = leadingEmpty + days.length;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    return AppCard(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.calendar_month_rounded, size: 16, color: colors.primary),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  context.tr('Cashflow Calendar'),
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              if (selectedDay != null)
+                InkWell(
+                  onTap: () => onSelectDay(null),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    child: Text(
+                      shortDate(selectedDay!),
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: colors.primary,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Text(
+                  context.tr('Tap a date to filter'),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 11,
+                    color: colors.textMuted,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              for (final w in weekdays)
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      w,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                        color: colors.textMuted,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: totalCells,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 7,
+              mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
+              childAspectRatio: 1.05,
+            ),
+            itemBuilder: (context, idx) {
+              if (idx < leadingEmpty) {
+                return const SizedBox.shrink();
+              }
+              final date = days[idx - leadingEmpty];
+              final inc = dailyIncome[date] ?? 0;
+              final exp = dailyExpense[date] ?? 0;
+              final isSelected = selectedDay != null &&
+                  selectedDay!.year == date.year &&
+                  selectedDay!.month == date.month &&
+                  selectedDay!.day == date.day;
+              final isToday = date == today;
+
+              return InkWell(
+                onTap: () => onSelectDay(date),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? colors.primary.withValues(alpha: 0.22)
+                        : (inc > 0 || exp > 0)
+                            ? colors.surfaceContainer.withValues(alpha: 0.55)
+                            : Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
+                    border: isSelected
+                        ? Border.all(color: colors.primary, width: 1.4)
+                        : isToday
+                            ? Border.all(
+                                color: colors.primary.withValues(alpha: 0.45),
+                                width: 1,
+                              )
+                            : null,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${date.day}',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: isSelected || isToday
+                              ? FontWeight.w800
+                              : FontWeight.w600,
+                          color: isSelected
+                              ? colors.primary
+                              : colors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (inc > 0)
+                            Container(
+                              width: 5,
+                              height: 5,
+                              margin: const EdgeInsets.symmetric(horizontal: 1),
+                              decoration: BoxDecoration(
+                                color: colors.income,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          if (exp > 0)
+                            Container(
+                              width: 5,
+                              height: 5,
+                              margin: const EdgeInsets.symmetric(horizontal: 1),
+                              decoration: BoxDecoration(
+                                color: colors.expense,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

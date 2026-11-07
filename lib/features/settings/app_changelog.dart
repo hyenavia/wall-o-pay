@@ -45,10 +45,32 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.1.2',
+      version: '2.2.0',
       dateEn: 'November 7, 2026',
       dateId: '7 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Android Home Screen Quick Shortcuts & Direct Note Field: Long-press the app icon to immediately record an Expense, Income, or Transfer without unlocking PIN/biometrics, with the Note field now directly accessible on the main form.',
+          textId: 'Pintasan Cepat Ikon Beranda & Kolom Catatan Langsung: Tekan-tahan ikon aplikasi untuk langsung mencatat Pengeluaran, Pemasukan, atau Transfer tanpa perlu membuka kunci PIN/biometrik, dilengkapi kolom Catatan langsung di form utama.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Interactive Cashflow Calendar: Toggle the new on-demand calendar heatmap in the Transactions tab to see daily activity dots and filter transactions by date.',
+          textId: 'Kalender Arus Kas Interaktif: Buka kalender arus kas di tab Transaksi untuk melihat indikator aktivitas harian dan memfilter transaksi per tanggal.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Split Bill Wallet Integration & Frequent Small Purchases Insight: Choose which wallet pays when splitting bills, and spot recurring micro-expenses ("Latte Factor") in Insights.',
+          textId: 'Integrasi Dompet Patungan & Deteksi Pengeluaran Kecil Berulang: Pilih rekening pembayaran saat patungan tagihan, serta pantau akumulasi pengeluaran kecil berulang di tab Insight.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.2',
+      dateEn: 'November 7, 2026',
+      dateId: '7 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.changed,

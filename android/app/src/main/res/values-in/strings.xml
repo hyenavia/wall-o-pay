@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Wall o\' Pay</string>
+    <string name="shortcut_expense_short">Catat Pengeluaran</string>
+    <string name="shortcut_expense_long">Tambah Pengeluaran Baru</string>
+    <string name="shortcut_income_short">Catat Pemasukan</string>
+    <string name="shortcut_income_long">Tambah Pemasukan Baru</string>
+    <string name="shortcut_transfer_short">Transfer Dana</string>
+    <string name="shortcut_transfer_long">Transfer Antar Dompet</string>
+</resources>
+

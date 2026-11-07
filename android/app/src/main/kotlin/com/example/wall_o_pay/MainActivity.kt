@@ -1,6 +1,9 @@
 package com.example.wall_o_pay
 
 import android.content.Intent
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.graphics.drawable.Icon
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -20,7 +23,56 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setupQuickShortcuts()
         handleSendIntent(intent)
+    }
+
+    private fun setupQuickShortcuts() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) return
+        try {
+            val shortcutManager = getSystemService(ShortcutManager::class.java) ?: return
+            val icon = Icon.createWithResource(this, R.mipmap.ic_launcher)
+
+            val expenseShortcut = ShortcutInfo.Builder(this, "add_expense")
+                .setShortLabel(getString(R.string.shortcut_expense_short))
+                .setLongLabel(getString(R.string.shortcut_expense_long))
+                .setIcon(icon)
+                .setRank(0)
+                .setIntent(
+                    Intent(this, MainActivity::class.java).apply {
+                        action = "com.example.wall_o_pay.SHORTCUT_EXPENSE"
+                    }
+                )
+                .build()
+
+            val incomeShortcut = ShortcutInfo.Builder(this, "add_income")
+                .setShortLabel(getString(R.string.shortcut_income_short))
+                .setLongLabel(getString(R.string.shortcut_income_long))
+                .setIcon(icon)
+                .setRank(1)
+                .setIntent(
+                    Intent(this, MainActivity::class.java).apply {
+                        action = "com.example.wall_o_pay.SHORTCUT_INCOME"
+                    }
+                )
+                .build()
+
+            val transferShortcut = ShortcutInfo.Builder(this, "transfer_funds")
+                .setShortLabel(getString(R.string.shortcut_transfer_short))
+                .setLongLabel(getString(R.string.shortcut_transfer_long))
+                .setIcon(icon)
+                .setRank(2)
+                .setIntent(
+                    Intent(this, MainActivity::class.java).apply {
+                        action = "com.example.wall_o_pay.SHORTCUT_TRANSFER"
+                    }
+                )
+                .build()
+
+            shortcutManager.dynamicShortcuts = listOf(expenseShortcut, incomeShortcut, transferShortcut)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -33,7 +85,22 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     private fun handleSendIntent(intent: Intent?) {
-        if (intent == null || intent.action != Intent.ACTION_SEND) return
+        if (intent == null) return
+        when (intent.action) {
+            "com.example.wall_o_pay.SHORTCUT_EXPENSE" -> {
+                latestSharedData = mapOf("shortcutType" to "expense")
+                return
+            }
+            "com.example.wall_o_pay.SHORTCUT_INCOME" -> {
+                latestSharedData = mapOf("shortcutType" to "income")
+                return
+            }
+            "com.example.wall_o_pay.SHORTCUT_TRANSFER" -> {
+                latestSharedData = mapOf("shortcutType" to "transfer")
+                return
+            }
+        }
+        if (intent.action != Intent.ACTION_SEND) return
 
         val type = intent.type ?: return
         val map = mutableMapOf<String, Any?>()
