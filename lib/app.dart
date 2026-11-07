@@ -73,7 +73,7 @@ class _RootState extends State<_Root> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer(const Duration(milliseconds: 1400), () {
+    _timer = Timer(const Duration(milliseconds: 450), () {
       if (mounted) setState(() => _ready = true);
     });
   }
@@ -87,7 +87,7 @@ class _RootState extends State<_Root> {
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 250),
       child: _ready
           ? const AuthGate(key: ValueKey('gate'))
           : const SplashPage(key: ValueKey('splash')),
@@ -158,6 +158,7 @@ class HomeShell extends ConsumerStatefulWidget {
 }
 
 class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserver {
+  final Set<int> _visitedTabs = {0};
 
   static const _pages = <Widget>[
     HomePage(),
@@ -218,6 +219,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     final scheme = Theme.of(context).colorScheme;
     final colors = context.themeColors;
     final index = ref.watch(tabIndexProvider);
+    _visitedTabs.add(index);
     final notifier = ref.read(tabIndexProvider.notifier);
 
     Widget item(int i, IconData icon, IconData activeIcon, String label) {
@@ -313,7 +315,13 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
         }
       },
       child: Scaffold(
-        body: IndexedStack(index: index, children: _pages),
+        body: IndexedStack(
+          index: index,
+          children: [
+            for (int i = 0; i < _pages.length; i++)
+              _visitedTabs.contains(i) ? _pages[i] : const SizedBox.shrink(),
+          ],
+        ),
         floatingActionButton: FloatingActionButton(
           tooltip: context.tr('Add transaction'),
           shape: const CircleBorder(),

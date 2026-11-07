@@ -45,10 +45,32 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.1.1',
+      version: '2.1.2',
       dateEn: 'November 7, 2026',
       dateId: '7 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Faster Cold Start & Lazy Navigation Tabs: Parallelized startup initialization with 10-year timezone tables and deferred building unvisited navigation tabs until opened.',
+          textId: 'Buka Aplikasi Lebih Cepat & Lazy Tab: Memparalelkan inisialisasi awal dengan tabel zona waktu 10-tahunan serta menunda pembuatan tab navigasi yang belum dibuka.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'SQL-Aggregated Wallet Balances & GPU Batching: Computed wallet net flows directly in SQLite without loading all historical transactions into RAM, and batched Cyberpunk grid/scanline paths for smoother GPU frame rendering.',
+          textId: 'Agregasi Saldo SQL & Optimasi GPU: Menghitung arus kas dompet langsung di SQLite tanpa memuat seluruh riwayat transaksi ke RAM, serta menggabungkan garis grid Cyberpunk ke satu Path agar render GPU lebih ringan.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Smaller APK & Asset Footprint: Enabled R8 code/resource shrinking with safe ProGuard rules and optimized bundled PNG assets.',
+          textId: 'Ukuran APK & Aset Lebih Ringan: Mengaktifkan pemangkasan kode/resource R8 dengan aturan ProGuard yang aman serta mengoptimalkan aset gambar PNG.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.1.1',
+      dateEn: 'November 7, 2026',
+      dateId: '7 November 2026',
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

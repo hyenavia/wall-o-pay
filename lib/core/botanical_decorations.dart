@@ -222,27 +222,35 @@ class CyberHeroCardPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // Grid garis halus
+    // Grid garis halus (digabung ke satu Path agar beban GPU minimal)
     final gridPaint = Paint()
       ..color = color.withValues(alpha: opacity * 0.45)
       ..strokeWidth = 0.8
       ..style = PaintingStyle.stroke;
 
     const step = 22.0;
+    final gridPath = Path();
     for (double x = 0; x < w; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, h), gridPaint);
+      gridPath.moveTo(x, 0);
+      gridPath.lineTo(x, h);
     }
     for (double y = 0; y < h; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(w, y), gridPaint);
+      gridPath.moveTo(0, y);
+      gridPath.lineTo(w, y);
     }
+    canvas.drawPath(gridPath, gridPaint);
 
-    // Subtle CRT scanlines overlay
+    // Subtle CRT scanlines overlay (digabung ke satu Path)
     final scanlinePaint = Paint()
       ..color = Colors.black.withValues(alpha: 0.12)
-      ..strokeWidth = 1.0;
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+    final scanlinePath = Path();
     for (double y = 1.5; y < h; y += 3.0) {
-      canvas.drawLine(Offset(0, y), Offset(w, y), scanlinePaint);
+      scanlinePath.moveTo(0, y);
+      scanlinePath.lineTo(w, y);
     }
+    canvas.drawPath(scanlinePath, scanlinePaint);
 
     // Jalur circuit trace sudut kanan atas
     final tracePaint = Paint()
@@ -429,19 +437,23 @@ class CyberBackgroundPainter extends CustomPainter {
       );
     canvas.drawCircle(Offset(w * 0.85, h * 0.65), w * 0.75, magentaGlowPaint);
 
-    // 2. Futuristic Cyber Grid (24px step)
+    // 2. Futuristic Cyber Grid (24px step, digabung ke satu Path agar ringan di GPU)
     final gridPaint = Paint()
       ..color = cyanColor.withValues(alpha: gridOpacity)
       ..strokeWidth = 0.7
       ..style = PaintingStyle.stroke;
 
     const step = 24.0;
+    final gridPath = Path();
     for (double x = 0; x < w; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, h), gridPaint);
+      gridPath.moveTo(x, 0);
+      gridPath.lineTo(x, h);
     }
     for (double y = 0; y < h; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(w, y), gridPaint);
+      gridPath.moveTo(0, y);
+      gridPath.lineTo(w, y);
     }
+    canvas.drawPath(gridPath, gridPaint);
   }
 
   @override

@@ -209,39 +209,24 @@ final walletMapProvider = Provider<Map<String, Wallet>>((ref) {
       );
 });
 
-/// Seluruh transaksi aktif (sepanjang waktu) untuk menghitung saldo dompet secara akurat.
+/// Seluruh transaksi aktif (sepanjang waktu).
 final allTransactionsProvider = StreamProvider<List<TransactionEntry>>((ref) {
   return ref.watch(databaseProvider).watchAllTransactions();
+});
+
+/// Selisih arus kas bersih per dompet hasil agregasi langsung di SQLite.
+final walletNetFlowsProvider = StreamProvider<Map<String, int>>((ref) {
+  return ref.watch(databaseProvider).watchWalletNetFlows();
 });
 
 /// Map id dompet -> saldo saat ini (initialBalance + income - expense + transfer_in - transfer_out).
 final walletBalancesProvider = Provider<Map<String, int>>((ref) {
   final wallets = ref.watch(walletsProvider).value ?? const [];
-  final txs = ref.watch(allTransactionsProvider).value ?? const [];
+  final netFlows = ref.watch(walletNetFlowsProvider).value ?? const <String, int>{};
 
-  final balances = <String, int>{
-    for (final w in wallets) w.id: w.initialBalance,
+  return <String, int>{
+    for (final w in wallets) w.id: w.initialBalance + (netFlows[w.id] ?? 0),
   };
-
-  final activeIds = balances.keys.toSet();
-
-  for (final t in txs) {
-    final walletId = t.walletId;
-    if (walletId != null && activeIds.contains(walletId)) {
-      if (t.type == TxType.income) {
-        balances[walletId] = (balances[walletId] ?? 0) + t.amount;
-      } else if (t.type == TxType.expense) {
-        balances[walletId] = (balances[walletId] ?? 0) - t.amount;
-      } else if (t.type == TxType.transfer) {
-        balances[walletId] = (balances[walletId] ?? 0) - t.amount;
-      }
-    }
-    if (t.type == TxType.transfer && t.toWalletId != null && activeIds.contains(t.toWalletId!)) {
-      balances[t.toWalletId!] = (balances[t.toWalletId!] ?? 0) + t.amount;
-    }
-  }
-
-  return balances;
 });
 
 /// Total saldo dari seluruh dompet/rekening aktif yang terdaftar di Your Accounts.

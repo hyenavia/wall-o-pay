@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/data/latest_10y.dart' as tz;
 
 import 'app.dart';
 import 'core/l10n.dart';
@@ -24,38 +24,44 @@ import 'firebase_options.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Data tanggal untuk kedua bahasa (Inggris default, Indonesia pilihan).
-  await initializeDateFormatting('en');
-  await initializeDateFormatting('id');
-
-  // Inisialisasi zona waktu & layanan notifikasi lokal.
+  // Inisialisasi tabel zona waktu 10-tahunan yang ringan.
   tz.initializeTimeZones();
-  await NotificationService.instance.init();
 
-  final prefs = await SharedPreferences.getInstance();
+  late final SharedPreferences prefs;
+  var firebaseReady = false;
+
+  // Jalankan seluruh inisialisasi independen secara paralel untuk mempercepat cold start.
+  await Future.wait<void>([
+    initializeDateFormatting('en'),
+    initializeDateFormatting('id'),
+    NotificationService.instance.init(),
+    SharedPreferences.getInstance().then((p) => prefs = p),
+    () async {
+      try {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+        firebaseReady = true;
+      } catch (e) {
+        debugPrint('Firebase is not available: $e');
+      }
+    }(),
+    () async {
+      try {
+        await UpdateCheckerService.getInstalledVersion();
+      } catch (e) {
+        debugPrint('Error loading app version: $e');
+      }
+    }(),
+  ]);
+
   AppLocale.code = prefs.getString('pref_locale') == 'id' ? 'id' : 'en';
 
-  // Firebase diinisialisasi terlebih dahulu sebelum layanan yang mengandalkan auth
-  var firebaseReady = false;
-  try {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    firebaseReady = true;
-  } catch (e) {
-    debugPrint('Firebase is not available: $e');
-  }
-
-  // Muat status kunci PIN aplikasi (offline-first & sync cloud).
+  // Muat status kunci PIN aplikasi setelah SharedPreferences & Firebase siap.
   try {
     await Lock.instance.load();
   } catch (e) {
     debugPrint('Error loading lock state: $e');
-  }
-
-  // Muat versi terpasang dari native Android package manager.
-  try {
-    await UpdateCheckerService.getInstalledVersion();
-  } catch (e) {
-    debugPrint('Error loading app version: $e');
   }
 
   runApp(

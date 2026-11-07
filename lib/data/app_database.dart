@@ -327,13 +327,15 @@ class AppDatabase extends _$AppDatabase {
 
   /// Jumlah transaksi per kategori, untuk mengurutkan kategori yang sering dipakai.
   Future<Map<String, int>> categoryUsageCounts() async {
-    final rows =
-        await (select(transactions)..where((t) => t.deletedAt.isNull())).get();
-    final result = <String, int>{};
-    for (final t in rows) {
-      result[t.categoryId] = (result[t.categoryId] ?? 0) + 1;
-    }
-    return result;
+    final rows = await customSelect(
+      'SELECT category_id, COUNT(*) AS cnt FROM transactions '
+      'WHERE deleted_at IS NULL GROUP BY category_id',
+      readsFrom: {transactions},
+    ).get();
+    return <String, int>{
+      for (final row in rows)
+        row.read<String>('category_id'): row.read<int>('cnt'),
+    };
   }
 
   // ---------- Dompet & Rekening (Wallets) ----------
@@ -430,6 +432,39 @@ class AppDatabase extends _$AppDatabase {
         receiptPath: Value(receiptPath),
       ),
     );
+  }
+
+  /// Menghitung selisih arus kas bersih (net flow: income - expense - transfer_out + transfer_in)
+  /// per dompet langsung melalui agregasi SQLite tanpa memuat seluruh riwayat transaksi ke memori Dart.
+  Stream<Map<String, int>> watchWalletNetFlows() {
+    return customSelect(
+      '''
+      SELECT wallet_id, SUM(delta) AS net_flow
+      FROM (
+        SELECT wallet_id,
+               CASE
+                 WHEN type = 'income' THEN amount
+                 WHEN type IN ('expense', 'transfer') THEN -amount
+                 ELSE 0
+               END AS delta
+        FROM transactions
+        WHERE deleted_at IS NULL AND wallet_id IS NOT NULL
+        UNION ALL
+        SELECT to_wallet_id AS wallet_id,
+               amount AS delta
+        FROM transactions
+        WHERE deleted_at IS NULL AND type = 'transfer' AND to_wallet_id IS NOT NULL
+      )
+      GROUP BY wallet_id
+      ''',
+      readsFrom: {transactions},
+    ).watch().map((rows) {
+      return <String, int>{
+        for (final row in rows)
+          if (row.readNullable<String>('wallet_id') != null)
+            row.read<String>('wallet_id'): row.readNullable<int>('net_flow') ?? 0,
+      };
+    });
   }
 
   // ---------- Transaksi ----------

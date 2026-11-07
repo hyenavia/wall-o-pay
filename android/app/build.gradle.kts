@@ -58,6 +58,13 @@ android {
             applicationIdSuffix = ".debug"
         }
         release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+
             val keyFile = keystoreProperties.getProperty("storeFile")
             val targetFile = if (keyFile != null) {
                 if (file(keyFile).exists()) file(keyFile)

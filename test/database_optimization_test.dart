@@ -1,6 +1,8 @@
 import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wall_o_pay/data/app_database.dart';
+import 'package:wall_o_pay/data/providers.dart';
 import 'package:wall_o_pay/data/tables.dart';
 
 void main() {
@@ -109,6 +111,65 @@ void main() {
 
       results = await db.watchSearchTransactions(query: 'padang').first;
       expect(results.isEmpty, isTrue);
+    });
+
+    test('watchWalletNetFlows and walletBalancesProvider compute accurate SQL balances', () async {
+      final now = DateTime(2026, 11, 7, 12, 0);
+      await db.updateWalletInitialBalance('wallet-main', 1000000);
+      await db.updateWalletInitialBalance('wallet-digital', 200000);
+
+      // +500,000 income to wallet-main
+      await db.addTransaction(
+        amount: 500000,
+        type: TxType.income,
+        categoryId: 'cat-inc-parttime',
+        walletId: 'wallet-main',
+        date: now,
+      );
+
+      // -120,000 expense from wallet-main
+      await db.addTransaction(
+        amount: 120000,
+        type: TxType.expense,
+        categoryId: 'cat-exp-food',
+        walletId: 'wallet-main',
+        date: now,
+      );
+
+      // Transfer 300,000 from wallet-main to wallet-digital
+      await db.transferBetweenWallets(
+        amount: 300000,
+        fromWalletId: 'wallet-main',
+        toWalletId: 'wallet-digital',
+        date: now,
+      );
+
+      final netFlows = await db.watchWalletNetFlows().first;
+      // wallet-main net flow: +500,000 - 120,000 - 300,000 = +80,000
+      expect(netFlows['wallet-main'], 80000);
+      // wallet-digital net flow: +300,000
+      expect(netFlows['wallet-digital'], 300000);
+
+      // Verify categoryUsageCounts SQL aggregation
+      final usageCounts = await db.categoryUsageCounts();
+      expect(usageCounts['cat-inc-parttime'], 1);
+      expect(usageCounts['cat-exp-food'], 1);
+      expect(usageCounts['cat-tra-transfer'], 1);
+
+      // Verify Riverpod walletBalancesProvider & totalCurrentBalanceProvider
+      final wallets = await db.getAllWallets();
+      final container = ProviderContainer(
+        overrides: [
+          walletsProvider.overrideWithValue(AsyncData(wallets)),
+          walletNetFlowsProvider.overrideWithValue(AsyncData(netFlows)),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final balances = container.read(walletBalancesProvider);
+      expect(balances['wallet-main'], 1080000); // 1,000,000 + 80,000
+      expect(balances['wallet-digital'], 500000); // 200,000 + 300,000
+      expect(container.read(totalCurrentBalanceProvider), 1580000);
     });
   });
 }

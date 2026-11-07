@@ -4,6 +4,16 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.2] - 2026-11-07
+
+### Changed
+- **Android Performance, Startup & APK Size Optimization:**
+  - **Parallel Cold Start & Lightweight Timezones:** Switched from `timezone/data/latest_all.dart` to `latest_10y.dart` and parallelized independent startup tasks (`initializeDateFormatting`, `SharedPreferences`, `Firebase`, `NotificationService`, and `UpdateCheckerService`) via `Future.wait`, reducing cold-start latency.
+  - **Lazy Tab Mounting in `HomeShell`:** Deferred instantiation of non-initial navigation tabs (`TransactionsPage`, `BudgetPage`, `InsightsPage`) inside `IndexedStack` until first visited, significantly reducing initial frame widget tree and stream overhead.
+  - **Batched GPU Path Rendering:** Consolidated grid and scanline drawing loops in `CyberHeroCardPainter` and `CyberBackgroundPainter` into single `Path` draw calls to lower GPU command buffer overhead.
+  - **SQL-Aggregated Wallet Balances & Category Usage:** Added `watchWalletNetFlows()` (`UNION ALL` + `GROUP BY` SQL aggregation) and SQL `COUNT(*)` in `categoryUsageCounts()` inside `AppDatabase`, eliminating the need to load all historical transactions into Dart memory to compute current wallet balances.
+  - **R8 Shrinking & Asset Bundling Optimization:** Enabled R8 code/resource shrinking (`isMinifyEnabled` and `isShrinkResources`) with comprehensive `proguard-rules.pro` and `@raw/keep` rules, losslessly compressed brand PNG assets, and excluded unused `logo_hybrid.png` from the runtime asset bundle.
+
 ## [2.1.1] - 2026-11-07
 
 ### Fixed

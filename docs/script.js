@@ -4,7 +4,7 @@
  * Mobile Navigation, and GitHub Releases API Version Sync.
  */
 
-const APP_VERSION = "2.1.1";
+const APP_VERSION = "2.1.2";
 const THEME_STORAGE_KEY = "wall_o_pay_theme";
 
 // Helper to compare semver strings (e.g. "2.0.10" vs "v2.0.9")
