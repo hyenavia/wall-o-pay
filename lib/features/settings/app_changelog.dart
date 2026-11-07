@@ -62,8 +62,8 @@ class AppChangelog {
         ),
         ChangeItem(
           type: ChangeType.changed,
-          textEn: 'Smaller APK & Asset Footprint: Enabled R8 code/resource shrinking with safe ProGuard rules and optimized bundled PNG assets.',
-          textId: 'Ukuran APK & Aset Lebih Ringan: Mengaktifkan pemangkasan kode/resource R8 dengan aturan ProGuard yang aman serta mengoptimalkan aset gambar PNG.',
+          textEn: 'Smaller APK & Asset Footprint: Losslessly compressed bundled PNG brand assets and removed unused high-resolution image assets from the runtime bundle.',
+          textId: 'Ukuran APK & Aset Lebih Ringan: Mengompresi aset gambar PNG secara lossless serta menghapus aset gambar beresolusi besar yang tidak terpakai dari bundel aplikasi.',
         ),
       ],
     ),
