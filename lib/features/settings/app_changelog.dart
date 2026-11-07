@@ -45,10 +45,43 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '2.1.0',
+      dateEn: 'November 7, 2026',
+      dateId: '7 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'WhatsApp-Style Profile Photo Studio: Interactive circular photo cropper with zoom/pan/rotate, full-screen interactive viewer, and direct camera/gallery bottom modal sheet.',
+          textId: 'Studio Foto Profil ala WhatsApp: Pemotong foto lingkaran interaktif dengan zoom/geser/putar, penampil layar penuh interaktif, dan modal sheet kamera/galeri langsung.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Cyberpunk HUD Telemetry & Monospace Typography: Integrated Share Tech Mono font across all financial metrics, authentic chamfered beveled geometry, CRT scanlines, and animated money counter.',
+          textId: 'Telemetri HUD & Tipografi Monospasi Cyberpunk: Mengintegrasikan font Share Tech Mono pada angka finansial, geometri chamfered bersudut, scanlines CRT, dan animasi counter saldo.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Discreet Theme Switcher in "About Wall o\' Pay": Shifted theme switcher into About sheet with contextual warning dialog, keeping Settings uncluttered.',
+          textId: 'Pengalih Tema Minimalis di "Tentang Wall o\' Pay": Memindahkan saklar tema ke lembar Tentang disertai dialog konfirmasi bertema, merapikan halaman Pengaturan.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Full-Bleed Adaptive Launcher Icon: Scaled Android adaptive icon foreground layer to ~93% viewport with solid pine background, eliminating margins and letterboxing on modern launchers.',
+          textId: 'Ikon Peluncur Full-Bleed Adaptif: Menyesuaikan layer foreground ikon adaptif ke ~93% viewport dengan latar hijau hutan, menghilangkan margin kosong pada launcher modern.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Exhaustive Bilingual Localization & Zero Color Leaks: Standardized Indonesian and English terminology across all navigation, filters, and dialogs with zero color leaks in Cyberpunk.',
+          textId: 'Standarisasi Lokalisasi Dwibahasa & Bebas Kebocoran Warna: Menyelaraskan istilah Bahasa Indonesia dan Inggris di seluruh navigasi, filter, dan dialog tanpa kebocoran warna di Cyberpunk.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '2.0.0',
       dateEn: 'November 6, 2026',
       dateId: '6 November 2026',
-      isCurrent: true,
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

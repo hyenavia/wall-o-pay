@@ -126,9 +126,9 @@ class RecurringPage extends ConsumerWidget {
                               ),
                               Text(
                                 '${r.type == TxType.income ? '+' : '-'}${rupiah(r.amount)}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w800,
+                                style: ctx.moneyStyle(
                                   fontSize: 14,
+                                  fontWeight: FontWeight.w800,
                                   color: r.type == TxType.income
                                       ? (ctx.isCyberpunk ? ctx.themeColors.income : AppColors.income)
                                       : (ctx.isCyberpunk ? ctx.themeColors.expense : AppColors.expense),
@@ -183,9 +183,9 @@ class RecurringPage extends ConsumerWidget {
                           value: 'delete',
                           child: Row(
                             children: [
-                              const Icon(Icons.delete_outline, color: AppColors.expense, size: 18),
+                              Icon(Icons.delete_outline, color: context.themeColors.expense, size: 18),
                               const SizedBox(width: 8),
-                              Text(context.tr('Delete'), style: const TextStyle(color: AppColors.expense)),
+                              Text(context.tr('Delete'), style: TextStyle(color: context.themeColors.expense)),
                             ],
                           ),
                         ),

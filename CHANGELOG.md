@@ -4,6 +4,44 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-11-07
+
+### 🌟 Visual Polish, HUD Telemetry & Profile Studio (Minor Feature Release)
+Version 2.1.0 delivers major functional and aesthetic upgrades to Wall o' Pay — introducing a full-featured WhatsApp-style profile photo cropper and viewer, advanced sci-fi HUD chamfered geometry and monospace financial typography for Cyberpunk mode, an intentional minimalist theme switcher in About Wall o' Pay, full-bleed launcher icons, and comprehensive bilingual localization hardening.
+
+### Added
+- **WhatsApp-Style Profile Photo Studio & Interactive Cropper:**
+  - Implemented an interactive circular photo cropper (`ProfilePhotoCropPage`) launching upon photo selection, featuring a circular viewfinder mask, rule-of-thirds grid, corner framing brackets, pinch-to-zoom/pan gestures, 90° rotation, and crisp 512×512 rendering.
+  - Implemented full-screen interactive profile photo viewer (`ProfilePhotoViewPage`) with pinch-to-zoom, pan, and smooth Hero animation from the avatar.
+  - Added WhatsApp-style bottom modal sheet with direct Camera (`ImagePicker.camera`) and Gallery (`ImagePicker.gallery`) options, view full-screen, and safe deletion confirmation.
+- **Cyberpunk HUD Chamfered Geometry & Sci-Fi Telemetry:**
+  - Integrated `GoogleFonts.shareTechMono` with tabular figures across all financial metrics and numeric values in Cyberpunk mode, preserving elegant `Plus Jakarta Sans` for Botanical mode.
+  - Introduced authentic beveled sci-fi geometry (`BeveledRectangleBorder`) across cards (`HeroCard`, `AppCard`), dialogs, snackbars, floating action buttons, chips, and PIN pad keycaps.
+  - Implemented smooth financial counter roll-up animation (`AnimatedMoneyCounter`) on the home dashboard.
+  - Added horizontal CRT scanlines, crosshair reticle markers (`+`), atmospheric radial glows (`CyberBackgroundPainter`), and breathing radar pulses (`_PulsingBeacon`) on `DailyFinancialPulseCard`.
+  - Upgraded user avatar in Cyberpunk mode with a chamfered HUD profile badge and tactical ID micro-telemetry.
+- **Discreet Theme Switcher in "About Wall o' Pay":**
+  - Integrated a minimalist theme toggle badge (`[ 🌿 Botanical ⇄ ]` / `[ ⚡ Cyberpunk ⇄ ]`) inside the About sheet, featuring an immersive contextual warning dialog before switching visual modes.
+  - Streamlined primary Settings page by removing redundant theme toggles, keeping dual aesthetics as an intentional discovery feature.
+- **Expanded Automated Test Suite:**
+  - Added extensive test suites for profile photo crop/view interactions (`test/profile_photo_test.dart`), theme typography & HUD token systems (`test/theme_test.dart`), and about sheet theme switching (`test/about_sheet_test.dart`), bringing total automated test coverage to **82 passing tests (100%)**.
+
+### Changed
+- **Botanical Full-Bleed Adaptive Launcher Icon:**
+  - Scaled Android adaptive icon foreground layer (`assets/images/logo_foreground.png`) to optimal full-bleed dimensions with a solid botanical forest background (`#11392E`), eliminating dark margins and preventing launcher shrinking across Samsung One UI, Google Pixel, and Xiaomi.
+  - Provided a modernized multi-resolution web favicon and touch icon suite (`favicon.ico`, `favicon.png`, `apple-touch-icon.png`, PWA 192/512).
+- **Web Landing Page & Showcase Modernization (`docs/`):**
+  - Updated web showcase, CSS styling, and live previews to reflect the latest profile photo studio, monospace HUD typography, and theme toggle interactions.
+
+### Fixed
+- **Exhaustive Bilingual Localization & Terminology Standards:**
+  - Standardized bottom navigation labels (`Insight` -> `Analisis`), page titles (`Financial Insights` -> `Analisis Finansial`), period budgets (`This Month's Budget` -> `Anggaran Bulan Ini`), transaction filters, and account/category dropdown selectors in Debts & Goals dialogs.
+  - Localized Netrunner greeting headers, time cycle badges, exit dialogs, and Daily Financial Pulse spending phase guides into authentic Indonesian and English.
+- **Elimination of Theme Color Leaks:**
+  - Fixed hardcoded Botanical green/mint tokens across lock screen PIN indicators, settings action dialogs, and budget tags when running in Cyberpunk mode.
+
+---
+
 ## [2.0.0] - 2026-11-06
 
 ### 🌟 A New Era of Wall o' Pay (Major Milestone Release)

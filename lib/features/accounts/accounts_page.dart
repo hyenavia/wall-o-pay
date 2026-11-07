@@ -162,7 +162,8 @@ class _AccountCategoryHeader extends StatelessWidget {
 
     final subtotalWidget = Text(
       subtotalFormatted,
-      style: theme.textTheme.bodyMedium?.copyWith(
+      style: context.moneyStyle(
+        fontSize: 14,
         fontWeight: FontWeight.w800,
         color: muted,
       ),
@@ -315,7 +316,8 @@ class AccountsPage extends ConsumerWidget {
                     blurred(
                       Text(
                         money(total),
-                        style: theme.textTheme.headlineMedium?.copyWith(
+                        style: context.moneyStyle(
+                          fontSize: 28,
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
                         ),
@@ -378,8 +380,10 @@ class AccountsPage extends ConsumerWidget {
                           blurred(
                             Text(
                               money(balances[a.id] ?? 0),
-                              style: theme.textTheme.bodyLarge
-                                  ?.copyWith(fontWeight: FontWeight.w800),
+                              style: context.moneyStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                           ),
                         ],
@@ -407,8 +411,13 @@ class AccountsPage extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               blurred(
-                                Text(money(t.amount),
-                                    style: const TextStyle(fontWeight: FontWeight.w700)),
+                                Text(
+                                  money(t.amount),
+                                  style: context.moneyStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
                               ),
                               IconButton(
                                 tooltip: context.tr('Delete'),
@@ -655,7 +664,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 12),
-              Text(_error!, style: const TextStyle(color: AppColors.expense)),
+              Text(_error!, style: TextStyle(color: context.themeColors.expense)),
             ],
             const SizedBox(height: 20),
             FilledButton(onPressed: _save, child: Text(context.tr('Save'))),
@@ -818,7 +827,7 @@ class _TransferSheetState extends ConsumerState<TransferSheet> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 12),
-              Text(_error!, style: const TextStyle(color: AppColors.expense)),
+              Text(_error!, style: TextStyle(color: context.themeColors.expense)),
             ],
             const SizedBox(height: 20),
             FilledButton(

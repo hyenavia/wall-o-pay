@@ -261,9 +261,11 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                           children: [
                             Text(
                               '${summary.netBalance >= 0 ? '+' : ''}${rupiah(summary.netBalance)}',
-                              style: theme.textTheme.headlineMedium?.copyWith(
+                              style: context.moneyStyle(
+                                fontSize: 28,
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white,
+                                letterSpacing: colors.isCyberpunk ? 0.8 : null,
                               ),
                             ),
                           ],
@@ -303,7 +305,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                 label: context.tr('Income'),
                                 amount: rupiah(summary.totalIncome),
                                 icon: Icons.arrow_downward_rounded,
-                                iconColor: AppColors.income,
+                                iconColor: colors.income,
                                 bgColor: Colors.black.withValues(alpha: 0.18),
                               ),
                             ),
@@ -313,7 +315,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                 label: context.tr('Expense'),
                                 amount: rupiah(summary.totalExpense),
                                 icon: Icons.arrow_upward_rounded,
-                                iconColor: AppColors.expense,
+                                iconColor: colors.expense,
                                 bgColor: Colors.black.withValues(alpha: 0.18),
                               ),
                             ),
@@ -511,11 +513,12 @@ class _SummarySubBox extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 11,
+                  context.isCyberpunk ? label.toUpperCase() : label,
+                  style: TextStyle(
+                    fontSize: context.isCyberpunk ? 10 : 11,
                     color: Colors.white70,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: context.isCyberpunk ? 0.6 : 0.0,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -523,7 +526,7 @@ class _SummarySubBox extends StatelessWidget {
                   amount,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: context.moneyStyle(
                     fontSize: 13,
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
@@ -753,7 +756,7 @@ class _TopCategoryRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      category.name,
+                      context.tr(category.name),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
@@ -773,7 +776,8 @@ class _TopCategoryRow extends StatelessWidget {
                 children: [
                   Text(
                     rupiah(category.amount),
-                    style: theme.textTheme.bodyMedium?.copyWith(
+                    style: context.moneyStyle(
+                      fontSize: 14,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -782,10 +786,10 @@ class _TopCategoryRow extends StatelessWidget {
                     children: [
                       Text(
                         '${category.percentage.toStringAsFixed(1)}%',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.w600,
+                        style: context.moneyStyle(
                           fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: colors.primary,
                         ),
                       ),
                       if (category.pctChange != null) ...[
@@ -796,8 +800,8 @@ class _TopCategoryRow extends StatelessWidget {
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             color: category.pctChange! > 0
-                                ? AppColors.expense
-                                : AppColors.income,
+                                ? colors.expense
+                                : colors.income,
                           ),
                         ),
                       ],
@@ -1159,7 +1163,7 @@ class _TrendTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = context.themeColors;
     final periods = [for (var i = 5; i >= 0; i--) period.shift(-i)];
 
     return AppCard(
@@ -1188,16 +1192,18 @@ class _TrendTable extends StatelessWidget {
                     children: [
                       Text(
                         '+${rupiah(income)}',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: AppColors.income,
+                        style: context.moneyStyle(
+                          fontSize: 11,
                           fontWeight: FontWeight.w700,
+                          color: colors.income,
                         ),
                       ),
                       Text(
                         '-${rupiah(expense)}',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: AppColors.expense,
+                        style: context.moneyStyle(
+                          fontSize: 11,
                           fontWeight: FontWeight.w700,
+                          color: colors.expense,
                         ),
                       ),
                     ],

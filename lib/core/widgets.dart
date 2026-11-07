@@ -42,22 +42,22 @@ PreferredSizeWidget pageAppBar(
         .textTheme
         .titleLarge
         ?.copyWith(fontWeight: FontWeight.w800, color: Colors.white),
-    flexibleSpace: isCyber
-        ? null
-        : const IgnorePointer(
-            child: RepaintBoundary(
-              child: CustomPaint(
-                size: Size.infinite,
-                isComplex: true,
-                painter: BotanicalCanopyPainter(opacity: 0.10),
-              ),
-            ),
-          ),
+    flexibleSpace: IgnorePointer(
+      child: RepaintBoundary(
+        child: CustomPaint(
+          size: Size.infinite,
+          isComplex: true,
+          painter: isCyber
+              ? const CyberCanopyPainter()
+              : const BotanicalCanopyPainter(opacity: 0.10),
+        ),
+      ),
+    ),
     bottom: _SheetEdge(childHeight: bottomHeight, child: bottom),
   );
 }
 
-/// Lengkungan atas lembar background di bawah header hijau.
+/// Lengkungan atas lembar background di bawah header hijau / garis cyber divider.
 class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
   const _SheetEdge({this.child, this.childHeight = 0});
 
@@ -71,6 +71,7 @@ class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCyber = context.isCyberpunk;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -79,7 +80,17 @@ class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
           height: edge,
           decoration: BoxDecoration(
             color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            borderRadius: isCyber
+                ? null
+                : const BorderRadius.vertical(top: Radius.circular(28)),
+            border: isCyber
+                ? Border(
+                    top: BorderSide(
+                      color: context.themeColors.primary.withValues(alpha: 0.35),
+                      width: 1.2,
+                    ),
+                  )
+                : null,
           ),
         ),
       ],
@@ -98,8 +109,9 @@ InputDecoration appInput(
   Widget? suffixIcon,
 }) {
   final scheme = Theme.of(context).colorScheme;
+  final isCyber = context.isCyberpunk;
   OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(isCyber ? 6 : 14),
         borderSide: BorderSide(color: c, width: w),
       );
   return InputDecoration(
@@ -122,10 +134,10 @@ InputDecoration appInput(
 String categoryName(BuildContext context, Category? c) =>
     context.tr(c?.name ?? 'Uncategorized');
 
-/// Warna progres anggaran: hijau, kuning mendekati batas, merah jika lewat.
-Color budgetColor(double ratio, ColorScheme scheme) {
-  if (ratio > 1) return AppColors.expense;
-  if (ratio >= 0.8) return AppColors.warning;
+/// Warna progres anggaran: hijau/primary, kuning mendekati batas, merah jika lewat.
+Color budgetColor(double ratio, ColorScheme scheme, [AppThemeColors? colors]) {
+  if (ratio > 1) return colors?.expense ?? AppColors.expense;
+  if (ratio >= 0.8) return colors?.warning ?? AppColors.warning;
   return scheme.primary;
 }
 
@@ -145,22 +157,38 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final isCyber = context.isCyberpunk;
+    final colors = context.themeColors;
+    final isCyber = colors.isCyberpunk;
+
+    final shape = isCyber
+        ? BeveledRectangleBorder(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(6),
+              topRight: Radius.circular(14),
+              bottomLeft: Radius.circular(14),
+              bottomRight: Radius.circular(6),
+            ),
+            side: BorderSide(
+              color: colors.primary.withValues(alpha: 0.32),
+              width: 1.0,
+            ),
+          )
+        : RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: scheme.outlineVariant,
+              width: 1.0,
+            ),
+          );
 
     return Container(
-      decoration: BoxDecoration(
+      decoration: ShapeDecoration(
         color: scheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isCyber
-              ? const Color(0xFF00F0FF).withValues(alpha: 0.28)
-              : scheme.outlineVariant,
-          width: 1.0,
-        ),
-        boxShadow: isCyber
+        shape: shape,
+        shadows: isCyber
             ? [
                 BoxShadow(
-                  color: const Color(0xFF00F0FF).withValues(alpha: 0.10),
+                  color: colors.primary.withValues(alpha: 0.12),
                   blurRadius: 16,
                   spreadRadius: 0,
                   offset: const Offset(0, 3),
@@ -171,7 +199,7 @@ class AppCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         clipBehavior: Clip.antiAlias,
-        borderRadius: BorderRadius.circular(20),
+        shape: shape,
         child: InkWell(
           onTap: onTap,
           child: Padding(padding: padding, child: child),
@@ -197,11 +225,28 @@ class HeroCard extends StatelessWidget {
     final colors = context.themeColors;
     final isCyber = colors.isCyberpunk;
 
+    final shape = isCyber
+        ? BeveledRectangleBorder(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(8),
+              topRight: Radius.circular(22),
+              bottomLeft: Radius.circular(22),
+              bottomRight: Radius.circular(8),
+            ),
+            side: BorderSide(
+              color: colors.primary.withValues(alpha: 0.55),
+              width: 1.4,
+            ),
+          )
+        : RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          );
+
     return Container(
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: colors.heroBackground,
+      decoration: ShapeDecoration(
+        color: isCyber ? null : colors.heroBackground,
         gradient: isCyber
             ? const LinearGradient(
                 colors: [Color(0xFF13172E), Color(0xFF101326), Color(0xFF1A102B)],
@@ -209,17 +254,11 @@ class HeroCard extends StatelessWidget {
                 end: Alignment.bottomRight,
               )
             : null,
-        borderRadius: BorderRadius.circular(24),
-        border: isCyber
-            ? Border.all(
-                color: const Color(0xFF00F0FF).withValues(alpha: 0.50),
-                width: 1.4,
-              )
-            : null,
-        boxShadow: [
+        shape: shape,
+        shadows: [
           BoxShadow(
             color: isCyber
-                ? const Color(0xFF00F0FF).withValues(alpha: 0.30)
+                ? colors.primary.withValues(alpha: 0.30)
                 : AppColors.deepForest.withValues(alpha: 0.25),
             blurRadius: isCyber ? 22 : 18,
             spreadRadius: isCyber ? -1 : 0,
@@ -227,7 +266,7 @@ class HeroCard extends StatelessWidget {
           ),
           if (isCyber)
             BoxShadow(
-              color: const Color(0xFFFF2A6D).withValues(alpha: 0.16),
+              color: colors.expense.withValues(alpha: 0.16),
               blurRadius: 28,
               spreadRadius: -4,
               offset: const Offset(0, 10),
@@ -262,7 +301,7 @@ class HeroCard extends StatelessWidget {
   }
 }
 
-/// Lencana ikon persegi membulat dengan latar belakang berwarna transparan untuk kategori.
+/// Lencana ikon kategori persegi membulat (Botanical) atau bersegi chamfer/tech-cut (Cyberpunk).
 class CategoryBadge extends StatelessWidget {
   const CategoryBadge({
     super.key,
@@ -278,19 +317,25 @@ class CategoryBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isCyber = context.isCyberpunk;
+    final shape = isCyber
+        ? BeveledRectangleBorder(
+            borderRadius: BorderRadius.circular(size * 0.22),
+            side: BorderSide(
+              color: color.withValues(alpha: 0.50),
+              width: 1.2,
+            ),
+          )
+        : RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(size * 0.3),
+          );
+
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
+      decoration: ShapeDecoration(
         color: color.withValues(alpha: isCyber ? 0.22 : 0.16),
-        borderRadius: BorderRadius.circular(size * 0.3),
-        border: isCyber
-            ? Border.all(
-                color: color.withValues(alpha: 0.45),
-                width: 1.2,
-              )
-            : null,
-        boxShadow: isCyber
+        shape: shape,
+        shadows: isCyber
             ? [
                 BoxShadow(
                   color: color.withValues(alpha: 0.25),
@@ -305,7 +350,7 @@ class CategoryBadge extends StatelessWidget {
   }
 }
 
-/// Indikator bilah progres horizontal dengan ujung membulat (0.0 sampai 1.0).
+/// Indikator bilah progres horizontal dengan ujung membulat (Botanical) atau meter HUD datar (Cyberpunk).
 class AppProgressBar extends StatelessWidget {
   const AppProgressBar({
     super.key,
@@ -323,8 +368,9 @@ class AppProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isCyber = context.isCyberpunk;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(height),
+      borderRadius: BorderRadius.circular(isCyber ? 2 : height),
       child: LinearProgressIndicator(
         value: value.clamp(0.0, 1.0).toDouble(),
         minHeight: height,
@@ -335,7 +381,7 @@ class AppProgressBar extends StatelessWidget {
   }
 }
 
-/// Chip pilihan bergaya kapsul (stadium) untuk filter kategori, dompet, atau tipe transaksi.
+/// Chip pilihan bergaya kapsul stadium (Botanical) atau modul chamfered (Cyberpunk).
 class AppChip extends StatelessWidget {
   const AppChip({
     super.key,
@@ -353,6 +399,7 @@ class AppChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isCyber = context.isCyberpunk;
     final fg = selected ? scheme.onPrimary : scheme.onSurface;
     return ChoiceChip(
       avatar: icon == null ? null : Icon(icon, size: 18, color: fg),
@@ -363,8 +410,16 @@ class AppChip extends StatelessWidget {
       selectedColor: scheme.primary,
       backgroundColor: scheme.surface,
       side: BorderSide(color: selected ? scheme.primary : scheme.outlineVariant),
-      shape: const StadiumBorder(),
-      labelStyle: TextStyle(color: fg, fontWeight: FontWeight.w600),
+      shape: isCyber
+          ? const BeveledRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(6)),
+            )
+          : const StadiumBorder(),
+      labelStyle: TextStyle(
+        color: fg,
+        fontWeight: FontWeight.w700,
+        letterSpacing: isCyber ? 0.4 : 0.0,
+      ),
     );
   }
 }
@@ -465,26 +520,39 @@ class PeriodTypeToggle extends ConsumerWidget {
     if (compact) {
       final isMonthly = type == PeriodType.monthly;
       final theme = Theme.of(context);
+      final colors = context.themeColors;
+      final isCyber = colors.isCyberpunk;
+      final shape = isCyber
+          ? BeveledRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+              side: BorderSide(
+                color: colors.primary.withValues(alpha: 0.35),
+                width: 1.0,
+              ),
+            )
+          : RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: theme.colorScheme.outlineVariant,
+                width: 1.0,
+              ),
+            );
+
       return InkWell(
-        borderRadius: BorderRadius.circular(20),
+        customBorder: shape,
         onTap: () {
           final next = isMonthly ? PeriodType.weekly : PeriodType.monthly;
           ref.read(appPrefsProvider.notifier).setPeriodType(next);
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
+          decoration: ShapeDecoration(
             color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: context.isCyberpunk
-                  ? const Color(0xFF00F0FF).withValues(alpha: 0.35)
-                  : theme.colorScheme.outlineVariant,
-            ),
-            boxShadow: context.isCyberpunk
+            shape: shape,
+            shadows: isCyber
                 ? [
                     BoxShadow(
-                      color: const Color(0xFF00F0FF).withValues(alpha: 0.12),
+                      color: colors.primary.withValues(alpha: 0.12),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
@@ -534,36 +602,133 @@ class PeriodTypeToggle extends ConsumerWidget {
   }
 }
 
-/// Foto profil bulat; jika belum ada, tampil inisial nickname.
+/// Foto profil: lingkaran organik pada Botanical, atau Chamfered HUD Badge pada Cyberpunk.
+/// Jika belum ada foto, tampil inisial nickname.
 class UserAvatar extends ConsumerWidget {
-  const UserAvatar({super.key, this.size = 48, this.onTap});
+  const UserAvatar({super.key, this.size = 48, this.onTap, this.heroTag});
 
   final double size;
   final VoidCallback? onTap;
+  final String? heroTag;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final photoImage = ref.watch(profileProvider.select((s) => s.photoImage));
     final name = ref.watch(displayNameProvider) ?? '?';
-    final avatar = CircleAvatar(
-      radius: size / 2,
-      backgroundColor: scheme.primaryContainer,
-      backgroundImage: photoImage,
-      child: photoImage == null
-          ? Text(
-              (name.isEmpty ? '?' : String.fromCharCode(name.runes.first)).toUpperCase(),
-              style: TextStyle(
-                fontSize: size * 0.4,
-                fontWeight: FontWeight.w800,
-                color: scheme.onPrimaryContainer,
-              ),
-            )
-          : null,
-    );
+    final isCyber = context.isCyberpunk;
+    final colors = context.themeColors;
+
+    final Widget avatarCore;
+    if (isCyber) {
+      final bevel = size * 0.22;
+      final shape = BeveledRectangleBorder(
+        borderRadius: BorderRadius.circular(bevel),
+        side: BorderSide(
+          color: colors.primary,
+          width: size > 60 ? 2.0 : 1.4,
+        ),
+      );
+
+      final initialLetter =
+          (name.isEmpty ? '?' : String.fromCharCode(name.runes.first)).toUpperCase();
+
+      avatarCore = Container(
+        width: size,
+        height: size,
+        decoration: ShapeDecoration(
+          color: const Color(0xFF080912),
+          shape: shape,
+          shadows: [
+            BoxShadow(
+              color: colors.primary.withValues(alpha: 0.35),
+              blurRadius: size > 60 ? 10 : 5,
+              spreadRadius: 0.5,
+            ),
+          ],
+        ),
+        child: ClipPath(
+          clipper: ShapeBorderClipper(shape: shape),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (photoImage != null)
+                Image(
+                  image: photoImage,
+                  fit: BoxFit.cover,
+                  width: size,
+                  height: size,
+                )
+              else
+                Container(
+                  color: const Color(0xFF13172E),
+                  alignment: Alignment.center,
+                  child: Text(
+                    initialLetter,
+                    style: TextStyle(
+                      fontSize: size * 0.44,
+                      fontWeight: FontWeight.w800,
+                      color: colors.primary,
+                      shadows: [
+                        Shadow(
+                          color: colors.primary.withValues(alpha: 0.7),
+                          blurRadius: 6,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (size > 60)
+                Positioned(
+                  top: 5,
+                  left: 6,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: colors.primary.withValues(alpha: 0.22),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                    child: Text(
+                      'ID',
+                      style: TextStyle(
+                        fontSize: 8,
+                        fontWeight: FontWeight.w900,
+                        color: colors.primary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      avatarCore = CircleAvatar(
+        radius: size / 2,
+        backgroundColor: scheme.primaryContainer,
+        backgroundImage: photoImage,
+        child: photoImage == null
+            ? Text(
+                (name.isEmpty ? '?' : String.fromCharCode(name.runes.first)).toUpperCase(),
+                style: TextStyle(
+                  fontSize: size * 0.4,
+                  fontWeight: FontWeight.w800,
+                  color: scheme.onPrimaryContainer,
+                ),
+              )
+            : null,
+      );
+    }
+
+    final core = heroTag != null ? Hero(tag: heroTag!, child: avatarCore) : avatarCore;
+    final clickBorder = isCyber
+        ? BeveledRectangleBorder(borderRadius: BorderRadius.circular(size * 0.22))
+        : const CircleBorder();
+
     return onTap == null
-        ? avatar
-        : InkWell(customBorder: const CircleBorder(), onTap: onTap, child: avatar);
+        ? core
+        : InkWell(customBorder: clickBorder, onTap: onTap, child: core);
   }
 }
 
@@ -684,16 +849,18 @@ class EmptyStateCard extends StatelessWidget {
           Container(
             width: 72,
             height: 72,
-            decoration: BoxDecoration(
+            decoration: ShapeDecoration(
               color: colors.primary.withValues(alpha: 0.22),
-              shape: BoxShape.circle,
-              border: isCyber
-                  ? Border.all(
-                      color: colors.primary.withValues(alpha: 0.60),
-                      width: 1.5,
+              shape: isCyber
+                  ? BeveledRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: colors.primary.withValues(alpha: 0.60),
+                        width: 1.5,
+                      ),
                     )
-                  : null,
-              boxShadow: isCyber
+                  : const CircleBorder(),
+              shadows: isCyber
                   ? [
                       BoxShadow(
                         color: colors.primary.withValues(alpha: 0.35),
@@ -789,19 +956,67 @@ class BotanicalBackgroundSheet extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        if (!isCyber)
-          const Positioned.fill(
-            child: IgnorePointer(
-              child: RepaintBoundary(
-                child: CustomPaint(
-                  isComplex: true,
-                  painter: BotanicalBackgroundPainter(),
-                ),
+        Positioned.fill(
+          child: IgnorePointer(
+            child: RepaintBoundary(
+              child: CustomPaint(
+                key: ValueKey('sheetBg_$isCyber'),
+                isComplex: true,
+                painter: isCyber
+                    ? const CyberBackgroundPainter()
+                    : const BotanicalBackgroundPainter(),
               ),
             ),
           ),
+        ),
         child,
       ],
+    );
+  }
+}
+
+/// Widget angka finansial dengan animasi roll-up / counter naik yang halus.
+/// Mendukung aksesibilitas (otomatis di-bypass jika [MediaQuery.disableAnimationsOf] bernilai true).
+class AnimatedMoneyCounter extends StatelessWidget {
+  const AnimatedMoneyCounter({
+    super.key,
+    required this.amount,
+    this.style,
+    this.duration = const Duration(milliseconds: 650),
+    this.curve = Curves.easeOutCubic,
+    this.prefix = '',
+  });
+
+  final int amount;
+  final TextStyle? style;
+  final Duration duration;
+  final Curve curve;
+  final String prefix;
+
+  @override
+  Widget build(BuildContext context) {
+    final disableAnimations = MediaQuery.disableAnimationsOf(context);
+    if (disableAnimations) {
+      return Text(
+        '$prefix${rupiah(amount)}',
+        style: style,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      );
+    }
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0.0, end: amount.toDouble()),
+      duration: duration,
+      curve: curve,
+      builder: (context, value, child) {
+        return Text(
+          '$prefix${rupiah(value.round())}',
+          style: style,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        );
+      },
     );
   }
 }

@@ -191,19 +191,17 @@ class HomePage extends ConsumerWidget {
                             ),
                             const SizedBox(height: 16),
                             SectionHeader(
-                              title: context.tr(isCyber ? 'LEDGER STREAM // RECENT' : 'Recent Transactions'),
-                              actionLabel: context.tr(isCyber ? 'ALL PACKETS' : 'See All'),
+                              title: context.tr('Recent Transactions'),
+                              actionLabel: context.tr('See All'),
                               onAction: () => ref.read(tabIndexProvider.notifier).set(1),
                             ),
                             if (txs.isEmpty)
                               EmptyStateCard(
-                                title: context.tr(isCyber
-                                    ? 'LEDGER EMPTY, CHOOM!'
-                                    : 'Start recording your first transaction!'),
-                                subtitle: context.tr(isCyber
-                                    ? 'No transaction packets detected on this node. Transmit your first credit log!'
-                                    : 'Every small transaction brings you closer to your financial goals.'),
-                                actionLabel: context.tr(isCyber ? '+ TRANSMIT LOG' : 'Add transaction'),
+                                title: context.tr('Start recording your first transaction!'),
+                                subtitle: context.tr(
+                                  'Every small transaction brings you closer to your financial goals.',
+                                ),
+                                actionLabel: context.tr('Add transaction'),
                                 onAction: () => showTransactionForm(context),
                               )
                             else
@@ -255,18 +253,26 @@ class _HomeHeader extends ConsumerWidget {
     final sync = ref.watch(syncStateProvider);
 
     final isCyber = context.isCyberpunk;
-    String effectiveGreeting() {
-      if (!isCyber) return greeting();
+    (String, String?) effectiveGreeting() {
+      if (!isCyber) return (greeting(), null);
       final h = DateTime.now().hour;
       final isId = AppLocale.code == 'id';
       if (h >= 5 && h < 11) {
-        return isId ? 'WAKE UP, CHOOM // GRID AKTIF' : 'WAKE UP, CHOOM // NIGHT CITY AM';
+        return isId
+            ? ('BANGUN, CHOOM', '// GRID AKTIF')
+            : ('WAKE UP, CHOOM', '// NIGHT CITY AM');
       } else if (h >= 11 && h < 18) {
-        return isId ? 'NETRUNNER ONLINE // TRAFIK TINGGI' : 'NETRUNNER ONLINE // GRID ACTIVE';
+        return isId
+            ? ('NETRUNNER ONLINE', '// TRAFIK TINGGI')
+            : ('NETRUNNER ONLINE', '// GRID ACTIVE');
       } else {
-        return isId ? 'NIGHT CITY MEMANGGIL // AFTER HOURS' : 'NIGHT CITY CALLS // AFTER HOURS';
+        return isId
+            ? ('NIGHT CITY MEMANGGIL', '// LARUT MALAM')
+            : ('NIGHT CITY CALLS', '// AFTER HOURS');
       }
     }
+
+    final (greetingTop, greetingSub) = effectiveGreeting();
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 10, 8, 20),
@@ -279,22 +285,24 @@ class _HomeHeader extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Baris 1: Sapaan status utama
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Flexible(
                       child: Text(
-                        effectiveGreeting(),
+                        greetingTop,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: isCyber ? const Color(0xFF00F0FF).withValues(alpha: 0.90) : Colors.white70,
                           fontWeight: isCyber ? FontWeight.w700 : FontWeight.w500,
                           letterSpacing: isCyber ? 0.6 : 0.0,
+                          fontSize: isCyber ? 10.5 : null,
                         ),
                       ),
                     ),
-                    if (sync.status == SyncStatus.syncing) ...[
+                    if (!isCyber && sync.status == SyncStatus.syncing) ...[
                       const SizedBox(width: 6),
                       const SizedBox(
                         width: 10,
@@ -307,16 +315,51 @@ class _HomeHeader extends ConsumerWidget {
                     ],
                   ],
                 ),
+                // Baris 2: Sub-sapaan / status siklus waktu Cyberpunk
+                if (greetingSub != null) ...[
+                  const SizedBox(height: 1),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          greetingSub,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: const Color(0xFF00F0FF).withValues(alpha: 0.65),
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.4,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ),
+                      if (sync.status == SyncStatus.syncing) ...[
+                        const SizedBox(width: 6),
+                        const SizedBox(
+                          width: 9,
+                          height: 9,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 1.6,
+                            color: Color(0xFF00F0FF),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 2),
+                // Baris 3: Nama Pengguna
                 Text(
                   (name != null && name!.trim().isNotEmpty)
                       ? name!.trim()
                       : context.tr('Wall o\' Pay'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleLarge?.copyWith(
+                  style: (isCyber ? theme.textTheme.titleMedium : theme.textTheme.titleLarge)?.copyWith(
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
+                    fontSize: isCyber ? 18 : null,
                   ),
                 ),
               ],
@@ -449,7 +492,7 @@ class _BalanceCard extends ConsumerWidget {
                         children: [
                           Flexible(
                             child: Text(
-                              context.tr(isCyber ? 'TOTAL CREDITS (EDDIES)' : 'Total Balance'),
+                              context.tr('Total Balance'),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: Colors.white70,
                                 fontWeight: FontWeight.w600,
@@ -499,11 +542,13 @@ class _BalanceCard extends ConsumerWidget {
           ),
           const SizedBox(height: 2),
           blurred(
-            Text(
-              rupiah(totalBalance),
-              style: theme.textTheme.headlineMedium?.copyWith(
+            AnimatedMoneyCounter(
+              amount: totalBalance,
+              style: context.moneyStyle(
+                fontSize: 28,
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
+                letterSpacing: isCyber ? 0.8 : null,
               ),
             ),
           ),
@@ -512,9 +557,7 @@ class _BalanceCard extends ConsumerWidget {
             builder: (ctx) {
               final c = ctx.themeColors;
               final isCyber = ctx.isCyberpunk;
-              final flowColor = isSurplus
-                  ? (isCyber ? c.income : AppColors.incomeOnDark)
-                  : (isCyber ? c.expense : AppColors.expenseOnDark);
+              final flowColor = isSurplus ? c.income : c.expense;
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
@@ -538,7 +581,7 @@ class _BalanceCard extends ConsumerWidget {
                     blurred(
                       Text(
                         isSurplus ? '+${rupiah(periodFlow)}' : rupiah(periodFlow),
-                        style: TextStyle(
+                        style: ctx.moneyStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,
                           color: flowColor,
@@ -563,7 +606,7 @@ class _BalanceCard extends ConsumerWidget {
                 Expanded(
                   child: _FlowTile(
                     icon: isCyber ? Icons.arrow_downward_rounded : Icons.arrow_downward,
-                    label: context.tr(isCyber ? 'CREDIT INFLOW' : 'Income'),
+                    label: context.tr('Income'),
                     value: rupiah(income),
                     blurred: hidden,
                   ),
@@ -573,7 +616,7 @@ class _BalanceCard extends ConsumerWidget {
                 Expanded(
                   child: _FlowTile(
                     icon: isCyber ? Icons.arrow_upward_rounded : Icons.arrow_upward,
-                    label: context.tr(isCyber ? 'BURN RATE' : 'Expense'),
+                    label: context.tr('Expense'),
                     value: rupiah(expense),
                     blurred: hidden,
                   ),
@@ -753,11 +796,13 @@ class _FlowTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isCyber = context.isCyberpunk;
     final valueWidget = Text(
       value,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: theme.textTheme.bodyMedium?.copyWith(
+      style: context.moneyStyle(
+        fontSize: 14,
         fontWeight: FontWeight.w700,
         color: Colors.white,
       ),
@@ -775,10 +820,14 @@ class _FlowTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                label,
+                isCyber ? label.toUpperCase() : label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.white70,
+                  fontSize: 11,
+                  letterSpacing: isCyber ? 0.6 : 0.0,
+                ),
               ),
               blurred
                   ? ClipRect(child: ImageFiltered(imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8), child: valueWidget))
@@ -820,14 +869,14 @@ class _UpdateBannerCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: isCyber
             ? Border.all(
-                color: const Color(0xFF00F0FF).withValues(alpha: 0.40),
+                color: colors.primary.withValues(alpha: 0.40),
                 width: 1.2,
               )
             : null,
         boxShadow: [
           BoxShadow(
             color: isCyber
-                ? const Color(0xFF00F0FF).withValues(alpha: 0.28)
+                ? colors.primary.withValues(alpha: 0.28)
                 : AppColors.deepForest.withValues(alpha: 0.28),
             blurRadius: isCyber ? 20 : 16,
             offset: const Offset(0, 6),
@@ -908,7 +957,7 @@ class _UpdateBannerCard extends StatelessWidget {
                           Text(
                             'v${info.currentVersion} ➔ v${info.latestVersion}',
                             style: TextStyle(
-                              color: context.isCyberpunk ? context.themeColors.income : AppColors.incomeOnDark,
+                              color: context.themeColors.income,
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                             ),

@@ -226,14 +226,18 @@ class _GoalCard extends ConsumerWidget {
                             ?.copyWith(fontWeight: FontWeight.w700)),
                     Text(
                       '${rupiah(goal.currentAmount)} / ${rupiah(goal.targetAmount)}',
-                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                      style: context.moneyStyle(
+                        fontSize: 12,
+                        color: muted,
+                      ),
                     ),
                   ],
                 ),
               ),
               Text(
                 '${(ratio * 100).round()}%',
-                style: theme.textTheme.bodyMedium?.copyWith(
+                style: context.moneyStyle(
+                  fontSize: 14,
                   fontWeight: FontWeight.w800,
                   color: scheme.primary,
                 ),
@@ -413,7 +417,7 @@ class _GoalDialogState extends State<_GoalDialog> {
               onTap: _pickDate,
             ),
             if (_error != null)
-              Text(_error!, style: const TextStyle(color: AppColors.expense)),
+              Text(_error!, style: TextStyle(color: context.themeColors.expense)),
           ],
         ),
       ),
@@ -498,7 +502,7 @@ class _GoalFundsDialogState extends ConsumerState<_GoalFundsDialog> {
                 decoration: appInput(context, label: context.tr('Account / Wallet')),
                 items: [
                   for (final w in wallets)
-                    DropdownMenuItem(value: w.id, child: Text(w.name)),
+                    DropdownMenuItem(value: w.id, child: Text(context.tr(w.name))),
                 ],
                 onChanged: (val) => setState(() => _walletId = val),
               ),

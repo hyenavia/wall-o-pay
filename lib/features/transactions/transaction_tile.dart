@@ -97,7 +97,8 @@ class TransactionTile extends StatelessWidget {
                   isTransfer
                       ? '⇄ ${rupiah(entry.amount)}'
                       : '${isIncome ? '+' : '-'}${rupiah(entry.amount)}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  style: context.moneyStyle(
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: isTransfer
                         ? (context.isCyberpunk ? context.themeColors.secondaryNeon : const Color(0xFF00897B))

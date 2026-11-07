@@ -322,12 +322,13 @@ class InsightEngine {
     }
 
     if (maxIncreaseCat != null && maxIncreasePct >= 10) {
+      final catName = context.tr(maxIncreaseCat.name);
       insights.add(SmartInsightItem(
-        title: context.tr('Category Surge: {category}', {'category': maxIncreaseCat.name}),
+        title: context.tr('Category Surge: {category}', {'category': catName}),
         description: context.tr(
           '{category} spending increased by {pct}% (+{diff}) compared to {prev}.',
           {
-            'category': maxIncreaseCat.name,
+            'category': catName,
             'pct': maxIncreasePct.toStringAsFixed(0),
             'diff': rupiah(maxIncreaseCat.amountChange),
             'prev': prevPeriodName,
@@ -338,12 +339,13 @@ class InsightEngine {
         badge: '+${maxIncreasePct.toStringAsFixed(0)}%',
       ));
     } else if (maxSavedCat != null && maxSavedPct <= -10) {
+      final catName = context.tr(maxSavedCat.name);
       insights.add(SmartInsightItem(
-        title: context.tr('Savings: {category}', {'category': maxSavedCat.name}),
+        title: context.tr('Savings: {category}', {'category': catName}),
         description: context.tr(
           'Great job! {category} spending was cut by {pct}% (saved {saved}) compared to {prev}.',
           {
-            'category': maxSavedCat.name,
+            'category': catName,
             'pct': maxSavedPct.abs().toStringAsFixed(0),
             'saved': rupiah(maxSavedCat.amountChange.abs()),
             'prev': prevPeriodName,
@@ -358,12 +360,13 @@ class InsightEngine {
     // 3. Dominant Category
     if (categories.isNotEmpty && categories.first.percentage >= 35) {
       final top = categories.first;
+      final topCatName = context.tr(top.name);
       insights.add(SmartInsightItem(
-        title: context.tr('Spending Hub: {category}', {'category': top.name}),
+        title: context.tr('Spending Hub: {category}', {'category': topCatName}),
         description: context.tr(
           '{category} accounted for the largest share at {pct}% ({amount}) of all spending this {period}.',
           {
-            'category': top.name,
+            'category': topCatName,
             'pct': top.percentage.toStringAsFixed(1),
             'amount': rupiah(top.amount),
             'period': periodName,

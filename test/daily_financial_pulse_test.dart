@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wall_o_pay/core/l10n.dart';
 import 'package:wall_o_pay/core/theme.dart';
@@ -89,6 +90,29 @@ void main() {
 
       expect(stringsEn.tr('Spent today'), 'Spent today');
       expect(stringsId.tr('Spent today'), 'Belanja hari ini');
+
+      expect(stringsEn.tr('Weekly Summary'), 'Weekly Summary');
+      expect(stringsId.tr('Weekly Summary'), 'Ringkasan Minggu Ini');
+
+      expect(stringsEn.tr('Monthly Summary'), 'Monthly Summary');
+      expect(stringsId.tr('Monthly Summary'), 'Ringkasan Bulan Ini');
+
+      expect(stringsEn.tr('Insight'), 'Insight');
+      expect(stringsId.tr('Insight'), 'Analisis');
+
+      expect(stringsEn.tr('Financial Insights'), 'Financial Insights');
+      expect(stringsId.tr('Financial Insights'), 'Analisis Finansial');
+
+      expect(stringsEn.tr("This Week's Budget"), "This Week's Budget");
+      expect(stringsId.tr("This Week's Budget"), 'Anggaran Minggu Ini');
+
+      expect(stringsEn.tr("This Month's Budget"), "This Month's Budget");
+      expect(stringsId.tr("This Month's Budget"), 'Anggaran Bulan Ini');
+
+      expect(stringsId.tr('Food & Drinks'), 'Makanan & Minuman');
+      expect(stringsId.tr('Main Account'), 'Rekening Utama');
+      expect(stringsId.tr('Digital Bank'), 'Bank Digital');
+      expect(stringsId.tr('Cash'), 'Tunai');
     });
 
     testWidgets('Renders DailyFinancialPulseCard with status badge and progress', (tester) async {
@@ -181,7 +205,108 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Daily Financial Pulse Guide'), findsOneWidget);
+      expect(find.text('Phase 1: Safe Financial Health'), findsOneWidget);
+      expect(find.text('Phase 2: Spending Velocity Warning'), findsOneWidget);
+      expect(find.text('Phase 3: Budget Limit Reached'), findsOneWidget);
+      expect(find.text('Condition: Daily spending < safe quota & budget healthy.'), findsOneWidget);
       expect(find.text('I Understand'), findsOneWidget);
+    });
+
+    testWidgets('Tapping status badge in Botanical (ID) displays Indonesian guide without mix', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('id'),
+          supportedLocales: const [Locale('en'), Locale('id')],
+          theme: buildTheme('botanical'),
+          localizationsDelegates: const [
+            AppStrings.delegate,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          home: const Scaffold(
+            body: DailyFinancialPulseCard(
+              dailyAllowance: 100000,
+              todayExpense: 40000,
+              daysLeft: 10,
+              balance: 1000000,
+              totalBudget: 2000000,
+              budgetSpent: 500000,
+              txCount: 5,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Aman'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Panduan Ritme Keuangan Harian'), findsOneWidget);
+      expect(find.text('Fase 1: Kondisi Finansial Aman'), findsOneWidget);
+      expect(find.text('Fase 2: Laju Pengeluaran Meningkat'), findsOneWidget);
+      expect(find.text('Fase 3: Batas Anggaran Tercapai'), findsOneWidget);
+      expect(find.text('Kondisi: Belanja harian < kuota aman & anggaran terjaga.'), findsOneWidget);
+      expect(find.text('Mengerti'), findsOneWidget);
+    });
+
+    testWidgets('Cyberpunk theme with ID locale uses Indonesian terms without English leaks', (tester) async {
+      late BuildContext ctx;
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('id'),
+          supportedLocales: const [Locale('en'), Locale('id')],
+          theme: buildTheme('cyberpunk'),
+          localizationsDelegates: const [
+            AppStrings.delegate,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          home: Builder(
+            builder: (context) {
+              ctx = context;
+              return const Scaffold();
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(ctx.tr('Needs'), 'KEBUTUHAN');
+      expect(ctx.tr('Wants'), 'KEINGINAN');
+      expect(ctx.tr('Savings & Goals'), 'TABUNGAN & TARGET');
+      expect(ctx.tr('Language'), 'BAHASA SISTEM');
+      expect(ctx.tr('Accounts'), 'AKUN & REKENING');
+      expect(ctx.tr('E-Wallet'), 'DOMPET DIGITAL');
+      expect(ctx.tr('Cash'), 'UANG TUNAI');
+      expect(ctx.tr('Add account'), '+ TAMBAH AKUN');
+      expect(ctx.tr('Exit Application'), 'TERMINASI LINK // GRID');
+      expect(ctx.tr('Exit'), 'JACK OUT');
+      expect(ctx.tr('Stay in App'), 'TETAP DI GRID');
+    });
+
+    testWidgets('Cyberpunk theme with EN locale uses cyberpunk exit vocabulary', (tester) async {
+      late BuildContext ctx;
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('en'),
+          supportedLocales: const [Locale('en'), Locale('id')],
+          theme: buildTheme('cyberpunk'),
+          localizationsDelegates: const [
+            AppStrings.delegate,
+            ...GlobalMaterialLocalizations.delegates,
+          ],
+          home: Builder(
+            builder: (context) {
+              ctx = context;
+              return const Scaffold();
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(ctx.tr('Exit Application'), 'TERMINATE GRID UPLINK');
+      expect(ctx.tr('Exit'), 'JACK OUT');
+      expect(ctx.tr('Stay in App'), 'STAY IN GRID');
     });
   });
 }

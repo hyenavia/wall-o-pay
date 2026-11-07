@@ -65,6 +65,8 @@ ThemeData buildTheme([String preset = 'botanical']) {
     surfaceContainerHighest: colors.surfaceContainer,
     outline: colors.borderOutline,
     outlineVariant: colors.borderOutline,
+    error: colors.expense,
+    onError: colors.onPrimary,
   );
 
   final base = ThemeData(
@@ -88,7 +90,17 @@ ThemeData buildTheme([String preset = 'botanical']) {
     scaffoldBackgroundColor: colors.bg,
     cardColor: colors.cardSurface,
     canvasColor: colors.cardSurface,
-    dialogTheme: DialogThemeData(backgroundColor: colors.cardSurface),
+    dividerColor: colors.borderOutline,
+    dividerTheme: DividerThemeData(color: colors.borderOutline, thickness: 1),
+    dialogTheme: DialogThemeData(
+      backgroundColor: colors.cardSurface,
+      shape: isCyber
+          ? const BeveledRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(14)),
+              side: BorderSide(color: Color(0xFF232946), width: 1.2),
+            )
+          : RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    ),
     textTheme: styledTextTheme,
     extensions: [colors],
     appBarTheme: AppBarTheme(
@@ -110,38 +122,81 @@ ThemeData buildTheme([String preset = 'botanical']) {
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: colors.cardSurface,
       surfaceTintColor: Colors.transparent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      shape: isCyber
+          ? const BeveledRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              side: BorderSide(color: Color(0xFF232946), width: 1.0),
+            )
+          : const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
     ),
     popupMenuTheme: PopupMenuThemeData(
       color: colors.surfaceContainer,
       surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: isCyber
+          ? BeveledRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+              side: BorderSide(color: colors.borderOutline, width: 1.0),
+            )
+          : RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       textStyle: TextStyle(color: colors.textPrimary),
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: colors.surfaceContainer,
       contentTextStyle: TextStyle(color: colors.textPrimary),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: isCyber
+          ? BeveledRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+              side: BorderSide(
+                color: colors.primary.withValues(alpha: 0.40),
+                width: 1.0,
+              ),
+            )
+          : RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       behavior: SnackBarBehavior.floating,
     ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: colors.fabBackground,
       foregroundColor: colors.fabForeground,
       elevation: 3,
+      shape: isCyber
+          ? const BeveledRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            )
+          : RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+    ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(
+        shape: WidgetStatePropertyAll(
+          isCyber
+              ? const BeveledRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                )
+              : RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        ),
+      ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size(64, 48),
         backgroundColor: colors.primary,
         foregroundColor: colors.onPrimary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: isCyber
+            ? const BeveledRectangleBorder(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  topRight: Radius.circular(4),
+                  bottomLeft: Radius.circular(4),
+                  bottomRight: Radius.circular(8),
+                ),
+              )
+            : RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         textStyle: isCyber
             ? GoogleFonts.rajdhani(
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
-                letterSpacing: 0.5,
+                letterSpacing: 0.6,
                 fontFeatures: const [FontFeature.tabularFigures()],
               )
             : GoogleFonts.plusJakartaSans(
@@ -149,6 +204,35 @@ ThemeData buildTheme([String preset = 'botanical']) {
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
       ),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return colors.primary;
+        }
+        return isCyber ? Colors.white54 : null;
+      }),
+      trackColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return isCyber
+              ? colors.primary.withValues(alpha: 0.35)
+              : colors.primary.withValues(alpha: 0.45);
+        }
+        return isCyber ? colors.surfaceContainer : null;
+      }),
+      trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return isCyber ? colors.primary.withValues(alpha: 0.8) : null;
+        }
+        return isCyber ? colors.borderOutline : null;
+      }),
+    ),
+    sliderTheme: SliderThemeData(
+      activeTrackColor: colors.primary,
+      inactiveTrackColor: isCyber ? colors.surfaceContainer : null,
+      thumbColor: colors.primary,
+      overlayColor: colors.primary.withValues(alpha: 0.16),
+      trackHeight: isCyber ? 3.0 : 4.0,
     ),
   );
 }
@@ -293,9 +377,58 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
   }
 }
 
-/// Helper extension untuk mengakses token warna tema dari [BuildContext].
+/// Gaya teks untuk angka finansial / nominal mata uang.
+/// Di tema Cyberpunk, menggunakan [GoogleFonts.shareTechMono] (tampilan HUD terminal).
+/// Di tema Botanical, menggunakan [GoogleFonts.plusJakartaSans] dengan tabularFigures.
+/// Gaya teks untuk angka finansial / nominal mata uang.
+/// Di tema Cyberpunk, menggunakan [GoogleFonts.shareTechMono] (tampilan HUD terminal).
+/// Di tema Botanical, menggunakan [GoogleFonts.plusJakartaSans] dengan tabularFigures.
+TextStyle appMoneyStyle(
+  BuildContext? context, {
+  bool? isCyberpunk,
+  double? fontSize,
+  FontWeight? fontWeight,
+  Color? color,
+  double? letterSpacing,
+}) {
+  final isCyber = isCyberpunk ?? (context != null && context.isCyberpunk);
+  const tabular = [FontFeature.tabularFigures()];
+  if (isCyber) {
+    return GoogleFonts.shareTechMono(
+      fontSize: fontSize,
+      fontWeight: fontWeight ?? FontWeight.w700,
+      color: color,
+      letterSpacing: letterSpacing ?? 0.5,
+      fontFeatures: tabular,
+    );
+  }
+  return GoogleFonts.plusJakartaSans(
+    fontSize: fontSize,
+    fontWeight: fontWeight ?? FontWeight.w700,
+    color: color,
+    letterSpacing: letterSpacing,
+    fontFeatures: tabular,
+  );
+}
+
+/// Helper extension untuk mengakses token warna tema dan tipografi dari [BuildContext].
 extension ThemeContextX on BuildContext {
   AppThemeColors get themeColors =>
       Theme.of(this).extension<AppThemeColors>() ?? AppThemeColors.botanical;
   bool get isCyberpunk => themeColors.isCyberpunk;
+
+  /// Shortcut praktis untuk mendapatkan gaya teks angka finansial (monospace di Cyberpunk).
+  TextStyle moneyStyle({
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? letterSpacing,
+  }) =>
+      appMoneyStyle(
+        this,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        color: color,
+        letterSpacing: letterSpacing,
+      );
 }

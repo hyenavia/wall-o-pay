@@ -303,7 +303,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
               ),
             if (_error != null) ...[
               const SizedBox(height: 8),
-              Text(_error!, style: const TextStyle(color: AppColors.expense)),
+              Text(_error!, style: TextStyle(color: context.themeColors.expense)),
             ],
             if (_info != null) ...[
               const SizedBox(height: 8),

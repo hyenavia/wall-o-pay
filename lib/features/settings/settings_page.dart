@@ -3,7 +3,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
@@ -65,8 +64,20 @@ class SettingsPage extends ConsumerWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.14),
+          color: color.withValues(alpha: isCyber ? 0.20 : 0.14),
           borderRadius: BorderRadius.circular(12),
+          border: isCyber
+              ? Border.all(color: color.withValues(alpha: 0.40), width: 1.2)
+              : null,
+          boxShadow: isCyber
+              ? [
+                  BoxShadow(
+                    color: color.withValues(alpha: 0.20),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Icon(icon, color: color, size: 20),
       );
@@ -207,113 +218,6 @@ class SettingsPage extends ConsumerWidget {
                   ),
                 ],
                 const SizedBox(height: 20),
-                Text(context.tr('Theme'), style: theme.textTheme.labelLarge),
-                const SizedBox(height: 4),
-                Text(
-                  prefs.isCyberpunk
-                      ? context.tr('High-Contrast Cyberpunk — Electric Cyan & Neon Yellow')
-                      : context.tr("Signature Botanical Forest — Wall o' Pay exclusive aesthetic"),
-                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                ),
-                const SizedBox(height: 10),
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () {
-                      prefsCtl.setThemePreset(prefs.isCyberpunk ? 'botanical' : 'cyberpunk');
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: prefs.isCyberpunk
-                            ? const Color(0xFF00F0FF).withValues(alpha: 0.12)
-                            : AppColors.deepForest.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: prefs.isCyberpunk
-                              ? const Color(0xFF00F0FF).withValues(alpha: 0.45)
-                              : AppColors.deepForest.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: prefs.isCyberpunk ? const Color(0xFF13172E) : AppColors.deepForest,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              prefs.isCyberpunk ? Icons.electric_bolt_rounded : Icons.forest_rounded,
-                              color: prefs.isCyberpunk ? const Color(0xFF00F0FF) : AppColors.sage,
-                              size: 22,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        prefs.isCyberpunk
-                                            ? context.tr('Cyberpunk Edgerunners')
-                                            : context.tr('Deep Forest Botanical'),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: prefs.isCyberpunk ? const Color(0xFFFCEE0A) : AppColors.deepForest,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        prefs.isCyberpunk ? 'CYBER' : context.tr('SIGNATURE'),
-                                        style: TextStyle(
-                                          color: prefs.isCyberpunk ? const Color(0xFF080912) : Colors.white,
-                                          fontSize: 9,
-                                          fontWeight: FontWeight.w800,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  prefs.isCyberpunk
-                                      ? context.tr('Electric Cyan, Matrix Mint & Edgerunner Yellow')
-                                      : context.tr('Curated signature palette (Night Pine, Velvet Forest & Sage)'),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(fontSize: 11, color: muted),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Switch(
-                            value: prefs.isCyberpunk,
-                            activeThumbColor: const Color(0xFF00F0FF),
-                            activeTrackColor: const Color(0xFF00F0FF).withValues(alpha: 0.35),
-                            inactiveThumbColor: AppColors.sage,
-                            inactiveTrackColor: AppColors.deepForest.withValues(alpha: 0.35),
-                            onChanged: (val) {
-                              prefsCtl.setThemePreset(val ? 'cyberpunk' : 'botanical');
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
                 Text(context.tr('Language'), style: theme.textTheme.labelLarge),
                 const SizedBox(height: 10),
                 SizedBox(
@@ -338,7 +242,7 @@ class SettingsPage extends ConsumerWidget {
             child: Column(
               children: [
                 SwitchListTile(
-                  secondary: iconBadge(Icons.redo_rounded, AppColors.income),
+                  secondary: iconBadge(Icons.redo_rounded, colors.income),
                   title: Text(
                     context.tr('Carry over unused budget'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -352,7 +256,7 @@ class SettingsPage extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 68),
                 SwitchListTile(
-                  secondary: iconBadge(Icons.notifications_active_outlined, AppColors.warning),
+                  secondary: iconBadge(Icons.notifications_active_outlined, colors.warning),
                   title: Text(
                     context.tr('Budget alerts'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -452,8 +356,8 @@ class SettingsPage extends ConsumerWidget {
                   leading: iconBadge(
                     Icons.lock_outline_rounded,
                     lockState.enabled
-                        ? (isCyber ? colors.income : AppColors.income)
-                        : (isCyber ? colors.primary : AppColors.sage),
+                        ? colors.income
+                        : colors.primary,
                   ),
                   title: Text(
                     context.tr('App PIN Lock'),
@@ -691,7 +595,7 @@ class SettingsPage extends ConsumerWidget {
               children: [
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  leading: iconBadge(Icons.file_upload_outlined, AppColors.income),
+                  leading: iconBadge(Icons.file_upload_outlined, colors.income),
                   title: Text(
                     context.tr('Export backup file (JSON)'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -796,7 +700,7 @@ class SettingsPage extends ConsumerWidget {
                 children: [
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(Icons.logout_rounded, AppColors.warning),
+                    leading: iconBadge(Icons.logout_rounded, colors.warning),
                     title: Text(
                       context.tr('Log out'),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -810,10 +714,10 @@ class SettingsPage extends ConsumerWidget {
                   const Divider(height: 1, indent: 68),
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(Icons.person_remove_outlined, AppColors.expense),
+                    leading: iconBadge(Icons.person_remove_outlined, colors.expense),
                     title: Text(
                       context.tr('Delete Account & Data'),
-                      style: const TextStyle(color: AppColors.expenseOnDark, fontWeight: FontWeight.w600, fontSize: 14),
+                      style: TextStyle(color: colors.expense, fontWeight: FontWeight.w600, fontSize: 14),
                     ),
                     subtitle: Text(
                       context.tr('Permanently delete your account and all data.'),
@@ -833,7 +737,7 @@ class SettingsPage extends ConsumerWidget {
                   if (ready) ...[
                     ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      leading: iconBadge(Icons.logout_rounded, AppColors.warning),
+                      leading: iconBadge(Icons.logout_rounded, colors.warning),
                       title: Text(
                         context.tr('Exit Guest Mode'),
                         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -848,11 +752,11 @@ class SettingsPage extends ConsumerWidget {
                   ],
                   ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                    leading: iconBadge(Icons.delete_forever_outlined, AppColors.expense),
+                    leading: iconBadge(Icons.delete_forever_outlined, colors.expense),
                     title: Text(
                       context.tr('Erase Local Guest Data'),
-                      style: const TextStyle(
-                        color: AppColors.expenseOnDark,
+                      style: TextStyle(
+                        color: colors.expense,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -887,7 +791,7 @@ class SettingsPage extends ConsumerWidget {
                   onTap: () => showAboutWallOPaySheet(context),
                 ),
                 const Divider(height: 1, indent: 68),
-                _UpdateAndEasterEggTile(
+                _UpdateTile(
                   updateInfo: updateInfo,
                   muted: muted,
                   iconBadge: iconBadge,
@@ -954,8 +858,8 @@ class SettingsPage extends ConsumerWidget {
   }
 }
 
-class _UpdateAndEasterEggTile extends StatefulWidget {
-  const _UpdateAndEasterEggTile({
+class _UpdateTile extends StatelessWidget {
+  const _UpdateTile({
     required this.updateInfo,
     required this.muted,
     required this.iconBadge,
@@ -965,67 +869,10 @@ class _UpdateAndEasterEggTile extends StatefulWidget {
   final Color muted;
   final Widget Function(IconData, Color) iconBadge;
 
-  @override
-  State<_UpdateAndEasterEggTile> createState() => _UpdateAndEasterEggTileState();
-}
-
-class _UpdateAndEasterEggTileState extends State<_UpdateAndEasterEggTile> {
-  int _taps = 0;
-  DateTime? _lastTap;
-
-  void _handleTap(BuildContext context, WidgetRef ref) async {
-    final now = DateTime.now();
-    if (_lastTap == null || now.difference(_lastTap!) > const Duration(seconds: 2)) {
-      _taps = 1;
-    } else {
-      _taps++;
-    }
-    _lastTap = now;
-
-    if (_taps == 7) {
-      _taps = 0;
-      HapticFeedback.heavyImpact();
-      final prefs = ref.read(appPrefsProvider);
-      final wasCyber = prefs.isCyberpunk;
-      await ref.read(appPrefsProvider.notifier).unlockCyberpunk(true);
-      await ref.read(appPrefsProvider.notifier).setThemePreset(wasCyber ? 'botanical' : 'cyberpunk');
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).removeCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: const Color(0xFF191E38),
-            content: Text(
-              context.tr(wasCyber ? '⚡ Cyberware Mode Deactivated!' : '⚡ Cyberware Mode Activated!'),
-              style: const TextStyle(color: Color(0xFF00F0FF), fontWeight: FontWeight.bold),
-            ),
-            duration: const Duration(seconds: 3),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-      return;
-    }
-
-    if (_taps >= 4 && _taps < 7) {
-      final remaining = 7 - _taps;
-      ScaffoldMessenger.of(context).removeCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          duration: const Duration(milliseconds: 600),
-          behavior: SnackBarBehavior.floating,
-          content: Text(
-            '$remaining taps away from Cyberware...',
-            style: const TextStyle(fontSize: 12),
-          ),
-        ),
-      );
-    }
-
-    final updateInfo = widget.updateInfo;
+  void _handleTap(BuildContext context, WidgetRef ref) {
     if (updateInfo != null) {
       UpdateCheckerService.showUpdateDialog(context, updateInfo);
-    } else if (_taps == 1) {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.tr('Checking for updates...')),
@@ -1038,16 +885,16 @@ class _UpdateAndEasterEggTileState extends State<_UpdateAndEasterEggTile> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     return Consumer(
       builder: (context, ref, _) {
-        final updateInfo = widget.updateInfo;
         return ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          leading: widget.iconBadge(
+          leading: iconBadge(
             Icons.system_update_alt_rounded,
             updateInfo != null
-                ? (context.isCyberpunk ? context.themeColors.warning : AppColors.warning)
-                : (context.isCyberpunk ? context.themeColors.income : AppColors.income),
+                ? colors.warning
+                : colors.income,
           ),
           title: Row(
             children: [
@@ -1078,10 +925,10 @@ class _UpdateAndEasterEggTileState extends State<_UpdateAndEasterEggTile> {
           subtitle: Text(
             updateInfo != null
                 ? 'v${UpdateCheckerService.currentVersion} ➔ v${updateInfo.latestVersion} (${context.tr('Update Available!')})'
-                : 'Wall o\' Pay v${UpdateCheckerService.currentVersion} • Latest Release',
+                : 'Wall o\' Pay v${UpdateCheckerService.currentVersion} • ${context.tr('Latest Release')}',
             style: TextStyle(
               fontSize: 12,
-              color: updateInfo != null ? const Color(0xFFE65100) : widget.muted,
+              color: updateInfo != null ? const Color(0xFFE65100) : muted,
               fontWeight: updateInfo != null ? FontWeight.w700 : null,
             ),
           ),

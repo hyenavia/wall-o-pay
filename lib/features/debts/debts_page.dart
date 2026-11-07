@@ -149,8 +149,11 @@ class _Total extends StatelessWidget {
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.titleMedium
-              ?.copyWith(fontWeight: FontWeight.w800, color: Colors.white),
+          style: context.moneyStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: Colors.white,
+          ),
         ),
       ],
     );
@@ -185,7 +188,7 @@ class _DebtCard extends StatelessWidget {
               children: [
                 CategoryBadge(
                   icon: done ? Icons.check : Icons.person_outline,
-                  color: done ? AppColors.income : scheme.primary,
+                  color: done ? context.themeColors.income : scheme.primary,
                   size: 40,
                 ),
                 const SizedBox(width: 12),
@@ -206,7 +209,12 @@ class _DebtCard extends StatelessWidget {
                 ),
                 Text(
                   done ? context.tr('Settled') : rupiah(left),
-                  style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800),
+                  style: done
+                      ? theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800)
+                      : context.moneyStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                        ),
                 ),
               ],
             ),
@@ -228,7 +236,7 @@ class _DebtCard extends StatelessWidget {
                   Text(
                     context.tr('Due {date}', {'date': shortDate(debt.dueDate!)}),
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: overdue ? AppColors.expense : muted,
+                      color: overdue ? context.themeColors.expense : muted,
                       fontWeight: overdue ? FontWeight.w700 : null,
                     ),
                   ),
@@ -420,7 +428,7 @@ class _PaymentDialogState extends ConsumerState<_PaymentDialog> {
                 decoration: appInput(context, label: context.tr('Account / Wallet')),
                 items: [
                   for (final w in wallets)
-                    DropdownMenuItem(value: w.id, child: Text(w.name)),
+                    DropdownMenuItem(value: w.id, child: Text(context.tr(w.name))),
                 ],
                 onChanged: (val) => setState(() => _walletId = val),
               ),
@@ -570,7 +578,7 @@ class _DebtFormState extends ConsumerState<_DebtForm> {
             ),
             if (_error != null) ...[
               const SizedBox(height: 12),
-              Text(_error!, style: const TextStyle(color: AppColors.expense)),
+              Text(_error!, style: TextStyle(color: context.themeColors.expense)),
             ],
             const SizedBox(height: 20),
             FilledButton(onPressed: _save, child: Text(context.tr('Save'))),
@@ -744,7 +752,7 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
               ),
             if (_error != null) ...[
               const SizedBox(height: 12),
-              Text(_error!, style: const TextStyle(color: AppColors.expense)),
+              Text(_error!, style: TextStyle(color: context.themeColors.expense)),
             ],
             const SizedBox(height: 20),
             FilledButton(onPressed: _save, child: Text(context.tr('Create debts'))),

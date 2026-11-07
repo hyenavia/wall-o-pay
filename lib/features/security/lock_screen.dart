@@ -118,30 +118,46 @@ class PinPad extends StatelessWidget {
   final IconData biometricIcon;
   final String? biometricTooltip;
 
-  Widget _key(Widget child, VoidCallback? tap) => Padding(
-        padding: const EdgeInsets.all(6),
-        child: SizedBox(
-          width: 72,
-          height: 72,
-          child: Material(
-            color: Colors.white.withValues(alpha: tap == null ? 0 : 0.12),
-            shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: tap,
-              child: Center(child: child),
+  Widget _key(BuildContext context, Widget child, VoidCallback? tap) {
+    final isCyber = context.isCyberpunk;
+    final shape = isCyber
+        ? BeveledRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(
+              color: tap == null
+                  ? Colors.transparent
+                  : context.themeColors.primary.withValues(alpha: 0.35),
             ),
+          )
+        : const CircleBorder();
+
+    return Padding(
+      padding: const EdgeInsets.all(6),
+      child: SizedBox(
+        width: 72,
+        height: 72,
+        child: Material(
+          color: Colors.white.withValues(alpha: tap == null ? 0 : (isCyber ? 0.08 : 0.12)),
+          shape: shape,
+          child: InkWell(
+            customBorder: shape,
+            onTap: tap,
+            child: Center(child: child),
           ),
         ),
-      );
+      ),
+    );
+  }
 
-  Widget _digit(int d) => _key(
+  Widget _digit(BuildContext context, int d) => _key(
+        context,
         Text(
           '$d',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.w700,
             color: Colors.white,
+            fontFamily: context.isCyberpunk ? 'Rajdhani' : null,
           ),
         ),
         value.length < length ? () => onChanged('$value$d') : null,
@@ -149,6 +165,7 @@ class PinPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCyber = context.isCyberpunk;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -160,16 +177,23 @@ class PinPad extends StatelessWidget {
                 width: 14,
                 height: 14,
                 margin: const EdgeInsets.symmetric(horizontal: 7),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                decoration: ShapeDecoration(
                   color: i < value.length
-                      ? const Color(0xFF6EE7B7)
+                      ? (isCyber
+                          ? context.themeColors.primary
+                          : const Color(0xFF6EE7B7))
                       : Colors.white.withValues(alpha: 0.22),
-                  boxShadow: i < value.length
+                  shape: isCyber
+                      ? BeveledRectangleBorder(borderRadius: BorderRadius.circular(3.5))
+                      : const CircleBorder(),
+                  shadows: i < value.length
                       ? [
                           BoxShadow(
-                            color: const Color(0xFF6EE7B7).withValues(alpha: 0.4),
-                            blurRadius: 8,
+                            color: (isCyber
+                                    ? context.themeColors.primary
+                                    : const Color(0xFF6EE7B7))
+                                .withValues(alpha: 0.45),
+                            blurRadius: isCyber ? 12 : 8,
                             spreadRadius: 1,
                           ),
                         ]
@@ -186,26 +210,30 @@ class PinPad extends StatelessWidget {
         ])
           Row(
             mainAxisSize: MainAxisSize.min,
-            children: [for (final d in row) _digit(d)],
+            children: [for (final d in row) _digit(context, d)],
           ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             onBiometricTap != null
                 ? _key(
+                    context,
                     Tooltip(
                       message: biometricTooltip ?? '',
                       child: Icon(
                         biometricIcon,
-                        color: const Color(0xFF6EE7B7),
+                        color: isCyber
+                            ? context.themeColors.primary
+                            : const Color(0xFF6EE7B7),
                         size: 28,
                       ),
                     ),
                     onBiometricTap,
                   )
                 : const SizedBox(width: 84, height: 84),
-            _digit(0),
+            _digit(context, 0),
             _key(
+              context,
               const Icon(Icons.backspace_outlined, color: Colors.white, size: 22),
               value.isEmpty ? null : () => onChanged(value.substring(0, value.length - 1)),
             ),
@@ -296,7 +324,7 @@ class _LockScreenState extends ConsumerState<LockScreen> {
             child: Text(context.tr('Cancel')),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.expense),
+            style: FilledButton.styleFrom(backgroundColor: context.themeColors.expense),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(context.tr(isGuest ? 'Erase All Data' : 'Log Out')),
           ),

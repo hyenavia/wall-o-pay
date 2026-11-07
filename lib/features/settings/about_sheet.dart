@@ -3,9 +3,11 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/l10n.dart';
 import '../../core/theme.dart';
+import '../../data/prefs.dart';
 import '../../data/update_checker.dart';
 import 'app_changelog.dart';
 
@@ -19,11 +21,11 @@ void showAboutWallOPaySheet(BuildContext context) {
   );
 }
 
-class AboutWallOPaySheet extends StatelessWidget {
+class AboutWallOPaySheet extends ConsumerWidget {
   const AboutWallOPaySheet({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isIndonesian = AppLocale.code == 'id';
     final mutedColor = theme.colorScheme.onSurface.withValues(alpha: 0.65);
@@ -122,24 +124,40 @@ class AboutWallOPaySheet extends StatelessWidget {
                               letterSpacing: -0.3,
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: colors.primary.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: colors.primary.withValues(alpha: 0.35),
+                          const SizedBox(height: 6),
+                          Wrap(
+                            alignment: WrapAlignment.center,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: colors.primary.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: colors.primary.withValues(alpha: 0.35),
+                                  ),
+                                ),
+                                child: Text(
+                                  'v${UpdateCheckerService.currentVersion} • Release',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: colors.primary,
+                                  ),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              'v${UpdateCheckerService.currentVersion} • Release',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: colors.primary,
+                              _ThemeAestheticButton(
+                                isCyberpunk: context.isCyberpunk,
+                                onTap: () => _showThemeConfirmDialog(
+                                  context,
+                                  ref,
+                                  isCyberpunk: context.isCyberpunk,
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                           const SizedBox(height: 8),
                           Text(
@@ -385,6 +403,174 @@ class AboutWallOPaySheet extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+Future<void> _showThemeConfirmDialog(
+  BuildContext context,
+  WidgetRef ref, {
+  required bool isCyberpunk,
+}) async {
+  final targetIsCyber = !isCyberpunk;
+  final dialogAccent = targetIsCyber ? const Color(0xFF00F0FF) : AppColors.sage;
+
+  await showDialog<void>(
+    context: context,
+    builder: (dialogCtx) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      icon: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: dialogAccent.withValues(alpha: 0.16),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          targetIsCyber ? Icons.electric_bolt_rounded : Icons.forest_rounded,
+          color: dialogAccent,
+          size: 32,
+        ),
+      ),
+      title: Text(
+        targetIsCyber
+            ? dialogCtx.tr('Switch to Cyberpunk Grid?')
+            : dialogCtx.tr('Return to Botanical Sanctuary?'),
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontWeight: FontWeight.w700),
+      ),
+      content: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: dialogAccent.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: dialogAccent.withValues(alpha: 0.28),
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.info_outline_rounded,
+              color: dialogAccent,
+              size: 20,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                targetIsCyber
+                    ? dialogCtx.tr(
+                        'Activate high-contrast tactical aesthetic with electric cyan, matrix mint, and neon yellow accents?',
+                      )
+                    : dialogCtx.tr(
+                        'Return to the tranquil, mindful deep forest pine aesthetic of Wall o\' Pay?',
+                      ),
+                style: const TextStyle(fontSize: 13, height: 1.45),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actionsAlignment: MainAxisAlignment.spaceEvenly,
+      actions: [
+        OutlinedButton(
+          onPressed: () => Navigator.of(dialogCtx).pop(),
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          ),
+          child: Text(
+            isCyberpunk
+                ? dialogCtx.tr('Stay in Grid')
+                : dialogCtx.tr('Cancel'),
+          ),
+        ),
+        FilledButton(
+          onPressed: () {
+            ref.read(appPrefsProvider.notifier).setThemePreset(
+              targetIsCyber ? 'cyberpunk' : 'botanical',
+            );
+            Navigator.of(dialogCtx).pop();
+          },
+          style: FilledButton.styleFrom(
+            backgroundColor: dialogAccent,
+            foregroundColor: targetIsCyber ? const Color(0xFF080912) : Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          ),
+          child: Text(
+            targetIsCyber
+                ? dialogCtx.tr('Jack In')
+                : dialogCtx.tr('Return to Sanctuary'),
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _ThemeAestheticButton extends StatelessWidget {
+  const _ThemeAestheticButton({
+    required this.isCyberpunk,
+    required this.onTap,
+  });
+
+  final bool isCyberpunk;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final accentColor = isCyberpunk ? const Color(0xFF00F0FF) : AppColors.sage;
+    final label = isCyberpunk ? 'Cyberpunk' : 'Botanical';
+    final icon = isCyberpunk ? Icons.electric_bolt_rounded : Icons.eco_rounded;
+
+    return Tooltip(
+      message: isCyberpunk
+          ? context.tr('Return to Botanical Sanctuary?')
+          : context.tr('Switch to Cyberpunk Grid?'),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: accentColor.withValues(alpha: 0.35),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 13,
+                  color: accentColor,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: accentColor,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.swap_horiz_rounded,
+                  size: 13,
+                  color: accentColor.withValues(alpha: 0.7),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

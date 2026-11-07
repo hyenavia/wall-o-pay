@@ -205,7 +205,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                           else
                                             const SizedBox(width: 16),
                                           const SizedBox(width: 8),
-                                          Text(w.name),
+                                          Text(context.tr(w.name)),
                                         ],
                                       ),
                                     ),
@@ -237,7 +237,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                       Text(
                                         _selectedWalletId == null
                                             ? context.tr('All Accounts')
-                                            : (wallets[_selectedWalletId]?.name ?? context.tr('All Accounts')),
+                                            : (wallets[_selectedWalletId] != null
+                                                ? context.tr(wallets[_selectedWalletId]!.name)
+                                                : context.tr('All Accounts')),
                                         style: TextStyle(
                                           fontSize: 12.5,
                                           fontWeight: FontWeight.w600,
@@ -278,7 +280,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                           else
                                             const SizedBox(width: 16),
                                           const SizedBox(width: 8),
-                                          Text(c.name),
+                                          Text(context.tr(c.name)),
                                         ],
                                       ),
                                     ),
@@ -310,7 +312,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                       Text(
                                         _selectedCategoryId == null
                                             ? context.tr('All Categories')
-                                            : (cats[_selectedCategoryId]?.name ?? context.tr('All Categories')),
+                                            : (cats[_selectedCategoryId] != null
+                                                ? context.tr(cats[_selectedCategoryId]!.name)
+                                                : context.tr('All Categories')),
                                         style: TextStyle(
                                           fontSize: 12.5,
                                           fontWeight: FontWeight.w600,

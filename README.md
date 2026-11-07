@@ -2,8 +2,6 @@
 
 <div align="center">
 
-<img src="docs/images/banner.png" alt="Wall o' Pay Banner" width="600" style="border-radius: 16px; margin-bottom: 16px;" />
-
 ### *Your Money, Under Your Control*
 **Modern, Lightning-Fast & Offline-First Personal Finance Tracker**
 
@@ -13,7 +11,7 @@
 [![Security](https://img.shields.io/badge/Security-Keystore%20%7C%20Biometrics-38B271?logo=android&logoColor=white)](https://github.com/hyenavia/wall-o-pay)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.0.0-234B3B.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-2.1.0-234B3B.svg)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://hyenavia.github.io/wall-o-pay/) • [📥 Download Latest APK](https://github.com/hyenavia/wall-o-pay/releases/latest) • [📐 Architecture Guide](ARCHITECTURE.md) • [📋 Changelog](CHANGELOG.md)
 

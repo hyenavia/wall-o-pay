@@ -85,7 +85,7 @@ class MorePage extends StatelessWidget {
                   const Divider(height: 1, indent: 68),
                   tile(
                     Icons.swap_horiz_rounded,
-                    isCyber ? colors.income : AppColors.income,
+                    colors.income,
                     context.tr('Transfer balance'),
                     context.tr('Move money between accounts and wallets'),
                     () => showTransactionForm(context, initialType: TxType.transfer),
@@ -93,7 +93,7 @@ class MorePage extends StatelessWidget {
                   const Divider(height: 1, indent: 68),
                   tile(
                     Icons.handshake_outlined,
-                    isCyber ? colors.warning : AppColors.warning,
+                    colors.warning,
                     context.tr('Debts & splits'),
                     context.tr('Who owes whom, and splitting bills'),
                     () => open(const DebtsPage()),
@@ -109,7 +109,7 @@ class MorePage extends StatelessWidget {
                 children: [
                   tile(
                     Icons.pie_chart_outline_rounded,
-                    isCyber ? colors.income : AppColors.income,
+                    colors.income,
                     context.tr('Budget'),
                     context.tr('Set monthly or weekly spending limits per category.'),
                     () => open(const BudgetPage()),
@@ -149,7 +149,7 @@ class MorePage extends StatelessWidget {
                   const Divider(height: 1, indent: 68),
                   tile(
                     Icons.picture_as_pdf_outlined,
-                    AppColors.expense,
+                    colors.expense,
                     context.tr('PDF report'),
                     context.tr('Export a report for any period'),
                     () => showReportDialog(context),

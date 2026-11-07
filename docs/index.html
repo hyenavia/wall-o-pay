@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="botanical">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wall o' Pay - Your Money, Under Your Control | Offline-First Finance App</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Wall o' Pay – Your Money, Under Your Control | Offline-First Finance App</title>
   <meta name="description"
-    content="A modern, lightning-fast, and offline-first personal finance application with Drift SQLite, optional Firebase cloud sync, visual analytics, and savings goals.">
+    content="A modern, lightning-fast, and offline-first personal finance application with Drift SQLite, biometric keystore encryption, dual themes, and savings goals.">
   <meta name="keywords"
     content="Wall o' Pay, personal finance, budget tracker, expense tracker, flutter, offline first, drift sqlite, cashflow manager">
   <meta name="author" content="Wall o' Pay">
@@ -15,23 +15,25 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Wall o' Pay - Your Money, Under Your Control">
   <meta property="og:description"
-    content="Modern, lightning-fast, and offline-first personal finance management. Log expenses without lag, budget smart, and conquer your savings goals.">
+    content="Modern, lightning-fast, and offline-first personal finance management. Log expenses in 5 seconds with zero latency, budget smart, and conquer your savings goals.">
   <meta property="og:image" content="images/banner.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Wall o' Pay - Your Money, Under Your Control">
   <meta name="twitter:description"
-    content="Modern, lightning-fast, and offline-first personal finance management. Log expenses without lag, budget smart, and conquer your savings goals.">
+    content="Modern, lightning-fast, and offline-first personal finance management. Log expenses in 5 seconds with zero latency, budget smart, and conquer your savings goals.">
   <meta name="twitter:image" content="images/banner.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="images/icon.png">
-  <link rel="shortcut icon" type="image/png" href="favicon.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="images/icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Outfit (Display), Plus Jakarta Sans (Body), Rajdhani & Share Tech Mono (Cyberpunk) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap"
     rel="stylesheet">
 
   <!-- Stylesheet -->
@@ -39,614 +41,869 @@
 </head>
 
 <body>
+  <!-- Leaf Symbol Definition for Botanical Decorations -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="lf" viewBox="0 0 100 160">
+        <path d="M50 0C88 32 94 88 50 160 6 88 12 32 50 0Z" />
+        <path d="M50 14V150" stroke="currentColor" stroke-opacity=".3" stroke-width="2" fill="none" />
+      </symbol>
+    </defs>
+  </svg>
 
-  <!-- Ambient Glow Effects -->
-  <div class="ambient-glow glow-1"></div>
-  <div class="ambient-glow glow-2"></div>
-  <div class="ambient-glow glow-3"></div>
-
-  <!-- Navigation Bar -->
-  <header class="navbar">
-    <div class="container nav-container">
-      <a href="#" class="brand">
-        <img src="images/logo.png" alt="Wall o' Pay Logo" class="brand-icon" id="brand-logo-img">
+  <!-- Sticky Navbar Header -->
+  <header>
+    <div class="wrap nav">
+      <a class="logo" href="#top">
+        <img src="images/logo.png" alt="Wall o' Pay Logo" class="brand-img" id="brand-logo-img">
         <span class="brand-name">Wall o' Pay</span>
-        <span class="brand-tag app-version-tag">v2.0.0</span>
+        <span class="app-version-pill app-version-tag">v2.1.0</span>
       </a>
 
-      <ul class="nav-links" id="nav-links">
-        <li><a href="#about" class="nav-link">About</a></li>
-        <li><a href="#features" class="nav-link">Features</a></li>
-        <li><a href="#showcase" class="nav-link">Showcase</a></li>
-        <li><a href="https://forms.gle/W5MNr8eeZcmiiPbp9" class="nav-link" target="_blank" rel="noopener">Feedback</a>
-        </li>
-        <li><a href="#download" class="nav-link btn-nav-download">Download APK</a></li>
-      </ul>
+      <nav class="links" id="nav-links" aria-label="Main Navigation">
+        <a href="#about">Lore</a>
+        <a href="#features">Features</a>
+        <a href="#showcase">Showcase</a>
+        <a href="#comparison">Why Us</a>
+        <a href="#testimonials">Community</a>
+        <a href="https://forms.gle/W5MNr8eeZcmiiPbp9" target="_blank" rel="noopener">Feedback</a>
+      </nav>
 
-      <div class="nav-actions">
-        <button id="theme-toggle-btn" class="theme-toggle-btn"
-          aria-label="Toggle theme between Botanical Forest and Pure Cyberpunk"
-          title="Click to toggle theme (Botanical / Cyberpunk)">
-          <span class="badge-dot"></span>
-          <span id="theme-toggle-text">Botanical Forest</span>
-          <span class="theme-chip-action" id="theme-toggle-action">Switch ⚡</span>
-        </button>
-        <button id="mobile-toggle" class="mobile-toggle" aria-label="Toggle Mobile Menu">☰</button>
+      <div class="right">
+        <a class="btn sm dl-btn" href="#download">Download APK</a>
+        <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle navigation menu">☰</button>
       </div>
     </div>
   </header>
 
-  <main>
-    <!-- HERO SECTION -->
-    <section class="hero" id="home">
-      <div class="container hero-grid">
-        <div class="hero-content">
-          <div class="hero-badge">
-            <span class="badge-pulse"></span>
-            <span><span class="app-version-tag">v2.0.0</span> • Major Release Available</span>
-          </div>
+  <!-- ========================================================================
+       HERO SECTION (Botanical Dark Background with Wave Bottom)
+       ======================================================================== -->
+  <section class="hero dark" id="top">
+    <!-- Floating Leaf SVGs -->
+    <svg class="leaf" style="width:260px;left:-60px;bottom:40px;transform:rotate(60deg)"><use href="#lf" /></svg>
+    <svg class="leaf" style="width:200px;right:6%;top:40px;transform:rotate(25deg)"><use href="#lf" /></svg>
+    <svg class="leaf" style="width:240px;right:-70px;bottom:60px;transform:rotate(-50deg)"><use href="#lf" /></svg>
 
-          <h1 class="hero-title">
-            Your Money,<br>
-            <span class="gradient-text">Under Your Control.</span>
-          </h1>
+    <div class="wrap">
+      <div class="hero-text-col">
+        <div class="pill">
+          <span class="pulse-dot"></span>
+          <span>Your Personal Finance Companion • <strong class="app-version-tag">v2.1.0</strong></span>
+        </div>
 
-          <p class="hero-desc">
-            A modern, lightning-fast, and offline-first personal finance application. Log cashflows in 5 seconds with
-            zero latency, switch seamlessly between Botanical Forest & Cyberpunk themes, protect records with universal
-            biometric unlock, and conquer your savings goals.
-          </p>
+        <h1>
+          Your Money,<br>
+          <em>Under Your Control.</em>
+        </h1>
 
-          <div class="hero-actions">
-            <a href="https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk"
-              class="btn btn-primary" id="hero-cta-download">
-              <span>📥</span>
-              <span id="hero-download-text">Download APK (v2.0.0)</span>
-            </a>
-            <a href="#showcase" class="btn btn-secondary">
-              <span>📱</span>
-              <span>Explore Interface</span>
-            </a>
-          </div>
+        <p class="lead">
+          A modern, lightning-fast, and offline-first personal finance application. Log cashflows in 5 seconds with
+          zero latency, protect records with biometric keystore encryption, and conquer your savings goals.
+        </p>
 
-          <div class="hero-highlights">
-            <div class="highlight-item">
-              <span class="highlight-icon">⚡</span>
-              <span>Offline-First (Drift)</span>
+        <div class="cta-row">
+          <a class="btn" href="https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk"
+            id="hero-download-cta">
+            <span>📥</span>
+            <span id="hero-download-text">Download APK (v2.1.0)</span>
+          </a>
+          <a class="btn ghost" href="#showcase">
+            <span>▷</span>
+            <span>Explore Interface</span>
+          </a>
+        </div>
+
+        <div class="hero-specs-summary">
+          <div class="spec-chip"><span>⚡</span> Local SQLite (0ms)</div>
+          <div class="spec-chip"><span>🛡️</span> Biometric Unlock</div>
+          <div class="spec-chip"><span>🎨</span> Dual Theme Engine</div>
+          <div class="spec-chip"><span>🚫</span> Zero Ads Forever</div>
+        </div>
+      </div>
+
+      <!-- Hero Phone Stage with CSS/HTML Mockup & Floating Card -->
+      <div class="stage">
+        <div class="phone">
+          <div class="screen">
+            <!-- Device Status Bar -->
+            <div class="device-status-bar">
+              <span class="status-time">09:41</span>
+              <div class="status-icons">
+                <span class="status-ico">5G</span>
+                <span class="status-ico">▲</span>
+                <span class="status-ico">⚡</span>
+              </div>
             </div>
-            <div class="highlight-item">
-              <span class="highlight-icon">🛡️</span>
-              <span>Biometric & Keystore</span>
+
+            <div class="row phone-header">
+              <div class="user-greeting">
+                <span class="user-name">Welcome back 👋</span>
+                <span class="user-sub">Make today count!</span>
+              </div>
+              <span class="bell-icon">🔔</span>
             </div>
-            <div class="highlight-item">
-              <span class="highlight-icon">🎨</span>
-              <span>Dual Theme Engine</span>
+
+            <!-- Net Balance Card (Reflecting Flutter HeroCard in Deep Forest) -->
+            <div class="mock-hero-card">
+              <div class="mock-hero-top">
+                <span class="mock-hero-label">Total Net Balance</span>
+                <span class="mock-hero-arrow">›</span>
+              </div>
+              <div class="mock-hero-amount money-val">Rp 12.850.000</div>
+              <div class="mock-hero-flow-pill">
+                <span class="flow-icon">↗</span>
+                <span class="flow-text">Monthly Flow:</span>
+                <strong class="flow-val money-val">+Rp 5.350.000</strong>
+              </div>
+              <div class="mock-hero-stats-row">
+                <span class="mock-stat-in money-val">↗ In: Rp 8.5M</span>
+                <span class="mock-stat-out money-val">↘ Out: Rp 3.1M</span>
+              </div>
             </div>
-            <div class="highlight-item">
-              <span class="highlight-icon">🚀</span>
-              <span>120 FPS Fluid</span>
+
+            <!-- Daily Financial Pulse Card -->
+            <div class="mock-pulse-card">
+              <div class="mock-pulse-header">
+                <div class="mock-pulse-title-group">
+                  <span class="pulse-icon">🌿</span>
+                  <span class="pulse-title-text">Daily Budget Pulse</span>
+                </div>
+                <span class="mock-pulse-badge">
+                  <span class="radar-dot"></span>
+                  <span class="badge-text">Safe</span>
+                </span>
+              </div>
+              <div class="mock-pulse-amount-row">
+                <strong class="pulse-quota money-val">Rp 145.000</strong>
+                <span class="pulse-sub">/ day safe</span>
+              </div>
+              <div class="mock-track-bar">
+                <div class="mock-track-fill" style="width: 38%;"></div>
+              </div>
+            </div>
+
+            <!-- Recent Activities Section -->
+            <div class="mock-section-head">
+              <span>Recent Activities</span>
+              <span class="mock-see-all">See All ›</span>
+            </div>
+            <div class="mock-tx-group">
+              <div class="mock-tx-tile">
+                <span class="tx-badge-icon" style="background: rgba(110, 231, 183, 0.2); color: var(--income);">💼</span>
+                <div class="tx-tile-info">
+                  <strong>Monthly Salary</strong>
+                  <small>Primary Income • Today</small>
+                </div>
+                <strong class="tx-tile-val pos money-val">+Rp 8.500.000</strong>
+              </div>
+              <div class="mock-tx-tile">
+                <span class="tx-badge-icon" style="background: rgba(252, 165, 165, 0.2); color: var(--expense);">☕</span>
+                <div class="tx-tile-info">
+                  <strong>Coffee &amp; Breakfast</strong>
+                  <small>Food &amp; Dining • Yesterday</small>
+                </div>
+                <strong class="tx-tile-val neg money-val">-Rp 28.000</strong>
+              </div>
+            </div>
+
+            <!-- Bottom Navigation Dock -->
+            <div class="mock-bottom-dock">
+              <div class="dock-item active">
+                <span class="dock-ico">🏠</span>
+                <span class="dock-label">Home</span>
+              </div>
+              <div class="dock-item">
+                <span class="dock-ico">📝</span>
+                <span class="dock-label">Tx</span>
+              </div>
+              <div class="dock-fab">
+                <span>＋</span>
+              </div>
+              <div class="dock-item">
+                <span class="dock-ico">📊</span>
+                <span class="dock-label">Budget</span>
+              </div>
+              <div class="dock-item">
+                <span class="dock-ico">🎯</span>
+                <span class="dock-label">Goals</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Phone Mockup Preview -->
-        <div class="phone-mockup-wrapper">
-          <div class="phone-card-float float-top">
-            <div class="float-icon icon-income">📈</div>
-            <div class="float-text">
-              <span class="float-label">Monthly Inflow</span>
-              <span class="float-val">+Rp 8.500.000</span>
-            </div>
+        <!-- Floating Badge Card -->
+        <div class="float">
+          <div class="float-title">⚡ 100% Offline-First</div>
+          <p>Powered by local Drift SQLite. Instant response, zero tracking, zero ads.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Organic Wave Divider: Transition from Hero (Dark) to Lore (Paper) -->
+    <svg class="wave b" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+      <path fill="var(--paper)" d="M0 40C240 -10 420 90 720 50S1200 0 1440 50V80H0Z" />
+    </svg>
+  </section>
+
+  <!-- ========================================================================
+       BRAND PHILOSOPHY & LORE SECTION (Paper Background)
+       ======================================================================== -->
+  <section class="paper about" id="about">
+    <svg class="leaf" style="width:200px;right:-30px;top:40px;transform:rotate(30deg)"><use href="#lf" /></svg>
+    <div class="wrap">
+      <div class="about-intro">
+        <div class="kick">BRAND PHILOSOPHY &amp; LORE</div>
+        <h2>The Story Behind <em>Wall o' Pay</em></h2>
+        <p>
+          We believe personal finance shouldn't feel like a cold, stressful chore.
+          Wall o' Pay reframes money management into a calm sanctuary where every transaction
+          protects your peace of mind and builds lasting wealth.
+        </p>
+        <div class="lore-quote-box">
+          <div class="lore-quote-mark">“</div>
+          <p>A protective financial fortress where every payment you make and save is nurtured to grow into a brighter tomorrow.</p>
+          <small>— The Wall o' Pay Lore</small>
+        </div>
+      </div>
+
+      <div class="grid4">
+        <!-- Pillar 1 -->
+        <div class="fcard">
+          <span class="ico">🛡️</span>
+          <div>
+            <h3>The Protective Wall</h3>
+            <p>The solid pillars of the <strong>"W"</strong> guard your budget against impulsive leaks and preserve your financial sovereignty offline.</p>
           </div>
+        </div>
 
-          <div class="phone-card-float float-bottom">
-            <div class="float-icon icon-goal">🎯</div>
-            <div class="float-text">
-              <span class="float-label">Emergency Stash</span>
-              <span class="float-val">78% Completed</span>
-            </div>
+        <!-- Pillar 2 -->
+        <div class="fcard">
+          <span class="ico">🌱</span>
+          <div>
+            <h3>The Growing Sprout</h3>
+            <p>Reframing <strong>"Pay"</strong> into <em>"Pay yourself first"</em>. Every dollar saved and budgeted is a seed tended with care.</p>
           </div>
+        </div>
 
-          <div class="phone-frame">
-            <div class="phone-notch"></div>
-            <div class="phone-screen">
-              <div class="screen-app-bar">
-                <div>
-                  <div class="app-user-greeting">Welcome back 👋</div>
-                  <div class="app-user-name">Wall o' Pay</div>
-                </div>
-                <div class="app-user-avatar">W</div>
+        <!-- Pillar 3 -->
+        <div class="fcard">
+          <span class="ico">✨</span>
+          <div>
+            <h3>The Guiding Star</h3>
+            <p>The celestial sparkle represents your savings milestones, debt-free victories, and pride in achieving life goals.</p>
+          </div>
+        </div>
+
+        <!-- Pillar 4 -->
+        <div class="fcard">
+          <span class="ico">🌲</span>
+          <div>
+            <h3>The Botanical Sanctuary</h3>
+            <p>A serene night-forest environment crafted in emerald greens and soft sage—replacing fintech anxiety with mindful planning.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       CORE FEATURES & VELOCITY SECTION (Dark Background with Wave Top & Bottom)
+       ======================================================================== -->
+  <section class="dark features-section" id="features">
+    <svg class="wave t" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+      <path fill="var(--paper)" d="M0 0H1440V30C1200 90 900 -10 640 40S200 90 0 30Z" />
+    </svg>
+    <svg class="leaf" style="width:180px;left:-40px;bottom:30px;transform:rotate(70deg)"><use href="#lf" /></svg>
+
+    <div class="wrap">
+      <div class="section-title-center">
+        <div class="kick">CORE CAPABILITIES</div>
+        <h2>Engineered for Velocity, <em>Elegance &amp; Privacy</em></h2>
+        <p class="section-sub">
+          All essential tools you need to master your personal finances without clutter, pop-ups, or subscriptions.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-item">
+          <div class="feature-icon">⚡</div>
+          <h3>Offline-First &amp; Instant</h3>
+          <p>Powered by local Drift SQLite. Log expenses with zero network latency, zero buffering, and full offline autonomy.</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">🛡️</div>
+          <h3>Biometric &amp; Keystore Lock</h3>
+          <p>Universal Fingerprint &amp; Face Recognition via local_auth. Hardened with salted PBKDF2 HMAC-SHA256 and Android Keystore encryption.</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">🎨</div>
+          <h3>Dual Theme Engine</h3>
+          <p>Seamlessly toggle between serene Botanical Forest (Night Pine &amp; Sage) and high-contrast Pure Cyberpunk (Electric Cyan &amp; Neon Magenta).</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">🚀</div>
+          <h3>Silky 120 FPS Fluidity</h3>
+          <p>Engineered with RepaintBoundary canvas caching, lazy slivers, and zero shader overdraw for butter-smooth navigation.</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">📝</div>
+          <h3>5-Second Logging &amp; Calc</h3>
+          <p>Rapid cashflow input with dynamic category badges, mini calculator arithmetic, transfer admin fee tracking, and receipt photos.</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">📊</div>
+          <h3>Smart Budgets &amp; Daily Pulse</h3>
+          <p>50/30/20 budget pools with adaptive progress bars, rollover balances, and daily financial pulse alerts before overspending.</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">🤝</div>
+          <h3>Debts, Split Bills &amp; Alerts</h3>
+          <p>Track who owes whom, record partial settlements, split shared dinner bills in 1 tap, and configure due date reminders.</p>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-icon">🎯</div>
+          <h3>Savings Goals &amp; Reports</h3>
+          <p>Create milestone funds for emergency stashes or travel. Export clean PDF statements, CSV spreadsheets, or JSON backups.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       DUO INTERFACE SHOWCASE SECTION (Budget & Insights Mockups)
+       ======================================================================== -->
+  <section class="dark show" id="showcase">
+    <div class="wrap">
+      <!-- Showcase Header with Interactive Phone Theme Switcher (Option A) -->
+      <div class="showcase-header">
+        <div class="kick">INTERFACE SHOWCASE</div>
+        <h2>Designed for <em>Your Daily Flow</em></h2>
+        <p class="section-sub">
+          Test drive Wall o' Pay's signature dual aesthetic directly on the device preview below.
+        </p>
+
+        <div class="showcase-theme-switch-wrapper">
+          <div class="showcase-switch-pill" role="tablist" aria-label="Device Theme Preview">
+            <button type="button" class="theme-tab-btn active" id="btn-theme-botanical" data-target="botanical" aria-selected="true">
+              <span>🌿</span> Botanical Forest
+            </button>
+            <button type="button" class="theme-tab-btn" id="btn-theme-cyberpunk" data-target="cyberpunk" aria-selected="false">
+              <span>⚡</span> Pure Cyberpunk <span class="teaser-tag">Teaser</span>
+            </button>
+          </div>
+          <span class="showcase-switch-hint">👆 Click above to preview the Cyberpunk HUD theme inside the phone!</span>
+        </div>
+      </div>
+
+      <div class="showcase-grid">
+        <div class="showcase-left">
+          <div class="kick">SMART VISIBILITY</div>
+          <h2>Stress-Free <em>Budgeting</em></h2>
+          <p>
+            From rapid morning coffee logging to monthly financial health reviews, Wall o' Pay keeps your numbers clear and private.
+          </p>
+          <ul class="ck plain">
+            <li><span>⚡</span><b>Offline Speed:</b> Instant response, works on airplanes and underground commutes.</li>
+            <li><span>🔒</span><b>Absolute Privacy:</b> Financial data stays encrypted locally on your device.</li>
+            <li><span>🚫</span><b>Zero Ads:</b> No loan offers, no banners, no intrusive pop-ups ever.</li>
+          </ul>
+        </div>
+
+        <!-- Duo Overlapping Phones Mockup with Authentic Wall o' Pay UI -->
+        <div class="duo" id="duo-mockup" data-preview="botanical" aria-label="App interface previews">
+          <!-- Phone 1: Real Wall o' Pay Home Dashboard -->
+          <div class="phone p1">
+            <div class="screen phone-screen-app">
+              <!-- Android Status Bar -->
+              <div class="device-status-bar">
+                <span class="status-time">09:41</span>
+                <span class="status-icons">📶 5G 🔋</span>
               </div>
 
-              <!-- Balance Card -->
-              <div class="screen-balance-card">
-                <div class="balance-card-title">Total Net Balance</div>
-                <div class="balance-card-amount">Rp 12.850.000</div>
-                <div class="balance-card-stats">
-                  <div class="stat-pill">
-                    Inflow
-                    <span style="color: #6EE7B7;">+Rp 8.500.000</span>
+              <!-- Home App Bar Header -->
+              <div class="app-header-row">
+                <div class="app-user-meta">
+                  <div class="app-avatar-circle">W</div>
+                  <div class="app-greeting-box">
+                    <span class="app-greeting-sub" data-cyber="SYS_NET // v2.0 ACTIVE">Welcome back 👋</span>
+                    <strong class="app-user-title" data-cyber="CITIZEN // OLIVIA">Olivia</strong>
                   </div>
-                  <div class="stat-pill">
-                    Outflow
-                    <span style="color: #FCA5A5;">-Rp 3.150.000</span>
+                </div>
+                <div class="app-header-actions">
+                  <span class="app-action-ico">🔔</span>
+                  <span class="app-action-ico">⚙️</span>
+                </div>
+              </div>
+
+              <!-- Hero Balance Card (Reflecting Flutter HeroCard) -->
+              <div class="mock-hero-card">
+                <div class="mock-card-reticle top-l">+</div>
+                <div class="mock-card-reticle top-r">+</div>
+                <div class="mock-hero-top">
+                  <span class="mock-hero-label">Total Net Balance</span>
+                  <span class="mock-hero-arrow">›</span>
+                </div>
+                <div class="mock-hero-amount money-val">Rp 12.850.000</div>
+                <div class="mock-hero-flow-pill">
+                  <span class="flow-icon">↗</span>
+                  <span class="flow-text">Monthly Flow:</span>
+                  <strong class="flow-val money-val">+Rp 5.350.000</strong>
+                </div>
+                <div class="mock-hero-stats-row">
+                  <span class="mock-stat-in money-val">↗ In: Rp 8.5M</span>
+                  <span class="mock-stat-out money-val">↘ Out: Rp 3.1M</span>
+                </div>
+              </div>
+
+              <!-- Daily Financial Pulse Card (Reflecting Flutter DailyFinancialPulseCard) -->
+              <div class="mock-pulse-card">
+                <div class="mock-pulse-header">
+                  <div class="mock-pulse-title-group">
+                    <span class="pulse-icon">🌿</span>
+                    <span class="pulse-title-text">Daily Budget Pulse</span>
                   </div>
+                  <span class="mock-pulse-badge">
+                    <span class="radar-dot"></span>
+                    <span class="badge-text" data-cyber="GRID STABLE">Safe</span>
+                  </span>
+                </div>
+                <div class="mock-pulse-amount-row">
+                  <strong class="pulse-quota money-val">Rp 145.000</strong>
+                  <span class="pulse-sub">/ day safe</span>
+                </div>
+                <div class="mock-track-bar">
+                  <div class="mock-track-fill" style="width: 38%;"></div>
                 </div>
               </div>
 
-              <!-- Block 2: Daily Budget Pulse Card -->
-              <div class="screen-pulse-card">
-                <div class="pulse-header">
-                  <span class="pulse-title">Daily Budget Pulse</span>
-                  <span class="pulse-badge">Safe</span>
-                </div>
-                <div class="pulse-amount">Rp 145.000 <span class="pulse-sub">/ day remaining</span></div>
-                <div class="pulse-track">
-                  <div class="pulse-fill" style="width: 38%;"></div>
-                </div>
-              </div>
-
-              <!-- Block 3: Recent Transactions List -->
-              <div class="screen-section-title">
+              <!-- Recent Transactions List (Reflecting Flutter TransactionTile) -->
+              <div class="mock-section-head">
                 <span>Recent Activities</span>
-                <a href="#showcase">View All</a>
+                <span class="mock-see-all">See All ›</span>
+              </div>
+              <div class="mock-tx-group">
+                <div class="mock-tx-tile">
+                  <span class="tx-badge-icon" style="background: rgba(110, 231, 183, 0.2); color: var(--income);">💼</span>
+                  <div class="tx-tile-info">
+                    <strong>Monthly Salary</strong>
+                    <small>Primary Income • Today</small>
+                  </div>
+                  <strong class="tx-tile-val pos money-val">+Rp 8.500.000</strong>
+                </div>
+                <div class="mock-tx-tile">
+                  <span class="tx-badge-icon" style="background: rgba(252, 165, 165, 0.2); color: var(--expense);">☕</span>
+                  <div class="tx-tile-info">
+                    <strong>Morning Coffee</strong>
+                    <small>Food &amp; Dining • Yesterday</small>
+                  </div>
+                  <strong class="tx-tile-val neg money-val">-Rp 28.000</strong>
+                </div>
               </div>
 
-              <div class="mock-tx-list">
-                <div class="mock-tx-item">
-                  <div class="tx-left">
-                    <div class="tx-icon-box">💼</div>
-                    <div>
-                      <div class="tx-name">Monthly Salary</div>
-                      <div class="tx-cat">Primary Income • Today</div>
-                    </div>
-                  </div>
-                  <div class="tx-amount tx-income">+Rp 8.500.000</div>
+              <!-- Bottom Navigation Dock (Reflecting Flutter HomeShell) -->
+              <div class="mock-bottom-dock">
+                <div class="dock-item active">
+                  <span class="dock-ico">🏠</span>
+                  <span class="dock-label">Home</span>
                 </div>
-
-                <div class="mock-tx-item">
-                  <div class="tx-left">
-                    <div class="tx-icon-box">☕</div>
-                    <div>
-                      <div class="tx-name">Coffee & Breakfast</div>
-                      <div class="tx-cat">Food & Dining • Yesterday</div>
-                    </div>
-                  </div>
-                  <div class="tx-amount tx-expense">-Rp 28.000</div>
+                <div class="dock-item">
+                  <span class="dock-ico">📝</span>
+                  <span class="dock-label">Tx</span>
                 </div>
+                <div class="dock-fab">
+                  <span>＋</span>
+                </div>
+                <div class="dock-item">
+                  <span class="dock-ico">📊</span>
+                  <span class="dock-label">Budget</span>
+                </div>
+                <div class="dock-item">
+                  <span class="dock-ico">🎯</span>
+                  <span class="dock-label">Goals</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                <div class="mock-tx-item">
-                  <div class="tx-left">
-                    <div class="tx-icon-box">🛒</div>
+          <!-- Phone 2: Real Wall o' Pay 50/30/20 Smart Budget -->
+          <div class="phone p2">
+            <div class="screen phone-screen-app">
+              <!-- Android Status Bar -->
+              <div class="device-status-bar">
+                <span class="status-time">09:41</span>
+                <span class="status-icons">📶 5G 🔋</span>
+              </div>
+
+              <!-- Budget Header -->
+              <div class="app-header-row">
+                <div>
+                  <span class="app-greeting-sub">50/30/20 Rule</span>
+                  <strong class="app-user-title">Monthly Budget</strong>
+                </div>
+                <span class="mock-period-pill">Nov 2026 ▾</span>
+              </div>
+
+              <!-- Total Pool Overview Card -->
+              <div class="mock-pool-card">
+                <div class="mock-pool-row">
+                  <span class="mock-pool-label">Allocated Pool</span>
+                  <strong class="mock-pool-amount money-val">Rp 8.500.000</strong>
+                </div>
+                <div class="mock-pool-sub">Rp 3.250.000 remaining (38%)</div>
+                <div class="mock-multi-track">
+                  <div class="seg seg-needs" style="width: 50%;"></div>
+                  <div class="seg seg-wants" style="width: 30%;"></div>
+                  <div class="seg seg-savings" style="width: 20%;"></div>
+                </div>
+              </div>
+
+              <!-- 50/30/20 Pillar Cards (Reflecting Flutter BudgetPillarCard) -->
+              <div class="mock-pillar-card">
+                <div class="pillar-head">
+                  <div class="pillar-title-group">
+                    <span class="pillar-emoji">🛡️</span>
                     <div>
-                      <div class="tx-name">Monthly Groceries</div>
-                      <div class="tx-cat">Household Essentials • Nov 02</div>
+                      <strong>Needs (50%)</strong>
+                      <small>Kebutuhan Pokok</small>
                     </div>
                   </div>
-                  <div class="tx-amount tx-expense">-Rp 450.000</div>
+                  <span class="pillar-pct money-val">62%</span>
+                </div>
+                <div class="pillar-amount-row">
+                  <span class="spent-val money-val">Rp 2.635.000</span>
+                  <span class="cap-val money-val">/ Rp 4.250.000</span>
+                </div>
+                <div class="mock-track-bar">
+                  <div class="mock-track-fill fill-needs" style="width: 62%;"></div>
+                </div>
+              </div>
+
+              <div class="mock-pillar-card">
+                <div class="pillar-head">
+                  <div class="pillar-title-group">
+                    <span class="pillar-emoji">🎮</span>
+                    <div>
+                      <strong>Wants (30%)</strong>
+                      <small>Gaya Hidup &amp; Hiburan</small>
+                    </div>
+                  </div>
+                  <span class="pillar-pct money-val">40%</span>
+                </div>
+                <div class="pillar-amount-row">
+                  <span class="spent-val money-val">Rp 1.020.000</span>
+                  <span class="cap-val money-val">/ Rp 2.550.000</span>
+                </div>
+                <div class="mock-track-bar">
+                  <div class="mock-track-fill fill-wants" style="width: 40%;"></div>
+                </div>
+              </div>
+
+              <div class="mock-pillar-card">
+                <div class="pillar-head">
+                  <div class="pillar-title-group">
+                    <span class="pillar-emoji">🎯</span>
+                    <div>
+                      <strong>Savings (20%)</strong>
+                      <small>Dana Darurat &amp; Investasi</small>
+                    </div>
+                  </div>
+                  <span class="pillar-pct money-val pos">85%</span>
+                </div>
+                <div class="pillar-amount-row">
+                  <span class="spent-val money-val pos">Rp 1.445.000</span>
+                  <span class="cap-val money-val">/ Rp 1.700.000</span>
+                </div>
+                <div class="mock-track-bar">
+                  <div class="mock-track-fill fill-savings" style="width: 85%;"></div>
+                </div>
+              </div>
+
+              <!-- Bottom Navigation Dock -->
+              <div class="mock-bottom-dock">
+                <div class="dock-item">
+                  <span class="dock-ico">🏠</span>
+                  <span class="dock-label">Home</span>
+                </div>
+                <div class="dock-item">
+                  <span class="dock-ico">📝</span>
+                  <span class="dock-label">Tx</span>
+                </div>
+                <div class="dock-fab">
+                  <span>＋</span>
+                </div>
+                <div class="dock-item active">
+                  <span class="dock-ico">📊</span>
+                  <span class="dock-label">Budget</span>
+                </div>
+                <div class="dock-item">
+                  <span class="dock-ico">🎯</span>
+                  <span class="dock-label">Goals</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- BRAND PHILOSOPHY & LORE SECTION -->
-    <section class="philosophy-section" id="about">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Brand Philosophy</span>
-          <h2 class="section-title">The Story Behind <span class="gradient-text">Wall o' Pay</span></h2>
-          <p class="section-desc">
-            We believe personal finance shouldn't feel like a cold, stressful chore. Here is the lore behind our name
-            and signature botanical identity.
+        <div class="showcase-right">
+          <div class="kick">DUAL THEME ENGINE</div>
+          <h2>Two Vibes. <em>One App.</em></h2>
+          <p>
+            Match your financial workspace to your state of mind with seamless theme switching in Settings.
           </p>
-        </div>
-
-        <div class="lore-grid">
-          <!-- Pillar 1 -->
-          <div class="lore-card">
-            <div class="lore-icon-box">
-              <span class="lore-emoji">🛡️</span>
-            </div>
-            <div class="lore-content">
-              <h3 class="lore-title">The Protective Wall</h3>
-              <p class="lore-text">
-                The solid pillars of the <strong>"W"</strong> stand as a financial fortress—guarding your budget against
-                impulsive leaks and securing your personal sovereignty with an offline-first architecture.
-              </p>
-            </div>
-          </div>
-
-          <!-- Pillar 2 -->
-          <div class="lore-card">
-            <div class="lore-icon-box">
-              <span class="lore-emoji">🌱</span>
-            </div>
-            <div class="lore-content">
-              <h3 class="lore-title">The Growing Sprout</h3>
-              <p class="lore-text">
-                Reframing <strong>"Pay"</strong> into <em>"Pay yourself first"</em>. Every dollar saved and budgeted is
-                a seed tended with care, blossoming upward into lasting wealth over time.
-              </p>
-            </div>
-          </div>
-
-          <!-- Pillar 3 -->
-          <div class="lore-card">
-            <div class="lore-icon-box">
-              <span class="lore-emoji">✨</span>
-            </div>
-            <div class="lore-content">
-              <h3 class="lore-title">The Guiding Star</h3>
-              <p class="lore-text">
-                The celestial sparkle shining above represents your <strong>savings milestones</strong>, debt freedom,
-                and the delightful sense of accomplishment when achieving your life goals.
-              </p>
-            </div>
-          </div>
-
-          <!-- Pillar 4 -->
-          <div class="lore-card">
-            <div class="lore-icon-box">
-              <span class="lore-emoji">🌲</span>
-            </div>
-            <div class="lore-content">
-              <h3 class="lore-title">The Botanical Sanctuary</h3>
-              <p class="lore-text">
-                A serene night-forest environment crafted with calming emerald greens and soft sage—replacing fintech
-                anxiety with a tranquil, mindful space to plan your future.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Lore Quote Banner -->
-        <div class="lore-quote-card">
-          <div class="lore-quote-icon">“</div>
-          <p class="lore-quote-text">
-            A protective financial fortress where every payment you make and save is nurtured to grow into a brighter
-            tomorrow.
-          </p>
-          <span class="lore-quote-author">— The Wall o' Pay Philosophy</span>
+          <ul class="ck">
+            <li><span>✓</span><b>Botanical Sanctuary:</b> Soothing Night Pine &amp; Sage for mindful daily budgeting.</li>
+            <li><span>✓</span><b>Pure Cyberpunk:</b> High-contrast neon HUD &amp; monospace telemetry for night runners.</li>
+            <li><span>✓</span><b>Instant Switch:</b> Toggle freely in Settings anytime with zero data loss.</li>
+            <li><span>✓</span><b>100% Free &amp; Open Source:</b> MIT licensed, privacy-first, zero ads forever.</li>
+          </ul>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- CORE FEATURES SECTION -->
-    <section class="features-section" id="features">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Core Features</span>
-          <h2 class="section-title">Engineered for Velocity, Elegance & Privacy</h2>
-          <p class="section-desc">All the essential tools you need to master your personal finances without clutter or
-            compromises.</p>
-        </div>
+    <!-- Wave divider into comparison paper section -->
+    <svg class="wave b" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+      <path fill="var(--paper)" d="M0 50C260 0 520 90 820 40S1250 10 1440 40V80H0Z" />
+    </svg>
+  </section>
 
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">⚡</div>
-            <h3 class="feature-title">Offline-First & Instantaneous</h3>
-            <p class="feature-text">Powered by local Drift SQLite engine. Launch the app and log expenses instantly with
-              zero network latency, buffering, or waiting.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">🛡️</div>
-            <h3 class="feature-title">Biometric Unlock & Keystore Security</h3>
-            <p class="feature-text">Universal Fingerprint & Face Recognition via local_auth. Hardened with salted PBKDF2
-              HMAC-SHA256, lockout backoff, and Android Keystore encryption.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">🎨</div>
-            <h3 class="feature-title">Dual Aesthetics: Botanical & Cyberpunk</h3>
-            <p class="feature-text">Choose your visual vibe: serene Botanical Forest (Night Pine & Sage) or
-              hyper-contrasted Pure Cyberpunk (Electric Cyan, Matrix Mint & Edgerunner Yellow).</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">🚀</div>
-            <h3 class="feature-title">Silky-Smooth 60/120 FPS Performance</h3>
-            <p class="feature-text">Architected with RepaintBoundary canvas caching, lazy slivers, and zero shader
-              overdraw for butter-smooth navigation on high refresh rate displays.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">📝</div>
-            <h3 class="feature-title">Rapid 5-Second Logging & Mini Calculator</h3>
-            <p class="feature-text">Log expenses swiftly with dynamic categories, built-in math operators, transfer
-              admin fee tracking, and receipt photo attachments.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">📊</div>
-            <h3 class="feature-title">Smart Category Budgets & Daily Pulse</h3>
-            <p class="feature-text">Set monthly spending caps with 50/30/20 budget pools, adaptive progress indicators,
-              rollover balances, and daily financial pulse alerts before overspending.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">🤝</div>
-            <h3 class="feature-title">Debts, Split Bills & Due Reminders</h3>
-            <p class="feature-text">Track who owes whom, record partial or full debt payments, split bills with friends
-              in one tap, and get automated due reminders.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-wrapper">🎯</div>
-            <h3 class="feature-title">Milestone Savings Goals & Visual Reports</h3>
-            <p class="feature-text">Create milestone funds for emergency stashes, gadgets, or travel. Deposit funds
-              gradually and export clean PDF financial statements, CSV, or JSON backups.</p>
-          </div>
-        </div>
+  <!-- ========================================================================
+       COMPARISON & SPECIFICATIONS SECTION (Paper Background)
+       ======================================================================== -->
+  <section class="paper comparison-section" id="comparison">
+    <div class="wrap">
+      <div class="section-title-center">
+        <div class="kick">BENCHMARK &amp; SPECIFICATIONS</div>
+        <h2>How Wall o' Pay <em>Stands Out</em></h2>
+        <p class="section-sub">
+          See why users switch from bloated subscription apps to an offline-first fortress.
+        </p>
       </div>
-    </section>
 
-    <!-- SHOWCASE SECTION -->
-    <section class="showcase-section" id="showcase">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Interface</span>
-          <h2 class="section-title">Explore Wall o' Pay Interface</h2>
-          <p class="section-desc">Clean, intuitive, and responsive screens crafted for daily delight.</p>
-        </div>
-
-        <div class="showcase-tabs">
-          <button class="showcase-tab-btn active" data-tab="beranda">🏠 Dashboard</button>
-          <button class="showcase-tab-btn" data-tab="transaksi">📝 Transactions</button>
-          <button class="showcase-tab-btn" data-tab="anggaran">📊 Budgets</button>
-          <button class="showcase-tab-btn" data-tab="tabungan">🎯 Savings & Debts</button>
-          <button class="showcase-tab-btn" data-tab="tema">🎨 Dual Theme</button>
-          <button class="showcase-tab-btn" data-tab="keamanan">🛡️ Biometrics</button>
-        </div>
-
-        <div class="showcase-content-card">
-          <div class="showcase-desc-box">
-            <h3 class="showcase-desc-title" id="showcase-title">Instant Financial Dashboard</h3>
-            <p class="showcase-desc-text" id="showcase-desc">View your total balance, monthly inflows and outflows,
-              recent activities, and quick-action shortcuts in one clean interface.</p>
-            <ul class="showcase-feature-list" id="showcase-bullets">
-              <li><span class="check-icon">✓</span> Gradient balance card with net cashflow summary</li>
-              <li><span class="check-icon">✓</span> Real-time Daily Budget Pulse showing safe-to-spend allowance</li>
-              <li><span class="check-icon">✓</span> Recent activity feed pulled directly from local SQLite with zero lag
-              </li>
-            </ul>
-          </div>
-
-          <div class="showcase-visual-preview" id="showcase-visual">
-            <div class="preview-box">
-              <div class="preview-box-header">
-                <span class="preview-box-title"><span>🏠</span> Instant Financial Health</span>
-                <span class="preview-box-badge">Live Dashboard</span>
-              </div>
-              <div class="screen-balance-card" style="margin-bottom: 0;">
-                <div class="balance-card-title">Total Net Balance</div>
-                <div class="balance-card-amount">Rp 12.850.000</div>
-                <div class="balance-card-stats">
-                  <div class="stat-pill">Inflow<span style="color: #6EE7B7;">+Rp 8.500.000</span></div>
-                  <div class="stat-pill">Outflow<span style="color: #FCA5A5;">-Rp 3.150.000</span></div>
-                </div>
-              </div>
-              <div class="preview-row-item">
-                <div class="preview-item-left">
-                  <span class="preview-item-icon">⚡</span>
-                  <div>
-                    <div class="preview-item-name">Daily Budget Pulse</div>
-                    <div class="preview-item-cat">Safe to Spend</div>
-                  </div>
-                </div>
-                <div class="preview-item-amount" style="color: var(--income);">Rp 145.000 / day</div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- Comparison Table -->
+      <div class="comparison-table-wrapper">
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th>Aspect / Feature</th>
+              <th class="highlight-col"><span id="comp-theme-icon">🌿</span> Wall o' Pay</th>
+              <th>Conventional Finance Apps</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Speed &amp; Responsiveness</td>
+              <td class="highlight-col">120 FPS Fluid (Local SQLite + Canvas Caching)</td>
+              <td>Sluggish, frequent network buffering</td>
+            </tr>
+            <tr>
+              <td>Offline Capability</td>
+              <td class="highlight-col">100% Full Functionality (Zero Internet Required)</td>
+              <td>Features blocked or frozen when offline</td>
+            </tr>
+            <tr>
+              <td>Biometrics &amp; Security</td>
+              <td class="highlight-col">Fingerprint, Face Unlock &amp; Hardware Keystore</td>
+              <td>Plaintext storage or no biometric gate</td>
+            </tr>
+            <tr>
+              <td>Visual Aesthetics</td>
+              <td class="highlight-col">Dual Theme: Botanical Forest &amp; Pure Cyberpunk</td>
+              <td>Generic fixed light/dark mode</td>
+            </tr>
+            <tr>
+              <td>Advertisements &amp; Pop-ups</td>
+              <td class="highlight-col">Zero Ads Forever (Distraction-Free)</td>
+              <td>Cluttered with ads &amp; predatory loans</td>
+            </tr>
+            <tr>
+              <td>Financial Data Privacy</td>
+              <td class="highlight-col">Stored strictly on your device (Encrypted)</td>
+              <td>Monetized or shared with third parties</td>
+            </tr>
+            <tr>
+              <td>Cloud Synchronization</td>
+              <td class="highlight-col">Optional via your personal Firebase config</td>
+              <td>Mandatory monthly paid subscription</td>
+            </tr>
+            <tr>
+              <td>Statements &amp; Exports</td>
+              <td class="highlight-col">Free &amp; Unlimited (PDF, CSV, JSON)</td>
+              <td>Paywalled behind premium subscriptions</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </section>
 
-    <!-- DOWNLOAD SECTION -->
-    <section class="download-section" id="download">
-      <div class="container">
-        <div class="download-card-wrapper">
-          <div class="download-content">
-            <div>
-              <h2 class="download-title">Take Control of Your Wealth Today</h2>
-              <p class="download-subtitle">Download the standalone Wall o' Pay APK installer directly to your Android
-                device for free and without ads.</p>
-
-              <div class="download-cta-group">
-                <a href="https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk"
-                  class="btn-download-main" id="btn-download-apk" target="_blank" rel="noopener">
-                  <span>📥</span>
-                  <span>Direct APK Download</span>
-                </a>
-                <a href="https://github.com/hyenavia/wall-o-pay/releases" class="btn-github-release" target="_blank"
-                  rel="noopener">
-                  <span>🔗</span>
-                  <span>View on GitHub Releases</span>
-                </a>
-              </div>
+      <!-- Specs & Install Guide Row -->
+      <div class="specs-and-guide-grid">
+        <!-- Release Specifications Card -->
+        <div class="download-specs-card">
+          <div class="specs-title">
+            <span>📱</span>
+            <strong>Release Specifications</strong>
+          </div>
+          <div class="specs-list">
+            <div class="specs-item">
+              <span class="specs-label">App Version</span>
+              <span class="specs-val app-version-tag" id="specs-version-val">v2.1.0 (Release)</span>
             </div>
-
-            <!-- Specs Card -->
-            <div class="download-specs-card">
-              <div class="specs-title">
-                <span>📱</span>
-                <span>Release Specifications</span>
-              </div>
-              <div class="specs-list">
-                <div class="specs-item">
-                  <span class="specs-label">App Version</span>
-                  <span class="specs-val" id="specs-version-val">v2.0.0 (Release)</span>
-                </div>
-                <div class="specs-item">
-                  <span class="specs-label">File Size</span>
-                  <span class="specs-val">~20 MB</span>
-                </div>
-                <div class="specs-item">
-                  <span class="specs-label">Operating System</span>
-                  <span class="specs-val">Android 8.0+ (Oreo)</span>
-                </div>
-                <div class="specs-item">
-                  <span class="specs-label">Theme Support</span>
-                  <span class="specs-val">Botanical & Cyberpunk</span>
-                </div>
-                <div class="specs-item">
-                  <span class="specs-label">License</span>
-                  <span class="specs-val">Open Source (MIT)</span>
-                </div>
-              </div>
+            <div class="specs-item">
+              <span class="specs-label">Package Size</span>
+              <span class="specs-val">~20 MB</span>
+            </div>
+            <div class="specs-item">
+              <span class="specs-label">Operating System</span>
+              <span class="specs-val">Android 8.0+ (Oreo to Android 15)</span>
+            </div>
+            <div class="specs-item">
+              <span class="specs-label">Theme Support</span>
+              <span class="specs-val">Botanical Forest &amp; Pure Cyberpunk</span>
+            </div>
+            <div class="specs-item">
+              <span class="specs-label">License</span>
+              <span class="specs-val">Open Source (MIT License)</span>
             </div>
           </div>
         </div>
 
-        <!-- Android Install Guide -->
-        <div class="install-guide-box">
-          <h3 class="install-guide-title">
+        <!-- 4-Step Android Installation Guide -->
+        <div class="install-guide-card">
+          <div class="specs-title">
             <span>⚙️</span>
-            <span>How to Install APK on Android</span>
-          </h3>
+            <strong>How to Install on Android</strong>
+          </div>
           <div class="install-steps">
             <div class="install-step-card">
               <div class="step-num">1</div>
-              <strong>1. Download APK</strong>
-              <p class="step-text">Click the download button above and wait for the APK file to finish downloading.</p>
+              <div>
+                <strong>Download APK</strong>
+                <p>Tap download to grab the official APK package directly to your phone.</p>
+              </div>
             </div>
             <div class="install-step-card">
               <div class="step-num">2</div>
-              <strong>2. Open File</strong>
-              <p class="step-text">Tap the download notification or locate the file in your 'Downloads' folder.</p>
+              <div>
+                <strong>Open Package</strong>
+                <p>Tap the download notification or locate it in your 'Downloads' folder.</p>
+              </div>
             </div>
             <div class="install-step-card">
               <div class="step-num">3</div>
-              <strong>3. Allow Unknown Sources</strong>
-              <p class="step-text">If prompted with 'Install unknown apps', tap 'Settings' and toggle 'Allow from this
-                source'.</p>
+              <div>
+                <strong>Allow Source</strong>
+                <p>If prompted with 'Install unknown apps', tap Settings and enable this source.</p>
+              </div>
             </div>
             <div class="install-step-card">
               <div class="step-num">4</div>
-              <strong>4. Install & Launch</strong>
-              <p class="step-text">Tap 'Install'. Launch Wall o' Pay and begin commanding your cashflow!</p>
+              <div>
+                <strong>Launch &amp; Enjoy</strong>
+                <p>Tap Install. Open Wall o' Pay and begin commanding your cashflow!</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- COMPARISON SECTION -->
-    <section class="comparison-section">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-tag">Comparison</span>
-          <h2 class="section-title">Why Choose Wall o' Pay?</h2>
-          <p class="section-desc">How Wall o' Pay stands out from conventional expense tracking apps.</p>
+  <!-- ========================================================================
+       COMMUNITY & TESTIMONIALS SECTION (Paper Background)
+       ======================================================================== -->
+  <section class="paper testi" id="testimonials">
+    <svg class="leaf" style="width:220px;right:-40px;bottom:20px;transform:rotate(-30deg)"><use href="#lf" /></svg>
+    <div class="wrap">
+      <div class="testi-intro">
+        <div class="kick">COMMUNITY VOICES</div>
+        <h2>Real People.<br><em>Real Financial Peace.</em></h2>
+        <p class="s">Join thousands who have unlocked mindful cashflow habits with Wall o' Pay.</p>
+      </div>
+
+      <div class="testi-slider-col">
+        <div class="quote" id="quote-card">
+          <span class="av" aria-hidden="true"></span>
+          <div>
+            <q id="qt">“Wall o’ Pay made me far more aware of my daily spending leaks. Managing monthly allowance is now completely effortless!”</q>
+            <small id="qn">— Sarah, University Student</small>
+          </div>
         </div>
-
-        <div class="comparison-table-wrapper">
-          <table class="comp-table">
-            <thead>
-              <tr>
-                <th>Aspect / Criteria</th>
-                <th class="highlight-col"><span id="comp-theme-icon">🌿</span> Wall o' Pay</th>
-                <th>Conventional Finance Apps</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Speed & Performance</td>
-                <td class="highlight-col">120 FPS Fluid (Local Drift SQLite + Canvas Caching)</td>
-                <td>Often sluggish / network-dependent</td>
-              </tr>
-              <tr>
-                <td>Offline Capability</td>
-                <td class="highlight-col">100% Full Functionality (Zero Internet Required)</td>
-                <td>Features blocked while offline</td>
-              </tr>
-              <tr>
-                <td>Biometrics & Security</td>
-                <td class="highlight-col">Fingerprint, Face Unlock & Hardware Keystore</td>
-                <td>Plaintext storage or no local biometric lock</td>
-              </tr>
-              <tr>
-                <td>Visual Aesthetics</td>
-                <td class="highlight-col">Dual Theme: Botanical Forest & Pure Cyberpunk</td>
-                <td>Generic fixed dark/light mode</td>
-              </tr>
-              <tr>
-                <td>Advertisements & Pop-ups</td>
-                <td class="highlight-col">Zero Ads (Distraction-Free)</td>
-                <td>Cluttered with ads & loan offers</td>
-              </tr>
-              <tr>
-                <td>Financial Data Privacy</td>
-                <td class="highlight-col">Stored strictly on your device (Encrypted)</td>
-                <td>Monetized or shared with third parties</td>
-              </tr>
-              <tr>
-                <td>Cloud Synchronization</td>
-                <td class="highlight-col">Optional via your own Firebase</td>
-                <td>Mandatory paid monthly subscription</td>
-              </tr>
-              <tr>
-                <td>Reports & Exports</td>
-                <td class="highlight-col">Free & Unlimited (PDF Statements, CSV, JSON)</td>
-                <td>Gated behind premium tiers</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="ctl">
+          <span style="width:40px"></span>
+          <div class="dots" id="dots" role="tablist" aria-label="Testimonial pagination"></div>
+          <button class="next" id="next" aria-label="Next testimonial">→</button>
         </div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-top">
-        <div>
-          <a href="#" class="brand">
-            <img src="images/logo.png" alt="Wall o' Pay Logo" class="brand-icon" id="footer-logo-img">
-            <span class="brand-name">Wall o' Pay</span>
-          </a>
-          <p class="footer-brand-desc">
-            A modern, lightning-fast, and offline-first personal finance application. Your money, under your control.
-          </p>
-        </div>
+  <!-- ========================================================================
+       FINAL CTA & DOWNLOAD SECTION (Dark Background with Wave Top)
+       ======================================================================== -->
+  <section class="dark final" id="download">
+    <svg class="wave t" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+      <path fill="var(--paper)" d="M0 0H1440V20C1100 90 700 -10 400 50S100 60 0 30Z" />
+    </svg>
+    <svg class="leaf" style="width:230px;left:-50px;bottom:0;transform:rotate(55deg)"><use href="#lf" /></svg>
+    <svg class="leaf" style="width:230px;right:-50px;bottom:0;transform:rotate(-55deg)"><use href="#lf" /></svg>
 
-        <div>
-          <div class="footer-col-title">Navigation</div>
-          <ul class="footer-nav-list">
-            <li><a href="#about" class="footer-nav-link">About</a></li>
-            <li><a href="#features" class="footer-nav-link">Core Features</a></li>
-            <li><a href="#showcase" class="footer-nav-link">Showcase</a></li>
-            <li><a href="#download" class="footer-nav-link">Download APK</a></li>
-          </ul>
-        </div>
+    <div class="wrap">
+      <svg width="40" height="64" viewBox="0 0 100 160" fill="var(--leaf)" aria-hidden="true">
+        <use href="#lf" />
+      </svg>
+      <h2>Ready to Take Control?</h2>
+      <p>Start your private, offline-first financial journey with Wall o' Pay today.</p>
 
+      <div class="cta-row center">
+        <a class="btn" href="https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk"
+          id="btn-download-apk" target="_blank" rel="noopener">
+          <span>📥</span>
+          <span>Download Official APK (<span class="app-version-tag">v2.1.0</span>)</span>
+        </a>
+        <a class="btn ghost" href="https://github.com/hyenavia/wall-o-pay/releases" target="_blank" rel="noopener">
+          <span>🔗</span>
+          <span>GitHub Releases</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       FOOTER
+       ======================================================================== -->
+  <footer>
+    <div class="wrap">
+      <div class="logo">
+        <img src="images/logo.png" alt="Wall o' Pay Logo" class="brand-img" id="footer-logo-img">
         <div>
-          <div class="footer-col-title">Documentation</div>
-          <ul class="footer-nav-list">
-            <li><a href="https://github.com/hyenavia/wall-o-pay/blob/main/CHANGELOG.md" class="footer-nav-link"
-                target="_blank" rel="noopener">Changelog & Releases</a></li>
-            <li><a href="https://github.com/hyenavia/wall-o-pay/blob/main/README.md" class="footer-nav-link"
-                target="_blank" rel="noopener">Developer Guide (README)</a></li>
-            <li><a href="https://github.com/hyenavia/wall-o-pay/releases" class="footer-nav-link" target="_blank"
-                rel="noopener">GitHub Releases</a></li>
-            <li><a href="https://forms.gle/W5MNr8eeZcmiiPbp9" class="footer-nav-link" target="_blank"
-                rel="noopener">User Feedback & Survey</a></li>
-          </ul>
+          Wall o' Pay
+          <small>Your money, under your control.</small>
         </div>
       </div>
 
-      <div class="footer-bottom">
-        <div>Copyright &copy; 2026 <strong>Wall o' Pay</strong>. Licensed under the MIT License.</div>
-        <div>Crafted with care for your financial freedom.</div>
+      <nav class="links" aria-label="Footer Navigation">
+        <a href="#about">Lore</a>
+        <a href="#features">Features</a>
+        <a href="#showcase">Interface</a>
+        <a href="#comparison">Why Us</a>
+        <a href="https://github.com/hyenavia/wall-o-pay/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+        <a href="https://github.com/hyenavia/wall-o-pay" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+
+      <div class="footer-copy">
+        <small>Copyright &copy; 2026 <strong>Wall o' Pay</strong>. Open source under MIT License.</small>
       </div>
     </div>
   </footer>
 
-  <!-- Scripts -->
+  <!-- Interactive JavaScript -->
   <script src="script.js"></script>
 </body>
 

@@ -131,8 +131,8 @@ class BudgetPage extends ConsumerWidget {
                         AppProgressBar(
                           value: breakdown.overallRatio,
                           color: breakdown.overallRatio > 1
-                              ? (colors.isCyberpunk ? colors.expense : AppColors.expense)
-                              : (colors.isCyberpunk ? colors.primary : AppColors.sage),
+                              ? colors.expense
+                              : colors.primary,
                           backgroundColor: Colors.white24,
                         ),
                         const SizedBox(height: 8),
@@ -315,9 +315,7 @@ class BudgetPage extends ConsumerWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
-                              color: colors.isCyberpunk
-                                  ? colors.primary
-                                  : AppColors.deepForest,
+                              color: colors.primary,
                             ),
                           ),
                         ),

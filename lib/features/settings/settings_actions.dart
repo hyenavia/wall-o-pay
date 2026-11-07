@@ -256,7 +256,7 @@ class SettingsActions {
         Navigator.of(context, rootNavigator: true).pop(); // dismiss loading
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: AppColors.expense,
+            backgroundColor: context.themeColors.expense,
             content: Text(context.tr('Log out failed: {error}', {'error': e})),
           ),
         );
@@ -279,7 +279,7 @@ class SettingsActions {
       builder: (ctx) => AlertDialog(
         title: Text(
           context.tr('Delete Account Permanently?'),
-          style: const TextStyle(color: AppColors.expense, fontWeight: FontWeight.bold),
+          style: TextStyle(color: ctx.themeColors.expense, fontWeight: FontWeight.bold),
         ),
         content: SingleChildScrollView(
           child: Column(
@@ -311,7 +311,7 @@ class SettingsActions {
             child: Text(context.tr('Cancel')),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.expense),
+            style: FilledButton.styleFrom(backgroundColor: ctx.themeColors.expense),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(context.tr('Delete Permanently')),
           ),
@@ -331,7 +331,7 @@ class SettingsActions {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: AppColors.expense,
+            backgroundColor: context.themeColors.expense,
             content: Text(context.tr('Password is required to delete account.')),
           ),
         );
@@ -404,7 +404,7 @@ class SettingsActions {
         Navigator.of(context, rootNavigator: true).popUntil((r) => r.isFirst);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: AppColors.income,
+            backgroundColor: context.themeColors.income,
             content: Text(context.tr('Account and all data successfully deleted.')),
           ),
         );
@@ -416,7 +416,7 @@ class SettingsActions {
             ? context.tr('Incorrect password. Account was not deleted.')
             : e.message ?? e.code;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(backgroundColor: AppColors.expense, content: Text(errorMsg)),
+          SnackBar(backgroundColor: context.themeColors.expense, content: Text(errorMsg)),
         );
       }
     } catch (e) {
@@ -424,7 +424,7 @@ class SettingsActions {
         Navigator.of(context).pop(); // dismiss loading
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: AppColors.expense,
+            backgroundColor: context.themeColors.expense,
             content: Text(context.tr('Error: {error}', {'error': e})),
           ),
         );
@@ -454,8 +454,8 @@ class SettingsActions {
       builder: (ctx) => AlertDialog(
         title: Text(
           ctx.tr('Erase Local Guest Data?'),
-          style: const TextStyle(
-            color: AppColors.expense,
+          style: TextStyle(
+            color: ctx.themeColors.expense,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -468,7 +468,7 @@ class SettingsActions {
             child: Text(ctx.tr('Cancel')),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.expense),
+            style: FilledButton.styleFrom(backgroundColor: ctx.themeColors.expense),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(ctx.tr('Erase All Data')),
           ),
@@ -493,7 +493,7 @@ class SettingsActions {
         Navigator.of(context, rootNavigator: true).popUntil((r) => r.isFirst);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: AppColors.income,
+            backgroundColor: context.themeColors.income,
             content: Text(context.tr('Local guest data erased.')),
           ),
         );
@@ -502,7 +502,7 @@ class SettingsActions {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: AppColors.expense,
+            backgroundColor: context.themeColors.expense,
             content: Text(context.tr('Error: {error}', {'error': e})),
           ),
         );

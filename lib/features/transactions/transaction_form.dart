@@ -503,7 +503,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                         padding: const EdgeInsets.only(right: 8),
                         child: ActionChip(
                           avatar: const Icon(Icons.flash_on, size: 16),
-                          label: Text(t.name),
+                          label: Text(context.tr(t.name)),
                           onPressed: () => _applyTemplate(t),
                         ),
                       ),

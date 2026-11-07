@@ -49,7 +49,7 @@ class BudgetPillarCard extends StatelessWidget {
     final isCyber = context.isCyberpunk;
     final bucketColor = bucket.colorIn(context);
     final isOver = allocated > 0 && spent > allocated;
-    final color = isOver ? (isCyber ? colors.expense : AppColors.expense) : bucketColor;
+    final color = isOver ? colors.expense : bucketColor;
 
     return AppCard(
       padding: EdgeInsets.zero,
@@ -86,10 +86,10 @@ class BudgetPillarCard extends StatelessWidget {
                             allocated > 0
                                 ? '${rupiah(spent)} / ${rupiah(allocated)}'
                                 : context.tr('Spent: {amount}', {'amount': rupiah(spent)}),
-                            style: TextStyle(
+                            style: context.moneyStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: isOver ? AppColors.expense : scheme.onSurface.withValues(alpha: 0.65),
+                              color: isOver ? colors.expense : scheme.onSurface.withValues(alpha: 0.65),
                             ),
                           ),
                         ],
@@ -104,7 +104,7 @@ class BudgetPillarCard extends StatelessWidget {
                         ),
                         child: Text(
                           '${(ratio * 100).round()}%',
-                          style: TextStyle(
+                          style: context.moneyStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
                             color: color,
@@ -122,9 +122,9 @@ class BudgetPillarCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     context.tr('Over budget by {amount}', {'amount': rupiah(spent - allocated)}),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
-                      color: AppColors.expense,
+                      color: colors.expense,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -192,7 +192,7 @@ class BudgetPillarCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
-                              color: isCyber ? colors.primary : AppColors.deepForest,
+                              color: colors.primary,
                             ),
                           ),
                         ),
@@ -206,10 +206,11 @@ class BudgetPillarCard extends StatelessWidget {
                         : (cSpent > 0
                             ? context.tr('Spent: {amount}', {'amount': rupiah(cSpent)})
                             : context.tr('Tap to set budget or reassign')),
-                    style: TextStyle(
+                    style: context.moneyStyle(
                       fontSize: 12,
+                      fontWeight: FontWeight.w500,
                       color: (hasSpecificLimit && cSpent > cBudget)
-                          ? AppColors.expense
+                          ? colors.expense
                           : scheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),

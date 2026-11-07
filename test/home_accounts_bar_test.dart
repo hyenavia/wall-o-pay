@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wall_o_pay/core/l10n.dart';
+import 'package:wall_o_pay/core/theme.dart';
+import 'package:wall_o_pay/data/profile.dart';
 import 'package:wall_o_pay/data/app_database.dart';
 import 'package:wall_o_pay/data/prefs.dart';
 import 'package:wall_o_pay/data/providers.dart';
@@ -114,6 +116,42 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(AccountsPage), findsOneWidget);
+    });
+
+    testWidgets('Cyberpunk mode renders 3-line header with status, cycle, and name', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      final prefs = await SharedPreferences.getInstance();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            walletsProvider.overrideWithValue(const AsyncData(<Wallet>[])),
+            walletBalancesProvider.overrideWithValue({}),
+            totalCurrentBalanceProvider.overrideWithValue(0),
+            transactionsProvider.overrideWithValue(const AsyncData(<TransactionEntry>[])),
+            displayNameProvider.overrideWithValue('Olivia Adeline'),
+          ],
+          child: MaterialApp(
+            theme: buildTheme('cyberpunk'),
+            home: const HomePage(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Olivia Adeline'), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((w) =>
+            w is Text &&
+            (w.data == 'BANGUN, CHOOM' ||
+                w.data == 'NETRUNNER ONLINE' ||
+                w.data == 'NIGHT CITY MEMANGGIL' ||
+                w.data == 'WAKE UP, CHOOM' ||
+                w.data == 'NIGHT CITY CALLS')),
+        findsOneWidget,
+      );
     });
   });
 }

@@ -223,7 +223,8 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                 children: [
                   Text(
                     _formulaText.isEmpty ? '0' : _formulaText,
-                    style: theme.textTheme.bodyMedium?.copyWith(
+                    style: context.moneyStyle(
+                      fontSize: 14,
                       color: muted,
                       letterSpacing: 0.5,
                     ),
@@ -236,9 +237,10 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     alignment: Alignment.centerRight,
                     child: Text(
                       rupiah(_displayResult),
-                      style: theme.textTheme.headlineMedium?.copyWith(
+                      style: context.moneyStyle(
+                        fontSize: 28,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.income,
+                        color: context.themeColors.income,
                       ),
                     ),
                   ),
@@ -256,8 +258,8 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: 'C',
                       onPressed: _onClear,
-                      color: AppColors.expense.withValues(alpha: 0.15),
-                      textColor: AppColors.expense,
+                      color: context.themeColors.expense.withValues(alpha: 0.15),
+                      textColor: context.themeColors.expense,
                     ),
                     const SizedBox(width: 8),
                     _calcBtn(

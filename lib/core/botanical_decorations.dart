@@ -236,6 +236,14 @@ class CyberHeroCardPainter extends CustomPainter {
       canvas.drawLine(Offset(0, y), Offset(w, y), gridPaint);
     }
 
+    // Subtle CRT scanlines overlay
+    final scanlinePaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.12)
+      ..strokeWidth = 1.0;
+    for (double y = 1.5; y < h; y += 3.0) {
+      canvas.drawLine(Offset(0, y), Offset(w, y), scanlinePaint);
+    }
+
     // Jalur circuit trace sudut kanan atas
     final tracePaint = Paint()
       ..color = color.withValues(alpha: opacity)
@@ -250,7 +258,7 @@ class CyberHeroCardPainter extends CustomPainter {
     canvas.drawPath(trace, tracePaint);
 
     final nodePaint = Paint()
-      ..color = color.withValues(alpha: opacity * 1.5)
+      ..color = color.withValues(alpha: opacity * 1.8)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(Offset(w - 120, h * 0.45), 2.5, nodePaint);
 
@@ -262,6 +270,39 @@ class CyberHeroCardPainter extends CustomPainter {
       ..lineTo(90, h * 0.85);
     canvas.drawPath(cornerPath, tracePaint);
     canvas.drawCircle(Offset(90, h * 0.85), 2.2, nodePaint);
+
+    // HUD Corner Brackets
+    final bracketPaint = Paint()
+      ..color = color.withValues(alpha: opacity * 2.2)
+      ..strokeWidth = 1.6
+      ..style = PaintingStyle.stroke;
+
+    final tlBracket = Path()
+      ..moveTo(14, 24)
+      ..lineTo(14, 14)
+      ..lineTo(24, 14);
+    canvas.drawPath(tlBracket, bracketPaint);
+
+    final brBracket = Path()
+      ..moveTo(w - 24, h - 14)
+      ..lineTo(w - 14, h - 14)
+      ..lineTo(w - 14, h - 24);
+    canvas.drawPath(brBracket, bracketPaint);
+
+    // Grid crosshairs (+) at technical intersection points
+    final crossPaint = Paint()
+      ..color = color.withValues(alpha: opacity * 1.6)
+      ..strokeWidth = 1.0;
+    void drawCross(double cx, double cy, double arm) {
+      canvas.drawLine(Offset(cx - arm, cy), Offset(cx + arm, cy), crossPaint);
+      canvas.drawLine(Offset(cx, cy - arm), Offset(cx, cy + arm), crossPaint);
+    }
+
+    if (w > step * 4 && h > step * 4) {
+      drawCross(step * 2, step * 2, 3);
+      drawCross(w - step * 2, step * 2, 3);
+      drawCross(step * 3, h - step * 2, 3);
+    }
   }
 
   @override
@@ -359,30 +400,34 @@ class CyberBackgroundPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // 1. Ambient Glow Orbs di sudut layar
+    // 1. Atmospheric Neon Ambient Glow (Cyan & Magenta Night City depth)
     final cyanGlowPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          cyanColor.withValues(alpha: 0.12),
+          cyanColor.withValues(alpha: gridOpacity * 1.5),
           cyanColor.withValues(alpha: 0.0),
         ],
-      ).createShader(Rect.fromCircle(
-        center: Offset(w * 0.95, h * 0.12),
-        radius: w * 0.55,
-      ));
-    canvas.drawCircle(Offset(w * 0.95, h * 0.12), w * 0.55, cyanGlowPaint);
+      ).createShader(
+        Rect.fromCircle(
+          center: Offset(w * 0.15, h * 0.08),
+          radius: w * 0.85,
+        ),
+      );
+    canvas.drawCircle(Offset(w * 0.15, h * 0.08), w * 0.85, cyanGlowPaint);
 
     final magentaGlowPaint = Paint()
       ..shader = RadialGradient(
         colors: [
-          magentaColor.withValues(alpha: 0.07),
+          magentaColor.withValues(alpha: gridOpacity * 1.2),
           magentaColor.withValues(alpha: 0.0),
         ],
-      ).createShader(Rect.fromCircle(
-        center: Offset(-w * 0.1, h * 0.65),
-        radius: w * 0.5,
-      ));
-    canvas.drawCircle(Offset(-w * 0.1, h * 0.65), w * 0.5, magentaGlowPaint);
+      ).createShader(
+        Rect.fromCircle(
+          center: Offset(w * 0.85, h * 0.65),
+          radius: w * 0.75,
+        ),
+      );
+    canvas.drawCircle(Offset(w * 0.85, h * 0.65), w * 0.75, magentaGlowPaint);
 
     // 2. Futuristic Cyber Grid (24px step)
     final gridPaint = Paint()
