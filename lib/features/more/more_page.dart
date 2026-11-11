@@ -37,20 +37,31 @@ class MorePage extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: iconColor.withValues(alpha: 0.14),
+            color: iconColor.withValues(alpha: 0.16),
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: iconColor.withValues(alpha: 0.35),
+              width: 0.8,
+            ),
           ),
           child: Icon(icon, color: iconColor, size: 20),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(
-            fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 14.5,
+            color: AppColors.softIvory,
           ),
         ),
-        trailing: const Icon(Icons.chevron_right, size: 20),
+        subtitle: Text(
+          subtitle,
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppColors.freshSage,
+          ),
+        ),
+        trailing: const Icon(Icons.chevron_right, size: 20, color: AppColors.dewMint),
         onTap: onTap,
       );
     }
@@ -61,14 +72,12 @@ class MorePage extends StatelessWidget {
         );
 
     final colors = context.themeColors;
-    final isCyber = colors.isCyberpunk;
-    final primaryBadge = isCyber ? colors.primary : AppColors.sage;
+    const primaryBadge = AppColors.sage;
 
     return Scaffold(
-      appBar: pageAppBar(context, title: Text(context.tr('More Features'))),
-      body: BotanicalBackgroundSheet(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 48),
+      appBar: secondaryAppBar(context, title: Text(context.tr('More Features'))),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
           children: [
             SectionHeader(title: context.tr('Money & Wallets')),
             AppCard(
@@ -167,7 +176,6 @@ class MorePage extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }

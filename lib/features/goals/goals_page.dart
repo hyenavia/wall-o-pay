@@ -24,19 +24,18 @@ class GoalsPage extends ConsumerWidget {
     final goalsAsync = ref.watch(savingsGoalsProvider);
 
     return Scaffold(
-      appBar: pageAppBar(context, title: Text(context.tr('Goals'))),
-      body: BotanicalBackgroundSheet(
-        child: goalsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(
-            child: Text(context.tr('Could not load data: {error}', {'error': e})),
-          ),
-          data: (goals) {
+      appBar: secondaryAppBar(context, title: Text(context.tr('Goals'))),
+      body: goalsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(
+          child: Text(context.tr('Could not load data: {error}', {'error': e})),
+        ),
+        data: (goals) {
           final active = goals.where((g) => g.currentAmount < g.targetAmount).toList();
           final done = goals.where((g) => g.currentAmount >= g.targetAmount).toList();
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
             children: [
               HeroCard(
                 child: Row(
@@ -67,12 +66,12 @@ class GoalsPage extends ConsumerWidget {
                       width: 64,
                       height: 64,
                       decoration: BoxDecoration(
-                        color: (context.isCyberpunk ? context.themeColors.primary : AppColors.sage).withValues(alpha: 0.25),
+                        color: AppColors.sage.withValues(alpha: 0.25),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        context.isCyberpunk ? Icons.rocket_launch_rounded : Icons.eco_outlined,
-                        color: context.isCyberpunk ? context.themeColors.primary : AppColors.sage,
+                      child: const Icon(
+                        Icons.eco_outlined,
+                        color: AppColors.sage,
                         size: 34,
                       ),
                     ),
@@ -116,7 +115,6 @@ class GoalsPage extends ConsumerWidget {
             ],
           );
         },
-      ),
       ),
     );
   }
@@ -204,9 +202,6 @@ class _GoalCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final muted = scheme.onSurface.withValues(alpha: 0.6);
     final ratio = goal.targetAmount == 0 ? 0.0 : goal.currentAmount / goal.targetAmount;
     final left = _timeLeft(context, goal.targetDate);
 
@@ -221,14 +216,19 @@ class _GoalCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(goal.name,
-                        style: theme.textTheme.bodyLarge
-                            ?.copyWith(fontWeight: FontWeight.w700)),
+                    Text(
+                      goal.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: AppColors.softIvory,
+                      ),
+                    ),
                     Text(
                       '${rupiah(goal.currentAmount)} / ${rupiah(goal.targetAmount)}',
                       style: context.moneyStyle(
                         fontSize: 12,
-                        color: muted,
+                        color: AppColors.freshSage,
                       ),
                     ),
                   ],
@@ -239,10 +239,11 @@ class _GoalCard extends ConsumerWidget {
                 style: context.moneyStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
-                  color: scheme.primary,
+                  color: AppColors.dewMint,
                 ),
               ),
               PopupMenuButton<String>(
+                iconColor: AppColors.freshSage,
                 onSelected: (v) async {
                   if (v == 'edit') {
                     await _editGoal(context, ref);
@@ -268,20 +269,33 @@ class _GoalCard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 10),
-          AppProgressBar(value: ratio),
+          AppProgressBar(
+            value: ratio,
+            color: AppColors.dewMint,
+            backgroundColor: AppColors.mossShadow.withValues(alpha: 0.6),
+          ),
           const SizedBox(height: 4),
           Row(
             children: [
               Expanded(
                 child: Text(
                   left ?? '',
-                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.freshSage,
+                  ),
                 ),
               ),
               TextButton.icon(
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.dewMint,
+                ),
                 onPressed: () => _handleFunds(context, ref, true),
                 icon: const Icon(Icons.add, size: 18),
-                label: Text(context.tr('Add funds')),
+                label: Text(
+                  context.tr('Add funds'),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
               ),
             ],
           ),
@@ -298,33 +312,52 @@ class _CompletedGoalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return AppCard(
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 21,
-            backgroundColor: theme.colorScheme.primary,
-            child: Icon(Icons.check, color: theme.colorScheme.onPrimary),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.incomeOnDark.withValues(alpha: 0.18),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppColors.incomeOnDark.withValues(alpha: 0.35),
+                width: 1,
+              ),
+            ),
+            child: const Icon(Icons.check, color: AppColors.incomeOnDark, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(goal.name,
-                    style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700)),
+                Text(
+                  goal.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    color: AppColors.softIvory,
+                  ),
+                ),
                 Text(
                   context.tr('Reached on {date}', {'date': shortDate(goal.updatedAt)}),
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.freshSage,
                   ),
                 ),
               ],
             ),
           ),
-          Text(rupiah(goal.targetAmount),
-              style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)),
+          Text(
+            rupiah(goal.targetAmount),
+            style: context.moneyStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: AppColors.incomeOnDark,
+            ),
+          ),
         ],
       ),
     );

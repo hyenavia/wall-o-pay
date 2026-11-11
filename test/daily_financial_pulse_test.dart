@@ -142,48 +142,10 @@ void main() {
       expect(find.text('40% of quota'), findsOneWidget);
     });
 
-    testWidgets('Renders DailyFinancialPulseCard with Cyberpunk telemetry', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: buildTheme('cyberpunk'),
-          localizationsDelegates: const [AppStrings.delegate],
-          home: const Scaffold(
-            body: DailyFinancialPulseCard(
-              dailyAllowance: 100000,
-              todayExpense: 40000,
-              daysLeft: 10,
-              balance: 1000000,
-              totalBudget: 2000000,
-              budgetSpent: 500000,
-              txCount: 5,
-            ),
-          ),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      expect(find.text('GRID STABLE'), findsOneWidget);
-      expect(find.text('Cyber Telemetry Nominal'), findsOneWidget);
-      expect(find.text('Daily Bandwidth'), findsOneWidget);
-      expect(find.text('Burned today'), findsOneWidget);
-      expect(find.text('40% bandwidth consumed'), findsOneWidget);
-
-      // Tap on the status badge to verify phase info sheet opens
-      await tester.tap(find.text('GRID STABLE'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('GRID TELEMETRY PROTOCOL'), findsOneWidget);
-      expect(find.text('Phase 01 // Subroutines Nominal'), findsOneWidget);
-      expect(find.text('Phase 02 // Velocity Warning'), findsOneWidget);
-      expect(find.text('Phase 03 // Critical Capacity'), findsOneWidget);
-      expect(find.text('ACKNOWLEDGE // DISMISS'), findsOneWidget);
-    });
-
     testWidgets('Tapping status badge in Botanical opens Daily Financial Pulse Guide', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: buildTheme('botanical'),
+          theme: buildTheme(),
           localizationsDelegates: const [AppStrings.delegate],
           home: const Scaffold(
             body: DailyFinancialPulseCard(
@@ -217,7 +179,7 @@ void main() {
         MaterialApp(
           locale: const Locale('id'),
           supportedLocales: const [Locale('en'), Locale('id')],
-          theme: buildTheme('botanical'),
+          theme: buildTheme(),
           localizationsDelegates: const [
             AppStrings.delegate,
             ...GlobalMaterialLocalizations.delegates,
@@ -247,66 +209,6 @@ void main() {
       expect(find.text('Fase 3: Batas Anggaran Tercapai'), findsOneWidget);
       expect(find.text('Kondisi: Belanja harian < kuota aman & anggaran terjaga.'), findsOneWidget);
       expect(find.text('Mengerti'), findsOneWidget);
-    });
-
-    testWidgets('Cyberpunk theme with ID locale uses Indonesian terms without English leaks', (tester) async {
-      late BuildContext ctx;
-      await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('id'),
-          supportedLocales: const [Locale('en'), Locale('id')],
-          theme: buildTheme('cyberpunk'),
-          localizationsDelegates: const [
-            AppStrings.delegate,
-            ...GlobalMaterialLocalizations.delegates,
-          ],
-          home: Builder(
-            builder: (context) {
-              ctx = context;
-              return const Scaffold();
-            },
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(ctx.tr('Needs'), 'KEBUTUHAN');
-      expect(ctx.tr('Wants'), 'KEINGINAN');
-      expect(ctx.tr('Savings & Goals'), 'TABUNGAN & TARGET');
-      expect(ctx.tr('Language'), 'BAHASA SISTEM');
-      expect(ctx.tr('Accounts'), 'AKUN & REKENING');
-      expect(ctx.tr('E-Wallet'), 'DOMPET DIGITAL');
-      expect(ctx.tr('Cash'), 'UANG TUNAI');
-      expect(ctx.tr('Add account'), '+ TAMBAH AKUN');
-      expect(ctx.tr('Exit Application'), 'TERMINASI LINK // GRID');
-      expect(ctx.tr('Exit'), 'JACK OUT');
-      expect(ctx.tr('Stay in App'), 'TETAP DI GRID');
-    });
-
-    testWidgets('Cyberpunk theme with EN locale uses cyberpunk exit vocabulary', (tester) async {
-      late BuildContext ctx;
-      await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('en'),
-          supportedLocales: const [Locale('en'), Locale('id')],
-          theme: buildTheme('cyberpunk'),
-          localizationsDelegates: const [
-            AppStrings.delegate,
-            ...GlobalMaterialLocalizations.delegates,
-          ],
-          home: Builder(
-            builder: (context) {
-              ctx = context;
-              return const Scaffold();
-            },
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(ctx.tr('Exit Application'), 'TERMINATE GRID UPLINK');
-      expect(ctx.tr('Exit'), 'JACK OUT');
-      expect(ctx.tr('Stay in App'), 'STAY IN GRID');
     });
   });
 }

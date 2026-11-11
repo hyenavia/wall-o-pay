@@ -22,8 +22,6 @@ Future<void> showCategoryBudgetSheet(
   int? currentBudget,
   BudgetBucket currentBucket,
 ) async {
-  final theme = Theme.of(context);
-  final scheme = theme.colorScheme;
   var selectedBucket = currentBucket;
   final budgetController = TextEditingController(
     text: (currentBudget != null && currentBudget > 0) ? currentBudget.toString() : '',
@@ -33,8 +31,13 @@ Future<void> showCategoryBudgetSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    backgroundColor: AppColors.mossShadow,
+    shape: RoundedRectangleBorder(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      side: BorderSide(
+        color: AppColors.dewMint.withValues(alpha: 0.25),
+        width: 1,
+      ),
     ),
     builder: (ctx) {
       return StatefulBuilder(
@@ -55,7 +58,7 @@ Future<void> showCategoryBudgetSheet(
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey.withValues(alpha: 0.3),
+                      color: AppColors.dewMint.withValues(alpha: 0.35),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -66,6 +69,7 @@ Future<void> showCategoryBudgetSheet(
                     CategoryBadge(
                       icon: iconFor(category.icon),
                       color: Color(category.colorValue),
+                      categoryKey: category.icon,
                       size: 44,
                     ),
                     const SizedBox(width: 14),
@@ -75,11 +79,18 @@ Future<void> showCategoryBudgetSheet(
                         children: [
                           Text(
                             categoryName(context, category),
-                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 17,
+                              color: AppColors.softIvory,
+                            ),
                           ),
                           Text(
                             context.tr('Manage Category & Budget'),
-                            style: TextStyle(fontSize: 12, color: scheme.onSurface.withValues(alpha: 0.6)),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.freshSage,
+                            ),
                           ),
                         ],
                       ),
@@ -89,7 +100,11 @@ Future<void> showCategoryBudgetSheet(
                 const SizedBox(height: 20),
                 Text(
                   context.tr('Select Budget Group'),
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: AppColors.softIvory,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -99,13 +114,20 @@ Future<void> showCategoryBudgetSheet(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 3),
                           child: ChoiceChip(
+                            side: BorderSide(
+                              color: selectedBucket == b
+                                  ? b.color
+                                  : AppColors.dewMint.withValues(alpha: 0.2),
+                              width: 1,
+                            ),
+                            backgroundColor: AppColors.emeraldLeaf.withValues(alpha: 0.25),
                             label: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
                                   b.icon,
                                   size: 18,
-                                  color: selectedBucket == b ? Colors.white : b.color,
+                                  color: selectedBucket == b ? AppColors.deepForest : b.color,
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
@@ -113,8 +135,9 @@ Future<void> showCategoryBudgetSheet(
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: selectedBucket == b
-                                        ? FontWeight.w700
+                                        ? FontWeight.w800
                                         : FontWeight.normal,
+                                    color: selectedBucket == b ? AppColors.deepForest : AppColors.softIvory,
                                   ),
                                 ),
                                 Text(
@@ -122,8 +145,8 @@ Future<void> showCategoryBudgetSheet(
                                   style: TextStyle(
                                     fontSize: 9,
                                     color: selectedBucket == b
-                                        ? Colors.white70
-                                        : scheme.onSurface.withValues(alpha: 0.5),
+                                        ? AppColors.deepForest.withValues(alpha: 0.8)
+                                        : AppColors.freshSage,
                                   ),
                                 ),
                               ],
@@ -141,23 +164,60 @@ Future<void> showCategoryBudgetSheet(
                 const SizedBox(height: 20),
                 Text(
                   context.tr('Specific category limit (optional)'),
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: AppColors.softIvory,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   context.tr('Enter 0 to remove specific limit'),
-                  style: TextStyle(fontSize: 11, color: scheme.onSurface.withValues(alpha: 0.55)),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.freshSage,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: budgetController,
                   keyboardType: TextInputType.number,
+                  style: const TextStyle(
+                    color: AppColors.softIvory,
+                    fontWeight: FontWeight.w600,
+                    fontFeatures: [FontFeature.tabularFigures()],
+                  ),
                   decoration: InputDecoration(
                     prefixText: 'Rp ',
+                    prefixStyle: const TextStyle(
+                      color: AppColors.dewMint,
+                      fontWeight: FontWeight.w700,
+                    ),
                     hintText: '0',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                    hintStyle: TextStyle(
+                      color: AppColors.freshSage.withValues(alpha: 0.5),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: AppColors.dewMint.withValues(alpha: 0.25),
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(
+                        color: AppColors.dewMint.withValues(alpha: 0.25),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(
+                        color: AppColors.dewMint,
+                        width: 1.5,
+                      ),
+                    ),
                     filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    fillColor: AppColors.deepForest.withValues(alpha: 0.6),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -165,10 +225,12 @@ Future<void> showCategoryBudgetSheet(
                   width: double.infinity,
                   child: FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest,
-                      foregroundColor: ctx.isCyberpunk ? ctx.themeColors.onPrimary : Colors.white,
+                      backgroundColor: AppColors.dewMint,
+                      foregroundColor: AppColors.deepForest,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                     onPressed: () async {
                       Navigator.pop(ctx);
@@ -198,7 +260,10 @@ Future<void> showCategoryBudgetSheet(
                         );
                       }
                     },
-                    child: Text(context.tr('Save')),
+                    child: Text(
+                      context.tr('Save'),
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
                   ),
                 ),
               ],

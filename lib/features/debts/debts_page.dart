@@ -29,12 +29,10 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.6);
     final debtsAsync = ref.watch(debtsProvider);
 
     return Scaffold(
-      appBar: pageAppBar(
+      appBar: secondaryAppBar(
         context,
         title: Text(context.tr('Debts & splits')),
         actions: [
@@ -50,13 +48,12 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
         icon: const Icon(Icons.add),
         label: Text(context.tr('Add debt')),
       ),
-      body: BotanicalBackgroundSheet(
-        child: debtsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(
-            child: Text(context.tr('Could not load data: {error}', {'error': e})),
-          ),
-          data: (all) {
+      body: debtsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(
+          child: Text(context.tr('Could not load data: {error}', {'error': e})),
+        ),
+        data: (all) {
           int remaining(DebtDirection d) => all
               .where((x) => x.direction == d)
               .fold<int>(0, (s, x) => s + (x.amount - x.paidAmount));
@@ -68,7 +65,7 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
             });
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
             children: [
               HeroCard(
                 child: Row(
@@ -93,11 +90,29 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
               const SizedBox(height: 14),
               SegmentedButton<DebtDirection>(
                 showSelectedIcon: false,
+                style: SegmentedButton.styleFrom(
+                  selectedBackgroundColor: AppColors.dewMint.withValues(alpha: 0.22),
+                  selectedForegroundColor: AppColors.dewMint,
+                  foregroundColor: AppColors.freshSage,
+                  side: BorderSide(
+                    color: AppColors.dewMint.withValues(alpha: 0.25),
+                  ),
+                ),
                 segments: [
                   ButtonSegment(
-                      value: DebtDirection.lent, label: Text(context.tr('Owed to me'))),
+                    value: DebtDirection.lent,
+                    label: Text(
+                      context.tr('Owed to me'),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
                   ButtonSegment(
-                      value: DebtDirection.borrowed, label: Text(context.tr('I owe'))),
+                    value: DebtDirection.borrowed,
+                    label: Text(
+                      context.tr('I owe'),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
                 ],
                 selected: {_tab},
                 onSelectionChanged: (s) => setState(() => _tab = s.first),
@@ -105,7 +120,7 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
               const SizedBox(height: 8),
               Text(
                 context.tr('Debts are a separate ledger and do not change your account balances.'),
-                style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                style: const TextStyle(fontSize: 12, color: AppColors.freshSage),
               ),
               const SizedBox(height: 12),
               if (list.isEmpty)
@@ -125,7 +140,6 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
             ],
           );
         },
-      ),
       ),
     );
   }
@@ -167,9 +181,6 @@ class _DebtCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final muted = scheme.onSurface.withValues(alpha: 0.6);
     final left = debt.amount - debt.paidAmount;
     final done = left <= 0;
     final ratio = debt.amount == 0 ? 0.0 : debt.paidAmount / debt.amount;
@@ -180,7 +191,7 @@ class _DebtCard extends StatelessWidget {
     return AppCard(
       onTap: () => showDebtDetail(context, debt),
       child: Opacity(
-        opacity: done ? 0.55 : 1,
+        opacity: done ? 0.6 : 1,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -188,7 +199,7 @@ class _DebtCard extends StatelessWidget {
               children: [
                 CategoryBadge(
                   icon: done ? Icons.check : Icons.person_outline,
-                  color: done ? context.themeColors.income : scheme.primary,
+                  color: done ? AppColors.incomeOnDark : AppColors.dewMint,
                   size: 40,
                 ),
                 const SizedBox(width: 12),
@@ -196,30 +207,49 @@ class _DebtCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(debt.person,
-                          style: theme.textTheme.bodyLarge
-                              ?.copyWith(fontWeight: FontWeight.w700)),
+                      Text(
+                        debt.person,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          color: AppColors.softIvory,
+                        ),
+                      ),
                       if (debt.note.isNotEmpty)
-                        Text(debt.note,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+                        Text(
+                          debt.note,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.freshSage,
+                          ),
+                        ),
                     ],
                   ),
                 ),
                 Text(
                   done ? context.tr('Settled') : rupiah(left),
                   style: done
-                      ? theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w800)
-                      : context.moneyStyle(
-                          fontSize: 14,
+                      ? const TextStyle(
+                          fontSize: 13,
                           fontWeight: FontWeight.w800,
+                          color: AppColors.incomeOnDark,
+                        )
+                      : context.moneyStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.softIvory,
                         ),
                 ),
               ],
             ),
             const SizedBox(height: 10),
-            AppProgressBar(value: ratio),
+            AppProgressBar(
+              value: ratio,
+              color: done ? AppColors.incomeOnDark : AppColors.dewMint,
+              backgroundColor: AppColors.mossShadow.withValues(alpha: 0.6),
+            ),
             const SizedBox(height: 6),
             Row(
               children: [
@@ -229,15 +259,20 @@ class _DebtCard extends StatelessWidget {
                       'paid': rupiah(debt.paidAmount),
                       'total': rupiah(debt.amount),
                     }),
-                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.freshSage,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
                   ),
                 ),
                 if (debt.dueDate != null)
                   Text(
                     context.tr('Due {date}', {'date': shortDate(debt.dueDate!)}),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: overdue ? context.themeColors.expense : muted,
-                      fontWeight: overdue ? FontWeight.w700 : null,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: overdue ? AppColors.expenseOnDark : AppColors.freshSage,
+                      fontWeight: overdue ? FontWeight.w700 : FontWeight.w500,
                     ),
                   ),
               ],

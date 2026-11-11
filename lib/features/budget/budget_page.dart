@@ -25,7 +25,6 @@ class BudgetPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final period = ref.watch(selectedPeriodProvider);
     final catsAsync = ref.watch(categoriesProvider);
     final budgets = ref.watch(effectiveBudgetProvider);
@@ -36,7 +35,6 @@ class BudgetPage extends ConsumerWidget {
     );
     final spent = ref.watch(spentByCategoryProvider);
     final breakdown = ref.watch(budget503020BreakdownProvider);
-    final colors = context.themeColors;
 
     return Scaffold(
       appBar: pageAppBar(
@@ -76,23 +74,23 @@ class BudgetPage extends ConsumerWidget {
                                   context.tr('Total Budget'),
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     color: Colors.white70,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   rupiah(breakdown.totalBudget),
-                                  style: theme.textTheme.headlineMedium
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.white,
-                                      ),
+                                  style: context.moneyStyle(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
                           FilledButton.tonalIcon(
-                            icon: const Icon(Icons.edit_outlined, size: 16),
+                            icon: const Icon(Icons.edit_outlined, size: 15),
                             label: Text(
                               breakdown.totalBudget > 0
                                   ? context.tr('Edit')
@@ -104,9 +102,13 @@ class BudgetPage extends ConsumerWidget {
                             ),
                             style: FilledButton.styleFrom(
                               backgroundColor: Colors.white.withValues(
-                                alpha: 0.18,
+                                alpha: 0.16,
                               ),
-                              foregroundColor: Colors.white,
+                              foregroundColor: AppColors.dewMint,
+                              side: BorderSide(
+                                color: AppColors.dewMint.withValues(alpha: 0.35),
+                                width: 1,
+                              ),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
                                 vertical: 8,
@@ -131,9 +133,9 @@ class BudgetPage extends ConsumerWidget {
                         AppProgressBar(
                           value: breakdown.overallRatio,
                           color: breakdown.overallRatio > 1
-                              ? colors.expense
-                              : colors.primary,
-                          backgroundColor: Colors.white24,
+                              ? AppColors.expenseOnDark
+                              : AppColors.dewMint,
+                          backgroundColor: Colors.white.withValues(alpha: 0.18),
                         ),
                         const SizedBox(height: 8),
                         Row(
@@ -145,6 +147,7 @@ class BudgetPage extends ConsumerWidget {
                                 }),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: Colors.white70,
+                                  fontFeatures: const [FontFeature.tabularFigures()],
                                 ),
                               ),
                             ),
@@ -153,8 +156,11 @@ class BudgetPage extends ConsumerWidget {
                                 'pct': (breakdown.overallRatio * 100).round(),
                               }),
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
+                                color: breakdown.overallRatio > 1
+                                    ? AppColors.expenseOnDark
+                                    : AppColors.dewMint,
+                                fontWeight: FontWeight.w800,
+                                fontFeatures: const [FontFeature.tabularFigures()],
                               ),
                             ),
                           ],
@@ -165,25 +171,32 @@ class BudgetPage extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.16),
-                            borderRadius: BorderRadius.circular(14),
+                            color: const Color(0xFF0F221B).withValues(alpha: 0.70),
+                            borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.1),
+                              color: AppColors.dewMint.withValues(alpha: 0.18),
+                              width: 1,
                             ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                context.tr('50/30/20 Budgeting Rule'),
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.white70,
-                                  letterSpacing: 0.5,
-                                ),
+                              Row(
+                                children: [
+                                  const Icon(Icons.pie_chart_outline_rounded, size: 14, color: AppColors.dewMint),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    context.tr('50/30/20 Budgeting Rule'),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.dewMint,
+                                      letterSpacing: 0.4,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 10),
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(6),
                                 child: Row(
@@ -193,8 +206,8 @@ class BudgetPage extends ConsumerWidget {
                                           ? breakdown.needsPercentage
                                           : 50,
                                       child: Container(
-                                        height: 6,
-                                        color: BudgetBucket.needs.colorIn(context),
+                                        height: 7,
+                                        color: const Color(0xFF38B271),
                                       ),
                                     ),
                                     const SizedBox(width: 2),
@@ -203,8 +216,8 @@ class BudgetPage extends ConsumerWidget {
                                           ? breakdown.wantsPercentage
                                           : 30,
                                       child: Container(
-                                        height: 6,
-                                        color: BudgetBucket.wants.colorIn(context),
+                                        height: 7,
+                                        color: const Color(0xFFE8A33D),
                                       ),
                                     ),
                                     const SizedBox(width: 2),
@@ -213,19 +226,19 @@ class BudgetPage extends ConsumerWidget {
                                           ? breakdown.savingsPercentage
                                           : 20,
                                       child: Container(
-                                        height: 6,
-                                        color: BudgetBucket.savings.colorIn(context),
+                                        height: 7,
+                                        color: const Color(0xFF5EEAD4),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 10),
                               Row(
                                 children: [
                                   Expanded(
                                     child: _ratioLegend(
-                                      BudgetBucket.needs.colorIn(context),
+                                      const Color(0xFF38B271),
                                       '${breakdown.needsPercentage}% ${context.tr('Needs')}',
                                       rupiah(breakdown.needsBudget),
                                     ),
@@ -233,7 +246,7 @@ class BudgetPage extends ConsumerWidget {
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: _ratioLegend(
-                                      BudgetBucket.wants.colorIn(context),
+                                      const Color(0xFFE8A33D),
                                       '${breakdown.wantsPercentage}% ${context.tr('Wants')}',
                                       rupiah(breakdown.wantsBudget),
                                     ),
@@ -241,7 +254,7 @@ class BudgetPage extends ConsumerWidget {
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: _ratioLegend(
-                                      BudgetBucket.savings.colorIn(context),
+                                      const Color(0xFF5EEAD4),
                                       '${breakdown.savingsPercentage}% ${context.tr('Savings')}',
                                       rupiah(breakdown.savingsBudget),
                                     ),
@@ -265,8 +278,8 @@ class BudgetPage extends ConsumerWidget {
                           icon: const Icon(Icons.add, size: 18),
                           label: Text(context.tr('Set Total Budget')),
                           style: FilledButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: colors.heroBackground,
+                            backgroundColor: AppColors.dewMint,
+                            foregroundColor: AppColors.deepForest,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -292,18 +305,26 @@ class BudgetPage extends ConsumerWidget {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: colors.primary.withValues(alpha: 0.15),
+                      color: AppColors.mossShadow.withValues(alpha: 0.85),
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: colors.primary.withValues(alpha: 0.3),
+                        color: AppColors.dewMint.withValues(alpha: 0.25),
+                        width: 1,
                       ),
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.redo_rounded,
-                          color: colors.primary,
-                          size: 20,
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: AppColors.dewMint.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.redo_rounded,
+                            color: AppColors.dewMint,
+                            size: 16,
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -312,10 +333,11 @@ class BudgetPage extends ConsumerWidget {
                               'Rollover active: +{amount} from last period',
                               {'amount': rupiah(totalCarry)},
                             ),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
-                              color: colors.primary,
+                              color: AppColors.softIvory,
+                              fontFeatures: [FontFeature.tabularFigures()],
                             ),
                           ),
                         ),
@@ -394,50 +416,66 @@ class BudgetPage extends ConsumerWidget {
                     budgets[c.id],
                     BudgetBucket.savings,
                   ),
-                  footerWidget: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 4,
-                    ),
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: BudgetBucket.savings.colorIn(context).withValues(
-                          alpha: 0.12,
+                  footerWidget: Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(
+                          color: AppColors.dewMint.withValues(alpha: 0.12),
+                          width: 1,
                         ),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.track_changes_rounded,
-                        color: BudgetBucket.savings.colorIn(context),
-                        size: 20,
                       ),
                     ),
-                    title: Text(
-                      context.tr('Manage Savings Goals'),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 4,
                       ),
-                    ),
-                    subtitle: Text(
-                      context.tr(
-                        'View your active savings targets in Goals tab.',
-                      ),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: scheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(
-                          builder: (_) => const GoalsPage(),
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF5EEAD4).withValues(alpha: 0.16),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFF5EEAD4).withValues(alpha: 0.35),
+                            width: 1,
+                          ),
                         ),
-                      );
-                    },
+                        child: const Icon(
+                          Icons.track_changes_rounded,
+                          color: Color(0xFF5EEAD4),
+                          size: 20,
+                        ),
+                      ),
+                      title: Text(
+                        context.tr('Manage Savings Goals'),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: AppColors.softIvory,
+                        ),
+                      ),
+                      subtitle: Text(
+                        context.tr(
+                          'View your active savings targets in Goals tab.',
+                        ),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.freshSage,
+                        ),
+                      ),
+                      trailing: const Icon(
+                        Icons.chevron_right,
+                        color: AppColors.freshSage,
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (_) => const GoalsPage(),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -455,9 +493,19 @@ class BudgetPage extends ConsumerWidget {
         Container(
           width: 8,
           height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: 0.6),
+                blurRadius: 4,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: 6),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -466,7 +514,11 @@ class BudgetPage extends ConsumerWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 10, color: Colors.white70),
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               Text(
                 amount,
@@ -474,8 +526,9 @@ class BudgetPage extends ConsumerWidget {
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   fontSize: 10,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                   color: Colors.white,
+                  fontFeatures: [FontFeature.tabularFigures()],
                 ),
               ),
             ],

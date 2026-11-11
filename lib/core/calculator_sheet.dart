@@ -18,9 +18,13 @@ Future<int?> showCalculatorSheet(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    backgroundColor: Theme.of(context).colorScheme.surface,
+    backgroundColor: AppColors.cardSurface,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      side: BorderSide(
+        color: Color(0xFF2A4D3E),
+        width: 1.0,
+      ),
     ),
     builder: (_) => CalculatorSheet(initialValue: initialValue),
   );
@@ -179,9 +183,6 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final colors = context.themeColors;
-    final muted = scheme.onSurface.withValues(alpha: 0.6);
 
     return SafeArea(
       child: Padding(
@@ -193,30 +194,50 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
             // Header
             Row(
               children: [
-                Icon(Icons.calculate_outlined, color: colors.primary, size: 22),
-                const SizedBox(width: 8),
+                Image.asset(
+                  'assets/icons/glasshouse/calculator.png',
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(width: 10),
                 Text(
                   context.tr('Calculator'),
                   style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.softIvory,
                   ),
                 ),
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close, size: 20),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.surfaceContainer.withValues(alpha: 0.6),
+                    foregroundColor: AppColors.freshSage,
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
 
             // Display Screen
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               decoration: BoxDecoration(
-                color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.4)),
+                color: AppColors.surfaceContainer.withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: AppColors.dewMint.withValues(alpha: 0.22),
+                  width: 1.0,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.25),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -225,7 +246,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _formulaText.isEmpty ? '0' : _formulaText,
                     style: context.moneyStyle(
                       fontSize: 14,
-                      color: muted,
+                      color: AppColors.freshSage.withValues(alpha: 0.85),
                       letterSpacing: 0.5,
                     ),
                     maxLines: 1,
@@ -238,9 +259,9 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     child: Text(
                       rupiah(_displayResult),
                       style: context.moneyStyle(
-                        fontSize: 28,
+                        fontSize: 30,
                         fontWeight: FontWeight.w800,
-                        color: context.themeColors.income,
+                        color: AppColors.incomeOnDark,
                       ),
                     ),
                   ),
@@ -258,29 +279,33 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: 'C',
                       onPressed: _onClear,
-                      color: context.themeColors.expense.withValues(alpha: 0.15),
-                      textColor: context.themeColors.expense,
+                      color: AppColors.expense.withValues(alpha: 0.18),
+                      textColor: AppColors.expenseOnDark,
+                      borderColor: AppColors.expense.withValues(alpha: 0.35),
                     ),
                     const SizedBox(width: 8),
                     _calcBtn(
                       icon: Icons.backspace_outlined,
                       onPressed: _onBackspace,
-                      color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      color: AppColors.surfaceContainer.withValues(alpha: 0.65),
+                      textColor: AppColors.freshSage,
                     ),
                     const SizedBox(width: 8),
                     _calcBtn(
                       label: '÷',
                       onPressed: () => _onOperator('÷'),
-                      color: colors.heroBackground.withValues(alpha: 0.25),
-                      textColor: colors.primary,
+                      color: const Color(0xFF1B4434).withValues(alpha: 0.85),
+                      textColor: AppColors.dewMint,
+                      borderColor: AppColors.dewMint.withValues(alpha: 0.30),
                       isOperator: true,
                     ),
                     const SizedBox(width: 8),
                     _calcBtn(
                       label: '×',
                       onPressed: () => _onOperator('×'),
-                      color: colors.heroBackground.withValues(alpha: 0.25),
-                      textColor: colors.primary,
+                      color: const Color(0xFF1B4434).withValues(alpha: 0.85),
+                      textColor: AppColors.dewMint,
+                      borderColor: AppColors.dewMint.withValues(alpha: 0.30),
                       isOperator: true,
                     ),
                   ],
@@ -299,8 +324,9 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: '-',
                       onPressed: () => _onOperator('-'),
-                      color: colors.heroBackground.withValues(alpha: 0.25),
-                      textColor: colors.primary,
+                      color: const Color(0xFF1B4434).withValues(alpha: 0.85),
+                      textColor: AppColors.dewMint,
+                      borderColor: AppColors.dewMint.withValues(alpha: 0.30),
                       isOperator: true,
                     ),
                   ],
@@ -319,8 +345,9 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: '+',
                       onPressed: () => _onOperator('+'),
-                      color: colors.heroBackground.withValues(alpha: 0.25),
-                      textColor: colors.primary,
+                      color: const Color(0xFF1B4434).withValues(alpha: 0.85),
+                      textColor: AppColors.dewMint,
+                      borderColor: AppColors.dewMint.withValues(alpha: 0.30),
                       isOperator: true,
                     ),
                   ],
@@ -339,8 +366,9 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: '=',
                       onPressed: _onEquals,
-                      color: colors.heroBackground,
+                      color: AppColors.emeraldLeaf,
                       textColor: Colors.white,
+                      borderColor: AppColors.dewMint.withValues(alpha: 0.45),
                       isOperator: true,
                     ),
                   ],
@@ -355,29 +383,59 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: '000',
                       onPressed: _onTripleZero,
-                      textColor: colors.primary,
+                      textColor: AppColors.dewMint,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       flex: 2,
                       child: SizedBox(
                         height: 52,
-                        child: FilledButton.icon(
-                          onPressed: _onApply,
-                          style: FilledButton.styleFrom(
-                            backgroundColor: colors.primary,
-                            foregroundColor: colors.onPrimary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: AppColors.dewMint.withValues(alpha: 0.45),
+                              width: 1.2,
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xFF2E634D),
+                                Color(0xFF1B4434),
+                              ],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.emeraldLeaf.withValues(alpha: 0.25),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
                           ),
-                          icon: const Icon(Icons.check, size: 20),
-                          label: Text(
-                            context.tr('Use Amount'),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 14,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: _onApply,
+                              borderRadius: BorderRadius.circular(16),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.check, size: 20, color: AppColors.dewMint),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      context.tr('Use Amount'),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 14,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -399,32 +457,42 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
     required VoidCallback onPressed,
     Color? color,
     Color? textColor,
+    Color? borderColor,
     bool isOperator = false,
   }) {
-    final scheme = Theme.of(context).colorScheme;
-    final bg = color ?? scheme.surfaceContainerHighest.withValues(alpha: 0.28);
-    final fg = textColor ?? scheme.onSurface;
+    final bg = color ?? AppColors.surfaceContainer.withValues(alpha: 0.65);
+    final border = borderColor ?? AppColors.dewMint.withValues(alpha: 0.14);
+    final fg = textColor ?? AppColors.softIvory;
 
     return Expanded(
       child: SizedBox(
         height: 52,
-        child: Material(
-          color: bg,
-          borderRadius: BorderRadius.circular(14),
-          child: InkWell(
-            onTap: onPressed,
-            borderRadius: BorderRadius.circular(14),
-            child: Center(
-              child: icon != null
-                  ? Icon(icon, color: fg, size: 20)
-                  : Text(
-                      label ?? '',
-                      style: TextStyle(
-                        fontSize: isOperator ? 22 : 18,
-                        fontWeight: isOperator ? FontWeight.w700 : FontWeight.w600,
-                        color: fg,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: border, width: 1.0),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
+              onTap: onPressed,
+              borderRadius: BorderRadius.circular(16),
+              splashColor: AppColors.dewMint.withValues(alpha: 0.15),
+              highlightColor: AppColors.dewMint.withValues(alpha: 0.08),
+              child: Center(
+                child: icon != null
+                    ? Icon(icon, color: fg, size: 20)
+                    : Text(
+                        label ?? '',
+                        style: TextStyle(
+                          fontSize: isOperator ? 22 : 18,
+                          fontWeight: isOperator ? FontWeight.w800 : FontWeight.w600,
+                          color: fg,
+                        ),
                       ),
-                    ),
+              ),
             ),
           ),
         ),

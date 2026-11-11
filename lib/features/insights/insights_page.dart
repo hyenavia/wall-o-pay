@@ -32,7 +32,6 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final period = ref.watch(selectedPeriodProvider);
     final isWeekly = period.type == PeriodType.weekly;
     final cats = ref.watch(categoryMapProvider);
@@ -57,7 +56,6 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
             ),
           ),
           data: (currentTxs) {
-            final colors = context.themeColors;
             final prevTxs = prevTxsAsync.value ?? const <TransactionEntry>[];
             final trendTxs = trendTxsAsync.value ?? const <TransactionEntry>[];
 
@@ -160,8 +158,9 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                       children: [
                         Text(
                           context.tr('Income vs Expense Comparison'),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurface.withValues(alpha: 0.65),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.freshSage,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -198,25 +197,13 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                               ),
                               decoration: BoxDecoration(
                                 color: summary.isDeficit
-                                    ? (colors.isCyberpunk
-                                              ? colors.expense
-                                              : AppColors.expense)
-                                          .withValues(alpha: 0.3)
-                                    : (colors.isCyberpunk
-                                              ? colors.income
-                                              : AppColors.sage)
-                                          .withValues(alpha: 0.25),
+                                    ? AppColors.expenseOnDark.withValues(alpha: 0.18)
+                                    : AppColors.incomeOnDark.withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
                                   color: summary.isDeficit
-                                      ? (colors.isCyberpunk
-                                                ? colors.expense
-                                                : AppColors.expense)
-                                            .withValues(alpha: 0.6)
-                                      : (colors.isCyberpunk
-                                                ? colors.income
-                                                : AppColors.sage)
-                                            .withValues(alpha: 0.5),
+                                      ? AppColors.expenseOnDark.withValues(alpha: 0.4)
+                                      : AppColors.incomeOnDark.withValues(alpha: 0.4),
                                   width: 1,
                                 ),
                               ),
@@ -229,10 +216,8 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                         : Icons.trending_up_rounded,
                                     size: 14,
                                     color: summary.isDeficit
-                                        ? Colors.white
-                                        : (colors.isCyberpunk
-                                              ? colors.income
-                                              : AppColors.sage),
+                                        ? AppColors.expenseOnDark
+                                        : AppColors.incomeOnDark,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
@@ -243,10 +228,8 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                       color: summary.isDeficit
-                                          ? Colors.white
-                                          : (colors.isCyberpunk
-                                                ? colors.income
-                                                : AppColors.sage),
+                                          ? AppColors.expenseOnDark
+                                          : AppColors.incomeOnDark,
                                     ),
                                   ),
                                 ],
@@ -262,10 +245,9 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                             Text(
                               '${summary.netBalance >= 0 ? '+' : ''}${rupiah(summary.netBalance)}',
                               style: context.moneyStyle(
-                                fontSize: 28,
+                                fontSize: 30,
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white,
-                                letterSpacing: colors.isCyberpunk ? 0.8 : null,
                               ),
                             ),
                           ],
@@ -305,8 +287,8 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                 label: context.tr('Income'),
                                 amount: rupiah(summary.totalIncome),
                                 icon: Icons.arrow_downward_rounded,
-                                iconColor: colors.income,
-                                bgColor: Colors.black.withValues(alpha: 0.18),
+                                iconColor: AppColors.incomeOnDark,
+                                bgColor: const Color(0xFF0F221B).withValues(alpha: 0.65),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -315,8 +297,8 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                 label: context.tr('Expense'),
                                 amount: rupiah(summary.totalExpense),
                                 icon: Icons.arrow_upward_rounded,
-                                iconColor: colors.expense,
-                                bgColor: Colors.black.withValues(alpha: 0.18),
+                                iconColor: AppColors.expenseOnDark,
+                                bgColor: const Color(0xFF0F221B).withValues(alpha: 0.65),
                               ),
                             ),
                           ],
@@ -354,18 +336,18 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                     : context.tr(
                                         'Weekly spending distribution',
                                       ),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: scheme.onSurface.withValues(
-                                    alpha: 0.65,
-                                  ),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.freshSage,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                               Text(
                                 rupiah(summary.totalExpense),
-                                style: theme.textTheme.titleSmall?.copyWith(
+                                style: context.moneyStyle(
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w800,
-                                  color: colors.primary,
+                                  color: AppColors.expenseOnDark,
                                 ),
                               ),
                             ],
@@ -377,7 +359,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                           ),
                           const SizedBox(height: 10),
                           Divider(
-                            color: scheme.outlineVariant.withValues(alpha: 0.4),
+                            color: AppColors.borderOutline.withValues(alpha: 0.3),
                           ),
                           const SizedBox(height: 6),
                           Row(
@@ -387,10 +369,9 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                 isWeekly
                                     ? context.tr('Daily average:')
                                     : context.tr('Weekly average:'),
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: scheme.onSurface.withValues(
-                                    alpha: 0.6,
-                                  ),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.freshSage,
                                 ),
                               ),
                               Text(
@@ -402,8 +383,10 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                                 ? 1
                                                 : chartPoints.length),
                                       ),
-                                style: theme.textTheme.bodySmall?.copyWith(
+                                style: context.moneyStyle(
+                                  fontSize: 12,
                                   fontWeight: FontWeight.w700,
+                                  color: AppColors.softIvory,
                                 ),
                               ),
                             ],
@@ -446,16 +429,36 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                   width: double.infinity,
                   child: SegmentedButton<int>(
                     showSelectedIcon: false,
+                    style: SegmentedButton.styleFrom(
+                      selectedBackgroundColor: AppColors.dewMint.withValues(alpha: 0.22),
+                      selectedForegroundColor: AppColors.dewMint,
+                      foregroundColor: AppColors.freshSage,
+                      side: BorderSide(
+                        color: AppColors.dewMint.withValues(alpha: 0.25),
+                      ),
+                    ),
                     segments: [
                       ButtonSegment(
                         value: 0,
-                        label: Text(context.tr('Overview')),
+                        label: Text(
+                          context.tr('Overview'),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
                       ),
                       ButtonSegment(
                         value: 1,
-                        label: Text(context.tr('Categories')),
+                        label: Text(
+                          context.tr('Categories'),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
                       ),
-                      ButtonSegment(value: 2, label: Text(context.tr('Trend'))),
+                      ButtonSegment(
+                        value: 2,
+                        label: Text(
+                          context.tr('Trend'),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
                     ],
                     selected: {_tab},
                     onSelectionChanged: (s) => setState(() => _tab = s.first),
@@ -494,15 +497,22 @@ class _SummarySubBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        border: Border.all(
+          color: AppColors.dewMint.withValues(alpha: 0.18),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.2),
+              color: iconColor.withValues(alpha: 0.16),
               shape: BoxShape.circle,
+              border: Border.all(
+                color: iconColor.withValues(alpha: 0.35),
+                width: 1,
+              ),
             ),
             child: Icon(icon, color: iconColor, size: 16),
           ),
@@ -513,12 +523,11 @@ class _SummarySubBox extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  context.isCyberpunk ? label.toUpperCase() : label,
-                  style: TextStyle(
-                    fontSize: context.isCyberpunk ? 10 : 11,
+                  label,
+                  style: const TextStyle(
+                    fontSize: 11,
                     color: Colors.white70,
                     fontWeight: FontWeight.w600,
-                    letterSpacing: context.isCyberpunk ? 0.6 : 0.0,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -555,21 +564,22 @@ class _PeriodComparisonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
 
     if (summary.prevTotalExpense == 0) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: scheme.surface,
+          color: AppColors.cardSurface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: scheme.outlineVariant),
+          border: Border.all(
+            color: AppColors.borderOutline.withValues(alpha: 0.4),
+          ),
         ),
         child: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.info_outline_rounded,
-              color: scheme.onSurface.withValues(alpha: 0.5),
+              color: AppColors.freshSage,
               size: 20,
             ),
             const SizedBox(width: 12),
@@ -579,7 +589,7 @@ class _PeriodComparisonCard extends StatelessWidget {
                   'prev': prevPeriodName,
                 }),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.onSurface.withValues(alpha: 0.7),
+                  color: AppColors.freshSage,
                 ),
               ),
             ),
@@ -592,14 +602,9 @@ class _PeriodComparisonCard extends StatelessWidget {
     final isSame = summary.expenseDiff == 0;
     final pct = summary.expensePctChange?.abs().toStringAsFixed(1) ?? '0';
 
-    final colors = context.themeColors;
-    final isCyber = colors.isCyberpunk;
-
     final Color badgeColor = isSame
-        ? Colors.grey
-        : (isLower
-              ? (isCyber ? colors.income : AppColors.income)
-              : (isCyber ? colors.expense : AppColors.expense));
+        ? AppColors.freshSage
+        : (isLower ? AppColors.incomeOnDark : AppColors.expenseOnDark);
 
     final IconData badgeIcon = isSame
         ? Icons.horizontal_rule_rounded
@@ -642,21 +647,12 @@ class _PeriodComparisonCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: badgeColor.withValues(alpha: isCyber ? 0.14 : 0.10),
+        color: AppColors.cardSurface.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: badgeColor.withValues(alpha: isCyber ? 0.50 : 0.30),
-          width: isCyber ? 1.2 : 1.0,
+          color: badgeColor.withValues(alpha: 0.35),
+          width: 1,
         ),
-        boxShadow: isCyber
-            ? [
-                BoxShadow(
-                  color: badgeColor.withValues(alpha: 0.16),
-                  blurRadius: 14,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -664,8 +660,12 @@ class _PeriodComparisonCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: badgeColor.withValues(alpha: 0.18),
+              color: badgeColor.withValues(alpha: 0.16),
               shape: BoxShape.circle,
+              border: Border.all(
+                color: badgeColor.withValues(alpha: 0.35),
+                width: 1,
+              ),
             ),
             child: Icon(badgeIcon, color: badgeColor, size: 20),
           ),
@@ -685,7 +685,7 @@ class _PeriodComparisonCard extends StatelessWidget {
                 Text(
                   subtitle,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurface.withValues(alpha: 0.7),
+                    color: AppColors.freshSage,
                   ),
                 ),
               ],
@@ -710,10 +710,6 @@ class _TopCategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final colors = context.themeColors;
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
@@ -727,11 +723,15 @@ class _TopCategoryRow extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: rank <= 3
-                      ? (colors.isCyberpunk
-                            ? colors.primary.withValues(alpha: 0.18)
-                            : AppColors.deepForest.withValues(alpha: 0.2))
-                      : scheme.outlineVariant.withValues(alpha: 0.4),
+                      ? AppColors.emeraldLeaf.withValues(alpha: 0.35)
+                      : AppColors.cardSurface,
                   borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: rank <= 3
+                        ? AppColors.dewMint.withValues(alpha: 0.3)
+                        : AppColors.borderOutline.withValues(alpha: 0.3),
+                    width: 0.8,
+                  ),
                 ),
                 child: Text(
                   '#$rank',
@@ -739,8 +739,8 @@ class _TopCategoryRow extends StatelessWidget {
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     color: rank <= 3
-                        ? colors.primary
-                        : scheme.onSurface.withValues(alpha: 0.6),
+                        ? AppColors.dewMint
+                        : AppColors.freshSage,
                   ),
                 ),
               ),
@@ -748,6 +748,7 @@ class _TopCategoryRow extends StatelessWidget {
               CategoryBadge(
                 icon: iconFor(category.icon),
                 color: category.color,
+                categoryKey: category.icon,
                 size: 34,
               ),
               const SizedBox(width: 10),
@@ -757,14 +758,16 @@ class _TopCategoryRow extends StatelessWidget {
                   children: [
                     Text(
                       context.tr(category.name),
-                      style: theme.textTheme.bodyMedium?.copyWith(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: AppColors.softIvory,
                       ),
                     ),
                     Text(
                       '${category.txCount} ${context.tr('transactions')}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurface.withValues(alpha: 0.5),
+                      style: const TextStyle(
+                        color: AppColors.freshSage,
                         fontSize: 11,
                       ),
                     ),
@@ -779,6 +782,7 @@ class _TopCategoryRow extends StatelessWidget {
                     style: context.moneyStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
+                      color: AppColors.softIvory,
                     ),
                   ),
                   Row(
@@ -789,7 +793,7 @@ class _TopCategoryRow extends StatelessWidget {
                         style: context.moneyStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: colors.primary,
+                          color: AppColors.dewMint,
                         ),
                       ),
                       if (category.pctChange != null) ...[
@@ -800,8 +804,8 @@ class _TopCategoryRow extends StatelessWidget {
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             color: category.pctChange! > 0
-                                ? colors.expense
-                                : colors.income,
+                                ? AppColors.expenseOnDark
+                                : AppColors.incomeOnDark,
                           ),
                         ),
                       ],
@@ -815,6 +819,7 @@ class _TopCategoryRow extends StatelessWidget {
           AppProgressBar(
             value: category.percentage / 100,
             color: category.color,
+            backgroundColor: AppColors.mossShadow.withValues(alpha: 0.6),
             height: 6,
           ),
         ],
@@ -830,49 +835,17 @@ class _SmartInsightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final colors = context.themeColors;
-    final isCyber = colors.isCyberpunk;
-    final Color accent;
-    if (isCyber) {
-      if (item.accentColor == AppColors.sage) {
-        accent = colors.primary;
-      } else if (item.accentColor == AppColors.income) {
-        accent = colors.income;
-      } else if (item.accentColor == AppColors.warning) {
-        accent = colors.warning;
-      } else if (item.accentColor == AppColors.expense ||
-          item.accentColor == const Color(0xFFEF9A9A)) {
-        accent = colors.expense;
-      } else {
-        accent = item.accentColor;
-      }
-    } else {
-      accent = item.accentColor;
-    }
+    final accent = item.accentColor;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: scheme.surface,
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isCyber
-              ? accent.withValues(alpha: 0.45)
-              : scheme.outlineVariant,
-          width: isCyber ? 1.2 : 1.0,
+          color: AppColors.borderOutline.withValues(alpha: 0.45),
         ),
-        boxShadow: isCyber
-            ? [
-                BoxShadow(
-                  color: accent.withValues(alpha: 0.18),
-                  blurRadius: 14,
-                  offset: const Offset(0, 3),
-                ),
-              ]
-            : null,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -880,8 +853,12 @@ class _SmartInsightCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.15),
+              color: accent.withValues(alpha: 0.16),
               borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: accent.withValues(alpha: 0.35),
+                width: 1,
+              ),
             ),
             child: Icon(item.icon, color: accent, size: 22),
           ),
@@ -896,8 +873,10 @@ class _SmartInsightCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         item.title,
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                          color: AppColors.softIvory,
                         ),
                       ),
                     ),
@@ -908,8 +887,12 @@ class _SmartInsightCard extends StatelessWidget {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: accent.withValues(alpha: 0.12),
+                          color: accent.withValues(alpha: 0.16),
                           borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: accent.withValues(alpha: 0.35),
+                            width: 1,
+                          ),
                         ),
                         child: Text(
                           item.badge!,
@@ -925,8 +908,9 @@ class _SmartInsightCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   item.description,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurface.withValues(alpha: 0.75),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.freshSage,
                     height: 1.4,
                   ),
                 ),
@@ -947,58 +931,31 @@ class _LowDataCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final colors = context.themeColors;
-    final isCyber = colors.isCyberpunk;
 
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: scheme.surface,
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isCyber
-              ? colors.primary.withValues(alpha: 0.40)
-              : scheme.outlineVariant,
-          width: isCyber ? 1.2 : 1.0,
+          color: AppColors.borderOutline.withValues(alpha: 0.45),
         ),
-        boxShadow: isCyber
-            ? [
-                BoxShadow(
-                  color: colors.primary.withValues(alpha: 0.14),
-                  blurRadius: 16,
-                  offset: const Offset(0, 3),
-                ),
-              ]
-            : null,
       ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: colors.primary.withValues(alpha: 0.15),
+              color: AppColors.dewMint.withValues(alpha: 0.16),
               shape: BoxShape.circle,
-              border: isCyber
-                  ? Border.all(
-                      color: colors.primary.withValues(alpha: 0.60),
-                      width: 1.5,
-                    )
-                  : null,
-              boxShadow: isCyber
-                  ? [
-                      BoxShadow(
-                        color: colors.primary.withValues(alpha: 0.35),
-                        blurRadius: 16,
-                      ),
-                    ]
-                  : null,
+              border: Border.all(
+                color: AppColors.dewMint.withValues(alpha: 0.35),
+                width: 1,
+              ),
             ),
-            child: Icon(
-              colors.isCyberpunk
-                  ? Icons.electric_bolt_rounded
-                  : Icons.auto_awesome_rounded,
-              color: colors.primary,
+            child: const Icon(
+              Icons.auto_awesome_rounded,
+              color: AppColors.dewMint,
               size: 36,
             ),
           ),
@@ -1008,6 +965,7 @@ class _LowDataCard extends StatelessWidget {
             textAlign: TextAlign.center,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
+              color: AppColors.softIvory,
             ),
           ),
           const SizedBox(height: 8),
@@ -1017,7 +975,7 @@ class _LowDataCard extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurface.withValues(alpha: 0.7),
+              color: AppColors.freshSage,
               height: 1.4,
             ),
           ),
@@ -1025,10 +983,13 @@ class _LowDataCard extends StatelessWidget {
           FilledButton.icon(
             onPressed: onAddTransaction,
             icon: const Icon(Icons.add, size: 18),
-            label: Text(context.tr('Add transaction')),
+            label: Text(
+              context.tr('Add transaction'),
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
             style: FilledButton.styleFrom(
-              backgroundColor: colors.heroBackground,
-              foregroundColor: Colors.white,
+              backgroundColor: AppColors.dewMint,
+              foregroundColor: AppColors.deepForest,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -1048,15 +1009,12 @@ class _NeedsWantsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final total = needTotal + wantTotal;
     final needPct = total == 0 ? 0 : ((needTotal / total) * 100).round();
     final wantPct = total == 0 ? 0 : 100 - needPct;
 
-    final isCyber = context.isCyberpunk;
-    final colors = context.themeColors;
-    final needColor = isCyber ? colors.primary : AppColors.sage;
-    final wantColor = isCyber ? colors.expense : const Color(0xFFEF9A9A);
+    const needColor = Color(0xFF38B271);
+    const wantColor = Color(0xFFE8A33D);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1068,10 +1026,17 @@ class _NeedsWantsCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    isCyber ? Icons.bolt_rounded : Icons.check_circle_outline,
-                    size: 16,
-                    color: needColor,
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: needColor.withValues(alpha: 0.16),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_circle_outline,
+                      size: 14,
+                      color: needColor,
+                    ),
                   ),
                   const SizedBox(width: 6),
                   Flexible(
@@ -1082,6 +1047,7 @@ class _NeedsWantsCard extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
+                        color: AppColors.softIvory,
                       ),
                     ),
                   ),
@@ -1093,7 +1059,18 @@ class _NeedsWantsCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.favorite_border, size: 16, color: wantColor),
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: wantColor.withValues(alpha: 0.16),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.favorite_border,
+                      size: 14,
+                      color: wantColor,
+                    ),
+                  ),
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(
@@ -1103,6 +1080,7 @@ class _NeedsWantsCard extends StatelessWidget {
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
+                        color: AppColors.softIvory,
                       ),
                     ),
                   ),
@@ -1111,7 +1089,7 @@ class _NeedsWantsCard extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
         ClipRRect(
           borderRadius: BorderRadius.circular(6),
           child: Row(
@@ -1119,12 +1097,14 @@ class _NeedsWantsCard extends StatelessWidget {
               if (needTotal > 0)
                 Expanded(
                   flex: needTotal,
-                  child: Container(height: 10, color: needColor),
+                  child: Container(height: 8, color: needColor),
                 ),
+              if (needTotal > 0 && wantTotal > 0)
+                const SizedBox(width: 2),
               if (wantTotal > 0)
                 Expanded(
                   flex: wantTotal,
-                  child: Container(height: 10, color: wantColor),
+                  child: Container(height: 8, color: wantColor),
                 ),
             ],
           ),
@@ -1135,16 +1115,18 @@ class _NeedsWantsCard extends StatelessWidget {
           children: [
             Text(
               rupiah(needTotal),
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: context.moneyStyle(
+                fontSize: 12,
                 color: needColor,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
               ),
             ),
             Text(
               rupiah(wantTotal),
-              style: theme.textTheme.bodySmall?.copyWith(
+              style: context.moneyStyle(
+                fontSize: 12,
                 color: wantColor,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],
@@ -1163,16 +1145,16 @@ class _TrendTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.themeColors;
     final periods = [for (var i = 5; i >= 0; i--) period.shift(-i)];
 
     return AppCard(
       padding: EdgeInsets.zero,
       child: Column(
         children: [
-          for (final p in periods.reversed)
+          for (int idx = 0; idx < periods.length; idx++)
             Builder(
               builder: (context) {
+                final p = periods.reversed.toList()[idx];
                 final inPeriod = txs.where((t) => p.contains(t.date));
                 final income = inPeriod
                     .where((t) => t.type == TxType.income)
@@ -1180,34 +1162,49 @@ class _TrendTable extends StatelessWidget {
                 final expense = inPeriod
                     .where((t) => t.type == TxType.expense)
                     .fold<int>(0, (a, t) => a + t.amount);
-                return ListTile(
-                  dense: true,
-                  title: Text(
-                    p.label(),
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '+${rupiah(income)}',
-                        style: context.moneyStyle(
-                          fontSize: 11,
+                return Column(
+                  children: [
+                    ListTile(
+                      dense: true,
+                      title: Text(
+                        p.label(),
+                        style: const TextStyle(
                           fontWeight: FontWeight.w700,
-                          color: colors.income,
+                          fontSize: 13,
+                          color: AppColors.softIvory,
                         ),
                       ),
-                      Text(
-                        '-${rupiah(expense)}',
-                        style: context.moneyStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: colors.expense,
-                        ),
+                      trailing: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '+${rupiah(income)}',
+                            style: context.moneyStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.incomeOnDark,
+                            ),
+                          ),
+                          Text(
+                            '-${rupiah(expense)}',
+                            style: context.moneyStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.expenseOnDark,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    if (idx < periods.length - 1)
+                      Divider(
+                        height: 1,
+                        indent: 16,
+                        endIndent: 16,
+                        color: AppColors.borderOutline.withValues(alpha: 0.3),
+                      ),
+                  ],
                 );
               },
             ),

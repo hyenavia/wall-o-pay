@@ -312,14 +312,25 @@ class _AuthPageState extends ConsumerState<AuthPage> {
             const SizedBox(height: 16),
             FilledButton(
               onPressed: _busy ? null : _submit,
-              style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+                backgroundColor: AppColors.glasshouseGreen,
+                foregroundColor: AppColors.softIvory,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.35)),
+                ),
+              ),
               child: _busy
                   ? const SizedBox(
                       height: 20,
                       width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.softIvory),
                     )
-                  : Text(context.tr(_register ? 'Sign Up' : 'Login')),
+                  : Text(
+                      context.tr(_register ? 'Sign Up' : 'Login'),
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                    ),
             ),
             const SizedBox(height: 12),
             Row(
@@ -328,10 +339,11 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                 Flexible(
                   child: Text(
                     context.tr(_register ? 'Already have an account?' : "Don't have an account?"),
-                    style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+                    style: const TextStyle(color: AppColors.freshSage),
                   ),
                 ),
                 TextButton(
+                  style: TextButton.styleFrom(foregroundColor: AppColors.dewMint),
                   onPressed: _busy
                       ? null
                       : () => setState(() {
@@ -339,7 +351,10 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                             _error = null;
                             _info = null;
                           }),
-                  child: Text(context.tr(_register ? 'Login' : 'Sign Up')),
+                  child: Text(
+                    context.tr(_register ? 'Login' : 'Sign Up'),
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
                 ),
               ],
             ),
@@ -347,15 +362,15 @@ class _AuthPageState extends ConsumerState<AuthPage> {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+                  Expanded(child: Divider(color: AppColors.dewMint.withValues(alpha: 0.15))),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
                       context.tr('or'),
-                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                      style: const TextStyle(color: AppColors.freshSage, fontSize: 12),
                     ),
                   ),
-                  Expanded(child: Divider(color: theme.colorScheme.outlineVariant)),
+                  Expanded(child: Divider(color: AppColors.dewMint.withValues(alpha: 0.15))),
                 ],
               ),
               const SizedBox(height: 16),
@@ -365,7 +380,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                     : () => ref.read(skipAuthProvider.notifier).skip(),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(50),
-                  side: BorderSide(color: theme.colorScheme.outlineVariant),
+                  foregroundColor: AppColors.dewMint,
+                  side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.35)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -382,7 +398,7 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                   '100% offline on this device. You can link an account anytime.',
                 ),
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                style: const TextStyle(fontSize: 12, color: AppColors.freshSage),
               ),
             ],
           ],

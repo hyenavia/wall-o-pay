@@ -1,13 +1,13 @@
 /**
  * Wall o' Pay - Landing Page Interactive Logic
- * Botanical Forest & Pure Cyberpunk Theme Switcher, Testimonial Carousel,
- * Mobile Navigation, and GitHub Releases API Version Sync.
+ * Signature Enchanted Glasshouse Theme
+ * Includes: Showcase Screen Switcher, Testimonial Carousel, Mobile Nav Drawer,
+ * and GitHub Releases API Version Sync.
  */
 
-const APP_VERSION = "2.2.0";
-const THEME_STORAGE_KEY = "wall_o_pay_theme";
+const APP_VERSION = "2.5.6";
 
-// Helper to compare semver strings (e.g. "2.0.10" vs "v2.0.9")
+// Helper to compare semver strings (e.g. "2.5.4" vs "v2.5.3")
 function isVersionGreater(v1, v2) {
   const clean = v => v.replace(/^v/, "").split(".").map(n => parseInt(n, 10) || 0);
   const a = clean(v1);
@@ -21,36 +21,51 @@ function isVersionGreater(v1, v2) {
   return false;
 }
 
-// Interactive Mockup Dual-Theme Preview (Option A: Showcase Teaser)
-function setupMockupThemeToggle() {
-  const duo = document.getElementById("duo-mockup");
-  const btnBot = document.getElementById("btn-theme-botanical");
-  const btnCyber = document.getElementById("btn-theme-cyberpunk");
+// 1. Interactive App Showcase Screen Switcher
+function setupShowcaseTabs() {
+  const tabButtons = document.querySelectorAll(".showcase-tab-btn");
+  const screenPanels = document.querySelectorAll(".showcase-screen-panel");
+  const detailPanels = document.querySelectorAll(".showcase-detail-panel");
 
-  if (!duo || !btnBot || !btnCyber) return;
+  if (!tabButtons.length || !screenPanels.length) return;
 
-  function setMockupTheme(theme) {
-    const isCyber = theme === "cyberpunk";
-    duo.setAttribute("data-preview", theme);
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetScreen = btn.getAttribute("data-screen");
 
-    if (isCyber) {
-      btnCyber.classList.add("active");
-      btnCyber.setAttribute("aria-selected", "true");
-      btnBot.classList.remove("active");
-      btnBot.setAttribute("aria-selected", "false");
-    } else {
-      btnBot.classList.add("active");
-      btnBot.setAttribute("aria-selected", "true");
-      btnCyber.classList.remove("active");
-      btnCyber.setAttribute("aria-selected", "false");
-    }
-  }
+      // Update active tab button
+      tabButtons.forEach(b => {
+        const isActive = b === btn;
+        b.classList.toggle("active", isActive);
+        b.setAttribute("aria-selected", String(isActive));
+      });
 
-  btnBot.addEventListener("click", () => setMockupTheme("botanical"));
-  btnCyber.addEventListener("click", () => setMockupTheme("cyberpunk"));
+      // Update visible phone screen panel
+      screenPanels.forEach(panel => {
+        const matches = panel.getAttribute("data-screen") === targetScreen;
+        panel.classList.toggle("active", matches);
+        if (matches) {
+          panel.removeAttribute("hidden");
+        } else {
+          panel.setAttribute("hidden", "true");
+        }
+      });
+
+      // Update visible detail explanation panel if present
+      detailPanels.forEach(panel => {
+        const matches = panel.getAttribute("data-screen") === targetScreen;
+        panel.classList.toggle("active", matches);
+        if (matches) {
+          panel.removeAttribute("hidden");
+        } else {
+          panel.setAttribute("hidden", "true");
+        }
+      });
+    });
+  });
 }
 
-// Testimonials Carousel
+// 2. Testimonials Carousel
 const testimonials = [
   {
     quote: "“Wall o’ Pay made me far more aware of my daily spending leaks. Managing my monthly allowance is now completely effortless!”",
@@ -61,7 +76,7 @@ const testimonials = [
     author: "— Rafi, Software Engineer"
   },
   {
-    quote: "“I love the dual aesthetics! Botanical Forest feels like a serene sanctuary by day, and Cyberpunk turns my expenses into an edgy sci-fi terminal.”",
+    quote: "“The Enchanted Glasshouse aesthetic feels tranquil, mindful, and bespoke. With instant local SQLite storage and Biometric Unlock, managing my daily finances never feels stressful.”",
     author: "— Dina, UI/UX Designer"
   }
 ];
@@ -120,24 +135,42 @@ function setupTestimonials() {
   startTimer();
 }
 
-// Mobile Nav Menu Toggle
+// 3. Mobile Navigation Drawer Toggle & Close on Anchor Click
 function setupMobileNav() {
   const toggle = document.getElementById("mobile-toggle");
   const nav = document.getElementById("nav-links");
   if (toggle && nav) {
     toggle.addEventListener("click", () => {
-      nav.classList.toggle("active");
+      const isOpen = nav.classList.toggle("active");
+      toggle.setAttribute("aria-expanded", String(isOpen));
+      toggle.innerHTML = isOpen ? "✕" : "☰";
     });
 
     nav.querySelectorAll("a").forEach(link => {
       link.addEventListener("click", () => {
         nav.classList.remove("active");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.innerHTML = "☰";
       });
     });
   }
 }
 
-// GitHub API: Fetch Latest Release Version without downgrading local version
+// 4. Header Scroll Elevation & Active Spy
+function setupNavScroll() {
+  const header = document.querySelector("header.glass-nav");
+  if (!header) return;
+
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 40) {
+      header.classList.add("scrolled");
+    } else {
+      header.classList.remove("scrolled");
+    }
+  }, { passive: true });
+}
+
+// 5. GitHub API: Fetch Latest Release Version without downgrading local version
 function fetchLatestReleaseVersion() {
   // Apply baseline local version
   document.querySelectorAll(".app-version-tag").forEach(el => {
@@ -183,8 +216,9 @@ function fetchLatestReleaseVersion() {
 
 // Initialize on DOM Ready
 document.addEventListener("DOMContentLoaded", () => {
-  setupMockupThemeToggle();
+  setupShowcaseTabs();
   setupTestimonials();
   setupMobileNav();
+  setupNavScroll();
   fetchLatestReleaseVersion();
 });

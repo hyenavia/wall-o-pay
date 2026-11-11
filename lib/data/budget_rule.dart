@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/l10n.dart';
-import '../core/theme.dart';
 import 'app_database.dart';
 import 'prefs.dart';
 import 'providers.dart';
@@ -54,21 +53,12 @@ enum BudgetBucket {
       };
 
   Color get color => switch (this) {
-        BudgetBucket.needs => const Color(0xFF2E7D32), // Forest Green
-        BudgetBucket.wants => const Color(0xFFD87D2A), // Warm Amber / Coral
-        BudgetBucket.savings => const Color(0xFF00897B), // Ocean Teal
+        BudgetBucket.needs => const Color(0xFF38B271), // Vibrant Emerald
+        BudgetBucket.wants => const Color(0xFFE8A33D), // Warm Amber
+        BudgetBucket.savings => const Color(0xFF5EEAD4), // Glowing Mint Teal
       };
 
-  Color colorIn(BuildContext context) {
-    if (context.isCyberpunk) {
-      return switch (this) {
-        BudgetBucket.needs => const Color(0xFF00F0FF), // Electric Cyan
-        BudgetBucket.wants => const Color(0xFFFF2A6D), // Laser Pink
-        BudgetBucket.savings => const Color(0xFFFCEE0A), // Edgerunners Yellow
-      };
-    }
-    return color;
-  }
+  Color colorIn(BuildContext context) => color;
 }
 
 /// Pemetaan pintar bawaan jika kategori belum pernah dipindahkan oleh pengguna.

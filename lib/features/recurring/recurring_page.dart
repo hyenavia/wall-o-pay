@@ -21,15 +21,13 @@ class RecurringPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final muted = scheme.onSurface.withValues(alpha: 0.6);
     final rulesAsync = ref.watch(recurringRulesProvider);
     final cats = ref.watch(categoryMapProvider);
     final wallets = ref.watch(walletsProvider).value ?? [];
     final walletMap = {for (final w in wallets) w.id: w};
 
     return Scaffold(
-      appBar: pageAppBar(context, title: Text(context.tr('Recurring & Subscriptions'))),
+      appBar: secondaryAppBar(context, title: Text(context.tr('Recurring & Subscriptions'))),
       body: rulesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text(context.tr('Error: {error}', {'error': e}))),
@@ -44,15 +42,26 @@ class RecurringPage extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                        color: AppColors.dewMint.withValues(alpha: 0.16),
                         shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.dewMint.withValues(alpha: 0.35),
+                          width: 1,
+                        ),
                       ),
-                      child: Icon(Icons.repeat_rounded, size: 48, color: scheme.primary),
+                      child: const Icon(
+                        Icons.repeat_rounded,
+                        size: 48,
+                        color: AppColors.dewMint,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Text(
                       context.tr('No recurring schedules yet.'),
-                      style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.softIvory,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
@@ -60,16 +69,25 @@ class RecurringPage extends ConsumerWidget {
                         'Set up regular income, bills, or subscription schedules. They will prompt you for confirmation on their due date before recording.',
                       ),
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.bodySmall?.copyWith(color: muted, height: 1.4),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.freshSage,
+                        height: 1.4,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     FilledButton.icon(
                       style: FilledButton.styleFrom(
-                        backgroundColor: context.themeColors.heroBackground,
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.dewMint,
+                        foregroundColor: AppColors.deepForest,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                       icon: const Icon(Icons.add, size: 18),
-                      label: Text(context.tr('Add Schedule')),
+                      label: Text(
+                        context.tr('Add Schedule'),
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
                       onPressed: () => _showAddOrEditDialog(context, ref),
                     ),
                   ],
@@ -79,15 +97,13 @@ class RecurringPage extends ConsumerWidget {
           }
 
           return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 80),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 80),
             itemCount: rules.length,
             separatorBuilder: (_, _) => const SizedBox(height: 10),
             itemBuilder: (ctx, i) {
               final r = rules[i];
               final cat = cats[r.categoryId];
-              final catColor = cat != null
-                  ? Color(cat.colorValue)
-                  : (ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.sage);
+              final catColor = cat != null ? Color(cat.colorValue) : AppColors.sage;
               final wallet = r.walletId != null ? walletMap[r.walletId] : null;
 
               String freqText = switch (r.frequency) {
@@ -118,8 +134,10 @@ class RecurringPage extends ConsumerWidget {
                               Expanded(
                                 child: Text(
                                   r.title,
-                                  style: theme.textTheme.titleSmall?.copyWith(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    color: AppColors.softIvory,
                                     decoration: r.isActive ? null : TextDecoration.lineThrough,
                                   ),
                                 ),
@@ -130,8 +148,8 @@ class RecurringPage extends ConsumerWidget {
                                   fontSize: 14,
                                   fontWeight: FontWeight.w800,
                                   color: r.type == TxType.income
-                                      ? (ctx.isCyberpunk ? ctx.themeColors.income : AppColors.income)
-                                      : (ctx.isCyberpunk ? ctx.themeColors.expense : AppColors.expense),
+                                      ? AppColors.incomeOnDark
+                                      : AppColors.expenseOnDark,
                                 ),
                               ),
                             ],
@@ -141,13 +159,20 @@ class RecurringPage extends ConsumerWidget {
                             children: [
                               Text(
                                 freqText,
-                                style: theme.textTheme.bodySmall?.copyWith(color: muted, fontWeight: FontWeight.w500),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.freshSage,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                               if (wallet != null) ...[
-                                Text(' • ', style: TextStyle(color: muted)),
+                                const Text(' • ', style: TextStyle(color: AppColors.freshSage)),
                                 Text(
                                   ctx.tr(wallet.name),
-                                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.freshSage,
+                                  ),
                                 ),
                               ],
                             ],
@@ -155,10 +180,10 @@ class RecurringPage extends ConsumerWidget {
                           const SizedBox(height: 2),
                           Text(
                             ctx.tr('Next due: {date}', {'date': shortDate(r.nextDueDate)}),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 11,
-                              color: scheme.primary,
-                              fontWeight: FontWeight.w600,
+                              color: AppColors.dewMint,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],

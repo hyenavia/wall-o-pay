@@ -4,6 +4,224 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.6] - 2026-11-11
+
+### Changed
+- **Freeform Transparent Android Home Screen Launcher Icon (Nesty Style):**
+  - Removed `mipmap-anydpi-v26/ic_launcher.xml` and omitted adaptive background/foreground configuration, mirroring the exact architecture from the **Nesty** project.
+  - Generates standalone transparent `mipmap-*/ic_launcher.png` icons directly from `assets/images/logo.png`, allowing Android and OEM launchers (such as Xiaomi/POCO Launcher) to render the authentic Enchanted Glasshouse logo directly on the wallpaper with zero background plates, masks, or container boxes.
+- **Enchanted Glasshouse Typography & Asset Hygiene:**
+  - Standardized `FilledButton` theme in `theme.dart` to strictly use `DM Sans` (`GoogleFonts.dmSans`), eliminating residual `PlusJakartaSans` font warnings.
+  - Removed unneeded `Plus Jakarta Sans` font import from `docs/index.html` to reduce web font payload.
+  - Purged obsolete legacy hybrid logo assets (`logo_hybrid.png` and `logo_hybrid_foreground.png`) from the repository, saving ~1.28 MB.
+  - Hardened `.gitignore` to explicitly prevent unintended commit of `.env` configuration files.
+
+## [2.5.5] - 2026-11-11
+
+### Changed
+- **Transparent Android Launcher Icons & Adaptive Layer Optimization:**
+  - Replaced the dark green background container box with transparent background configuration (`#00000000`) for Android adaptive icons in `pubspec.yaml` and `res/values/colors.xml`.
+  - Utilized authentic transparent PNG assets (`assets/images/logo_foreground.png` for adaptive foreground and `assets/images/logo.png` for legacy mipmaps) preserving full alpha channels and original Enchanted Glasshouse brand identity.
+  - Added calibrated `adaptive_icon_foreground_inset: 10` to guarantee 0.0% icon clipping across all Android OEM mask profiles (circular, squircle, and rounded rectangular shapes) while maintaining maximum symbol scale.
+  - Regenerated all Android launcher icon mipmap drawables across all standard density buckets (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`).
+  - Preserved solid opaque background for iOS launcher icons (`remove_alpha_ios: true`) in strict compliance with Apple App Store submission standards.
+
+## [2.5.4] - 2026-11-11
+
+### Added
+- **Enchanted Glasshouse Profile Card for Settings Page:**
+  - Designed and implemented a bespoke botanical glassmorphism profile card (`_GlasshouseProfileCard` in `SettingsPage`) featuring a horizontal layout with rounded corners (22px).
+  - Integrated circular user avatar with botanical glass frame, clean **Outfit SemiBold** user name typography, **DM Sans** email/handle, a frosted emerald glass "Personal Account" badge, and an edit profile action button in the top right.
+  - Crafted `_ProfileCardGlassPainter` featuring specular diagonal glass sheen, subtle greenhouse architectural mullion lines, and subtle botanical corner accents.
+  - Generated high-resolution frontal UI concept render artifact with neutral dark background.
+
+## [2.5.3] - 2026-11-11
+
+### Changed
+- **Enchanted Glasshouse App Launcher Icons & Web Favicons:**
+  - Regenerated all multi-platform launcher icons across Android (`mipmap` and adaptive icons with `#10251F` background), iOS (`AppIcon.appiconset`), Windows, and Web.
+  - Generated crisp multi-resolution favicons (`favicon.ico` 16/32/48/64px, `favicon.png` 32x32px), `apple-touch-icon.png` (180x180px), and `images/icon.png` (192x192px) for the documentation and landing page (`docs/`).
+
+## [2.5.2] - 2026-11-11
+
+### Changed
+- **Minimalist Clean 3D Botanical Navigation Bar:**
+  - Removed the rectangular glass pill container border around active tabs in `HomeShell` (`lib/app.dart`), giving the 3D icons breathing room and creating a cleaner, more spacious layout.
+  - Active tabs smoothly illuminate to full brilliance (`opacity: 1.0`) with `AnimatedOpacity` and bold `dewMint` labels, while passive tabs rest gently at `opacity: 0.38` with muted `freshSage` labels.
+
+## [2.5.1] - 2026-11-11
+
+### Changed
+- **Unified 100% 3D Botanical Glasshouse Navigation Bar:**
+  - Modernized the bottom navigation bar (`HomeShell` in `lib/app.dart`) to feature consistent bespoke 3D botanical glass icons across all states (Home, Transactions, Budget, and Insights), eliminating the mix between flat Material line icons and 3D icons.
+  - Added translucent, glowing `dewMint` active pill indicators (`AppColors.dewMint.withValues(alpha: 0.14)` background and `0.32` specular border) with smooth curves and animations when switching tabs.
+  - Set passive tabs to softly muted `opacity: 0.38` with `freshSage` labels, highlighting the active tab with full `opacity: 1.0` and vivid `dewMint` typography.
+
+## [2.5.0] - 2026-11-11
+
+### Added
+- **Enchanted Glasshouse Visual Identity Splash Screen:**
+  - Introduced new dedicated Splash Screen module (`SplashPage` & `GlasshouseCombinationLogo` in `lib/features/splash/splash_page.dart`) capturing the modern minimalist, botanical glassmorphism design ethos.
+  - Implemented vector **Combination Logo** featuring a modern lancet greenhouse architectural arch, frosted emerald glass facets with specular glare, mullion iron framing, and a thriving botanical sprout with radiant dew droplet at its core.
+  - Integrated high-contrast typography hierarchy with **Outfit SemiBold** for the "Wall o' Pay" title and **DM Sans Regular** for the signature tagline "Grow Your Financial Habits." (with bilingual translation in Indonesian: "Tumbuhkan Kebiasaan Finansialmu.").
+  - Added minimalist glowing `dewMint` loading indicator capsule providing smooth feedback during cold-start initialization.
+  - Designed `EnchantedGlasshouseBackgroundPainter` with deep `mossShadow` / `glasshouseGreen` radial canvas, subtle conservatory ceiling trusses, animated natural sunbeam light rays, edge-framed emerald & sage foliage silhouettes, and floating ethereal dew motes.
+  - Added native dark launch background configuration for Android (`launch_background.xml` & `colors.xml` with `#10251F`) and iOS (`LaunchScreen.storyboard` with `#10251F`) to eliminate blank/white screen flicker during Flutter engine cold boot.
+  - Built comprehensive widget test suite in `test/splash_screen_test.dart` verifying combination logo rendering, typography, multilingual translation, and seamless completion lifecycle.
+
+### Changed
+- Refactored `_Root` in `lib/app.dart` to use silky smooth fade transitions (`AnimatedSwitcher` with `Curves.easeOutCubic`) upon splash sequence completion, while preserving zero-wait bypass for pending share shortcuts.
+
+## [2.4.13] - 2026-11-11
+
+### Changed
+- **Phase 7 UI Redesign: Profile, Settings, Security, & Onboarding:**
+  - Modernized **Profile Screen** (`ProfilePage`) with dark moss card surfaces, specular `dewMint` highlights, glowing camera action badge with `AppColors.glasshouseGreen`, and polished WhatsApp-style photo bottom sheet with circular `dewMint` action containers.
+  - Refined **About Wall o' Pay Modal** (`AboutWallOPaySheet`) with botanical glasshouse identity, dark moss background (`AppColors.mossShadow`), specular `dewMint` top border, glowing botanical logo container, high-contrast typography, and redesigned principle and metadata cards.
+  - Upgraded **Settings Screen** (`SettingsPage`) and **More Hub** (`MorePage`) with high-contrast `UserAvatar` glass frame, specular border icon badges, high-contrast text hierarchies (`AppColors.softIvory` / `AppColors.freshSage`), and glowing `dewMint` forward chevrons.
+  - Enhanced **Security Screen** (`SecurityPage`) and **Lock Screen** (`LockScreen`) with specular bordered biometric containers, high-contrast PIN keypad with translucent circular borders (`Colors.white.withValues(alpha: 0.22)`), and elevated "Change PIN" outline action buttons.
+  - Polished **Auth Screen** (`AuthPage`) and **Onboarding Flow** (`OnboardingPage`) with botanical green CTA buttons (`AppColors.glasshouseGreen`), `dewMint` accent outlines, high-contrast step indicators, and guest mode actions.
+
+## [2.4.12] - 2026-11-11
+
+### Fixed
+- **Consistent Account & Wallet Glasshouse 3D Icons:**
+  - Resolved icon discrepancy in "Accounts & Wallets" (`AccountsPage`) where Digital Bank was showing default Material outline icons while other account kinds displayed bespoke 3D botanical glass icons.
+  - Registered `digital`, `bank`, `ewallet`, `cash`, `smartphone`, `devices`, and `wallet` keys in `glasshouseCategoryAssets` and `categoryIcons`.
+  - Expanded `glasshouseAssetForIcon` to map `Icons.smartphone_outlined`, `Icons.devices`, `Icons.devices_other`, and `Icons.devices_other_outlined` to `bills.png`, and `Icons.wallet` / `Icons.wallet_outlined` to `wallet.png`.
+  - Updated `AccountForm` so that Digital Bank sets `smartphone` icon key, and modernized `Recent transfers` list tile leading icon with a 3D glass `CategoryBadge`.
+
+## [2.4.11] - 2026-11-11
+
+### Changed
+- **Phase 6 UI Redesign: Financial Utilities & Supporting Modules:**
+  - Modernized **Accounts Page** (`AccountsPage`) with `_AccountCategoryHeader` glowing mint icons and distinct category count pills, tabular subtotal and balance figures, and transfer cards with teal styling (`#5EEAD4`).
+  - Refined **Categories Page** (`CategoriesPage`) with delicate `borderOutline` dividers, high-contrast category titles, and rounded bottom sheet with specular borders and elevated `dewMint` buttons.
+  - Upgraded **Debts & Splits Page** (`DebtsPage`) with SegmentedButton specular toggles, high-contrast settled and left badges (`incomeOnDark` / `softIvory`), and overdue alerts.
+  - Polished **Savings Goals Page** (`GoalsPage`) with tabular progress typography, `dewMint` deposit buttons, and completed goal badges.
+  - Enhanced **Recurring & Subscriptions Page** (`RecurringPage`) with glowing schedule icons, tabular income/expense figures, and tactile switch toggles.
+
+## [2.4.10] - 2026-11-11
+
+### Changed
+- **Phase 5 UI Redesign: Insights Page & Custom Chart Styling:**
+  - Upgraded Net Balance Hero Card with glowing surplus/deficit pill badges, tabular currency typography (`context.moneyStyle(fontSize: 30)`), and elevated translucent emerald `_SummarySubBox` metric containers.
+  - Modernized `_PeriodComparisonCard` with high-contrast `AppColors.cardSurface` glass background, dynamic reduction savings badges, and glowing trend icons.
+  - Enhanced SegmentedButton tab switcher (Overview, Categories, Trend) with `dewMint` specular highlights and high-contrast labels.
+  - Transformed `PeriodExpenseBarChart` with dark glass tooltips, tabular currency formatting, glowing mint touch selection states, and delicate refractions.
+  - Refined `TrendBarChart` with high-contrast `incomeOnDark` and `expenseOnDark` color styling and glowing dot legends.
+  - Polished `_NeedsWantsCard` with dual rounded progress segments, vibrant emerald and warm amber jewel tones, and tabular figures.
+  - Redesigned `_TopCategoryRow` with distinct rank pill containers, tabular percentages, and high-contrast category spending metrics.
+  - Upgraded `_SmartInsightCard` and `_TrendTable` with rounded glass surfaces and specular dividers.
+
+## [2.4.9] - 2026-11-10
+
+### Changed
+- **Phase 4 UI Redesign: Budget Page & 50/30/20 Pillars:**
+  - Upgraded Total Budget Hero Card with tabular currency typography (`context.moneyStyle(fontSize: 26)`), `dewMint` specular edit action, and dual-state `AppProgressBar`.
+  - Added elevated 50/30/20 preview container with jeweled 3-color ratio bar (`#38B271` Needs, `#E8A33D` Wants, `#5EEAD4` Savings) and glowing dot legends with tabular numbers.
+  - Refined Rollover Banner with `mossShadow` frosted container, `dewMint` circular icon, and tabular currency carryover badge.
+  - Transformed `BudgetPillarCard` with glowing circular bucket icons, `AppColors.softIvory` headings, `expenseOnDark` over-budget alerts, `dewMint` carryover badges, and delicate specular borders.
+  - Redesigned `CategoryBudgetSheet` with `mossShadow` glass background, top specular border, glowing drag handle, and elevated `dewMint` save button.
+  - Polished `TotalBudgetDialog` with glass container styling, modernized 50/30/20 vs custom nominal segmented toggle, tabular numeric inputs, and clear allocation status pill.
+
+## [2.4.8] - 2026-11-10
+
+### Changed
+- **Phase 3 UI Redesign: Transactions Page & Interactive Cashflow Telemetry:**
+  - Redesigned search bar with frosted glass surface, `freshSage` search icon, and high-contrast hint text.
+  - Upgraded transaction type filter chips (**All**, **Expense**, **Income**, **Transfer**) with tactile contextual icons and glowing emerald selection states.
+  - Enhanced Account and Category filter dropdown buttons with rounded translucent glass containers, `dewMint` specular borders, and active status indicators.
+  - Added a dedicated "Clear filters" action pill with soft berry/ruby border when filters are active.
+  - Transformed date grouping headers with dynamic daily net cashflow badges (`+Rp ...` in `incomeOnDark` or `-Rp ...` in `expenseOnDark`) for effortless scanning.
+  - Upgraded `_SummaryTile` metrics cards with circular glowing containers and tabular figures.
+  - Polished interactive `_CashflowCalendarCard` with highlighted current day border, emerald selected day pill, and glowing dual-color cashflow indicator dots.
+  - Refined `TransactionTile` and `TransactionGroupCard` with high-contrast text, `dewMint` receipt indicators, and delicate pine dividers.
+
+## [2.4.7] - 2026-11-10
+
+### Changed
+- **Scoped Atmospheric Canopy & Botanical Background Exclusively to Primary Navigation Tabs:**
+  - Reserved the atmospheric canopy header (`glasshouse_bg.jpg`, `#0D1D17` to `#142B22` gradient, `BotanicalCanopyPainter`) and rich `BotanicalBackgroundSheet` exclusively for the 4 core primary tabs (**Home**, **Transactions**, **Budget**, and **Insights**).
+  - Introduced `secondaryAppBar` for secondary and nested detail screens (`AccountsPage`, `CategoriesPage`, `DebtsPage`, `GoalsPage`, `MorePage`, `ProfilePage`, `RecurringPage`, `SecurityPage`, `SettingsPage`), featuring clean and minimalist flat styling on `mossShadow` canvas without decorative photo overlays or leaf clutter.
+  - Removed `BotanicalBackgroundSheet` from secondary sub-pages and auth/onboarding screens, ensuring peaceful, clutter-free focus on utilities, settings, and form controls.
+
+## [2.4.6] - 2026-11-10
+
+### Changed
+- **Atmospheric Header Canopy Depth & Content Boundary Separation:**
+  - Darkened the header backdrop gradient across `HomePage` and `pageAppBar` (`AppColors.headerCanopyTop = #0D1D17` to `AppColors.headerCanopyBottom = #142B22`) to provide distinct atmospheric depth and visual separation between the header area and the main content sheet.
+  - Enhanced title, profile avatar, and action button readability against the nocturnal conservatory canopy.
+  - Accentuated the specular curved `dewMint` boundary line on the sheet top.
+
+## [2.4.5] - 2026-11-10
+
+### Changed
+- **Harmonized Enchanted Glasshouse Header & Atmospheric Background Across All Pages:**
+  - Upgraded `pageAppBar` with sunlit conservatory backdrop (`glasshouse_bg.jpg`), subtle dual gradient overlay (`#23483B`), and delicate `BotanicalCanopyPainter` overlay identical to `HomePage`.
+  - Upgraded `BotanicalBackgroundSheet` with the multi-stop vertical gradient (`#163228` down to `#0C1914`), 10% opacity conservatory watermark, and the full 30+ precision leaves, ivy garlands, glasshouse arch geometry, and dewdrops.
+  - Wrapped `CategoriesPage`, `ProfilePage`, `RecurringPage`, `SecurityPage`, and `AuthPage` with `BotanicalBackgroundSheet`, and upgraded `CategoriesPage` to `pageAppBar` with high-contrast tab indicators.
+
+## [2.4.4] - 2026-11-10
+
+### Changed
+- **Phase 2 UI Redesign: Add / Edit Transaction Modal & Glass Keypad:**
+  - Upgraded `CalculatorSheet` with the Enchanted Glasshouse aesthetic: high-contrast formula (`freshSage`) and display result (`incomeOnDark`), frosted glass keypad buttons with specular highlights, emerald containers for arithmetic operators, and soft berry tint for the Clear action.
+  - Enhanced `TransactionForm` modal bottom sheet with 28px top rounded border and specular `#2A4D3E` edge, luminous amount field with tabular figures, illuminated `Rp ` prefix, and 3D glasshouse calculator launcher icon.
+  - Upgraded `AppChip` across the design system to seamlessly render 3D glasshouse icon assets for categories and wallets with glowing emerald selection states.
+  - Redesigned quick amount chips, more details toggles, date picker tiles, and receipt attachment cards with translucent glass surfaces.
+  - Enhanced global `segmentedButtonTheme`, `chipTheme`, and `bottomSheetTheme` in `ThemeData` to enforce unified glasshouse styling.
+
+## [2.4.3] - 2026-11-10
+
+### Changed
+- **High-Precision Botanical Foliage & Conservatory Backdrop:**
+  - Redesigned `BotanicalBackgroundPainter` with 30+ meticulously detailed ovate botanical leaves featuring sharp apexes, central midribs, and symmetrical lateral veins.
+  - Implemented cascading conservatory ivy garlands in upper corners, rich clustered understory foliage in lower corners, and reflective dewdrops.
+  - Integrated authentic photorealistic conservatory foliage and vaulted columns from `glasshouse_bg.jpg` at 10% opacity into the main dashboard sheet.
+
+## [2.4.2] - 2026-11-10
+
+### Changed
+- **Atmospheric Glasshouse Background (Option C):**
+  - Replaced solid background canvas with an atmospheric multi-stop vertical gradient (`#163228` emerald mist to `#0C1914` moss shadow) and enhanced top specular glass border (`dewMint`).
+  - Redesigned `BotanicalBackgroundPainter` with soft radial sunbeam light glow, conservatory vaulted glass arch geometry (`dewMint`), and calibrated botanical leaf silhouettes with delicate leaf rib details.
+  - Aligned `_SheetEdge` on page AppBars to share the new specular edge and ambient emerald mist tone.
+
+## [2.4.1] - 2026-11-10
+
+### Changed
+- **Phase 1 UI Redesign Benchmark (Dashboard / Home):**
+  - Enhanced `HomePage` header with frosted glass action buttons for settings and more features.
+  - Upgraded `DailyFinancialPulseCard` to match `AppCard`'s translucent emerald glass depth, specular `dewMint` highlights, and inner status ambient glow.
+  - Polished `_FlowTile` with high-contrast semantic income and expense indicators, and refreshed `_AccountsQuickBar` with deep translucent container styling.
+  - Refined `PeriodSwitcher`, `PeriodTypeToggle`, and `SectionHeader` with glass styling and consistent typography.
+
+## [2.4.0] - 2026-11-10
+
+### Added
+- **Enchanted Glasshouse Visual Identity:**
+  - Remade the botanical aesthetic into a modern enchanted conservatory with translucent glassmorphic surfaces, specular glass highlights, 24 bespoke 3D botanical glass icons (`assets/icons/glasshouse/`), and vaulted glasshouse architectural accents.
+- **Atmospheric Conservatory Lock Screen & Glass Avatar Frame:**
+  - Implemented serene glasshouse background with ambient lighting on `LockScreen` (`assets/images/glasshouse_bg.jpg`) and an intricate botanical glass wreath frame for user profile photos (`assets/images/frame_glasshouse.png`).
+- **New Glasshouse Mark & Wordmark Branding:**
+  - Designed and bundled the official Enchanted Glasshouse logo mark (protective glasshouse dome, flourishing coin stack pedestal, and orbiting enchanted light ring) across the application and landing page.
+
+### Changed
+- **Refined Glasshouse Typography & Palette:**
+  - Integrated `GoogleFonts.outfit` for display/headings and `GoogleFonts.dmSans` with tabular figures for financial metrics, alongside the new Enchanted Glasshouse palette (`glasshouseGreen`: `#23483B`, `emeraldLeaf`: `#39745A`, `freshSage`: `#A9C5B1`, `dewMint`: `#D5E8DC`, `softIvory`: `#F7F8F4`, and `mossShadow`: `#10251F`).
+- **Brand Lore & Tagline Alignment:**
+  - Updated the signature brand quote in the About Sheet to reflect the Enchanted Glasshouse philosophy: *"Small steps, nurtured consistently, create meaningful growth."*
+
+## [2.3.0] - 2026-11-10
+
+### Changed
+- **Focused Botanical Forest Identity:** Retired Cyberpunk theme mode and the in-app aesthetic switcher to unify Wall o' Pay 100% around the signature **Botanical Forest** visual identity (`Plus Jakarta Sans` typography with tabular figures, organic rounded geometry, and emerald/sage canvas decorations).
+- **Backward-Compatible Sync & Backup Handling:** Cloud preference sync (`AppPrefsController.applyRemoteData`) and JSON backup imports (`importPreferences`) continue to accept and cleanly ignore legacy `themePreset` and `cyberpunkUnlocked` keys from older releases (`<= v2.2.0`).
+
+### Removed
+- Removed Cyberpunk color tokens, custom HUD painters (`CyberHeroCardPainter`, `CyberCanopyPainter`, `CyberBackgroundPainter`), `ShareTechMono` / `Rajdhani` theme styling, dual-theme localization maps (`_cyberId` / `_cyberEn`), About-sheet theme confirmation dialog, and unused `logo_cyberpunk.png` image assets.
+
 ## [2.2.0] - 2026-11-07
 
 ### Added

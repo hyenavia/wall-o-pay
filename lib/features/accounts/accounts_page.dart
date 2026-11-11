@@ -24,7 +24,7 @@ IconData accountIcon(String type) {
     case 'bank':
       return Icons.account_balance_outlined;
     case 'digital':
-      return Icons.devices_other_outlined;
+      return Icons.smartphone_outlined;
     case 'ewallet':
       return Icons.account_balance_wallet_outlined;
     default:
@@ -157,19 +157,14 @@ class _AccountCategoryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.65);
-
     final subtotalWidget = Text(
       subtotalFormatted,
       style: context.moneyStyle(
         fontSize: 14,
         fontWeight: FontWeight.w800,
-        color: muted,
+        color: AppColors.freshSage,
       ),
     );
-
-    final primaryColor = theme.colorScheme.primary;
 
     return Padding(
       padding: const EdgeInsets.only(top: 22, bottom: 10),
@@ -178,30 +173,41 @@ class _AccountCategoryHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: primaryColor.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(8),
+              color: AppColors.dewMint.withValues(alpha: 0.16),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppColors.dewMint.withValues(alpha: 0.35),
+                width: 1,
+              ),
             ),
-            child: Icon(icon, size: 16, color: primaryColor),
+            child: Icon(icon, size: 16, color: AppColors.dewMint),
           ),
           const SizedBox(width: 10),
           Text(
             title,
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: const TextStyle(
               fontWeight: FontWeight.w700,
+              fontSize: 16,
+              color: AppColors.softIvory,
             ),
           ),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
             decoration: BoxDecoration(
-              color: primaryColor.withValues(alpha: 0.14),
+              color: AppColors.emeraldLeaf.withValues(alpha: 0.35),
               borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.dewMint.withValues(alpha: 0.25),
+                width: 0.8,
+              ),
             ),
             child: Text(
               '$count',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: primaryColor,
+              style: const TextStyle(
+                color: AppColors.dewMint,
                 fontWeight: FontWeight.w800,
+                fontSize: 11,
               ),
             ),
           ),
@@ -221,7 +227,6 @@ class AccountsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.6);
     final accountsAsync = ref.watch(walletsProvider);
     final balances = ref.watch(walletBalancesProvider);
     final walletMap = ref.watch(walletMapProvider);
@@ -241,7 +246,7 @@ class AccountsPage extends ConsumerWidget {
         : child;
 
     return Scaffold(
-      appBar: pageAppBar(
+      appBar: secondaryAppBar(
         context,
         title: Text(context.tr('Accounts')),
         actions: [
@@ -257,8 +262,7 @@ class AccountsPage extends ConsumerWidget {
         icon: const Icon(Icons.add),
         label: Text(context.tr('Add account')),
       ),
-      body: BotanicalBackgroundSheet(
-        child: accountsAsync.when(
+      body: accountsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(
             child: Text(context.tr('Could not load data: {error}', {'error': e})),
@@ -292,7 +296,7 @@ class AccountsPage extends ConsumerWidget {
               categoryOrder.where((cat) => grouped[cat]!.isNotEmpty).toList();
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 96),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 96),
             children: [
               HeroCard(
                 child: Column(
@@ -359,6 +363,7 @@ class AccountsPage extends ConsumerWidget {
                           CategoryBadge(
                             icon: accountIcon(a.type),
                             color: Color(a.colorValue),
+                            categoryKey: a.icon.isNotEmpty ? a.icon : a.type,
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -367,12 +372,18 @@ class AccountsPage extends ConsumerWidget {
                               children: [
                                 Text(
                                   context.tr(a.name),
-                                  style: theme.textTheme.bodyLarge
-                                      ?.copyWith(fontWeight: FontWeight.w700),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                    color: AppColors.softIvory,
+                                  ),
                                 ),
                                 Text(
                                   accountKindLabel(context, a.type),
-                                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.freshSage,
+                                  ),
                                 ),
                               ],
                             ),
@@ -383,6 +394,7 @@ class AccountsPage extends ConsumerWidget {
                               style: context.moneyStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
+                                color: AppColors.softIvory,
                               ),
                             ),
                           ),
@@ -399,13 +411,27 @@ class AccountsPage extends ConsumerWidget {
                     children: [
                       for (final t in transfers.take(10))
                         ListTile(
-                          leading: const Icon(Icons.swap_horiz),
+                          leading: const CategoryBadge(
+                            icon: Icons.swap_horiz_rounded,
+                            color: Color(0xFF00897B),
+                            categoryKey: 'swap_horiz',
+                            size: 38,
+                          ),
                           title: Text(
                             '${context.tr(walletMap[t.walletId]?.name ?? 'Wallet')}'
                             ' → ${context.tr(walletMap[t.toWalletId]?.name ?? 'Wallet')}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: AppColors.softIvory,
+                            ),
                           ),
                           subtitle: Text(
                             t.note.isEmpty ? shortDate(t.date) : '${shortDate(t.date)} • ${t.note}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.freshSage,
+                            ),
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -416,6 +442,7 @@ class AccountsPage extends ConsumerWidget {
                                   style: context.moneyStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF5EEAD4),
                                   ),
                                 ),
                               ),
@@ -434,7 +461,6 @@ class AccountsPage extends ConsumerWidget {
             ],
           );
         },
-      ),
       ),
     );
   }
@@ -543,7 +569,9 @@ class _AccountFormState extends ConsumerState<AccountForm> {
             ? 'payments'
             : _type == 'ewallet'
                 ? 'account_balance_wallet'
-                : 'account_balance',
+                : _type == 'digital'
+                    ? 'smartphone'
+                    : 'account_balance',
       );
     } else {
       final currentBal = ref.read(walletBalancesProvider)[w.id] ?? w.initialBalance;

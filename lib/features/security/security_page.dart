@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../core/l10n.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/lock.dart';
 import 'lock_screen.dart';
@@ -89,11 +90,8 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.6);
-
     return Scaffold(
-      appBar: pageAppBar(context, title: Text(context.tr('Security'))),
+      appBar: secondaryAppBar(context, title: Text(context.tr('Security'))),
       body: ValueListenableBuilder<AppLockState>(
         valueListenable: Lock.instance.state,
         builder: (context, st, _) {
@@ -112,7 +110,7 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                       : context.tr('Unlock the app quickly using fingerprint or face recognition alongside your PIN.');
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
             children: [
               AppCard(
                 child: Column(
@@ -122,47 +120,84 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                       contentPadding: EdgeInsets.zero,
                       title: Text(
                         context.tr('App PIN Lock'),
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: AppColors.softIvory,
+                        ),
                       ),
                       subtitle: Text(
                         context.tr('PIN protects your financial data and automatically syncs across your devices.'),
-                        style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.freshSage,
+                        ),
                       ),
                       value: st.enabled,
                       onChanged: (v) => _toggle(context, v),
                     ),
                     if (st.enabled) ...[
-                      const Divider(height: 28),
+                      Divider(height: 28, color: AppColors.dewMint.withValues(alpha: 0.12)),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        secondary: Icon(
-                          st.isFaceOnly ? Icons.face_rounded : Icons.fingerprint_rounded,
-                          color: st.biometricEnabled
-                              ? theme.colorScheme.primary
-                              : muted,
+                        secondary: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: st.biometricEnabled
+                                ? AppColors.dewMint.withValues(alpha: 0.16)
+                                : Colors.white.withValues(alpha: 0.06),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: st.biometricEnabled
+                                  ? AppColors.dewMint.withValues(alpha: 0.35)
+                                  : Colors.white.withValues(alpha: 0.15),
+                              width: 0.8,
+                            ),
+                          ),
+                          child: Icon(
+                            st.isFaceOnly ? Icons.face_rounded : Icons.fingerprint_rounded,
+                            color: st.biometricEnabled
+                                ? AppColors.dewMint
+                                : AppColors.freshSage,
+                            size: 22,
+                          ),
                         ),
                         title: Text(
                           bioTitle,
-                          style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14.5,
+                            color: AppColors.softIvory,
+                          ),
                         ),
                         subtitle: Text(
                           bioSubtitle,
-                          style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.freshSage,
+                          ),
                         ),
                         value: st.biometricEnabled,
                         onChanged: st.biometricAvailable
                             ? (v) => _toggleBiometric(context, v)
                             : null,
                       ),
-                      const Divider(height: 28),
+                      Divider(height: 28, color: AppColors.dewMint.withValues(alpha: 0.12)),
                       Text(
                         context.tr('Auto-lock timeout'),
-                        style: theme.textTheme.labelLarge,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: AppColors.dewMint,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         context.tr('Require PIN after leaving the app for:'),
-                        style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.freshSage,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       SizedBox(
@@ -181,6 +216,10 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                       const SizedBox(height: 20),
                       OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.dewMint,
+                          side: BorderSide(
+                            color: AppColors.dewMint.withValues(alpha: 0.4),
+                          ),
                           minimumSize: const Size.fromHeight(48),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
@@ -209,11 +248,18 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                   contentPadding: EdgeInsets.zero,
                   title: Text(
                     context.tr('Privacy Shield'),
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: AppColors.softIvory,
+                    ),
                   ),
                   subtitle: Text(
                     context.tr('Hide app preview in Recent Apps switcher and block screenshots.'),
-                    style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.freshSage,
+                    ),
                   ),
                   value: st.privacyShield,
                   onChanged: (v) => Lock.instance.setPrivacyShield(v),

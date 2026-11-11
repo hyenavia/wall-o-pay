@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/format.dart';
 import '../../core/l10n.dart';
@@ -52,7 +53,6 @@ class SettingsPage extends ConsumerWidget {
     final canUseCloud = ready && user != null && !isSyncing;
     final updateInfo = ref.watch(availableUpdateProvider);
     final colors = context.themeColors;
-    final isCyber = context.isCyberpunk;
 
     final lastSyncTime = sync.lastSynced ?? backup.lastBackup;
     final lastText = lastSyncTime == null
@@ -64,66 +64,30 @@ class SettingsPage extends ConsumerWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: color.withValues(alpha: isCyber ? 0.20 : 0.14),
+          color: color.withValues(alpha: 0.16),
           borderRadius: BorderRadius.circular(12),
-          border: isCyber
-              ? Border.all(color: color.withValues(alpha: 0.40), width: 1.2)
-              : null,
-          boxShadow: isCyber
-              ? [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.20),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
+          border: Border.all(
+            color: color.withValues(alpha: 0.35),
+            width: 0.8,
+          ),
         ),
         child: Icon(icon, color: color, size: 20),
       );
     }
 
     return Scaffold(
-      appBar: pageAppBar(context, title: Text(context.tr('Settings'))),
-      body: BotanicalBackgroundSheet(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 48),
-          children: [
-          AppCard(
-            padding: const EdgeInsets.all(14),
+      appBar: secondaryAppBar(context, title: Text(context.tr('Settings'))),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
+        children: [
+          _GlasshouseProfileCard(
+            name: name,
+            username: username,
+            email: user?.email,
+            isGuest: user == null,
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute<void>(builder: (_) => const ProfilePage()),
-            ),
-            child: Row(
-              children: [
-                const UserAvatar(size: 56),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name ??
-                            (user == null
-                                ? context.tr('Guest')
-                                : context.tr('Profile')),
-                        style: theme.textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w800),
-                      ),
-                      if (username != null)
-                        Text('@$username',
-                            style: theme.textTheme.bodySmall?.copyWith(color: muted))
-                      else if (user == null)
-                        Text(
-                          context.tr('Guest Mode • Offline local storage'),
-                          style: theme.textTheme.bodySmall?.copyWith(color: muted),
-                        ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.chevron_right),
-              ],
             ),
           ),
           SectionHeader(title: context.tr('Preferences')),
@@ -309,7 +273,7 @@ class SettingsPage extends ConsumerWidget {
                 if (features.dailyReminder) ...[
                   const Divider(height: 1, indent: 68),
                   ListTile(
-                    leading: iconBadge(Icons.schedule_rounded, isCyber ? colors.primary : AppColors.sage),
+                    leading: iconBadge(Icons.schedule_rounded, AppColors.sage),
                     title: Text(
                       context.tr('Reminder time'),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -318,7 +282,7 @@ class SettingsPage extends ConsumerWidget {
                       features.reminderTime.format(context),
                       style: theme.textTheme.labelLarge?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: isCyber ? colors.primary : AppColors.sage,
+                        color: AppColors.sage,
                       ),
                     ),
                     onTap: () async {
@@ -405,12 +369,12 @@ class SettingsPage extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: (isCyber ? colors.primary : AppColors.sage).withValues(alpha: 0.16),
+                          color: AppColors.sage.withValues(alpha: 0.16),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.cloud_off_outlined,
-                          color: isCyber ? colors.primary : AppColors.sage,
+                          color: AppColors.sage,
                           size: 24,
                         ),
                       ),
@@ -674,7 +638,7 @@ class SettingsPage extends ConsumerWidget {
                 const Divider(height: 1, indent: 68),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  leading: iconBadge(Icons.table_view_outlined, isCyber ? colors.primary : AppColors.sage),
+                  leading: iconBadge(Icons.table_view_outlined, AppColors.sage),
                   title: Text(
                     context.tr('Export transactions (CSV)'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -778,7 +742,7 @@ class SettingsPage extends ConsumerWidget {
               children: [
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  leading: iconBadge(Icons.info_outline_rounded, isCyber ? colors.primary : AppColors.sage),
+                  leading: iconBadge(Icons.info_outline_rounded, AppColors.sage),
                   title: Text(
                     context.tr('About Wall o\' Pay'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -839,7 +803,6 @@ class SettingsPage extends ConsumerWidget {
             ),
           ),
         ],
-      ),
       ),
     );
   }
@@ -938,4 +901,269 @@ class _UpdateTile extends StatelessWidget {
       },
     );
   }
+}
+
+/// Kartu profil pengguna bergaya premium botanical glassmorphism untuk halaman Pengaturan.
+class _GlasshouseProfileCard extends StatelessWidget {
+  const _GlasshouseProfileCard({
+    required this.name,
+    required this.username,
+    required this.email,
+    required this.isGuest,
+    required this.onTap,
+  });
+
+  final String? name;
+  final String? username;
+  final String? email;
+  final bool isGuest;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.mossShadow,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: AppColors.dewMint.withValues(alpha: 0.28),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: AppColors.dewMint.withValues(alpha: 0.05),
+            blurRadius: 12,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            splashColor: AppColors.dewMint.withValues(alpha: 0.10),
+            highlightColor: AppColors.dewMint.withValues(alpha: 0.05),
+            child: Stack(
+              children: [
+                // Glasshouse gradient background
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          const Color(0xFF1B3D30).withValues(alpha: 0.90),
+                          AppColors.mossShadow,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Specular glass glare & greenhouse arch overlay
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: _ProfileCardGlassPainter(),
+                    ),
+                  ),
+                ),
+                // Subtle botanical corner ornament
+                Positioned(
+                  right: -10,
+                  bottom: -10,
+                  child: IgnorePointer(
+                    child: Opacity(
+                      opacity: 0.09,
+                      child: Image.asset(
+                        'assets/icons/glasshouse/savings.png',
+                        width: 90,
+                        height: 90,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+                // Foreground content
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                  child: Row(
+                    children: [
+                      // Circular Profile Avatar with Botanical Glass Frame
+                      const UserAvatar(size: 60, withGlassFrame: true),
+                      const SizedBox(width: 14),
+                      // Information Hierarchy
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Minimalist Badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF23483B).withValues(alpha: 0.65),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: AppColors.dewMint.withValues(alpha: 0.35),
+                                  width: 0.8,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 5,
+                                    height: 5,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: AppColors.dewMint,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    isGuest
+                                        ? context.tr('Guest Mode')
+                                        : context.tr('Personal Account'),
+                                    style: GoogleFonts.dmSans(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.3,
+                                      color: AppColors.dewMint,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            // User Name in Outfit SemiBold
+                            Text(
+                              name ??
+                                  (isGuest
+                                      ? context.tr('Guest')
+                                      : context.tr('Profile')),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.outfit(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 17.5,
+                                color: AppColors.softIvory,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            // Email or username in DM Sans
+                            Text(
+                              email ??
+                                  (username != null
+                                      ? '@$username'
+                                      : (isGuest
+                                          ? context.tr('Offline local storage')
+                                          : 'user@wallopay.local')),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.dmSans(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.freshSage,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Edit Profile Button at the Top-Right
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: AppColors.mossShadow.withValues(alpha: 0.70),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.dewMint.withValues(alpha: 0.40),
+                            width: 1.0,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.dewMint.withValues(alpha: 0.12),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.edit_outlined,
+                          color: AppColors.dewMint,
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Painter efek specular sheen dan garis arsitektur conservatory untuk kartu profil.
+class _ProfileCardGlassPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // 1. Specular glass diagonal sheen
+    final sheenPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.white.withValues(alpha: 0.08),
+          Colors.white.withValues(alpha: 0.02),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.35, 0.7],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), sheenPaint);
+
+    // 2. Subtle greenhouse mullion lines in top-right
+    final archPaint = Paint()
+      ..color = AppColors.dewMint.withValues(alpha: 0.07)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    final path = Path()
+      ..moveTo(size.width * 0.65, 0)
+      ..cubicTo(
+        size.width * 0.75,
+        size.height * 0.3,
+        size.width * 0.9,
+        size.height * 0.4,
+        size.width,
+        size.height * 0.5,
+      );
+    canvas.drawPath(path, archPaint);
+
+    final path2 = Path()
+      ..moveTo(size.width * 0.8, 0)
+      ..cubicTo(
+        size.width * 0.88,
+        size.height * 0.25,
+        size.width * 0.95,
+        size.height * 0.35,
+        size.width,
+        size.height * 0.45,
+      );
+    canvas.drawPath(path2, archPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

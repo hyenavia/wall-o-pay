@@ -183,6 +183,35 @@ void main() {
       expect(container.read(appPrefsProvider).periodType, PeriodType.weekly);
     });
 
+    test('AppPrefsController ignores legacy Cyberpunk keys during JSON import cleanly', () async {
+      final container = ProviderContainer(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          firebaseReadyProvider.overrideWithValue(false),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final controller = container.read(appPrefsProvider.notifier);
+      await controller.importPreferences({
+        'themeMode': 'dark',
+        'themePreset': 'cyberpunk',
+        'cyberpunkUnlocked': true,
+        'localeCode': 'id',
+        'periodType': 'weekly',
+        'firstDayOfWeek': DateTime.sunday,
+        'firstDayOfMonth': 25,
+      });
+
+      final state = container.read(appPrefsProvider);
+      expect(state.localeCode, 'id');
+      expect(state.periodType, PeriodType.weekly);
+      expect(state.firstDayOfWeek, DateTime.sunday);
+      expect(state.firstDayOfMonth, 25);
+      expect(controller.exportPreferences().containsKey('themePreset'), isFalse);
+      expect(controller.exportPreferences().containsKey('cyberpunkUnlocked'), isFalse);
+    });
+
     test('BudgetRuleNotifier exports and imports configuration correctly', () async {
       final container = ProviderContainer(
         overrides: [

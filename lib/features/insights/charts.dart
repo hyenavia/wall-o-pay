@@ -54,7 +54,7 @@ class ExpensePieChart extends StatelessWidget {
           child: PieChart(
             PieChartData(
               sectionsSpace: 2,
-              centerSpaceRadius: 36,
+              centerSpaceRadius: 38,
               sections: [
                 for (final s in slices)
                   PieChartSectionData(
@@ -66,8 +66,9 @@ class ExpensePieChart extends StatelessWidget {
                         : '',
                     titleStyle: const TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                       color: Colors.white,
+                      fontFeatures: [FontFeature.tabularFigures()],
                     ),
                   ),
               ],
@@ -111,10 +112,8 @@ class TrendBarChart extends StatelessWidget {
     }
     final maxValue = [...income, ...expense].fold<int>(0, math.max);
     const hidden = AxisTitles(sideTitles: SideTitles(showTitles: false));
-    final colors = context.themeColors;
-    final isCyber = context.isCyberpunk;
-    final incColor = isCyber ? colors.income : AppColors.income;
-    final expColor = isCyber ? colors.expense : AppColors.expense;
+    const incColor = AppColors.incomeOnDark;
+    const expColor = AppColors.expenseOnDark;
 
     return Column(
       children: [
@@ -139,7 +138,11 @@ class TrendBarChart extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
                         periods[value.toInt()].shortLabel(),
-                        style: const TextStyle(fontSize: 11),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.freshSage,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -155,13 +158,13 @@ class TrendBarChart extends StatelessWidget {
                         toY: income[i].toDouble(),
                         color: incColor,
                         width: 9,
-                        borderRadius: BorderRadius.circular(2),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                       BarChartRodData(
                         toY: expense[i].toDouble(),
                         color: expColor,
                         width: 9,
-                        borderRadius: BorderRadius.circular(2),
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ],
                   ),
@@ -195,12 +198,29 @@ class _Dot extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          width: 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: color.withValues(alpha: 0.55),
+                blurRadius: 4,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
         ),
         const SizedBox(width: 6),
-        Text(label, style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 11,
+            color: AppColors.freshSage,
+            fontFeatures: [FontFeature.tabularFigures()],
+          ),
+        ),
       ],
     );
   }
@@ -226,9 +246,6 @@ class _PeriodExpenseBarChartState extends State<PeriodExpenseBarChart> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final colors = context.themeColors;
     final maxAmount = widget.points.fold<int>(0, (m, p) => math.max(m, p.amount));
     final maxY = maxAmount == 0 ? 10000.0 : (maxAmount * 1.25).toDouble();
 
@@ -248,7 +265,7 @@ class _PeriodExpenseBarChartState extends State<PeriodExpenseBarChart> {
                 drawVerticalLine: false,
                 horizontalInterval: maxY > 0 ? maxY / 3 : 1,
                 getDrawingHorizontalLine: (value) => FlLine(
-                  color: scheme.outlineVariant.withValues(alpha: 0.3),
+                  color: AppColors.borderOutline.withValues(alpha: 0.25),
                   strokeWidth: 1,
                   dashArray: [4, 4],
                 ),
@@ -266,7 +283,11 @@ class _PeriodExpenseBarChartState extends State<PeriodExpenseBarChart> {
                   });
                 },
                 touchTooltipData: BarTouchTooltipData(
-                  getTooltipColor: (group) => AppColors.ink,
+                  getTooltipColor: (group) => AppColors.mossShadow,
+                  tooltipBorder: BorderSide(
+                    color: AppColors.dewMint.withValues(alpha: 0.35),
+                    width: 1,
+                  ),
                   tooltipPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     final p = widget.points[group.x.toInt()];
@@ -280,10 +301,11 @@ class _PeriodExpenseBarChartState extends State<PeriodExpenseBarChart> {
                       children: [
                         TextSpan(
                           text: rupiah(rod.toY.toInt()),
-                          style: TextStyle(
-                            color: colors.isCyberpunk ? colors.primary : AppColors.sage,
+                          style: const TextStyle(
+                            color: AppColors.dewMint,
                             fontSize: 13,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w800,
+                            fontFeatures: [FontFeature.tabularFigures()],
                           ),
                         ),
                       ],
@@ -311,8 +333,8 @@ class _PeriodExpenseBarChartState extends State<PeriodExpenseBarChart> {
                           widget.points[idx].label,
                           style: TextStyle(
                             fontSize: 11,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                            color: isSelected ? scheme.primary : scheme.onSurface.withValues(alpha: 0.7),
+                            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                            color: isSelected ? AppColors.dewMint : AppColors.freshSage,
                           ),
                         ),
                       );
@@ -328,16 +350,16 @@ class _PeriodExpenseBarChartState extends State<PeriodExpenseBarChart> {
                       BarChartRodData(
                         toY: widget.points[i].amount.toDouble(),
                         color: _touchedIndex == i
-                            ? (colors.isCyberpunk ? colors.secondaryNeon : AppColors.deepForest)
+                            ? AppColors.dewMint
                             : (widget.points[i].amount > 0
-                                ? colors.primary
-                                : scheme.outlineVariant.withValues(alpha: 0.5)),
+                                ? const Color(0xFF38B271)
+                                : AppColors.borderOutline.withValues(alpha: 0.4)),
                         width: widget.points.length > 7 ? 14 : 20,
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
                         backDrawRodData: BackgroundBarChartRodData(
                           show: true,
                           toY: maxY,
-                          color: scheme.outlineVariant.withValues(alpha: 0.15),
+                          color: AppColors.mossShadow.withValues(alpha: 0.5),
                         ),
                       ),
                     ],

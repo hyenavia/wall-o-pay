@@ -112,21 +112,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     showModalBottomSheet<void>(
       context: context,
+      backgroundColor: AppColors.mossShadow,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        side: BorderSide(color: AppColors.borderOutline, width: 1),
       ),
       builder: (sheetCtx) {
-        final sheetTheme = Theme.of(sheetCtx);
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 12),
               Container(
-                width: 40,
+                width: 44,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: sheetTheme.colorScheme.onSurface.withValues(alpha: 0.2),
+                  color: AppColors.dewMint.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -137,16 +138,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                      Expanded(
                        child: Text(
                          sheetCtx.tr('Profile Photo'),
-                         style: sheetTheme.textTheme.titleMedium?.copyWith(
-                           fontWeight: FontWeight.bold,
+                         style: const TextStyle(
+                           fontWeight: FontWeight.w700,
+                           fontSize: 18,
+                           color: AppColors.softIvory,
                          ),
                        ),
                      ),
                      if (hasPhoto)
                        IconButton(
-                         icon: Icon(
+                         icon: const Icon(
                            Icons.delete_outline_rounded,
-                           color: sheetTheme.colorScheme.error,
+                           color: AppColors.expenseOnDark,
                          ),
                          tooltip: sheetCtx.tr('Remove photo'),
                          onPressed: () {
@@ -204,24 +207,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final user = ref.watch(currentUserProvider);
     final username = ref.watch(usernameProvider);
     final hasPhoto = ref.watch(profileProvider.select((s) => s.photo != null));
-    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.6);
-    final isCyber = context.isCyberpunk;
-    final colors = context.themeColors;
 
     return Scaffold(
-      appBar: pageAppBar(context, title: Text(context.tr('Profile'))),
+      appBar: secondaryAppBar(context, title: Text(context.tr('Profile'))),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         children: [
           Center(
             child: Stack(
               children: [
                 UserAvatar(
                   size: 112,
+                  withGlassFrame: true,
                   heroTag: 'profile_photo_hero',
                   onTap: () {
                     if (hasPhoto) {
@@ -235,24 +235,24 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   right: 0,
                   bottom: 0,
                   child: Material(
-                    color: isCyber ? colors.primary : theme.colorScheme.primary,
-                    shape: isCyber
-                        ? BeveledRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                            side: const BorderSide(color: Color(0xFF080912), width: 1.5),
-                          )
-                        : const CircleBorder(),
+                    color: AppColors.glasshouseGreen,
+                    shape: const CircleBorder(),
                     child: InkWell(
-                      customBorder: isCyber
-                          ? BeveledRectangleBorder(borderRadius: BorderRadius.circular(8))
-                          : const CircleBorder(),
+                      customBorder: const CircleBorder(),
                       onTap: () => _showPhotoBottomSheet(context),
-                      child: Padding(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.dewMint.withValues(alpha: 0.6),
+                            width: 1.5,
+                          ),
+                        ),
                         padding: const EdgeInsets.all(9),
-                        child: Icon(
+                        child: const Icon(
                           Icons.photo_camera_outlined,
                           size: 20,
-                          color: isCyber ? const Color(0xFF080912) : theme.colorScheme.onPrimary,
+                          color: AppColors.softIvory,
                         ),
                       ),
                     ),
@@ -266,6 +266,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextButton.icon(
+                style: TextButton.styleFrom(foregroundColor: AppColors.dewMint),
                 icon: const Icon(Icons.photo_camera_outlined, size: 18),
                 onPressed: () => _showPhotoBottomSheet(context),
                 label: Text(context.tr('Change photo')),
@@ -273,6 +274,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               if (hasPhoto) ...[
                 const SizedBox(width: 8),
                 TextButton.icon(
+                  style: TextButton.styleFrom(foregroundColor: AppColors.dewMint),
                   icon: const Icon(Icons.visibility_outlined, size: 18),
                   onPressed: _viewPhoto,
                   label: Text(context.tr('View Photo')),
@@ -281,41 +283,70 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ],
           ),
           const SizedBox(height: 16),
-          TextField(
-            controller: _nickname,
-            textCapitalization: TextCapitalization.words,
-            maxLength: 30,
-            decoration: appInput(
-              context,
-              label: context.tr('Nickname'),
-              helper: context.tr('Shown in your greeting on the Home screen.'),
+          AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                TextField(
+                  controller: _nickname,
+                  textCapitalization: TextCapitalization.words,
+                  maxLength: 30,
+                  decoration: appInput(
+                    context,
+                    label: context.tr('Nickname'),
+                    helper: context.tr('Shown in your greeting on the Home screen.'),
+                  ),
+                ),
+                if (username != null) ...[
+                  const SizedBox(height: 8),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.alternate_email, color: AppColors.freshSage),
+                    title: Text(username, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.softIvory)),
+                    subtitle: Text(context.tr('Username'), style: const TextStyle(color: AppColors.freshSage)),
+                  ),
+                ],
+                if (user?.email != null) ...[
+                  const SizedBox(height: 4),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.mail_outline, color: AppColors.freshSage),
+                    title: Text(user!.email!, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.softIvory)),
+                    subtitle: Text(context.tr('Email'), style: const TextStyle(color: AppColors.freshSage)),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                Text(
+                  context.tr(
+                    user == null
+                        ? 'You are in Guest mode. Your profile is saved locally on this device.'
+                        : 'Your username is used to log in and cannot be changed.',
+                  ),
+                  style: const TextStyle(fontSize: 12, color: AppColors.freshSage),
+                ),
+                const SizedBox(height: 18),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.glasshouseGreen,
+                    foregroundColor: AppColors.softIvory,
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      side: BorderSide(
+                        color: AppColors.dewMint.withValues(alpha: 0.35),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  onPressed: _save,
+                  child: Text(
+                    context.tr('Save'),
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          if (username != null)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.alternate_email),
-              title: Text(username),
-              subtitle: Text(context.tr('Username')),
-            ),
-          if (user?.email != null)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.mail_outline),
-              title: Text(user!.email!),
-              subtitle: Text(context.tr('Email')),
-            ),
-          Text(
-            context.tr(
-              user == null
-                  ? 'You are in Guest mode. Your profile is saved locally on this device.'
-                  : 'Your username is used to log in and cannot be changed.',
-            ),
-            style: theme.textTheme.bodySmall?.copyWith(color: muted),
-          ),
-          const SizedBox(height: 20),
-          FilledButton(onPressed: _save, child: Text(context.tr('Save'))),
         ],
       ),
     );
@@ -336,7 +367,6 @@ class _PhotoActionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
@@ -350,17 +380,21 @@ class _PhotoActionItem extends StatelessWidget {
               height: 56,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
+                color: AppColors.dewMint.withValues(alpha: 0.12),
                 border: Border.all(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                  color: AppColors.dewMint.withValues(alpha: 0.35),
+                  width: 1.0,
                 ),
               ),
-              child: Icon(icon, color: theme.colorScheme.primary, size: 26),
+              child: Icon(icon, color: AppColors.dewMint, size: 26),
             ),
             const SizedBox(height: 8),
             Text(
               label,
-              style: theme.textTheme.labelMedium?.copyWith(
+              style: const TextStyle(
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
+                color: AppColors.softIvory,
               ),
             ),
           ],

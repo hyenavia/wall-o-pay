@@ -26,8 +26,6 @@ class AppPrefs {
     required this.periodType,
     this.firstDayOfWeek = DateTime.monday,
     this.firstDayOfMonth = 1,
-    this.themePreset = 'botanical',
-    this.cyberpunkUnlocked = true,
   });
 
   final ThemeMode themeMode;
@@ -35,10 +33,6 @@ class AppPrefs {
   final PeriodType periodType;
   final int firstDayOfWeek; // 1 (Monday) sampai 7 (Sunday)
   final int firstDayOfMonth; // 1 s.d. 28 (Hari/tanggal gajian)
-  final String themePreset; // 'botanical' (default) atau 'cyberpunk'
-  final bool cyberpunkUnlocked;
-
-  bool get isCyberpunk => themePreset == 'cyberpunk';
 
   AppPrefs copyWith({
     ThemeMode? themeMode,
@@ -46,8 +40,6 @@ class AppPrefs {
     PeriodType? periodType,
     int? firstDayOfWeek,
     int? firstDayOfMonth,
-    String? themePreset,
-    bool? cyberpunkUnlocked,
   }) {
     return AppPrefs(
       themeMode: themeMode ?? this.themeMode,
@@ -55,8 +47,6 @@ class AppPrefs {
       periodType: periodType ?? this.periodType,
       firstDayOfWeek: firstDayOfWeek ?? this.firstDayOfWeek,
       firstDayOfMonth: firstDayOfMonth ?? this.firstDayOfMonth,
-      themePreset: themePreset ?? this.themePreset,
-      cyberpunkUnlocked: cyberpunkUnlocked ?? this.cyberpunkUnlocked,
     );
   }
 }
@@ -68,8 +58,6 @@ class AppPrefsController extends Notifier<AppPrefs> {
   static const _kPeriod = 'pref_period';
   static const _kFirstDayOfWeek = 'pref_first_day_of_week';
   static const _kFirstDayOfMonth = 'pref_first_day_of_month';
-  static const _kThemePreset = 'pref_theme_preset';
-  static const _kCyberpunkUnlocked = 'pref_cyberpunk_unlocked';
   static const _kUpdated = 'pref_prefs_updated';
 
   String? _uid() {
@@ -113,8 +101,6 @@ class AppPrefsController extends Notifier<AppPrefs> {
     final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
     final firstDay = p.getInt(_k(_kFirstDayOfWeek, uid)) ?? p.getInt(_kFirstDayOfWeek) ?? DateTime.monday;
     final firstDayMonth = p.getInt(_k(_kFirstDayOfMonth, uid)) ?? p.getInt(_kFirstDayOfMonth) ?? 1;
-    final themePreset = p.getString(_k(_kThemePreset, uid)) ?? p.getString(_kThemePreset) ?? 'botanical';
-    final cyberpunkUnlocked = p.getBool(_k(_kCyberpunkUnlocked, uid)) ?? p.getBool(_kCyberpunkUnlocked) ?? true;
 
     AppLocale.code = locale;
     return AppPrefs(
@@ -123,8 +109,6 @@ class AppPrefsController extends Notifier<AppPrefs> {
       periodType: period,
       firstDayOfWeek: firstDay,
       firstDayOfMonth: firstDayMonth,
-      themePreset: themePreset,
-      cyberpunkUnlocked: cyberpunkUnlocked,
     );
   }
 
@@ -143,8 +127,6 @@ class AppPrefsController extends Notifier<AppPrefs> {
     final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
     final firstDay = p.getInt(_k(_kFirstDayOfWeek, uid)) ?? p.getInt(_kFirstDayOfWeek) ?? DateTime.monday;
     final firstDayMonth = p.getInt(_k(_kFirstDayOfMonth, uid)) ?? p.getInt(_kFirstDayOfMonth) ?? 1;
-    final themePreset = p.getString(_k(_kThemePreset, uid)) ?? p.getString(_kThemePreset) ?? 'botanical';
-    final cyberpunkUnlocked = p.getBool(_k(_kCyberpunkUnlocked, uid)) ?? p.getBool(_kCyberpunkUnlocked) ?? true;
 
     AppLocale.code = locale;
     state = AppPrefs(
@@ -153,8 +135,6 @@ class AppPrefsController extends Notifier<AppPrefs> {
       periodType: period,
       firstDayOfWeek: firstDay,
       firstDayOfMonth: firstDayMonth,
-      themePreset: themePreset,
-      cyberpunkUnlocked: cyberpunkUnlocked,
     );
   }
 
@@ -191,8 +171,6 @@ class AppPrefsController extends Notifier<AppPrefs> {
       final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
       final firstDay = (data['firstDayOfWeek'] as num?)?.toInt() ?? DateTime.monday;
       final firstDayMonth = (data['firstDayOfMonth'] as num?)?.toInt() ?? 1;
-      final themePreset = (data['themePreset'] as String?) ?? p.getString(_k(_kThemePreset, uid)) ?? p.getString(_kThemePreset) ?? 'botanical';
-      final cyberpunkUnlocked = (data['cyberpunkUnlocked'] as bool?) ?? p.getBool(_k(_kCyberpunkUnlocked, uid)) ?? p.getBool(_kCyberpunkUnlocked) ?? true;
 
       AppLocale.code = locale;
       state = AppPrefs(
@@ -201,8 +179,6 @@ class AppPrefsController extends Notifier<AppPrefs> {
         periodType: period,
         firstDayOfWeek: firstDay,
         firstDayOfMonth: firstDayMonth,
-        themePreset: themePreset,
-        cyberpunkUnlocked: cyberpunkUnlocked,
       );
 
       await p.setString(_k(_kTheme, uid), theme.name);
@@ -210,8 +186,6 @@ class AppPrefsController extends Notifier<AppPrefs> {
       await p.setString(_k(_kPeriod, uid), period.name);
       await p.setInt(_k(_kFirstDayOfWeek, uid), firstDay);
       await p.setInt(_k(_kFirstDayOfMonth, uid), firstDayMonth);
-      await p.setString(_k(_kThemePreset, uid), themePreset);
-      await p.setBool(_k(_kCyberpunkUnlocked, uid), cyberpunkUnlocked);
       await p.setInt(_k(_kUpdated, uid), remoteAt);
 
       // Terapkan pengaturan fitur & pengingat (FeaturePrefs)
@@ -270,8 +244,6 @@ class AppPrefsController extends Notifier<AppPrefs> {
         'periodType': state.periodType.name,
         'firstDayOfWeek': state.firstDayOfWeek,
         'firstDayOfMonth': state.firstDayOfMonth,
-        'themePreset': state.themePreset,
-        'cyberpunkUnlocked': state.cyberpunkUnlocked,
         'rollover': feat.rollover,
         'budgetAlerts': feat.budgetAlerts,
         'dailyReminder': feat.dailyReminder,
@@ -298,8 +270,6 @@ class AppPrefsController extends Notifier<AppPrefs> {
       'periodType': state.periodType.name,
       'firstDayOfWeek': state.firstDayOfWeek,
       'firstDayOfMonth': state.firstDayOfMonth,
-      'themePreset': state.themePreset,
-      'cyberpunkUnlocked': state.cyberpunkUnlocked,
       'rollover': feat.rollover,
       'budgetAlerts': feat.budgetAlerts,
       'dailyReminder': feat.dailyReminder,
@@ -325,8 +295,6 @@ class AppPrefsController extends Notifier<AppPrefs> {
     final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
     final firstDay = (data['firstDayOfWeek'] as num?)?.toInt() ?? DateTime.monday;
     final firstDayMonth = (data['firstDayOfMonth'] as num?)?.toInt() ?? 1;
-    final themePreset = data['themePreset'] as String? ?? 'botanical';
-    final cyberpunkUnlocked = data['cyberpunkUnlocked'] as bool? ?? true;
 
     AppLocale.code = locale;
     state = AppPrefs(
@@ -335,8 +303,6 @@ class AppPrefsController extends Notifier<AppPrefs> {
       periodType: period,
       firstDayOfWeek: firstDay,
       firstDayOfMonth: firstDayMonth,
-      themePreset: themePreset,
-      cyberpunkUnlocked: cyberpunkUnlocked,
     );
 
     await p.setString(_kTheme, theme.name);
@@ -344,16 +310,11 @@ class AppPrefsController extends Notifier<AppPrefs> {
     await p.setString(_kPeriod, period.name);
     await p.setInt(_kFirstDayOfWeek, firstDay);
     await p.setInt(_kFirstDayOfMonth, firstDayMonth);
-    await p.setString(_kThemePreset, themePreset);
-    await p.setBool(_kCyberpunkUnlocked, cyberpunkUnlocked);
     if (uid != null) {
       await p.setString(_k(_kTheme, uid), theme.name);
       await p.setString(_k(_kLocale, uid), locale);
       await p.setString(_k(_kPeriod, uid), period.name);
       await p.setInt(_k(_kFirstDayOfWeek, uid), firstDay);
-      await p.setInt(_k(_kFirstDayOfMonth, uid), firstDayMonth);
-      await p.setString(_k(_kThemePreset, uid), themePreset);
-      await p.setBool(_k(_kCyberpunkUnlocked, uid), cyberpunkUnlocked);
       await p.setInt(_k(_kFirstDayOfMonth, uid), firstDayMonth);
       final now = DateTime.now().millisecondsSinceEpoch;
       await p.setInt(_k(_kUpdated, uid), now);
@@ -441,29 +402,6 @@ class AppPrefsController extends Notifier<AppPrefs> {
     await p.setInt(_kFirstDayOfMonth, day);
     if (uid != null) {
       await p.setInt(_k(_kFirstDayOfMonth, uid), day);
-      uploadToCloud(uid);
-    }
-  }
-
-  Future<void> setThemePreset(String preset) async {
-    final value = preset == 'cyberpunk' ? 'cyberpunk' : 'botanical';
-    state = state.copyWith(themePreset: value);
-    final p = ref.read(sharedPreferencesProvider);
-    final uid = _uid();
-    await p.setString(_kThemePreset, value);
-    if (uid != null) {
-      await p.setString(_k(_kThemePreset, uid), value);
-      uploadToCloud(uid);
-    }
-  }
-
-  Future<void> unlockCyberpunk([bool unlock = true]) async {
-    state = state.copyWith(cyberpunkUnlocked: unlock);
-    final p = ref.read(sharedPreferencesProvider);
-    final uid = _uid();
-    await p.setBool(_kCyberpunkUnlocked, unlock);
-    if (uid != null) {
-      await p.setBool(_k(_kCyberpunkUnlocked, uid), unlock);
       uploadToCloud(uid);
     }
   }

@@ -79,7 +79,6 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
     final cats = ref.watch(categoryMapProvider);
     final wallets = ref.watch(walletMapProvider);
     final period = ref.watch(selectedPeriodProvider);
-    final colors = context.themeColors;
 
     return Scaffold(
       appBar: pageAppBar(
@@ -90,7 +89,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             tooltip: context.tr('Cashflow Calendar'),
             icon: Icon(
               Icons.calendar_month_rounded,
-              color: (_showCalendar || _selectedDay != null) ? colors.primary : null,
+              color: (_showCalendar || _selectedDay != null) ? AppColors.dewMint : Colors.white,
             ),
             onPressed: () => setState(() {
               _showCalendar = !_showCalendar;
@@ -100,8 +99,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           IconButton(
             tooltip: context.tr('Filter by date range'),
             icon: Icon(
-              Icons.date_range,
-              color: _range == null ? null : colors.primary,
+              Icons.date_range_rounded,
+              color: _range == null ? Colors.white : AppColors.dewMint,
             ),
             onPressed: _pickRange,
           ),
@@ -110,14 +109,14 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           child: _range == null
               ? const PeriodSwitcher(onDark: true)
               : InputChip(
-                  avatar: const Icon(Icons.date_range, size: 18, color: Colors.white),
+                  avatar: const Icon(Icons.date_range_rounded, size: 18, color: AppColors.dewMint),
                   label: Text(
                     '${shortDate(_range!.start)} - ${shortDate(_range!.end)}',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                    style: const TextStyle(color: AppColors.dewMint, fontWeight: FontWeight.w700),
                   ),
-                  deleteIconColor: Colors.white70,
-                  backgroundColor: Colors.white.withValues(alpha: 0.18),
-                  side: BorderSide(color: Colors.white.withValues(alpha: 0.25)),
+                  deleteIconColor: AppColors.dewMint.withValues(alpha: 0.8),
+                  backgroundColor: AppColors.emeraldLeaf.withValues(alpha: 0.35),
+                  side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.40)),
                   onDeleted: () => setState(() => _range = null),
                 ),
         ),
@@ -177,7 +176,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           decoration: appInput(
                             context,
                             hint: context.tr('Search transaction...'),
-                            prefixIcon: const Icon(Icons.search),
+                            prefixIcon: const Icon(Icons.search_rounded, color: AppColors.freshSage),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -185,16 +184,17 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              for (final f in <(String, TxType?)>[
-                                (context.tr('All'), null),
-                                (context.tr('Expense'), TxType.expense),
-                                (context.tr('Income'), TxType.income),
-                                (context.tr('Transfer'), TxType.transfer),
+                              for (final f in <(String, TxType?, IconData)>[
+                                (context.tr('All'), null, Icons.tune_rounded),
+                                (context.tr('Expense'), TxType.expense, Icons.arrow_upward_rounded),
+                                (context.tr('Income'), TxType.income, Icons.arrow_downward_rounded),
+                                (context.tr('Transfer'), TxType.transfer, Icons.swap_horiz_rounded),
                               ])
                                 Padding(
                                   padding: const EdgeInsets.only(right: 8),
                                   child: AppChip(
                                     label: f.$1,
+                                    icon: f.$3,
                                     selected: _filter == f.$2,
                                     onSelected: () => setState(() => _filter = f.$2),
                                   ),
@@ -222,7 +222,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                       child: Row(
                                         children: [
                                           if (w.id == _selectedWalletId)
-                                            Icon(Icons.check, size: 16, color: context.themeColors.income)
+                                            const Icon(Icons.check, size: 16, color: AppColors.incomeOnDark)
                                           else
                                             const SizedBox(width: 16),
                                           const SizedBox(width: 8),
@@ -232,16 +232,17 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                     ),
                                 ],
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                                   decoration: BoxDecoration(
                                     color: _selectedWalletId != null
-                                        ? colors.primary.withValues(alpha: 0.18)
-                                        : Theme.of(context).colorScheme.surface,
-                                    borderRadius: BorderRadius.circular(20),
+                                        ? AppColors.emeraldLeaf.withValues(alpha: 0.35)
+                                        : AppColors.cardSurface.withValues(alpha: 0.85),
+                                    borderRadius: BorderRadius.circular(16),
                                     border: Border.all(
                                       color: _selectedWalletId != null
-                                          ? colors.primary
-                                          : Theme.of(context).colorScheme.outlineVariant,
+                                          ? AppColors.dewMint
+                                          : AppColors.dewMint.withValues(alpha: 0.22),
+                                      width: 1,
                                     ),
                                   ),
                                   child: Row(
@@ -251,8 +252,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                         Icons.account_balance_wallet_outlined,
                                         size: 15,
                                         color: _selectedWalletId != null
-                                            ? colors.primary
-                                            : Theme.of(context).colorScheme.onSurface,
+                                            ? AppColors.dewMint
+                                            : AppColors.freshSage,
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
@@ -265,8 +266,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                           fontSize: 12.5,
                                           fontWeight: FontWeight.w600,
                                           color: _selectedWalletId != null
-                                              ? colors.primary
-                                              : Theme.of(context).colorScheme.onSurface,
+                                              ? AppColors.dewMint
+                                              : AppColors.softIvory,
                                         ),
                                       ),
                                       const SizedBox(width: 4),
@@ -274,8 +275,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                         Icons.arrow_drop_down,
                                         size: 16,
                                         color: _selectedWalletId != null
-                                            ? colors.primary
-                                            : Theme.of(context).colorScheme.onSurface,
+                                            ? AppColors.dewMint
+                                            : AppColors.freshSage,
                                       ),
                                     ],
                                   ),
@@ -297,7 +298,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                       child: Row(
                                         children: [
                                           if (c.id == _selectedCategoryId)
-                                            Icon(Icons.check, size: 16, color: colors.income)
+                                            const Icon(Icons.check, size: 16, color: AppColors.incomeOnDark)
                                           else
                                             const SizedBox(width: 16),
                                           const SizedBox(width: 8),
@@ -307,16 +308,17 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                     ),
                                 ],
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                                   decoration: BoxDecoration(
                                     color: _selectedCategoryId != null
-                                        ? colors.primary.withValues(alpha: 0.18)
-                                        : Theme.of(context).colorScheme.surface,
-                                    borderRadius: BorderRadius.circular(20),
+                                        ? AppColors.emeraldLeaf.withValues(alpha: 0.35)
+                                        : AppColors.cardSurface.withValues(alpha: 0.85),
+                                    borderRadius: BorderRadius.circular(16),
                                     border: Border.all(
                                       color: _selectedCategoryId != null
-                                          ? colors.primary
-                                          : Theme.of(context).colorScheme.outlineVariant,
+                                          ? AppColors.dewMint
+                                          : AppColors.dewMint.withValues(alpha: 0.22),
+                                      width: 1,
                                     ),
                                   ),
                                   child: Row(
@@ -326,8 +328,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                         Icons.category_outlined,
                                         size: 15,
                                         color: _selectedCategoryId != null
-                                            ? colors.primary
-                                            : Theme.of(context).colorScheme.onSurface,
+                                            ? AppColors.dewMint
+                                            : AppColors.freshSage,
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
@@ -340,8 +342,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                           fontSize: 12.5,
                                           fontWeight: FontWeight.w600,
                                           color: _selectedCategoryId != null
-                                              ? colors.primary
-                                              : Theme.of(context).colorScheme.onSurface,
+                                              ? AppColors.dewMint
+                                              : AppColors.softIvory,
                                         ),
                                       ),
                                       const SizedBox(width: 4),
@@ -349,8 +351,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                         Icons.arrow_drop_down,
                                         size: 16,
                                         color: _selectedCategoryId != null
-                                            ? colors.primary
-                                            : Theme.of(context).colorScheme.onSurface,
+                                            ? AppColors.dewMint
+                                            : AppColors.freshSage,
                                       ),
                                     ],
                                   ),
@@ -366,19 +368,27 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                     _selectedCategoryId = null;
                                     _selectedDay = null;
                                   }),
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.expense.withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: AppColors.expenseOnDark.withValues(alpha: 0.35),
+                                        width: 0.9,
+                                      ),
+                                    ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.close, size: 15, color: context.themeColors.expense),
+                                        const Icon(Icons.close_rounded, size: 14, color: AppColors.expenseOnDark),
                                         const SizedBox(width: 4),
                                         Text(
                                           context.tr('Clear filters'),
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 12,
-                                            color: context.themeColors.expense,
+                                            color: AppColors.expenseOnDark,
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -416,8 +426,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                               child: _SummaryTile(
                                 label: context.tr('Total Income'),
                                 value: rupiah(totalIncome),
-                                color: context.themeColors.income,
-                                icon: Icons.arrow_downward,
+                                color: AppColors.incomeOnDark,
+                                icon: Icons.arrow_downward_rounded,
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -425,8 +435,8 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                               child: _SummaryTile(
                                 label: context.tr('Total Expense'),
                                 value: rupiah(totalExpense),
-                                color: context.themeColors.expense,
-                                icon: Icons.arrow_upward,
+                                color: AppColors.expenseOnDark,
+                                icon: Icons.arrow_upward_rounded,
                               ),
                             ),
                           ],
@@ -471,20 +481,53 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       itemCount: groupEntries.length,
                       itemBuilder: (context, index) {
                         final entry = groupEntries[index];
+                        final dayIncome = entry.value
+                            .where((t) => t.type == TxType.income)
+                            .fold<int>(0, (s, t) => s + t.amount);
+                        final dayExpense = entry.value
+                            .where((t) => t.type == TxType.expense)
+                            .fold<int>(0, (s, t) => s + t.amount);
+                        final hasDayNet = dayIncome > 0 || dayExpense > 0;
+                        final netDay = dayIncome - dayExpense;
+
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Padding(
-                              padding: const EdgeInsets.only(top: 18, bottom: 8),
-                              child: Text(
-                                dayHeader(entry.key),
-                                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurface
-                                          .withValues(alpha: 0.65),
+                              padding: const EdgeInsets.only(top: 20, bottom: 8),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    dayHeader(entry.key),
+                                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.softIvory.withValues(alpha: 0.85),
+                                        ),
+                                  ),
+                                  const Spacer(),
+                                  if (hasDayNet)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: (netDay >= 0 ? AppColors.income : AppColors.expense)
+                                            .withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: (netDay >= 0 ? AppColors.incomeOnDark : AppColors.expenseOnDark)
+                                              .withValues(alpha: 0.35),
+                                          width: 0.8,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        '${netDay >= 0 ? '+' : '-'}${rupiah(netDay.abs())}',
+                                        style: context.moneyStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          color: netDay >= 0 ? AppColors.incomeOnDark : AppColors.expenseOnDark,
+                                        ),
+                                      ),
                                     ),
+                                ],
                               ),
                             ),
                             TransactionGroupCard(
@@ -531,10 +574,22 @@ class _SummaryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AppCard(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
         children: [
-          CategoryBadge(icon: icon, color: color, size: 34),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.16),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: color.withValues(alpha: 0.35),
+                width: 1,
+              ),
+            ),
+            child: Icon(icon, color: color, size: 18),
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -545,14 +600,17 @@ class _SummaryTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: AppColors.freshSage.withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  style: context.moneyStyle(
+                    fontSize: 15.5,
                     fontWeight: FontWeight.w800,
                     color: color,
                   ),
@@ -583,7 +641,6 @@ class _CashflowCalendarCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = context.themeColors;
     final isId = AppLocale.code == 'id';
     final weekdays = isId
         ? const ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min']
@@ -616,35 +673,58 @@ class _CashflowCalendarCard extends StatelessWidget {
     final today = DateTime(now.year, now.month, now.day);
 
     return AppCard(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             children: [
-              Icon(Icons.calendar_month_rounded, size: 16, color: colors.primary),
-              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: AppColors.emeraldLeaf.withValues(alpha: 0.25),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.calendar_month_rounded, size: 16, color: AppColors.dewMint),
+              ),
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   context.tr('Cashflow Calendar'),
                   style: theme.textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w700,
+                    color: AppColors.softIvory,
                   ),
                 ),
               ),
               if (selectedDay != null)
                 InkWell(
                   onTap: () => onSelectDay(null),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    child: Text(
-                      shortDate(selectedDay!),
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w700,
-                        color: colors.primary,
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.emeraldLeaf.withValues(alpha: 0.35),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppColors.dewMint.withValues(alpha: 0.5),
+                        width: 1,
                       ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          shortDate(selectedDay!),
+                          style: const TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.dewMint,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.close_rounded, size: 12, color: AppColors.dewMint),
+                      ],
                     ),
                   ),
                 )
@@ -653,7 +733,7 @@ class _CashflowCalendarCard extends StatelessWidget {
                   context.tr('Tap a date to filter'),
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontSize: 11,
-                    color: colors.textMuted,
+                    color: AppColors.freshSage.withValues(alpha: 0.7),
                   ),
                 ),
             ],
@@ -669,7 +749,7 @@ class _CashflowCalendarCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 10.5,
                         fontWeight: FontWeight.w600,
-                        color: colors.textMuted,
+                        color: AppColors.freshSage.withValues(alpha: 0.75),
                       ),
                     ),
                   ),
@@ -702,23 +782,28 @@ class _CashflowCalendarCard extends StatelessWidget {
 
               return InkWell(
                 onTap: () => onSelectDay(date),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(9),
                 child: Container(
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? colors.primary.withValues(alpha: 0.22)
+                        ? AppColors.emeraldLeaf.withValues(alpha: 0.45)
                         : (inc > 0 || exp > 0)
-                            ? colors.surfaceContainer.withValues(alpha: 0.55)
+                            ? AppColors.surfaceContainer.withValues(alpha: 0.65)
                             : Colors.transparent,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(9),
                     border: isSelected
-                        ? Border.all(color: colors.primary, width: 1.4)
+                        ? Border.all(color: AppColors.dewMint, width: 1.5)
                         : isToday
                             ? Border.all(
-                                color: colors.primary.withValues(alpha: 0.45),
-                                width: 1,
+                                color: AppColors.freshSage.withValues(alpha: 0.6),
+                                width: 1.2,
                               )
-                            : null,
+                            : (inc > 0 || exp > 0)
+                                ? Border.all(
+                                    color: AppColors.borderOutline.withValues(alpha: 0.45),
+                                    width: 0.8,
+                                  )
+                                : null,
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -731,8 +816,13 @@ class _CashflowCalendarCard extends StatelessWidget {
                               ? FontWeight.w800
                               : FontWeight.w600,
                           color: isSelected
-                              ? colors.primary
-                              : colors.textPrimary,
+                              ? AppColors.dewMint
+                              : isToday
+                                  ? AppColors.dewMint
+                                  : (inc > 0 || exp > 0)
+                                      ? AppColors.softIvory
+                                      : AppColors.freshSage.withValues(alpha: 0.65),
+                          fontFeatures: const [FontFeature.tabularFigures()],
                         ),
                       ),
                       const SizedBox(height: 3),
@@ -741,22 +831,34 @@ class _CashflowCalendarCard extends StatelessWidget {
                         children: [
                           if (inc > 0)
                             Container(
-                              width: 5,
-                              height: 5,
-                              margin: const EdgeInsets.symmetric(horizontal: 1),
+                              width: 5.5,
+                              height: 5.5,
+                              margin: const EdgeInsets.symmetric(horizontal: 1.5),
                               decoration: BoxDecoration(
-                                color: colors.income,
+                                color: AppColors.incomeOnDark,
                                 shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.incomeOnDark.withValues(alpha: 0.4),
+                                    blurRadius: 3,
+                                  ),
+                                ],
                               ),
                             ),
                           if (exp > 0)
                             Container(
-                              width: 5,
-                              height: 5,
-                              margin: const EdgeInsets.symmetric(horizontal: 1),
+                              width: 5.5,
+                              height: 5.5,
+                              margin: const EdgeInsets.symmetric(horizontal: 1.5),
                               decoration: BoxDecoration(
-                                color: colors.expense,
+                                color: AppColors.expenseOnDark,
                                 shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: AppColors.expenseOnDark.withValues(alpha: 0.4),
+                                    blurRadius: 3,
+                                  ),
+                                ],
                               ),
                             ),
                         ],

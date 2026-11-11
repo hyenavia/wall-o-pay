@@ -45,8 +45,8 @@ class WallOPayApp extends ConsumerWidget {
       scaffoldMessengerKey: rootScaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
-      theme: buildTheme(prefs.themePreset),
-      darkTheme: buildTheme(prefs.themePreset),
+      theme: buildTheme(),
+      darkTheme: buildTheme(),
       locale: Locale(prefs.localeCode),
       supportedLocales: AppLocale.supported,
       localizationsDelegates: [
@@ -58,7 +58,7 @@ class WallOPayApp extends ConsumerWidget {
   }
 }
 
-/// Menampilkan splash sebentar, lalu lanjut ke gerbang login.
+/// Menampilkan layar splash bertema Enchanted Glasshouse, lalu lanjut ke gerbang autentikasi.
 class _Root extends StatefulWidget {
   const _Root();
 
@@ -68,31 +68,41 @@ class _Root extends StatefulWidget {
 
 class _RootState extends State<_Root> {
   bool _ready = ShareService.hasPendingShortcut;
-  Timer? _timer;
+  Timer? _fallbackTimer;
 
   @override
   void initState() {
     super.initState();
     if (!_ready) {
-      _timer = Timer(const Duration(milliseconds: 450), () {
-        if (mounted) setState(() => _ready = true);
+      // Fallback pengaman agar aplikasi selalu lanjut jika terjadi interupsi lifecycle
+      _fallbackTimer = Timer(const Duration(milliseconds: 2200), () {
+        if (mounted && !_ready) setState(() => _ready = true);
       });
     }
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _fallbackTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 250),
+      duration: const Duration(milliseconds: 350),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
       child: _ready
           ? const AuthGate(key: ValueKey('gate'))
-          : const SplashPage(key: ValueKey('splash')),
+          : SplashPage(
+              key: const ValueKey('splash'),
+              onFinish: () {
+                if (mounted && !_ready) {
+                  setState(() => _ready = true);
+                }
+              },
+            ),
     );
   }
 }
@@ -218,23 +228,47 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       }
     });
 
-    final scheme = Theme.of(context).colorScheme;
     final colors = context.themeColors;
     final index = ref.watch(tabIndexProvider);
     _visitedTabs.add(index);
     final notifier = ref.read(tabIndexProvider.notifier);
 
-    Widget item(int i, IconData icon, IconData activeIcon, String label) {
+    Widget item(int i, IconData icon, IconData activeIcon, String label, {String? glassIcon}) {
       final selected = index == i;
-      final color = selected ? scheme.primary : scheme.onSurface.withValues(alpha: 0.5);
+      const activeColor = AppColors.dewMint;
+      final inactiveColor = AppColors.freshSage.withValues(alpha: 0.55);
+
+      final Widget iconWidget;
+      if (glassIcon != null) {
+        iconWidget = AnimatedOpacity(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          opacity: selected ? 1.0 : 0.38,
+          child: Image.asset(
+            glassIcon,
+            width: 26,
+            height: 26,
+            fit: BoxFit.contain,
+          ),
+        );
+      } else {
+        iconWidget = Icon(
+          selected ? activeIcon : icon,
+          color: selected ? activeColor : inactiveColor,
+          size: 26,
+        );
+      }
+
       return Expanded(
         child: InkWell(
           onTap: () => notifier.set(i),
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(selected ? activeIcon : icon, color: color, size: 24),
-              const SizedBox(height: 2),
+              iconWidget,
+              const SizedBox(height: 3),
               Text(
                 label,
                 maxLines: 1,
@@ -242,7 +276,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: color,
+                  color: selected ? activeColor : inactiveColor,
                 ),
               ),
             ],
@@ -327,10 +361,43 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
         floatingActionButton: FloatingActionButton(
           tooltip: context.tr('Add transaction'),
           shape: const CircleBorder(),
-          backgroundColor: colors.fabBackground,
-          foregroundColor: colors.fabForeground,
+          backgroundColor: Colors.transparent,
+          elevation: 6,
           onPressed: () => showTransactionForm(context),
-          child: const Icon(Icons.add, size: 28),
+          child: Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF38B271),
+                  Color(0xFF1E4F39),
+                ],
+              ),
+              border: Border.all(
+                color: AppColors.dewMint.withValues(alpha: 0.55),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.income.withValues(alpha: 0.40),
+                  blurRadius: 14,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Image.asset(
+                'assets/icons/glasshouse/add.png',
+                width: 32,
+                height: 32,
+              ),
+            ),
+          ),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         bottomNavigationBar: BottomAppBar(
@@ -338,36 +405,50 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
           notchMargin: 8,
           height: 66,
           padding: EdgeInsets.zero,
-          color: scheme.surface,
+          color: AppColors.mossShadow,
           surfaceTintColor: Colors.transparent,
-          child: Row(
-            children: [
-              item(
-                0,
-                colors.isCyberpunk ? Icons.grid_view_outlined : Icons.home_outlined,
-                colors.isCyberpunk ? Icons.grid_view_rounded : Icons.home,
-                context.tr('Home'),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: AppColors.dewMint.withValues(alpha: 0.16),
+                  width: 1.0,
+                ),
               ),
-              item(
-                1,
-                colors.isCyberpunk ? Icons.terminal_outlined : Icons.receipt_long_outlined,
-                colors.isCyberpunk ? Icons.terminal_rounded : Icons.receipt_long,
-                context.tr('Transactions'),
-              ),
-              const SizedBox(width: 64),
-              item(
-                2,
-                Icons.pie_chart_outline,
-                Icons.pie_chart,
-                context.tr('Budget'),
-              ),
-              item(
-                3,
-                colors.isCyberpunk ? Icons.query_stats_rounded : Icons.insights_outlined,
-                colors.isCyberpunk ? Icons.query_stats_rounded : Icons.insights,
-                context.tr('Insight'),
-              ),
-            ],
+            ),
+            child: Row(
+              children: [
+                item(
+                  0,
+                  Icons.home_outlined,
+                  Icons.home,
+                  context.tr('Home'),
+                  glassIcon: 'assets/icons/glasshouse/home.png',
+                ),
+                item(
+                  1,
+                  Icons.receipt_long_outlined,
+                  Icons.receipt_long,
+                  context.tr('Transactions'),
+                  glassIcon: 'assets/icons/glasshouse/receipt.png',
+                ),
+                const SizedBox(width: 64),
+                item(
+                  2,
+                  Icons.pie_chart_outline,
+                  Icons.pie_chart,
+                  context.tr('Budget'),
+                  glassIcon: 'assets/icons/glasshouse/savings.png',
+                ),
+                item(
+                  3,
+                  Icons.insights_outlined,
+                  Icons.insights,
+                  context.tr('Insight'),
+                  glassIcon: 'assets/icons/glasshouse/investment.png',
+                ),
+              ],
+            ),
           ),
         ),
       ),

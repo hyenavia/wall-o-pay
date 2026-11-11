@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/icons.dart';
 import '../../core/l10n.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/app_database.dart';
 import '../../data/providers.dart';
@@ -20,9 +21,14 @@ class CategoriesPage extends StatelessWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        appBar: AppBar(
+        appBar: secondaryAppBar(
+          context,
           title: Text(context.tr('Categories')),
           bottom: TabBar(
+            indicatorColor: AppColors.dewMint,
+            labelColor: AppColors.dewMint,
+            unselectedLabelColor: AppColors.freshSage,
+            indicatorWeight: 3,
             tabs: [
               Tab(text: context.tr('Expense')),
               Tab(text: context.tr('Income')),
@@ -66,20 +72,39 @@ class _CategoryList extends ConsumerWidget {
             message: context.tr('No categories yet.'),
           );
         }
-        return ListView.builder(
+        return ListView.separated(
           padding: const EdgeInsets.only(bottom: 96),
           itemCount: list.length,
+          separatorBuilder: (_, _) => Divider(
+            height: 1,
+            indent: 72,
+            endIndent: 16,
+            color: AppColors.borderOutline.withValues(alpha: 0.25),
+          ),
           itemBuilder: (context, i) {
             final c = list[i];
             final color = Color(c.colorValue);
             return ListTile(
               onTap: () => showCategoryForm(context, category: c),
-              leading: CircleAvatar(
-                backgroundColor: color.withValues(alpha: 0.15),
-                child: Icon(iconFor(c.icon), color: color),
+              leading: CategoryBadge(
+                icon: iconFor(c.icon),
+                color: color,
+                categoryKey: c.icon,
+                size: 44,
               ),
-              title: Text(context.tr(c.name)),
-              trailing: const Icon(Icons.edit_outlined, size: 20),
+              title: Text(
+                context.tr(c.name),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  color: AppColors.softIvory,
+                ),
+              ),
+              trailing: const Icon(
+                Icons.edit_outlined,
+                size: 20,
+                color: AppColors.freshSage,
+              ),
             );
           },
         );
@@ -94,6 +119,14 @@ Future<void> showCategoryForm(BuildContext context, {Category? category}) {
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
+    backgroundColor: AppColors.mossShadow,
+    shape: RoundedRectangleBorder(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      side: BorderSide(
+        color: AppColors.dewMint.withValues(alpha: 0.25),
+        width: 1,
+      ),
+    ),
     builder: (_) => CategoryForm(category: category),
   );
 }
@@ -251,12 +284,32 @@ class _CategoryFormState extends ConsumerState<CategoryForm> {
               Text(_error!, style: TextStyle(color: theme.colorScheme.error)),
             ],
             const SizedBox(height: 16),
-            FilledButton(onPressed: _save, child: Text(context.tr('Save'))),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.dewMint,
+                foregroundColor: AppColors.deepForest,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              onPressed: _save,
+              child: Text(
+                context.tr('Save'),
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
             if (!isNew)
-              TextButton.icon(
-                onPressed: _delete,
-                icon: const Icon(Icons.delete_outline),
-                label: Text(context.tr('Delete category')),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.expenseOnDark,
+                  ),
+                  onPressed: _delete,
+                  icon: const Icon(Icons.delete_outline),
+                  label: Text(context.tr('Delete category')),
+                ),
               ),
           ],
         ),

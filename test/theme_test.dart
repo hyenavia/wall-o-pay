@@ -19,11 +19,17 @@ void main() {
       sp = await SharedPreferences.getInstance();
     });
     test('Botanical theme tokens, color scheme, and organic rounded shapes are configured correctly', () {
-      final theme = buildTheme('botanical');
+      final theme = buildTheme();
       final colors = theme.extension<AppThemeColors>()!;
 
-      expect(colors.isCyberpunk, isFalse);
+      expect(colors, AppThemeColors.botanical);
+      expect(colors.primary, AppColors.sage);
+      expect(colors.heroBackground, AppColors.deepForest);
+      expect(colors.income, AppColors.incomeOnDark);
+      expect(colors.expense, AppColors.expenseOnDark);
+      expect(colors.warning, AppColors.warning);
       expect(theme.colorScheme.primary, colors.primary);
+      expect(theme.colorScheme.secondary, colors.primary);
       expect(theme.colorScheme.error, colors.expense);
       expect(theme.dividerColor, colors.borderOutline);
       expect(theme.dividerTheme.color, colors.borderOutline);
@@ -32,58 +38,27 @@ void main() {
       expect(theme.floatingActionButtonTheme.shape, isA<RoundedRectangleBorder>());
     });
 
-    test('Cyberpunk theme tokens, neon color scheme, and beveled HUD shapes are configured correctly', () {
-      final theme = buildTheme('cyberpunk');
-      final colors = theme.extension<AppThemeColors>()!;
-
-      expect(colors.isCyberpunk, isTrue);
-      expect(colors.primary, const Color(0xFF00F0FF));
-      expect(colors.expense, const Color(0xFFFF2A6D));
-      expect(colors.income, const Color(0xFF00FF9D));
-      expect(colors.warning, const Color(0xFFFCEE0A));
-      expect(theme.colorScheme.primary, colors.primary);
-      expect(theme.colorScheme.secondary, colors.secondaryNeon);
-      expect(theme.colorScheme.error, colors.expense);
-      expect(theme.dividerColor, colors.borderOutline);
-      expect(theme.dialogTheme.shape, isA<BeveledRectangleBorder>());
-      expect(theme.snackBarTheme.shape, isA<BeveledRectangleBorder>());
-      expect(theme.floatingActionButtonTheme.shape, isA<BeveledRectangleBorder>());
-    });
-
     test('budgetColor dynamically responds to ratio and theme colors', () {
-      final cyberColors = AppThemeColors.cyberpunk;
+      const botanicalColors = AppThemeColors.botanical;
       const scheme = ColorScheme.dark();
 
-      expect(budgetColor(0.5, scheme, cyberColors), scheme.primary);
-      expect(budgetColor(0.85, scheme, cyberColors), cyberColors.warning);
-      expect(budgetColor(1.2, scheme, cyberColors), cyberColors.expense);
-
-      final botanicalColors = AppThemeColors.botanical;
+      expect(budgetColor(0.5, scheme, botanicalColors), scheme.primary);
       expect(budgetColor(0.85, scheme, botanicalColors), botanicalColors.warning);
       expect(budgetColor(1.2, scheme, botanicalColors), botanicalColors.expense);
     });
 
-    test('appMoneyStyle applies Share Tech Mono in Cyberpunk and Plus Jakarta Sans in Botanical', () {
-      final cyberStyle = appMoneyStyle(
-        null,
-        isCyberpunk: true,
-        fontSize: 16,
-        fontWeight: FontWeight.w700,
-      );
-      expect(cyberStyle.fontFamily, contains('ShareTechMono'));
-      expect(cyberStyle.fontFeatures, contains(const FontFeature.tabularFigures()));
-
+    test('appMoneyStyle applies DM Sans with tabular figures', () {
       final botanicalStyle = appMoneyStyle(
         null,
-        isCyberpunk: false,
         fontSize: 16,
         fontWeight: FontWeight.w700,
       );
-      expect(botanicalStyle.fontFamily, contains('PlusJakartaSans'));
+      expect(botanicalStyle.fontFamily, contains('DMSans'));
+      expect(botanicalStyle.fontFeatures, contains(const FontFeature.tabularFigures()));
     });
 
-    test('Cyberpunk Switch and Slider theme styles are configured', () {
-      final theme = buildTheme('cyberpunk');
+    test('Botanical Switch and Slider theme styles are configured', () {
+      final theme = buildTheme();
       final colors = theme.extension<AppThemeColors>()!;
 
       expect(theme.switchTheme.thumbColor?.resolve({WidgetState.selected}), colors.primary);
@@ -103,13 +78,12 @@ void main() {
       expect(find.text('Rp 1.500.000'), findsOneWidget);
     });
 
-    testWidgets('UserAvatar renders CircleAvatar in Botanical and Chamfered HUD badge in Cyberpunk', (tester) async {
-      // 1. Botanical mode renders CircleAvatar
+    testWidgets('UserAvatar renders CircleAvatar in Botanical theme', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [sharedPreferencesProvider.overrideWithValue(sp)],
           child: MaterialApp(
-            theme: buildTheme('botanical'),
+            theme: buildTheme(),
             home: const Scaffold(
               body: UserAvatar(size: 80),
             ),
@@ -118,27 +92,6 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(CircleAvatar), findsOneWidget);
-
-      // 2. Cyberpunk mode renders chamfered HUD badge with BeveledRectangleBorder and ID tag
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [sharedPreferencesProvider.overrideWithValue(sp)],
-          child: MaterialApp(
-            theme: buildTheme('cyberpunk'),
-            home: const Scaffold(
-              body: UserAvatar(size: 80),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(CircleAvatar), findsNothing);
-      expect(find.text('ID'), findsOneWidget);
-
-      // Verify ClipPath with BeveledRectangleBorder
-      final clipPath = tester.widget<ClipPath>(find.byType(ClipPath));
-      final clipper = clipPath.clipper as ShapeBorderClipper;
-      expect(clipper.shape, isA<BeveledRectangleBorder>());
     });
   });
 }

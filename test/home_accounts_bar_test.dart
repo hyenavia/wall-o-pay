@@ -118,7 +118,8 @@ void main() {
       expect(find.byType(AccountsPage), findsOneWidget);
     });
 
-    testWidgets('Cyberpunk mode renders 3-line header with status, cycle, and name', (tester) async {
+    testWidgets('Botanical header renders time-of-day greeting and display name', (tester) async {
+      AppLocale.code = 'en';
       SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
 
@@ -133,7 +134,7 @@ void main() {
             displayNameProvider.overrideWithValue('Olivia Adeline'),
           ],
           child: MaterialApp(
-            theme: buildTheme('cyberpunk'),
+            theme: buildTheme(),
             home: const HomePage(),
           ),
         ),
@@ -143,13 +144,13 @@ void main() {
 
       expect(find.text('Olivia Adeline'), findsOneWidget);
       expect(
-        find.byWidgetPredicate((w) =>
-            w is Text &&
-            (w.data == 'BANGUN, CHOOM' ||
-                w.data == 'NETRUNNER ONLINE' ||
-                w.data == 'NIGHT CITY MEMANGGIL' ||
-                w.data == 'WAKE UP, CHOOM' ||
-                w.data == 'NIGHT CITY CALLS')),
+        find.byWidgetPredicate(
+          (w) =>
+              w is Text &&
+              (w.data == 'Good morning' ||
+                  w.data == 'Good afternoon' ||
+                  w.data == 'Good evening'),
+        ),
         findsOneWidget,
       );
     });

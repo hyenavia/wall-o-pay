@@ -1,4 +1,4 @@
-# Wall o' Pay 🌿⚡
+# Wall o' Pay 🌿
 
 <div align="center">
 
@@ -11,7 +11,7 @@
 [![Security](https://img.shields.io/badge/Security-Keystore%20%7C%20Biometrics-38B271?logo=android&logoColor=white)](https://github.com/hyenavia/wall-o-pay)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.2.0-234B3B.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-2.5.6-234B3B.svg)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://hyenavia.github.io/wall-o-pay/) • [📥 Download Latest APK](https://github.com/hyenavia/wall-o-pay/releases/latest) • [📐 Architecture Guide](ARCHITECTURE.md) • [📋 Changelog](CHANGELOG.md)
 
@@ -27,15 +27,17 @@ When you're ready to back up or sync across devices, Wall o' Pay offers optional
 
 ---
 
-## 🚀 What's New in v2.0 (Major Release)
+## 🚀 Highlights in Latest Release (v2.5)
 
-Version 2.0 brings major architectural enhancements, hardware-grade security, and a dual aesthetic system:
+Wall o' Pay v2.5 combines hardware-grade security, smooth performance, and the enchanting **Enchanted Glasshouse** visual identity:
 
+- 🏛️ **Enchanted Glasshouse Visual Identity:** Modern botanical conservatory aesthetic featuring translucent emerald glassmorphic surfaces, specular glass highlights, 24 bespoke 3D botanical glass icons, and vaulted architectural accents.
+- 🌿 **Atmospheric Lock Screen & Profile Wreath:** Serene sunlit glasshouse background with ambient lighting on `LockScreen` and an intricate botanical glass wreath frame for user profile photos.
+- 🔤 **Outfit & DM Sans Tabular Typography:** Premium editorial headings powered by Google Fonts `Outfit` paired with `DM Sans` tabular figures for financial numbers.
 - 🛡️ **Universal Biometric Unlock:** Instant fingerprint and face recognition (`local_auth`) coupled with a 6-digit PIN pad. Authenticate in a fraction of a second when opening the app.
 - 🔐 **Hardware-Backed Secret Storage:** Cryptographic migration of PIN hashes, salts, and anti-tamper lockout counters into the **Android Keystore** (`EncryptedSharedPreferences`) and **iOS Keychain** via `FlutterSecureStorage`.
 - 🔑 **Key-Stretched Security (v2 Salted HMAC-SHA256):** Upgraded PIN verification to a 2,048-iteration salted HMAC-SHA256 scheme with persistent exponential backoff lockout protection (30s → 120s → 300s).
-- 🎭 **Dual Signature Themes:** Choose between the soothing emerald depths of **Botanical Forest** or the high-contrast neon energy of **Cyberpunk Edgerunners**, complete with custom vector canvas decorations.
-- ⚡ **60 / 120 FPS Rendering Pipeline:** Optimized vector painters wrapped with `RepaintBoundary(isComplex: true)`, eliminated offscreen `saveLayer` masks, implemented lazy sliver feeds, and introduced 150ms search debounce for buttery-smooth scrolling.
+- ⚡ **60 / 120 FPS Rendering & Quick Logging:** Parallel cold-start initialization, lazy tab mounting, SQL-aggregated wallet balances, Android home screen quick shortcuts, cashflow calendar, and 150ms search debounce.
 - 🧹 **Anti-Data-Leakage & Privacy Hardening:** Automatic purging of temporary receipt attachments, shared files, and exported documents on logout or data reset, backed by granular Firestore Security Rules.
 
 ---

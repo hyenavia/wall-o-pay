@@ -459,7 +459,6 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final wallets = ref.watch(walletsProvider).maybeWhen(
           data: (list) => list,
           orElse: () => const <Wallet>[],
@@ -486,9 +485,31 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              context.tr(isEdit ? 'Edit transaction' : 'Add transaction'),
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            Row(
+              children: [
+                Image.asset(
+                  isEdit ? 'assets/icons/glasshouse/other.png' : 'assets/icons/glasshouse/add.png',
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    context.tr(isEdit ? 'Edit transaction' : 'Add transaction'),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.softIvory,
+                    ),
+                  ),
+                ),
+                if (isEdit)
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, color: AppColors.expenseOnDark),
+                    tooltip: context.tr('Delete transaction'),
+                    onPressed: _delete,
+                  ),
+              ],
             ),
             const SizedBox(height: 16),
             if (widget.entry == null && templates.isNotEmpty) ...[
@@ -501,8 +522,11 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: ActionChip(
-                          avatar: const Icon(Icons.flash_on, size: 16),
+                          avatar: const Icon(Icons.flash_on, size: 16, color: AppColors.dewMint),
                           label: Text(context.tr(t.name)),
+                          backgroundColor: AppColors.surfaceContainer.withValues(alpha: 0.65),
+                          side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.18)),
+                          labelStyle: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.softIvory),
                           onPressed: () => _applyTemplate(t),
                         ),
                       ),
@@ -538,13 +562,24 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
               controller: _amount,
               keyboardType: TextInputType.number,
               inputFormatters: amountFormatters(),
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+              style: context.moneyStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: _type == TxType.expense
+                    ? AppColors.expenseOnDark
+                    : (_type == TxType.income ? AppColors.incomeOnDark : AppColors.dewMint),
+              ),
               decoration: appInput(
                 context,
                 label: context.tr('Amount'),
                 prefixText: 'Rp ',
                 suffixIcon: IconButton(
-                  icon: Icon(Icons.calculate_outlined, color: context.themeColors.primary),
+                  icon: Image.asset(
+                    'assets/icons/glasshouse/calculator.png',
+                    width: 24,
+                    height: 24,
+                    fit: BoxFit.contain,
+                  ),
                   tooltip: context.tr('Calculator'),
                   onPressed: _openCalculator,
                 ),
@@ -611,6 +646,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   for (final w in wallets)
                     AppChip(
                       icon: iconFor(w.icon),
+                      categoryKey: w.icon,
                       label: context.tr(w.name),
                       selected: (_walletId ?? (wallets.isNotEmpty ? wallets.first.id : '')) == w.id,
                       onSelected: () => setState(() => _walletId = w.id),
@@ -627,6 +663,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   for (final w in wallets)
                     AppChip(
                       icon: iconFor(w.icon),
+                      categoryKey: w.icon,
                       label: context.tr(w.name),
                       selected: (_toWalletId ?? (wallets.length > 1 ? wallets[1].id : '')) == w.id,
                       onSelected: () => setState(() => _toWalletId = w.id),
@@ -720,6 +757,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   for (final c in cats)
                     AppChip(
                       icon: iconFor(c.icon),
+                      categoryKey: c.icon,
                       label: context.tr(c.name),
                       selected: _categoryId == c.id,
                       onSelected: () => setState(() => _categoryId = c.id),
@@ -741,6 +779,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   for (final w in wallets)
                     AppChip(
                       icon: iconFor(w.icon),
+                      categoryKey: w.icon,
                       label: context.tr(w.name),
                       selected: (_walletId ?? (wallets.isNotEmpty ? wallets.first.id : '')) == w.id,
                       onSelected: () => setState(() => _walletId = w.id),
@@ -758,16 +797,16 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
             const SizedBox(height: 14),
             InkWell(
               onTap: () => setState(() => _showMoreDetails = !_showMoreDetails),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(14),
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest.withValues(alpha: 0.25),
-                  borderRadius: BorderRadius.circular(12),
+                  color: AppColors.surfaceContainer.withValues(alpha: 0.60),
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(
                     color: _showMoreDetails
-                        ? context.themeColors.heroBackground.withValues(alpha: 0.4)
-                        : Colors.transparent,
+                        ? AppColors.dewMint.withValues(alpha: 0.35)
+                        : AppColors.dewMint.withValues(alpha: 0.14),
                   ),
                 ),
                 child: Row(
@@ -776,7 +815,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     Icon(
                       _showMoreDetails ? Icons.expand_less : Icons.tune_rounded,
                       size: 18,
-                      color: context.themeColors.primary,
+                      color: AppColors.freshSage,
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -784,8 +823,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                           ? context.tr('Hide extra details')
                           : context.tr('More details (Date, receipt...)'),
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: context.themeColors.primary,
-                        fontWeight: FontWeight.w600,
+                        color: AppColors.dewMint,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ],
@@ -795,12 +834,30 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
 
             if (_showMoreDetails) ...[
               const SizedBox(height: 14),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.calendar_today_outlined),
-                title: Text(dateLabel(_date)),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: _pickDate,
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainer.withValues(alpha: 0.50),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.dewMint.withValues(alpha: 0.14)),
+                ),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                  leading: Image.asset(
+                    'assets/icons/glasshouse/calendar.png',
+                    width: 22,
+                    height: 22,
+                    fit: BoxFit.contain,
+                  ),
+                  title: Text(
+                    dateLabel(_date),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.softIvory,
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, color: AppColors.freshSage),
+                  onTap: _pickDate,
+                ),
               ),
               if (_type == TxType.expense) ...[
                 const SizedBox(height: 16),
@@ -893,9 +950,9 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                    color: AppColors.surfaceContainer.withValues(alpha: 0.65),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: context.themeColors.borderOutline),
+                    border: Border.all(color: AppColors.dewMint.withValues(alpha: 0.20)),
                   ),
                   child: Row(
                     children: [
@@ -918,20 +975,23 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                           children: [
                             Text(
                               context.tr('Receipt Attached'),
-                              style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.softIvory,
+                              ),
                             ),
                             GestureDetector(
                               onTap: () => _showReceiptPreview(context, _receiptPath!),
                               child: Text(
                                 context.tr('Tap to preview'),
-                                style: theme.textTheme.bodySmall?.copyWith(color: context.themeColors.primary),
+                                style: theme.textTheme.bodySmall?.copyWith(color: AppColors.dewMint),
                               ),
                             ),
                           ],
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.delete_outline, color: context.themeColors.expense),
+                        icon: const Icon(Icons.delete_outline, color: AppColors.expenseOnDark),
                         tooltip: context.tr('Remove receipt'),
                         onPressed: () => setState(() => _receiptPath = null),
                       ),
@@ -945,7 +1005,10 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.18)),
+                          backgroundColor: AppColors.surfaceContainer.withValues(alpha: 0.50),
+                          foregroundColor: AppColors.dewMint,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
                         onPressed: () => _pickReceipt(ImageSource.camera),
                         icon: const Icon(Icons.camera_alt_outlined, size: 20),
@@ -957,7 +1020,10 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.18)),
+                          backgroundColor: AppColors.surfaceContainer.withValues(alpha: 0.50),
+                          foregroundColor: AppColors.dewMint,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
                         onPressed: () => _pickReceipt(ImageSource.gallery),
                         icon: const Icon(Icons.photo_library_outlined, size: 20),
@@ -971,39 +1037,82 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 const SizedBox(height: 16),
                 OutlinedButton.icon(
                   onPressed: _saveAsTemplate,
-                  icon: const Icon(Icons.bolt, size: 18),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.18)),
+                    backgroundColor: AppColors.surfaceContainer.withValues(alpha: 0.40),
+                    foregroundColor: AppColors.freshSage,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  ),
+                  icon: const Icon(Icons.bolt, size: 18, color: AppColors.dewMint),
                   label: Text(context.tr('Save as template')),
                 ),
               ],
             ],
             if (_error != null) ...[
               const SizedBox(height: 12),
-              Text(_error!, style: TextStyle(color: context.themeColors.expense)),
+              Text(_error!, style: const TextStyle(color: AppColors.expenseOnDark, fontWeight: FontWeight.w600)),
             ],
             const SizedBox(height: 20),
-            FilledButton(
-              onPressed: _save,
-              style: FilledButton.styleFrom(
-                backgroundColor: _type == TxType.transfer
-                    ? (context.isCyberpunk ? context.themeColors.secondaryNeon : const Color(0xFF00897B))
-                    : (_type == TxType.income ? context.themeColors.income : context.themeColors.expense),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColors.dewMint.withValues(alpha: 0.40),
+                  width: 1.2,
+                ),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: _type == TxType.transfer
+                      ? [const Color(0xFF00A896), const Color(0xFF026A5F)]
+                      : (_type == TxType.income
+                          ? [const Color(0xFF2E8B57), const Color(0xFF1E633E)]
+                          : [const Color(0xFFD64545), const Color(0xFF9E2A2B)]),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.35),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              child: Text(
-                _type == TxType.transfer
-                    ? context.tr('Transfer Funds')
-                    : context.tr('Save'),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: _save,
+                  borderRadius: BorderRadius.circular(16),
+                  splashColor: Colors.white24,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    child: Center(
+                      child: Text(
+                        _type == TxType.transfer
+                            ? context.tr('Transfer Funds')
+                            : context.tr('Save'),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-            if (isEdit)
+            if (isEdit) ...[
+              const SizedBox(height: 10),
               TextButton.icon(
                 onPressed: _delete,
-                icon: const Icon(Icons.delete_outline),
-                label: Text(context.tr('Delete transaction')),
+                icon: const Icon(Icons.delete_outline, color: AppColors.expenseOnDark),
+                label: Text(
+                  context.tr('Delete transaction'),
+                  style: const TextStyle(color: AppColors.expenseOnDark, fontWeight: FontWeight.w700),
+                ),
               ),
+            ],
           ],
         ),
       ),
@@ -1019,21 +1128,30 @@ class _QuickAmountChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Material(
-      color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceContainer.withValues(alpha: 0.70),
         borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: context.themeColors.primary,
+        border: Border.all(
+          color: AppColors.dewMint.withValues(alpha: 0.18),
+          width: 1.0,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          splashColor: AppColors.dewMint.withValues(alpha: 0.15),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppColors.dewMint,
+              ),
             ),
           ),
         ),

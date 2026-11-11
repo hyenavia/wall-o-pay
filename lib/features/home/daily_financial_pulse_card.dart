@@ -66,44 +66,35 @@ class DailyFinancialPulseCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final muted = scheme.onSurface.withValues(alpha: 0.65);
     final colors = context.themeColors;
-    final isCyber = context.isCyberpunk;
     final safeColor = colors.primary;
     final warningColor = colors.warning;
-    final limitColor = isCyber ? colors.expense : const Color(0xFFD65D5D);
+    const limitColor = Color(0xFFD65D5D);
 
     final currentTier = tier;
 
     final (statusColor, statusIcon, labelKey, titleKey, messageKey) = switch (currentTier) {
       DailyHealthTier.safe => (
           safeColor,
-          isCyber ? Icons.memory_rounded : Icons.spa_rounded,
-          isCyber ? 'GRID STABLE' : 'Safe',
-          isCyber ? 'Cyber Telemetry Nominal' : 'Finances on Track',
-          isCyber
-              ? (txCount == 0
-                  ? 'Grid online. Ready for telemetry stream.'
-                  : 'Credit consumption optimal. Subroutines running smooth!')
-              : (txCount == 0
-                  ? 'Ready for this period. Log expenses to track your daily pace.'
-                  : 'Spending is well within limits. Keep up the mindful pace!'),
+          Icons.spa_rounded,
+          'Safe',
+          'Finances on Track',
+          txCount == 0
+              ? 'Ready for this period. Log expenses to track your daily pace.'
+              : 'Spending is well within limits. Keep up the mindful pace!',
         ),
       DailyHealthTier.caution => (
           warningColor,
-          isCyber ? Icons.electric_bolt_rounded : Icons.speed_rounded,
-          isCyber ? 'BANDWIDTH HIGH' : 'Caution',
-          isCyber ? 'Spending Velocity High' : 'Spending Pace is High',
-          isCyber
-              ? 'Daily burn rate has passed telemetry threshold. Balance it tomorrow.'
-              : 'Today\'s spending has passed your daily quota. Balance it out tomorrow.',
+          Icons.speed_rounded,
+          'Caution',
+          'Spending Pace is High',
+          'Today\'s spending has passed your daily quota. Balance it out tomorrow.',
         ),
       DailyHealthTier.limit => (
           limitColor,
-          isCyber ? Icons.warning_amber_rounded : Icons.shield_outlined,
-          isCyber ? 'CORE OVERLOAD' : 'Limit',
-          isCyber ? 'Period Capacity Reached' : 'Spending Limit Reached',
-          isCyber
-              ? 'Period credit capacity reached. Limit output to vital nodes only.'
-              : 'Expenses have reached the period limit. Focus on essentials only.',
+          Icons.shield_outlined,
+          'Limit',
+          'Spending Limit Reached',
+          'Expenses have reached the period limit. Focus on essentials only.',
         ),
     };
 
@@ -115,52 +106,36 @@ class DailyFinancialPulseCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      decoration: isCyber
-          ? ShapeDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  statusColor.withValues(alpha: 0.18),
-                  scheme.surface,
-                ],
-              ),
-              shape: BeveledRectangleBorder(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(8),
-                  topRight: Radius.circular(16),
-                  bottomLeft: Radius.circular(16),
-                  bottomRight: Radius.circular(8),
-                ),
-                side: BorderSide(
-                  color: statusColor.withValues(alpha: 0.50),
-                  width: 1.4,
-                ),
-              ),
-              shadows: [
-                BoxShadow(
-                  color: statusColor.withValues(alpha: 0.20),
-                  blurRadius: 18,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            )
-          : BoxDecoration(
-              color: scheme.surface,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: statusColor.withValues(alpha: 0.35),
-                width: 1.2,
-              ),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  statusColor.withValues(alpha: 0.12),
-                  scheme.surface,
-                ],
-              ),
-            ),
+      decoration: BoxDecoration(
+        color: AppColors.cardSurface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.dewMint.withValues(alpha: 0.20),
+          width: 1.0,
+        ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            statusColor.withValues(alpha: 0.16),
+            AppColors.cardSurface.withValues(alpha: 0.95),
+            AppColors.surfaceContainer.withValues(alpha: 0.88),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.22),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: statusColor.withValues(alpha: 0.12),
+            blurRadius: 10,
+            spreadRadius: -2,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -170,31 +145,19 @@ class DailyFinancialPulseCard extends StatelessWidget {
                 child: Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () => _showPhaseInfoSheet(context, isCyber),
+                    onTap: () => _showPhaseInfoSheet(context),
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: isCyber
-                          ? ShapeDecoration(
-                              color: statusColor.withValues(alpha: 0.18),
-                              shape: BeveledRectangleBorder(
-                                borderRadius: const BorderRadius.all(Radius.circular(5)),
-                                side: BorderSide(color: statusColor.withValues(alpha: 0.45)),
-                              ),
-                            )
-                          : BoxDecoration(
-                              color: statusColor.withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: statusColor.withValues(alpha: 0.4)),
-                            ),
+                      decoration: BoxDecoration(
+                        color: statusColor.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: statusColor.withValues(alpha: 0.4)),
+                      ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          _PulsingBeacon(
-                            icon: statusIcon,
-                            color: statusColor,
-                            isCyber: isCyber,
-                          ),
+                          Icon(statusIcon, size: 14, color: statusColor),
                           const SizedBox(width: 5),
                           Flexible(
                             child: Text(
@@ -265,28 +228,22 @@ class DailyFinancialPulseCard extends StatelessWidget {
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: isCyber
-                      ? ShapeDecoration(
-                          color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
-                          shape: const BeveledRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(6)),
-                            side: BorderSide(color: Colors.white10),
-                          ),
-                        )
-                      : BoxDecoration(
-                          color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainer.withValues(alpha: 0.60),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AppColors.dewMint.withValues(alpha: 0.12),
+                      width: 1.0,
+                    ),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        context.tr(isCyber ? 'Daily Bandwidth' : 'Safe daily quota'),
+                        context.tr('Safe daily quota'),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: muted,
                           fontSize: 11,
-                          fontWeight: isCyber ? FontWeight.w600 : null,
-                          letterSpacing: isCyber ? 0.6 : null,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -306,28 +263,22 @@ class DailyFinancialPulseCard extends StatelessWidget {
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: isCyber
-                      ? ShapeDecoration(
-                          color: scheme.surfaceContainerHighest.withValues(alpha: 0.35),
-                          shape: const BeveledRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(6)),
-                            side: BorderSide(color: Colors.white10),
-                          ),
-                        )
-                      : BoxDecoration(
-                          color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceContainer.withValues(alpha: 0.60),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AppColors.dewMint.withValues(alpha: 0.12),
+                      width: 1.0,
+                    ),
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        context.tr(isCyber ? 'Burned today' : 'Spent today'),
+                        context.tr('Spent today'),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: muted,
                           fontSize: 11,
-                          fontWeight: isCyber ? FontWeight.w600 : null,
-                          letterSpacing: isCyber ? 0.6 : null,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -349,7 +300,7 @@ class DailyFinancialPulseCard extends StatelessWidget {
             const SizedBox(height: 12),
             AppProgressBar(
               value: quotaRatio,
-              color: isExceeded ? warningColor : (isCyber ? colors.primary : AppColors.sage),
+              color: isExceeded ? warningColor : AppColors.sage,
               backgroundColor: scheme.surfaceContainerHighest,
               height: 6,
             ),
@@ -360,14 +311,10 @@ class DailyFinancialPulseCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     isExceeded
-                        ? context.tr(isCyber ? 'Bandwidth exceeded' : 'Quota exceeded')
-                        : (isCyber
-                            ? context.tr('{pct}% bandwidth consumed', {
-                                'pct': (todayExpense * 100 / dailyAllowance).round(),
-                              })
-                            : context.tr('{pct}% of quota', {
-                                'pct': (todayExpense * 100 / dailyAllowance).round(),
-                              })),
+                        ? context.tr('Quota exceeded')
+                        : context.tr('{pct}% of quota', {
+                            'pct': (todayExpense * 100 / dailyAllowance).round(),
+                          }),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -397,8 +344,8 @@ class DailyFinancialPulseCard extends StatelessWidget {
               final pct = (budgetSpent * 100 / totalBudget).round();
               final overAmount = budgetSpent - totalBudget;
               final statusColor = isOver
-                  ? (isCyber ? colors.expense : AppColors.expenseOnDark)
-                  : ((budgetSpent / totalBudget) >= 0.85 ? warningColor : (isCyber ? colors.primary : AppColors.sage));
+                  ? AppColors.expenseOnDark
+                  : ((budgetSpent / totalBudget) >= 0.85 ? warningColor : AppColors.sage);
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -410,7 +357,7 @@ class DailyFinancialPulseCard extends StatelessWidget {
                         child: Text(
                           budgetTitle != null
                               ? context.tr(budgetTitle!)
-                              : context.tr(isCyber ? 'System Budget' : 'Period Budget'),
+                              : context.tr('Period Budget'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
@@ -455,8 +402,8 @@ class DailyFinancialPulseCard extends StatelessWidget {
                   AppProgressBar(
                     value: (budgetSpent / totalBudget).clamp(0.0, 1.0),
                     color: isOver
-                        ? (isCyber ? colors.expense : AppColors.expense)
-                        : ((budgetSpent / totalBudget) >= 0.85 ? warningColor : (isCyber ? colors.primary : AppColors.sage)),
+                        ? AppColors.expense
+                        : ((budgetSpent / totalBudget) >= 0.85 ? warningColor : AppColors.sage),
                     backgroundColor: scheme.surfaceContainerHighest,
                     height: 6,
                   ),
@@ -489,38 +436,25 @@ class DailyFinancialPulseCard extends StatelessWidget {
   }
 }
 
-void _showPhaseInfoSheet(BuildContext context, bool isCyber) {
+void _showPhaseInfoSheet(BuildContext context) {
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: isCyber ? const Color(0xFF0D1022) : null,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (ctx) => _PhaseInfoSheet(isCyber: isCyber),
+    builder: (ctx) => const _PhaseInfoSheet(),
   );
 }
 
 class _PhaseInfoSheet extends StatelessWidget {
-  const _PhaseInfoSheet({required this.isCyber});
-
-  final bool isCyber;
+  const _PhaseInfoSheet();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final colors = context.themeColors;
-
-    final primaryAccent = colors.primary;
-    final primaryIcon = isCyber ? Icons.memory_rounded : Icons.spa_rounded;
-
-    final title = isCyber
-        ? context.tr('GRID TELEMETRY PROTOCOL')
-        : context.tr('Daily Financial Pulse Guide');
-    final subtitle = isCyber
-        ? context.tr('Active telemetry monitoring of your daily eddies & credit bandwidth, choom.')
-        : context.tr('Guide to the 3 daily spending phases to keep your finances healthy.');
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -534,7 +468,7 @@ class _PhaseInfoSheet extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: isCyber ? colors.primary.withValues(alpha: 0.4) : Colors.white24,
+                  color: Colors.white24,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -545,21 +479,10 @@ class _PhaseInfoSheet extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: primaryAccent.withValues(alpha: isCyber ? 0.2 : 0.15),
+                    color: colors.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(14),
-                    border: isCyber
-                        ? Border.all(color: colors.primary.withValues(alpha: 0.5))
-                        : null,
-                    boxShadow: isCyber
-                        ? [
-                            BoxShadow(
-                              color: colors.primary.withValues(alpha: 0.25),
-                              blurRadius: 12,
-                            ),
-                          ]
-                        : null,
                   ),
-                  child: Icon(primaryIcon, color: isCyber ? colors.primary : AppColors.sage, size: 24),
+                  child: const Icon(Icons.spa_rounded, color: AppColors.sage, size: 24),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -567,15 +490,14 @@ class _PhaseInfoSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        title,
+                        context.tr('Daily Financial Pulse Guide'),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
-                          letterSpacing: isCyber ? 0.6 : 0.0,
                         ),
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        subtitle,
+                        context.tr('Guide to the 3 daily spending phases to keep your finances healthy.'),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: scheme.onSurface.withValues(alpha: 0.7),
                           height: 1.3,
@@ -588,51 +510,30 @@ class _PhaseInfoSheet extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             _PhaseDetailTile(
-              isCyber: isCyber,
-              color: isCyber ? colors.primary : AppColors.sage,
-              icon: isCyber ? Icons.memory_rounded : Icons.spa_rounded,
-              phaseBadge: isCyber ? context.tr('GRID STABLE') : context.tr('Safe'),
-              phaseTitle: isCyber
-                  ? context.tr('Phase 01 // Subroutines Nominal')
-                  : context.tr('Phase 1: Safe Financial Health'),
-              description: isCyber
-                  ? context.tr('Optimal eddies consumption well below daily bandwidth. Subroutines running smooth, choom!')
-                  : context.tr('Spending is well within limits. Keep up the mindful pace!'),
-              triggerNote: isCyber
-                  ? context.tr('TRIGGER: Burn rate < daily bandwidth & budget healthy.')
-                  : context.tr('Condition: Daily spending < safe quota & budget healthy.'),
+              color: AppColors.sage,
+              icon: Icons.spa_rounded,
+              phaseBadge: context.tr('Safe'),
+              phaseTitle: context.tr('Phase 1: Safe Financial Health'),
+              description: context.tr('Spending is well within limits. Keep up the mindful pace!'),
+              triggerNote: context.tr('Condition: Daily spending < safe quota & budget healthy.'),
             ),
             const SizedBox(height: 12),
             _PhaseDetailTile(
-              isCyber: isCyber,
-              color: isCyber ? colors.warning : AppColors.warning,
-              icon: isCyber ? Icons.electric_bolt_rounded : Icons.speed_rounded,
-              phaseBadge: isCyber ? context.tr('BANDWIDTH HIGH') : context.tr('Caution'),
-              phaseTitle: isCyber
-                  ? context.tr('Phase 02 // Velocity Warning')
-                  : context.tr('Phase 2: Spending Velocity Warning'),
-              description: isCyber
-                  ? context.tr('Daily burn rate has passed telemetry threshold. Balance it tomorrow before core overloads!')
-                  : context.tr('Today\'s spending has passed your daily quota. Balance it out tomorrow.'),
-              triggerNote: isCyber
-                  ? context.tr('TRIGGER: Daily burn > bandwidth OR period capacity >= 85%.')
-                  : context.tr('Condition: Daily spending > quota OR capacity >= 85%.'),
+              color: AppColors.warning,
+              icon: Icons.speed_rounded,
+              phaseBadge: context.tr('Caution'),
+              phaseTitle: context.tr('Phase 2: Spending Velocity Warning'),
+              description: context.tr('Today\'s spending has passed your daily quota. Balance it out tomorrow.'),
+              triggerNote: context.tr('Condition: Daily spending > quota OR capacity >= 85%.'),
             ),
             const SizedBox(height: 12),
             _PhaseDetailTile(
-              isCyber: isCyber,
-              color: isCyber ? colors.expense : const Color(0xFFD65D5D),
-              icon: isCyber ? Icons.warning_amber_rounded : Icons.shield_outlined,
-              phaseBadge: isCyber ? context.tr('CORE OVERLOAD') : context.tr('Limit'),
-              phaseTitle: isCyber
-                  ? context.tr('Phase 03 // Critical Capacity')
-                  : context.tr('Phase 3: Budget Limit Reached'),
-              description: isCyber
-                  ? context.tr('Period credit capacity reached. Limit output to vital nodes only, don\'t flatline!')
-                  : context.tr('Expenses have reached the period limit. Focus on essentials only.'),
-              triggerNote: isCyber
-                  ? context.tr('TRIGGER: Period budget exhausted (100%) OR balance <= 0.')
-                  : context.tr('Condition: Period budget exhausted (100%) OR balance <= 0.'),
+              color: const Color(0xFFD65D5D),
+              icon: Icons.shield_outlined,
+              phaseBadge: context.tr('Limit'),
+              phaseTitle: context.tr('Phase 3: Budget Limit Reached'),
+              description: context.tr('Expenses have reached the period limit. Focus on essentials only.'),
+              triggerNote: context.tr('Condition: Period budget exhausted (100%) OR balance <= 0.'),
             ),
             const SizedBox(height: 20),
             SizedBox(
@@ -640,17 +541,14 @@ class _PhaseInfoSheet extends StatelessWidget {
               height: 48,
               child: FilledButton(
                 style: FilledButton.styleFrom(
-                  backgroundColor: isCyber ? colors.primary : scheme.primary,
-                  foregroundColor: isCyber ? Colors.black : scheme.onPrimary,
+                  backgroundColor: scheme.primary,
+                  foregroundColor: scheme.onPrimary,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(
-                  isCyber ? context.tr('ACKNOWLEDGE // DISMISS') : context.tr('I Understand'),
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: isCyber ? 0.8 : 0.0,
-                  ),
+                  context.tr('I Understand'),
+                  style: const TextStyle(fontWeight: FontWeight.w800),
                 ),
               ),
             ),
@@ -663,7 +561,6 @@ class _PhaseInfoSheet extends StatelessWidget {
 
 class _PhaseDetailTile extends StatelessWidget {
   const _PhaseDetailTile({
-    required this.isCyber,
     required this.color,
     required this.icon,
     required this.phaseBadge,
@@ -672,7 +569,6 @@ class _PhaseDetailTile extends StatelessWidget {
     required this.triggerNote,
   });
 
-  final bool isCyber;
   final Color color;
   final IconData icon;
   final String phaseBadge;
@@ -691,18 +587,9 @@ class _PhaseDetailTile extends StatelessWidget {
         color: scheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: color.withValues(alpha: isCyber ? 0.45 : 0.25),
-          width: isCyber ? 1.2 : 1.0,
+          color: color.withValues(alpha: 0.25),
+          width: 1.0,
         ),
-        boxShadow: isCyber
-            ? [
-                BoxShadow(
-                  color: color.withValues(alpha: 0.14),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -727,7 +614,6 @@ class _PhaseDetailTile extends StatelessWidget {
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
                         color: color,
-                        letterSpacing: isCyber ? 0.5 : 0.0,
                       ),
                     ),
                   ],
@@ -766,74 +652,11 @@ class _PhaseDetailTile extends StatelessWidget {
                 fontSize: 10,
                 color: color,
                 fontWeight: FontWeight.w600,
-                letterSpacing: isCyber ? 0.3 : 0.0,
               ),
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-/// Icon telemetri dengan efek denyut halus (breathing pulse) saat mode Cyberpunk aktif.
-class _PulsingBeacon extends StatefulWidget {
-  const _PulsingBeacon({
-    required this.color,
-    required this.icon,
-    required this.isCyber,
-  });
-
-  final Color color;
-  final IconData icon;
-  final bool isCyber;
-
-  @override
-  State<_PulsingBeacon> createState() => _PulsingBeaconState();
-}
-
-class _PulsingBeaconState extends State<_PulsingBeacon>
-    with SingleTickerProviderStateMixin {
-  AnimationController? _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.isCyber) {
-      final isTest =
-          WidgetsBinding.instance.runtimeType.toString().contains('Test');
-      if (!isTest) {
-        _controller = AnimationController(
-          vsync: this,
-          duration: const Duration(milliseconds: 1600),
-        )..repeat(reverse: true);
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!widget.isCyber ||
-        _controller == null ||
-        MediaQuery.disableAnimationsOf(context)) {
-      return Icon(widget.icon, size: 14, color: widget.color);
-    }
-
-    return AnimatedBuilder(
-      animation: _controller!,
-      builder: (context, child) {
-        final opacity = 0.55 + (_controller!.value * 0.45);
-        return Opacity(
-          opacity: opacity,
-          child: Icon(widget.icon, size: 14, color: widget.color),
-        );
-      },
     );
   }
 }

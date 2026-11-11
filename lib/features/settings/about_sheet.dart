@@ -3,11 +3,9 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/l10n.dart';
 import '../../core/theme.dart';
-import '../../data/prefs.dart';
 import '../../data/update_checker.dart';
 import 'app_changelog.dart';
 
@@ -21,16 +19,14 @@ void showAboutWallOPaySheet(BuildContext context) {
   );
 }
 
-class AboutWallOPaySheet extends ConsumerWidget {
+class AboutWallOPaySheet extends StatelessWidget {
   const AboutWallOPaySheet({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+  Widget build(BuildContext context) {
     final isIndonesian = AppLocale.code == 'id';
-    final mutedColor = theme.colorScheme.onSurface.withValues(alpha: 0.65);
-    final borderColor = theme.colorScheme.outlineVariant.withValues(alpha: 0.4);
-    final colors = context.themeColors;
+    const mutedColor = AppColors.freshSage;
+    const borderColor = AppColors.borderOutline;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
@@ -39,11 +35,17 @@ class AboutWallOPaySheet extends ConsumerWidget {
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: theme.scaffoldBackgroundColor,
+            color: AppColors.mossShadow,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            border: Border(
+              top: BorderSide(
+                color: AppColors.dewMint.withValues(alpha: 0.35),
+                width: 1.2,
+              ),
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
+                color: Colors.black.withValues(alpha: 0.35),
                 blurRadius: 20,
                 offset: const Offset(0, -4),
               ),
@@ -57,7 +59,7 @@ class AboutWallOPaySheet extends ConsumerWidget {
                 width: 44,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                  color: AppColors.dewMint.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -71,20 +73,22 @@ class AboutWallOPaySheet extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         context.tr('About Wall o\' Pay'),
-                        style: theme.textTheme.titleMedium?.copyWith(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w700,
+                          fontSize: 17,
+                          color: AppColors.softIvory,
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded),
+                      icon: const Icon(Icons.close_rounded, color: AppColors.softIvory),
                       onPressed: () => Navigator.of(context).pop(),
                       tooltip: context.tr('Close'),
                     ),
                   ],
                 ),
               ),
-              const Divider(height: 1),
+              Divider(height: 1, color: AppColors.dewMint.withValues(alpha: 0.12)),
 
               // Scrollable Body
               Expanded(
@@ -101,9 +105,13 @@ class AboutWallOPaySheet extends ConsumerWidget {
                             height: 88,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(22),
+                              border: Border.all(
+                                color: AppColors.dewMint.withValues(alpha: 0.35),
+                                width: 1.2,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: (context.isCyberpunk ? colors.primary : AppColors.deepForest).withValues(alpha: 0.25),
+                                  color: AppColors.deepForest.withValues(alpha: 0.40),
                                   blurRadius: 18,
                                   offset: const Offset(0, 6),
                                 ),
@@ -111,7 +119,7 @@ class AboutWallOPaySheet extends ConsumerWidget {
                             ),
                             clipBehavior: Clip.antiAlias,
                             child: Image.asset(
-                              context.isCyberpunk ? 'assets/images/logo_cyberpunk.png' : 'assets/images/logo.png',
+                              'assets/images/logo.png',
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -122,47 +130,32 @@ class AboutWallOPaySheet extends ConsumerWidget {
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.3,
+                              color: AppColors.softIvory,
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Wrap(
-                            alignment: WrapAlignment.center,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            spacing: 8,
-                            runSpacing: 6,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: colors.primary.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: colors.primary.withValues(alpha: 0.35),
-                                  ),
-                                ),
-                                child: Text(
-                                  'v${UpdateCheckerService.currentVersion} • Release',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: colors.primary,
-                                  ),
-                                ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.emeraldLeaf.withValues(alpha: 0.35),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.dewMint.withValues(alpha: 0.35),
                               ),
-                              _ThemeAestheticButton(
-                                isCyberpunk: context.isCyberpunk,
-                                onTap: () => _showThemeConfirmDialog(
-                                  context,
-                                  ref,
-                                  isCyberpunk: context.isCyberpunk,
-                                ),
+                            ),
+                            child: Text(
+                              'v${UpdateCheckerService.currentVersion} • Release',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.dewMint,
                               ),
-                            ],
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             context.tr('Your money, under your control.'),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 13,
                               color: mutedColor,
                               fontWeight: FontWeight.w500,
@@ -177,31 +170,32 @@ class AboutWallOPaySheet extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: colors.primary.withValues(alpha: 0.08),
+                        color: AppColors.glasshouseGreen.withValues(alpha: 0.35),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: colors.primary.withValues(alpha: 0.25),
+                          color: AppColors.dewMint.withValues(alpha: 0.35),
                         ),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.format_quote_rounded,
-                            color: colors.primary,
+                            color: AppColors.dewMint,
                             size: 28,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               context.tr(
-                                'A protective financial fortress where every payment you make and save is nurtured to grow into a brighter tomorrow.',
+                                'Small steps, nurtured consistently, create meaningful growth.',
                               ),
                               style: const TextStyle(
                                 fontSize: 13,
                                 height: 1.45,
                                 fontStyle: FontStyle.italic,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.softIvory,
                               ),
                             ),
                           ),
@@ -213,10 +207,10 @@ class AboutWallOPaySheet extends ConsumerWidget {
                     // Section: Brand Lore & Philosophy
                     Text(
                       context.tr('Brand Lore & Philosophy'),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: colors.primary,
+                        color: AppColors.dewMint,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -224,7 +218,7 @@ class AboutWallOPaySheet extends ConsumerWidget {
                       context.tr(
                         'Wall o\' Pay was built with a singular vision: managing personal finances should feel mindful, empowering, and calm—never stressful or intimidating. Here is the meaning behind our identity:',
                       ),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12.5,
                         color: mutedColor,
                         height: 1.4,
@@ -243,13 +237,11 @@ class AboutWallOPaySheet extends ConsumerWidget {
                     ),
                     const SizedBox(height: 10),
                     _LoreCard(
-                      icon: context.isCyberpunk ? Icons.offline_bolt_rounded : Icons.eco_outlined,
-                      title: context.isCyberpunk ? context.tr('The Overclock Sprout') : context.tr('The Growing Sprout'),
-                      description: context.isCyberpunk
-                          ? context.tr('Every credit budgeted and saved is fuel injected into your personal wealth engine.')
-                          : context.tr(
-                              'Reframing "Pay" into "Pay yourself first"—every dollar budgeted and saved is a seed nurtured to flourish over time.',
-                            ),
+                      icon: Icons.eco_outlined,
+                      title: context.tr('The Growing Sprout'),
+                      description: context.tr(
+                        'Reframing "Pay" into "Pay yourself first"—every dollar budgeted and saved is a seed nurtured to flourish over time.',
+                      ),
                       borderColor: borderColor,
                     ),
                     const SizedBox(height: 10),
@@ -263,13 +255,11 @@ class AboutWallOPaySheet extends ConsumerWidget {
                     ),
                     const SizedBox(height: 10),
                     _LoreCard(
-                      icon: context.isCyberpunk ? Icons.electric_bolt_rounded : Icons.forest_outlined,
-                      title: context.isCyberpunk ? context.tr('The Edgerunners Grid') : context.tr('The Botanical Sanctuary'),
-                      description: context.isCyberpunk
-                          ? context.tr('High-contrast neon cyberspace inspired by Night City, built for maximum tactical focus and financial mastery.')
-                          : context.tr(
-                              'An organic, tranquil environment inspired by the deep forest, replacing aggressive corporate fintech with mindful peace.',
-                            ),
+                      icon: Icons.forest_outlined,
+                      title: context.tr('The Botanical Sanctuary'),
+                      description: context.tr(
+                        'An organic, tranquil environment inspired by the deep forest, replacing aggressive corporate fintech with mindful peace.',
+                      ),
                       borderColor: borderColor,
                     ),
                     const SizedBox(height: 24),
@@ -277,10 +267,10 @@ class AboutWallOPaySheet extends ConsumerWidget {
                     // Section: Core Principles
                     Text(
                       context.tr('Core Principles'),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: colors.primary,
+                        color: AppColors.dewMint,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -304,19 +294,19 @@ class AboutWallOPaySheet extends ConsumerWidget {
                     // Section: App Information & Actions
                     Text(
                       context.tr('App Information'),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: colors.primary,
+                        color: AppColors.dewMint,
                       ),
                     ),
                     const SizedBox(height: 10),
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
+                        color: AppColors.cardSurface,
                         borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: borderColor),
+                        border: Border.all(color: AppColors.borderOutline),
                       ),
                       child: Column(
                         children: [
@@ -324,12 +314,12 @@ class AboutWallOPaySheet extends ConsumerWidget {
                             label: context.tr('Developer'),
                             value: 'Hyenavia',
                           ),
-                          const Divider(height: 16),
+                          Divider(height: 16, color: AppColors.dewMint.withValues(alpha: 0.12)),
                           _MetaRow(
                             label: context.tr('License'),
                             value: 'MIT License (Open Source)',
                           ),
-                          const Divider(height: 16),
+                          Divider(height: 16, color: AppColors.dewMint.withValues(alpha: 0.12)),
                           _MetaRow(
                             label: context.tr('Source Code'),
                             value: 'GitHub Repository',
@@ -351,8 +341,8 @@ class AboutWallOPaySheet extends ConsumerWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: colors.primary,
-                              side: BorderSide(color: colors.primary.withValues(alpha: 0.4)),
+                              foregroundColor: AppColors.dewMint,
+                              side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.4)),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -373,10 +363,11 @@ class AboutWallOPaySheet extends ConsumerWidget {
                         Expanded(
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: colors.primary,
-                              foregroundColor: colors.onPrimary,
+                              backgroundColor: AppColors.glasshouseGreen,
+                              foregroundColor: AppColors.softIvory,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.35)),
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
@@ -407,174 +398,6 @@ class AboutWallOPaySheet extends ConsumerWidget {
   }
 }
 
-Future<void> _showThemeConfirmDialog(
-  BuildContext context,
-  WidgetRef ref, {
-  required bool isCyberpunk,
-}) async {
-  final targetIsCyber = !isCyberpunk;
-  final dialogAccent = targetIsCyber ? const Color(0xFF00F0FF) : AppColors.sage;
-
-  await showDialog<void>(
-    context: context,
-    builder: (dialogCtx) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-      icon: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: dialogAccent.withValues(alpha: 0.16),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          targetIsCyber ? Icons.electric_bolt_rounded : Icons.forest_rounded,
-          color: dialogAccent,
-          size: 32,
-        ),
-      ),
-      title: Text(
-        targetIsCyber
-            ? dialogCtx.tr('Switch to Cyberpunk Grid?')
-            : dialogCtx.tr('Return to Botanical Sanctuary?'),
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontWeight: FontWeight.w700),
-      ),
-      content: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: dialogAccent.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: dialogAccent.withValues(alpha: 0.28),
-          ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.info_outline_rounded,
-              color: dialogAccent,
-              size: 20,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                targetIsCyber
-                    ? dialogCtx.tr(
-                        'Activate high-contrast tactical aesthetic with electric cyan, matrix mint, and neon yellow accents?',
-                      )
-                    : dialogCtx.tr(
-                        'Return to the tranquil, mindful deep forest pine aesthetic of Wall o\' Pay?',
-                      ),
-                style: const TextStyle(fontSize: 13, height: 1.45),
-              ),
-            ),
-          ],
-        ),
-      ),
-      actionsAlignment: MainAxisAlignment.spaceEvenly,
-      actions: [
-        OutlinedButton(
-          onPressed: () => Navigator.of(dialogCtx).pop(),
-          style: OutlinedButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          ),
-          child: Text(
-            isCyberpunk
-                ? dialogCtx.tr('Stay in Grid')
-                : dialogCtx.tr('Cancel'),
-          ),
-        ),
-        FilledButton(
-          onPressed: () {
-            ref.read(appPrefsProvider.notifier).setThemePreset(
-              targetIsCyber ? 'cyberpunk' : 'botanical',
-            );
-            Navigator.of(dialogCtx).pop();
-          },
-          style: FilledButton.styleFrom(
-            backgroundColor: dialogAccent,
-            foregroundColor: targetIsCyber ? const Color(0xFF080912) : Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          ),
-          child: Text(
-            targetIsCyber
-                ? dialogCtx.tr('Jack In')
-                : dialogCtx.tr('Return to Sanctuary'),
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class _ThemeAestheticButton extends StatelessWidget {
-  const _ThemeAestheticButton({
-    required this.isCyberpunk,
-    required this.onTap,
-  });
-
-  final bool isCyberpunk;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final accentColor = isCyberpunk ? const Color(0xFF00F0FF) : AppColors.sage;
-    final label = isCyberpunk ? 'Cyberpunk' : 'Botanical';
-    final icon = isCyberpunk ? Icons.electric_bolt_rounded : Icons.eco_rounded;
-
-    return Tooltip(
-      message: isCyberpunk
-          ? context.tr('Return to Botanical Sanctuary?')
-          : context.tr('Switch to Cyberpunk Grid?'),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
-            decoration: BoxDecoration(
-              color: accentColor.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: accentColor.withValues(alpha: 0.35),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  icon,
-                  size: 13,
-                  color: accentColor,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: accentColor,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.swap_horiz_rounded,
-                  size: 13,
-                  color: accentColor.withValues(alpha: 0.7),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _LoreCard extends StatelessWidget {
   const _LoreCard({
     required this.icon,
@@ -593,7 +416,7 @@ class _LoreCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: borderColor),
       ),
@@ -603,10 +426,14 @@ class _LoreCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: (context.isCyberpunk ? context.themeColors.primary : AppColors.sage).withValues(alpha: 0.18),
+              color: AppColors.dewMint.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: AppColors.dewMint.withValues(alpha: 0.35),
+                width: 0.8,
+              ),
             ),
-            child: Icon(icon, color: context.isCyberpunk ? context.themeColors.primary : AppColors.sage, size: 20),
+            child: Icon(icon, color: AppColors.dewMint, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -618,14 +445,15 @@ class _LoreCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w700,
+                    color: AppColors.softIvory,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   description,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    color: AppColors.freshSage,
                     height: 1.35,
                   ),
                 ),
@@ -654,21 +482,38 @@ class _PrincipleRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: context.isCyberpunk ? context.themeColors.primary : AppColors.sage, size: 20),
-        const SizedBox(width: 10),
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: AppColors.dewMint.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppColors.dewMint.withValues(alpha: 0.25),
+              width: 0.8,
+            ),
+          ),
+          child: Icon(icon, color: AppColors.dewMint, size: 18),
+        ),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.softIvory,
+                ),
               ),
+              const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: TextStyle(
-                  fontSize: 11.5,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.freshSage,
+                  height: 1.35,
                 ),
               ),
             ],
@@ -694,42 +539,48 @@ class _MetaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12.5,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
+    final content = Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.freshSage,
           ),
-          Row(
-            children: [
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  color: isLink ? (context.isCyberpunk ? context.themeColors.primary : AppColors.sage) : null,
-                ),
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: isLink ? AppColors.dewMint : AppColors.softIvory,
               ),
-              if (isLink) ...[
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.open_in_new_rounded,
-                  size: 14,
-                  color: context.isCyberpunk ? context.themeColors.primary : AppColors.sage,
-                ),
-              ],
+            ),
+            if (isLink) ...[
+              const SizedBox(width: 4),
+              const Icon(
+                Icons.open_in_new_rounded,
+                size: 14,
+                color: AppColors.dewMint,
+              ),
             ],
-          ),
-        ],
-      ),
+          ],
+        ),
+      ],
     );
+
+    if (isLink && onTap != null) {
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(6),
+        child: content,
+      );
+    }
+    return content;
   }
 }
 

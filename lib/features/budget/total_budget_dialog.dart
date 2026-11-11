@@ -17,8 +17,6 @@ Future<void> showTotalBudgetDialog(
   String periodKey,
   Budget503020Breakdown currentBreakdown,
 ) async {
-  final scheme = Theme.of(context).colorScheme;
-
   int mode = currentBreakdown.isCustom ? 1 : 0; // 0 = Standar 50/30/20, 1 = Kustom Nominal
 
   final totalCtrl = TextEditingController(
@@ -57,22 +55,37 @@ Future<void> showTotalBudgetDialog(
           final remainingToAllocate = totalVal - allocatedCustom;
 
           return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            backgroundColor: AppColors.mossShadow,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+              side: BorderSide(
+                color: AppColors.dewMint.withValues(alpha: 0.25),
+                width: 1,
+              ),
+            ),
             title: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: (ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest).withValues(alpha: 0.1),
+                    color: AppColors.dewMint.withValues(alpha: 0.16),
                     shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.dewMint.withValues(alpha: 0.35),
+                      width: 1,
+                    ),
                   ),
-                  child: Icon(Icons.calculate_outlined, color: ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest),
+                  child: const Icon(Icons.calculate_outlined, color: AppColors.dewMint),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     context.tr('Total Budget'),
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                      color: AppColors.softIvory,
+                    ),
                   ),
                 ),
               ],
@@ -84,6 +97,14 @@ Future<void> showTotalBudgetDialog(
                 children: [
                   // Mode Toggle: Standar 50/30/20 vs Kustom Nominal
                   SegmentedButton<int>(
+                    style: SegmentedButton.styleFrom(
+                      selectedBackgroundColor: AppColors.dewMint.withValues(alpha: 0.25),
+                      selectedForegroundColor: AppColors.dewMint,
+                      foregroundColor: AppColors.freshSage,
+                      side: BorderSide(
+                        color: AppColors.dewMint.withValues(alpha: 0.25),
+                      ),
+                    ),
                     segments: [
                       ButtonSegment(
                         value: 0,
@@ -113,19 +134,53 @@ Future<void> showTotalBudgetDialog(
                   // Input Total Anggaran
                   Text(
                     context.tr('Total Budget'),
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                      color: AppColors.softIvory,
+                    ),
                   ),
                   const SizedBox(height: 6),
                   TextField(
                     controller: totalCtrl,
                     keyboardType: TextInputType.number,
                     autofocus: totalVal == 0,
+                    style: const TextStyle(
+                      color: AppColors.softIvory,
+                      fontWeight: FontWeight.w600,
+                      fontFeatures: [FontFeature.tabularFigures()],
+                    ),
                     decoration: InputDecoration(
                       prefixText: 'Rp ',
+                      prefixStyle: const TextStyle(
+                        color: AppColors.dewMint,
+                        fontWeight: FontWeight.w700,
+                      ),
                       hintText: '0',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                      hintStyle: TextStyle(
+                        color: AppColors.freshSage.withValues(alpha: 0.5),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(
+                          color: AppColors.dewMint.withValues(alpha: 0.25),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(
+                          color: AppColors.dewMint.withValues(alpha: 0.25),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(
+                          color: AppColors.dewMint,
+                          width: 1.5,
+                        ),
+                      ),
                       filled: true,
-                      fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                      fillColor: AppColors.deepForest.withValues(alpha: 0.6),
                     ),
                     onChanged: (_) => setState(() {}),
                   ),
@@ -135,16 +190,20 @@ Future<void> showTotalBudgetDialog(
                     // Pratinjau Standar 50/30/20
                     Text(
                       context.tr('Budget Split Preview:'),
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        color: AppColors.softIvory,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: scheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                        color: AppColors.deepForest.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: scheme.outlineVariant.withValues(alpha: 0.5),
+                          color: AppColors.dewMint.withValues(alpha: 0.2),
                         ),
                       ),
                       child: Column(
@@ -154,13 +213,13 @@ Future<void> showTotalBudgetDialog(
                             context.tr('Needs (50%)'),
                             rupiah(stdNeeds),
                           ),
-                          const Divider(height: 12),
+                          Divider(height: 12, color: AppColors.borderOutline.withValues(alpha: 0.4)),
                           _previewRow(
                             BudgetBucket.wants.colorIn(ctx),
                             context.tr('Wants (30%)'),
                             rupiah(stdWants),
                           ),
-                          const Divider(height: 12),
+                          Divider(height: 12, color: AppColors.borderOutline.withValues(alpha: 0.4)),
                           _previewRow(
                             BudgetBucket.savings.colorIn(ctx),
                             context.tr('Savings & Goals (20%)'),
@@ -173,18 +232,52 @@ Future<void> showTotalBudgetDialog(
                     // Input Kustom Nominal (Tabungan, Kebutuhan, Keinginan)
                     Text(
                       context.tr('Savings Allocation'),
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: BudgetBucket.savings.colorIn(ctx)),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        color: BudgetBucket.savings.colorIn(ctx),
+                      ),
                     ),
                     const SizedBox(height: 4),
                     TextField(
                       controller: savingsCtrl,
                       keyboardType: TextInputType.number,
+                      style: const TextStyle(
+                        color: AppColors.softIvory,
+                        fontWeight: FontWeight.w600,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
                       decoration: InputDecoration(
                         prefixText: 'Rp ',
+                        prefixStyle: TextStyle(
+                          color: BudgetBucket.savings.colorIn(ctx),
+                          fontWeight: FontWeight.w700,
+                        ),
                         hintText: '100000',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        hintStyle: TextStyle(
+                          color: AppColors.freshSage.withValues(alpha: 0.5),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: BudgetBucket.savings.colorIn(ctx).withValues(alpha: 0.35),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: BudgetBucket.savings.colorIn(ctx).withValues(alpha: 0.35),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: BudgetBucket.savings.colorIn(ctx),
+                            width: 1.5,
+                          ),
+                        ),
                         filled: true,
-                        fillColor: BudgetBucket.savings.colorIn(ctx).withValues(alpha: 0.08),
+                        fillColor: BudgetBucket.savings.colorIn(ctx).withValues(alpha: 0.10),
                       ),
                       onChanged: (_) => setState(() {}),
                     ),
@@ -195,11 +288,14 @@ Future<void> showTotalBudgetDialog(
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton.icon(
-                          style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+                          style: TextButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            foregroundColor: AppColors.dewMint,
+                          ),
                           icon: const Icon(Icons.auto_awesome, size: 14),
                           label: Text(
                             context.tr('Split remaining 70/30'),
-                            style: const TextStyle(fontSize: 11),
+                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
                           ),
                           onPressed: () {
                             final rem = totalVal - savingsVal;
@@ -215,18 +311,52 @@ Future<void> showTotalBudgetDialog(
 
                     Text(
                       context.tr('Needs Allocation'),
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: BudgetBucket.needs.colorIn(ctx)),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        color: BudgetBucket.needs.colorIn(ctx),
+                      ),
                     ),
                     const SizedBox(height: 4),
                     TextField(
                       controller: needsCtrl,
                       keyboardType: TextInputType.number,
+                      style: const TextStyle(
+                        color: AppColors.softIvory,
+                        fontWeight: FontWeight.w600,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
                       decoration: InputDecoration(
                         prefixText: 'Rp ',
+                        prefixStyle: TextStyle(
+                          color: BudgetBucket.needs.colorIn(ctx),
+                          fontWeight: FontWeight.w700,
+                        ),
                         hintText: '350000',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        hintStyle: TextStyle(
+                          color: AppColors.freshSage.withValues(alpha: 0.5),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: BudgetBucket.needs.colorIn(ctx).withValues(alpha: 0.35),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: BudgetBucket.needs.colorIn(ctx).withValues(alpha: 0.35),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: BudgetBucket.needs.colorIn(ctx),
+                            width: 1.5,
+                          ),
+                        ),
                         filled: true,
-                        fillColor: BudgetBucket.needs.colorIn(ctx).withValues(alpha: 0.08),
+                        fillColor: BudgetBucket.needs.colorIn(ctx).withValues(alpha: 0.10),
                       ),
                       onChanged: (_) => setState(() {}),
                     ),
@@ -234,18 +364,52 @@ Future<void> showTotalBudgetDialog(
 
                     Text(
                       context.tr('Wants Allocation'),
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: BudgetBucket.wants.colorIn(ctx)),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                        color: BudgetBucket.wants.colorIn(ctx),
+                      ),
                     ),
                     const SizedBox(height: 4),
                     TextField(
                       controller: wantsCtrl,
                       keyboardType: TextInputType.number,
+                      style: const TextStyle(
+                        color: AppColors.softIvory,
+                        fontWeight: FontWeight.w600,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
                       decoration: InputDecoration(
                         prefixText: 'Rp ',
+                        prefixStyle: TextStyle(
+                          color: BudgetBucket.wants.colorIn(ctx),
+                          fontWeight: FontWeight.w700,
+                        ),
                         hintText: '150000',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        hintStyle: TextStyle(
+                          color: AppColors.freshSage.withValues(alpha: 0.5),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: BudgetBucket.wants.colorIn(ctx).withValues(alpha: 0.35),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: BudgetBucket.wants.colorIn(ctx).withValues(alpha: 0.35),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: BudgetBucket.wants.colorIn(ctx),
+                            width: 1.5,
+                          ),
+                        ),
                         filled: true,
-                        fillColor: BudgetBucket.wants.colorIn(ctx).withValues(alpha: 0.08),
+                        fillColor: BudgetBucket.wants.colorIn(ctx).withValues(alpha: 0.10),
                       ),
                       onChanged: (_) => setState(() {}),
                     ),
@@ -256,9 +420,15 @@ Future<void> showTotalBudgetDialog(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
                         color: remainingToAllocate == 0
-                            ? (ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest).withValues(alpha: 0.1)
-                            : Colors.amber.withValues(alpha: 0.15),
+                            ? AppColors.emeraldLeaf.withValues(alpha: 0.35)
+                            : const Color(0xFFE8A33D).withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: remainingToAllocate == 0
+                              ? AppColors.dewMint.withValues(alpha: 0.3)
+                              : const Color(0xFFE8A33D).withValues(alpha: 0.3),
+                          width: 1,
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -268,23 +438,24 @@ Future<void> showTotalBudgetDialog(
                                 : Icons.info_outline,
                             size: 16,
                             color: remainingToAllocate == 0
-                                ? (ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest)
-                                : Colors.amber[800],
+                                ? AppColors.dewMint
+                                : const Color(0xFFE8A33D),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               remainingToAllocate == 0
-                                  ? context.tr('All funds allocated')
-                                  : context.tr('Remaining to allocate: {amount}', {
-                                      'amount': rupiah(remainingToAllocate),
-                                    }),
+                                    ? context.tr('All funds allocated')
+                                    : context.tr('Remaining to allocate: {amount}', {
+                                        'amount': rupiah(remainingToAllocate),
+                                      }),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 color: remainingToAllocate == 0
-                                    ? (ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest)
-                                    : Colors.amber[900],
+                                    ? AppColors.dewMint
+                                    : const Color(0xFFE8A33D),
+                                fontFeatures: const [FontFeature.tabularFigures()],
                               ),
                             ),
                           ),
@@ -298,12 +469,15 @@ Future<void> showTotalBudgetDialog(
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: Text(context.tr('Cancel')),
+                child: Text(
+                  context.tr('Cancel'),
+                  style: const TextStyle(color: AppColors.freshSage),
+                ),
               ),
               FilledButton(
                 style: FilledButton.styleFrom(
-                  backgroundColor: ctx.isCyberpunk ? ctx.themeColors.primary : AppColors.deepForest,
-                  foregroundColor: ctx.isCyberpunk ? ctx.themeColors.onPrimary : Colors.white,
+                  backgroundColor: AppColors.dewMint,
+                  foregroundColor: AppColors.deepForest,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () async {
@@ -320,7 +494,10 @@ Future<void> showTotalBudgetDialog(
                         );
                   }
                 },
-                child: Text(context.tr('Save')),
+                child: Text(
+                  context.tr('Save'),
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
               ),
             ],
           );
@@ -336,13 +513,34 @@ Widget _previewRow(Color color, String title, String amount) {
       Container(
         width: 8,
         height: 8,
-        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.5),
+              blurRadius: 4,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
       ),
       const SizedBox(width: 8),
       Expanded(
-        child: Text(title, style: const TextStyle(fontSize: 12)),
+        child: Text(
+          title,
+          style: const TextStyle(fontSize: 12, color: AppColors.softIvory),
+        ),
       ),
-      Text(amount, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+      Text(
+        amount,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: AppColors.softIvory,
+          fontFeatures: [FontFeature.tabularFigures()],
+        ),
+      ),
     ],
   );
 }

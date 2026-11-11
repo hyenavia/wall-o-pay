@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'l10n_extra.dart';
-import 'theme.dart';
 
 /// Bahasa aktif untuk kode di luar widget (format tanggal, pesan hasil aksi).
 /// Diperbarui oleh pengaturan bahasa sebelum UI dibangun ulang.
@@ -57,22 +56,8 @@ class _AppStringsDelegate extends LocalizationsDelegate<AppStrings> {
 
 extension TrContext on BuildContext {
   /// Terjemahan yang ikut diperbarui otomatis saat bahasa diganti.
-  /// Secara cerdas menggunakan kamus kosakata Cyberpunk Edgerunners saat tema Cyberpunk aktif.
-  String tr(String key, [Map<String, Object?>? args]) {
-    if (isCyberpunk) {
-      final code = AppStrings.of(this).code;
-      final cyberMap = code == 'id' ? _cyberId : _cyberEn;
-      final cyberText = cyberMap[key];
-      if (cyberText != null) {
-        var text = cyberText;
-        if (args != null) {
-          args.forEach((k, v) => text = text.replaceAll('{$k}', '$v'));
-        }
-        return text;
-      }
-    }
-    return AppStrings.of(this).tr(key, args);
-  }
+  String tr(String key, [Map<String, Object?>? args]) =>
+      AppStrings.of(this).tr(key, args);
 }
 
 /// Terjemahan tanpa context (untuk service dan pesan hasil aksi).
@@ -127,6 +112,7 @@ const Map<String, String> _id = {
   'Account Name (e.g. BCA, Cash)': 'Nama Akun (contoh: BCA, Dompet Tunai)',
   'Please enter an account name': 'Silakan masukkan nama akun',
   'Account Type': 'Jenis Akun',
+  'Personal Account': 'Akun Personal',
   'Starting balance': 'Saldo awal',
   'Balance': 'Saldo',
   'Save Changes': 'Simpan Perubahan',
@@ -337,19 +323,8 @@ const Map<String, String> _id = {
   'The spark of reaching your savings targets, debt freedom, and achieving lasting financial serenity.': 'Kilau pencapaian saat target tabungan dan impian bebas utang berhasil diraih dengan kepuasan batin.',
   'The Botanical Sanctuary': 'Suaka Botani Finansial',
   'An organic, tranquil environment inspired by the deep forest, replacing aggressive corporate fintech with mindful peace.': 'Suasana hijau hutan yang teduh dan menenangkan, menggantikan atmosfer fintech yang kaku dengan ketenangan batin.',
-  'The Edgerunners Grid': 'Grid Edgerunners Siber',
-  'High-contrast neon cyberspace inspired by Night City, built for maximum tactical focus and financial mastery.': 'Ruang siber neon kontras tinggi terinspirasi dari Night City, dirancang untuk fokus taktis maksimal dan penguasaan finansial.',
-  'The Overclock Sprout': 'Tunas Overclock Siber',
-  'Every credit budgeted and saved is fuel injected into your personal wealth engine.': 'Setiap kredit yang dianggarkan dan ditabung adalah suntikan bahan bakar mesin kemakmuran Anda.',
   'A protective financial fortress where every payment you make and save is nurtured to grow into a brighter tomorrow.': 'Sebuah benteng pelindung finansial tempat uang dan masa depan Anda dirawat agar bertumbuh subur.',
-  'Switch to Cyberpunk Grid?': 'Beralih ke Tema Cyberpunk?',
-  'Activate high-contrast tactical aesthetic with electric cyan, matrix mint, and neon yellow accents?': 'Aktifkan antarmuka taktis berkecepatan tinggi dengan aksen sian elektrik, mint matriks, dan kuning neon?',
-  'Jack In': 'Masuk Grid',
-  'Return to Botanical Sanctuary?': 'Kembali ke Botanical Sanctuary?',
-  'Return to the tranquil, mindful deep forest pine aesthetic of Wall o\' Pay?': 'Kembali ke suasana tenang hijau pinus khas Wall o\' Pay?',
-  'Return to Sanctuary': 'Kembali ke Botanical',
-  'Stay in Grid': 'Tetap di Grid',
-  'Switch to Botanical Sanctuary?': 'Kembali ke Botanical Sanctuary?',
+  'Small steps, nurtured consistently, create meaningful growth.': 'Langkah kecil yang dirawat secara konsisten melahirkan pertumbuhan bermakna.',
   'Core Principles': 'Prinsip Utama',
   'Offline-First Architecture': 'Arsitektur Offline-First',
   'Fast SQLite storage with zero latency and complete local privacy.': 'Penyimpanan SQLite cepat tanpa latensi dan privasi lokal seutuhnya.',
@@ -609,11 +584,6 @@ const Map<String, String> _id = {
   'Target date (optional)': 'Tanggal target (opsional)',
   'That email address is not valid.': 'Format email tidak valid.',
   'Theme': 'Tema',
-  'Theme Preset': 'Preset Tema',
-  'Botanical Forest': 'Hutan Botani (Default)',
-  'Cyberpunk Edgerunners': 'Cyberpunk Edgerunners',
-  'Cyberware Interface': 'Antarmuka Cyberware',
-  'Switch between Botanical Forest and Cyberpunk Edgerunners': 'Beralih antara tema Hutan Botani dan Cyberpunk Edgerunners',
   'This Month\'s Budget': 'Anggaran Bulan Ini',
   'This Week\'s Budget': 'Anggaran Minggu Ini',
   'This device already has everything from your cloud backup.': 'Perangkat ini sudah memiliki semua data dari cadangan cloud.',
@@ -635,6 +605,8 @@ const Map<String, String> _id = {
   'Your cloud backup is already up to date.': 'Cadangan cloud-mu sudah yang terbaru.',
   'Your cloud backup is not deleted. Back up first if you have recent changes, especially before erasing data on this device.': 'Cadangan cloud-mu tidak terhapus. Cadangkan dulu jika ada perubahan terbaru, terutama sebelum menghapus data di perangkat ini.',
   'Your money, under your control.': 'Uangmu, di bawah kendalimu.',
+  'Grow Your Financial Habits.': 'Tumbuhkan Kebiasaan Finansialmu.',
+  'Let your financial growth begin.': 'Mulailah pertumbuhan finansialmu.',
   'Your username is used to log in and cannot be changed.': 'Username dipakai untuk masuk dan tidak bisa diubah.',
   '{amount} spent': '{amount} terpakai',
   '{amount}/day': '{amount}/hari',
@@ -731,10 +703,6 @@ const Map<String, String> _id = {
   'Day of the month to start monthly period (e.g. Payday on 25th)': 'Tanggal mulainya periode bulanan (misal gajian tanggal 25)',
   'Day {day}': 'Tanggal {day}',
   'Day {day} (Payday)': 'Tanggal {day} (Gajian)',
-  'Signature Botanical Forest — Wall o\' Pay exclusive aesthetic': 'Botanical Forest Khas — Estetika eksklusif Wall o\' Pay',
-  'Deep Forest Botanical': 'Deep Forest Botanical',
-  'Curated signature palette (Night Pine, Velvet Forest & Sage)': 'Palet khas terkurasi (Night Pine, Velvet Forest & Sage)',
-  'SIGNATURE': 'KHAS',
   'No accounts yet': 'Belum ada akun',
   'Change': 'Ubah',
   'Transfer balance': 'Transfer saldo',
@@ -861,56 +829,9 @@ const Map<String, String> _id = {
   'Money & Wallets': 'Keuangan & Dompet',
   'Planning & Goals': 'Perencanaan & Impian',
   'Tools & Settings': 'Alat & Pengaturan',
-  // Cyberpunk Telemetry
-  'GRID STABLE': 'GRID STABIL',
-  'Cyber Telemetry Nominal': 'Telemetri Finansial Stabil',
-  'Grid online. Ready for telemetry stream.': 'Grid online. Siap merekam telemetri pengeluaran.',
-  'Credit consumption optimal. Subroutines running smooth!': 'Konsumsi kredit optimal. Subrutin finansial berjalan stabil!',
-  'BANDWIDTH HIGH': 'BANDWIDTH TINGGI',
-  'Spending Velocity High': 'Kecepatan Belanja Meningkat',
-  'Daily burn rate has passed telemetry threshold. Balance it tomorrow.': 'Laju pengeluaran hari ini melewati ambang batas. Seimbangkan kembali besok.',
-  'CORE OVERLOAD': 'BATAS OVERLOAD',
-  'Period Capacity Reached': 'Kapasitas Periode Tercapai',
-  'Period credit capacity reached. Limit output to vital nodes only.': 'Kapasitas kredit periode telah habis. Batasi hanya untuk node vital.',
-  'Daily Bandwidth': 'Bandwidth Harian',
-  'Burned today': 'Konsumsi Hari Ini',
-  'Bandwidth exceeded': 'Bandwidth terlampaui',
-  '{pct}% bandwidth consumed': '{pct}% bandwidth terpakai',
-  'System Budget': 'Budget Sistem',
-  // Cyberpunk Phase Info Modal & Microcopy (Edgerunners Style)
-  'GRID TELEMETRY PROTOCOL': 'PROTOKOL GRID TELEMETRI',
   'Daily Financial Pulse Guide': 'Panduan Ritme Keuangan Harian',
-  'Active telemetry monitoring of your daily eddies & credit bandwidth, choom.': 'Status pemantauan konsumsi eddies & bandwidth kredit harianmu, choom.',
   'Guide to the 3 daily spending phases to keep your finances healthy.': 'Penjelasan 3 fase ritme belanja harian untuk menjaga kesehatan keuanganmu.',
-  'Phase 01 // Subroutines Nominal': 'Fase 01 // Subrutin Nominal',
-  'Fase 1: Kondisi Finansial Aman': 'Fase 1: Kondisi Finansial Aman',
-  'Optimal eddies consumption well below daily bandwidth. Subroutines running smooth, choom!': 'Konsumsi eddies optimal di bawah bandwidth harian. Neural subroutines berjalan lancar tanpa hambatan, choom!',
-  'TRIGGER: Burn rate < daily bandwidth & budget healthy.': 'KONDISI: Burn rate < bandwidth & alokasi aman.',
-  'Kondisi: Belanja harian < kuota aman & anggaran terjaga.': 'Kondisi: Belanja harian < kuota aman & anggaran terjaga.',
-  'Phase 02 // Velocity Warning': 'Fase 02 // Peringatan Kecepatan',
-  'Fase 2: Laju Pengeluaran Meningkat': 'Fase 2: Laju Pengeluaran Meningkat',
-  'Daily burn rate has passed telemetry threshold. Balance it tomorrow before core overloads!': 'Burn rate eddies melewati batas harian atau kapasitas mendekati overload (≥ 85%). Seimbangkan besok!',
-  'TRIGGER: Daily burn > bandwidth OR period capacity >= 85%.': 'KONDISI: Burn harian > bandwidth ATAU kapasitas >= 85%.',
-  'Kondisi: Belanja harian > kuota ATAU terpakai >= 85%.': 'Kondisi: Belanja harian > kuota ATAU terpakai >= 85%.',
-  'Phase 03 // Critical Capacity': 'Fase 03 // Kapasitas Kritis',
-  'Fase 3: Batas Anggaran Tercapai': 'Fase 3: Batas Anggaran Tercapai',
-  'Period credit capacity reached. Limit output to vital nodes only, don\'t flatline!': 'Kapasitas kredit periode telah habis (100%) atau saldo kas defisit (≤ 0). Alokasikan hanya untuk node vital!',
-  'TRIGGER: Period budget exhausted (100%) OR balance <= 0.': 'KONDISI: Kapasitas periode habis (100%) ATAU saldo <= 0.',
-  'Kondisi: Anggaran periode habis (100%) ATAU saldo minus.': 'Kondisi: Anggaran periode habis (100%) ATAU saldo minus.',
-  'ACKNOWLEDGE // DISMISS': 'PAHAM // DISMISS',
   'I Understand': 'Mengerti',
-  'TOTAL CREDITS (EDDIES)': 'TOTAL KREDIT (EDDIES)',
-  'CREDIT INFLOW': 'INFLOW KREDIT',
-  'BURN RATE (EDDIES)': 'BURN RATE (EDDIES)',
-  'LEDGER STREAM // RECENT': 'LEDGER STREAM // TERBARU',
-  'ALL PACKETS': 'SEMUA PACKET',
-  'LEDGER EMPTY, CHOOM!': 'LEDGER KOSONG, CHOOM!',
-  'No transaction packets detected on this node. Transmit your first credit log!': 'Belum ada data packet di node ini. Transmit catatan transaksi pertamamu ke Grid!',
-  '+ TRANSMIT LOG': '+ TRANSMIT LOG',
-  'GRID': 'GRID',
-  'LEDGER': 'LEDGER',
-  'BANDWIDTH': 'BANDWIDTH',
-  'TELEMETRY': 'TELEMETRI',
   'Biometric Unlock': 'Buka Kunci Biometrik',
   'Fingerprint Unlock': 'Buka Kunci Sidik Jari',
   'Face Unlock': 'Buka Kunci Wajah',
@@ -933,8 +854,6 @@ const Map<String, String> _id = {
   'Condition: Daily spending > quota OR capacity >= 85%.': 'Kondisi: Belanja harian > kuota ATAU terpakai >= 85%.',
   'Phase 3: Budget Limit Reached': 'Fase 3: Batas Anggaran Tercapai',
   'Condition: Period budget exhausted (100%) OR balance <= 0.': 'Kondisi: Anggaran periode habis (100%) ATAU saldo minus.',
-  'High-Contrast Cyberpunk — Electric Cyan & Neon Yellow': 'Cyberpunk Kontras Tinggi — Sian Elektrik & Kuning Neon',
-  'Electric Cyan, Matrix Mint & Edgerunner Yellow': 'Sian Elektrik, Mint Matrix & Kuning Edgerunner',
   'Latest Release': 'Versi Terbaru',
   'Set up regular income, bills, or subscription schedules. They will prompt you for confirmation on their due date before recording.': 'Atur jadwal pemasukan rutin, tagihan, atau langganan. Aplikasi akan meminta konfirmasi pada tanggal jatuh tempo sebelum mencatatnya.',
   'Every month on the {day}th': 'Setiap bulan tanggal {day}',
@@ -950,328 +869,5 @@ const Map<String, String> _id = {
   'You made {count} small purchases (≤ Rp 50.000) totaling {amount}, mostly in {cat}.':
       'Anda melakukan {count} transaksi kecil (≤ Rp 50.000) dengan total {amount}, terbanyak di {cat}.',
   'More details (Date, receipt...)': 'Detail tambahan (Tanggal, struk...)',
-};
-
-/// Kosakata Khusus Tema Cyberpunk (Edgerunners Style) - Bahasa Indonesia
-const Map<String, String> _cyberId = {
-  // Navigasi & Shell
-  'Home': 'GRID',
-  'Transactions': 'LEDGER',
-  'Budget': 'BANDWIDTH',
-  'Insight': 'TELEMETRI',
-  'Financial Insights': 'TELEMETRI FINANSIAL',
-  'More': 'SISTEM',
-  'More Features': 'SISTEM & SUBRUTIN',
-  'Settings': 'CONFIG SISTEM',
-  'Profile': 'IDENTITAS RUNNER',
-
-  // Finansial Inti (Edgerunners slang)
-  'Total Balance': 'TOTAL KREDIT (EDDIES)',
-  'Income': 'INFLOW KREDIT',
-  'Expense': 'BURN RATE',
-  'Weekly Flow': 'SIKLUS MINGGUAN',
-  'Monthly Flow': 'SIKLUS BULANAN',
-  'Period ended': 'SIKLUS SELESAI',
-  '1 day left': '1 SIKLUS TERSISA',
-  '{n} days left': '{n} SIKLUS TERSISA',
-  'Transfer': 'TRANSFER NODE',
-  'Recent Transactions': 'LEDGER STREAM // TERBARU',
-  'See All': 'SEMUA PACKET',
-  'All Transactions': 'SEMUA PACKET LEDGER',
-  'Transaction Details': 'DETAIL PACKET',
-  'Add transaction': '+ TRANSMIT LOG',
-  'New Transaction': 'TRANSMIT CATATAN KREDIT',
-  'Edit transaction': 'MODIFIKASI PACKET',
-  'Delete transaction': 'PURGE PACKET',
-  'Save': 'TRANSMIT // SIMPAN',
-  'Cancel': 'BATALKAN // ABORT',
-  'Delete': 'PURGE',
-  'Search transactions...': 'Scan query ledger...',
-  'All Categories': 'SEMUA NODE KATEGORI',
-  'Filter by account': 'Filter node rekening',
-  'Filter by category': 'Filter node kategori',
-  'Clear filters': 'Reset filter node',
-  'No transactions': 'Tidak ada packet ledger',
-  'No transactions found': 'Tidak ada packet yang cocok, choom',
-
-  // Empty States
-  'Start recording your first transaction!': 'LEDGER KOSONG, CHOOM!',
-  'Every small transaction brings you closer to your financial goals.':
-      'Belum ada data packet di node ini. Transmit catatan transaksi pertamamu ke Grid!',
-  'No expenses in this period.':
-      'TIDAK ADA BURN RATE // Node ini bersih dari pengeluaran periode ini, choom.',
-  'Record a few more transactions': 'DATA TELEMETRI BELUM CUKUP',
-  'Record a few more transactions to see your financial insights, spending charts, and top categories.':
-      'Transmit beberapa data packet lagi untuk mengaktifkan visualisasi telemetri pengeluaran dan chart node.',
-
-  // Akun & Dompet
-  'Accounts': 'AKUN & REKENING',
-  'Accounts & Wallets': 'AKUN & DOMPET',
-  'Main Account': 'REKENING UTAMA',
-  'Commercial Bank': 'BANK KONVENSIONAL',
-  'Bank Konvensional': 'BANK KONVENSIONAL',
-  'Digital Bank': 'BANK DIGITAL',
-  'Bank Digital': 'BANK DIGITAL',
-  'E-Wallet': 'DOMPET DIGITAL',
-  'Cash': 'UANG TUNAI',
-  'Tunai': 'UANG TUNAI',
-  'Add account': '+ TAMBAH AKUN',
-  'Edit account': 'EDIT AKUN',
-  'Delete account': 'HAPUS AKUN',
-  'Account name': 'Nama Akun',
-  'Initial balance': 'Saldo Awal Kredit',
-  'Total in accounts': 'Total Saldo di Seluruh Akun',
-
-  // Anggaran (Bandwidth Allocation)
-  'Period Budget': 'SISTEM BANDWIDTH',
-  'This Week\'s Budget': 'BANDWIDTH MINGGU INI',
-  'This Month\'s Budget': 'BANDWIDTH BULAN INI',
-  'Safe daily quota': 'Bandwidth Harian',
-  'Spent today': 'Konsumsi Hari Ini',
-  'Quota exceeded': 'Bandwidth terlampaui',
-  '{pct}% of quota': '{pct}% bandwidth terpakai',
-  'Category Budgets': 'ALOKASI BANDWIDTH KATEGORI',
-  'Set budget': 'ALOKASIKAN BANDWIDTH',
-  'Edit Budget': 'ATUR ANGGARAN',
-  'Budget Setup': 'SETUP ANGGARAN SISTEM',
-  'Total Budget': 'TOTAL BANDWIDTH',
-  'Spent': 'TERPAKAI',
-  'Remaining': 'SISA BANDWIDTH',
-  'Needs': 'KEBUTUHAN',
-  'Wants': 'KEINGINAN',
-  'Savings': 'TABUNGAN',
-  'Savings & Goals': 'TABUNGAN & TARGET',
-  'Needs vs wants': 'KEBUTUHAN VS KEINGINAN',
-  'Spending by category': 'PENGELUARAN PER KATEGORI',
-  'Expense Composition': 'KOMPOSISI PENGELUARAN',
-  'Rollover Budget': 'ROLLOVER BANDWIDTH',
-
-  // Tabungan & Impian (Tech Upgrades & Vault)
-  'Savings Goals': 'TARGET TABUNGAN & VAULT',
-  'Create Goal': '+ PASANG TARGET TABUNGAN',
-  'Edit goal': 'EDIT TARGET TABUNGAN',
-  'Saved': 'TERKUMPUL',
-  'Target': 'TARGET EDDIES',
-  'Deposit': 'SETOR KE VAULT',
-  'Withdraw': 'TARIK DARI VAULT',
-  'Goal reached!': 'TARGET TERCAPAI! // 100%',
-
-  // Utang & Patungan (Bounties & IOU)
-  'Debts & Split Bills': 'BUKU UTANG & PATUNGAN',
-  'You Owe': 'UTANG KAMU (BOUNTY)',
-  'You Are Owed': 'KREDIT PIUTANG',
-  'Add Debt': '+ CATAT UTANG / BOUNTY',
-  'Split Bill': 'PATUNGAN / SPLIT BILL',
-  'Paid': 'LUNAS // SETTLED',
-
-  // Jadwal Rutin (Automated Subroutines)
-  'Recurring Schedules': 'JADWAL RUTIN (SUBRUTIN)',
-  'Add Recurring': '+ SUBRUTIN OTOMATIS',
-  'Active Schedules': 'SUBRUTIN AKTIF',
-
-  // Keamanan & Cloud
-  'Security & Privacy': 'KEAMANAN & PRIVASI (ICE)',
-  'App Lock & PIN': 'KUNCI APLIKASI & PIN (ICE)',
-  'Lock App': 'KUNCI APLIKASI SEKARANG',
-  'Biometric Unlock': 'PEMINDAI BIOMETRIK',
-  'Fingerprint Unlock': 'PEMINDAI SIDIK JARI',
-  'Face Unlock': 'PEMINDAI WAJAH',
-  'Privacy Shield': 'STEALTH SHIELD (SENSOR SALDO)',
-  'Cloud Backup': 'CADANGAN CLOUD',
-  'Sync Now': 'SINKRONKAN SEKARANG',
-  'Sync with Cloud': 'SINKRONKAN KE CLOUD',
-  'Manual Backup & Export': 'EKSPOR & IMPOR MANUAL',
-  'Export JSON': 'EKSPOR FILE JSON',
-  'Import JSON': 'IMPOR FILE JSON',
-
-  // Pengaturan & Info
-  'Appearance & Theme': 'TAMPILAN & TEMA',
-  'Theme Preset': 'PRESET TEMA INTERFACE',
-  'Language': 'BAHASA SISTEM',
-  'About Wall o\' Pay': 'TENTANG WALL O\' PAY // MATRIX',
-  'App Version': 'VERSI APLIKASI FIRMWARE',
-  'Profile Photo': 'AVATAR NEURAL',
-  'Crop Photo': 'KALIBRASI AVATAR',
-  'Rotate': 'ROTASI MATRIX',
-  'Reset': 'RESET MATRIX',
-  'Done': 'KONFIRMASI',
-  'View Photo': 'LIHAT AVATAR',
-  'Remove photo?': 'HAPUS AVATAR NEURAL?',
-  'Are you sure you want to remove your profile photo?': 'Yakin ingin menghapus avatar neural dari memori?',
-  'Profile photo updated.': 'Avatar neural diperbarui.',
-  'Profile photo removed.': 'Avatar neural dihapus.',
-
-  // Dialog Keluar Aplikasi (Cyberpunk Grid Disconnect)
-  'Exit Application': 'TERMINASI LINK // GRID',
-  'Are you sure you want to exit Wall o\' Pay?': 'Yakin ingin jack out dan memutuskan sesi dari Grid, choom?',
-  'Exit': 'JACK OUT',
-  'Stay in App': 'TETAP DI GRID',
-
-  // Dialog Pergantian Tema
-  'Return to Botanical Sanctuary?': 'KEMBALI KE BOTANICAL SANCTUARY?',
-  'Return to the tranquil, mindful deep forest pine aesthetic of Wall o\' Pay?':
-      'Putuskan tautan dari Grid dan kembali ke atmosfer tenang hijau pinus khas Wall o\' Pay?',
-  'Return to Sanctuary': 'KEMBALI KE SANCTUARY',
-  'Stay in Grid': 'TETAP DI GRID',
-};
-
-/// Cyberpunk Thematic Vocabulary (Edgerunners Style) - English
-const Map<String, String> _cyberEn = {
-  // Navigation & Shell
-  'Home': 'GRID',
-  'Transactions': 'LEDGER',
-  'Budget': 'BANDWIDTH',
-  'Insight': 'TELEMETRY',
-  'Financial Insights': 'FINANCIAL TELEMETRY',
-  'More': 'SYSTEM',
-  'More Features': 'SYSTEM & SUBROUTINES',
-  'Settings': 'SYSTEM CONFIG',
-  'Profile': 'RUNNER IDENTITY',
-
-  // Core Financial (Edgerunners slang)
-  'Total Balance': 'TOTAL CREDITS (EDDIES)',
-  'Income': 'CREDIT INFLOW',
-  'Expense': 'BURN RATE',
-  'Weekly Flow': 'WEEKLY CYCLE',
-  'Monthly Flow': 'MONTHLY CYCLE',
-  'Period ended': 'CYCLE ENDED',
-  '1 day left': '1 CYCLE REMAINING',
-  '{n} days left': '{n} CYCLES REMAINING',
-  'Transfer': 'NODE TRANSFER',
-  'Recent Transactions': 'LEDGER STREAM // RECENT',
-  'See All': 'ALL PACKETS',
-  'All Transactions': 'ALL LEDGER PACKETS',
-  'Transaction Details': 'PACKET DETAILS',
-  'Add transaction': '+ TRANSMIT LOG',
-  'New Transaction': 'TRANSMIT CREDIT LOG',
-  'Edit transaction': 'MODIFY PACKET',
-  'Delete transaction': 'PURGE PACKET',
-  'Save': 'TRANSMIT // SAVE',
-  'Cancel': 'ABORT',
-  'Delete': 'PURGE',
-  'Search transactions...': 'Scan ledger logs...',
-  'All Categories': 'ALL NODE CATEGORIES',
-  'Filter by account': 'Filter by node',
-  'Filter by category': 'Filter by node category',
-  'Clear filters': 'Reset filters',
-  'No transactions': 'No ledger packets',
-  'No transactions found': 'No packets match query, choom',
-
-  // Empty States
-  'Start recording your first transaction!': 'LEDGER EMPTY, CHOOM!',
-  'Every small transaction brings you closer to your financial goals.':
-      'No transaction packets detected on this node. Transmit your first credit log to the Grid!',
-  'No expenses in this period.':
-      'NO BURN RATE // Node is clean of expenses this cycle, choom.',
-  'Record a few more transactions': 'INSUFFICIENT TELEMETRY DATA',
-  'Record a few more transactions to see your financial insights, spending charts, and top categories.':
-      'Transmit a few more data packets to activate expense telemetry visualizations and node breakdown charts.',
-
-  // Accounts & Wallets (Data Nodes)
-  'Accounts': 'DATA NODES',
-  'Accounts & Wallets': 'DATA NODES & WALLETS',
-  'Main Account': 'PRIMARY NODE',
-  'Commercial Bank': 'CORPO BANK NODE',
-  'Digital Bank': 'CYBERNETIC BANK NODE',
-  'E-Wallet': 'NEURAL E-WALLET',
-  'Cash': 'PHYSICAL EDDIES',
-  'Add account': '+ LINK NEW NODE',
-  'Edit account': 'CONFIG NODE',
-  'Delete account': 'DELINK NODE',
-  'Account name': 'Node Label',
-  'Initial balance': 'Initial Credit Balance',
-  'Total in accounts': 'Total Credits in All Nodes',
-
-  // Budget (Bandwidth Allocation)
-  'Period Budget': 'SYSTEM BANDWIDTH',
-  'This Week\'s Budget': 'THIS WEEK\'S BANDWIDTH',
-  'This Month\'s Budget': 'THIS MONTH\'S BANDWIDTH',
-  'Safe daily quota': 'Daily Bandwidth',
-  'Spent today': 'Burned today',
-  'Quota exceeded': 'Bandwidth exceeded',
-  '{pct}% of quota': '{pct}% bandwidth consumed',
-  'Category Budgets': 'NODE BANDWIDTH LIMITS',
-  'Set budget': 'ALLOCATE BANDWIDTH',
-  'Edit Budget': 'RECONFIG BANDWIDTH',
-  'Budget Setup': 'SETUP SYSTEM BANDWIDTH',
-  'Total Budget': 'TOTAL BANDWIDTH',
-  'Spent': 'BURNED',
-  'Remaining': 'REMAINING BANDWIDTH',
-  'Needs': 'SURVIVAL',
-  'Wants': 'DESIRES',
-  'Savings': 'VAULT',
-  'Savings & Goals': 'VAULT & GOALS',
-  'Needs vs wants': 'SURVIVAL VS DESIRES',
-  'Spending by category': 'BURN RATE PER NODE CATEGORY',
-  'Expense Composition': 'CREDIT DRAIN COMPOSITION',
-  'Rollover Budget': 'ROLLOVER BANDWIDTH',
-
-  // Goals (Tech Upgrades & Vault)
-  'Savings Goals': 'TECH UPGRADES & VAULT',
-  'Create Goal': '+ INSTALL TECH UPGRADE',
-  'Edit goal': 'CONFIG TECH UPGRADE',
-  'Saved': 'ACCUMULATED',
-  'Target': 'TARGET EDDIES',
-  'Deposit': 'DEPOSIT TO VAULT',
-  'Withdraw': 'DRAW FROM VAULT',
-  'Goal reached!': 'TECH UPGRADE INSTALLED! // 100%',
-
-  // Debts & Split (Bounties & IOU)
-  'Debts & Split Bills': 'BOUNTIES & SPLIT CREDITS',
-  'You Owe': 'OUTSTANDING BOUNTY (DEBT)',
-  'You Are Owed': 'RECEIVABLE BOUNTY',
-  'Add Debt': '+ LOG BOUNTY / IOU',
-  'Split Bill': 'SPLIT CREDIT PACKET',
-  'Paid': 'SETTLED',
-
-  // Recurring (Automated Subroutines)
-  'Recurring Schedules': 'AUTOMATED SUBROUTINES',
-  'Add Recurring': '+ NEW SUBROUTINE',
-  'Active Schedules': 'ACTIVE SUBROUTINES',
-
-  // Security & Cloud
-  'Security & Privacy': 'NEURAL ICE & PRIVACY',
-  'App Lock & PIN': 'CYBER ICE SECURITY & PIN',
-  'Lock App': 'ENGAGE ICE SECURITY',
-  'Biometric Unlock': 'NEURAL BIOMETRIC SCAN',
-  'Fingerprint Unlock': 'CYBER FINGERPRINT SCAN',
-  'Face Unlock': 'OPTICAL FACE SCAN',
-  'Privacy Shield': 'STEALTH SHIELD (BALANCE CENSOR)',
-  'Cloud Backup': 'NEURAL CLOUD UPLINK',
-  'Sync Now': 'TRANSMIT UPLINK',
-  'Sync with Cloud': 'SYNC NEURAL UPLINK',
-  'Manual Backup & Export': 'MANUAL DATA EXTRACTION',
-  'Export JSON': 'EXTRACT JSON DUMP',
-  'Import JSON': 'INJECT JSON PACKET',
-
-  // Settings & Info
-  'Appearance & Theme': 'INTERFACE MATRIX CONFIG',
-  'Theme Preset': 'INTERFACE PRESET',
-  'Language': 'NEURAL LANGUAGE PACK',
-  'About Wall o\' Pay': 'ABOUT WALL O\' PAY // MATRIX',
-  'App Version': 'FIRMWARE MATRIX VERSION',
-  'Profile Photo': 'NEURAL AVATAR',
-  'Crop Photo': 'CALIBRATE AVATAR',
-  'Rotate': 'ROTATE MATRIX',
-  'Reset': 'RESET MATRIX',
-  'Done': 'CONFIRM',
-  'View Photo': 'VIEW AVATAR',
-  'Remove photo?': 'PURGE NEURAL AVATAR?',
-  'Are you sure you want to remove your profile photo?': 'Are you sure you want to purge your neural avatar from memory?',
-  'Profile photo updated.': 'Neural avatar updated.',
-  'Profile photo removed.': 'Neural avatar purged.',
-
-  // Exit Application Dialog (Cyberpunk Grid Disconnect)
-  'Exit Application': 'TERMINATE GRID UPLINK',
-  'Are you sure you want to exit Wall o\' Pay?': 'Are you sure you want to jack out and disconnect from the Grid, choom?',
-  'Exit': 'JACK OUT',
-  'Stay in App': 'STAY IN GRID',
-
-  // Theme Switch Dialog
-  'Return to Botanical Sanctuary?': 'RETURN TO BOTANICAL SANCTUARY?',
-  'Return to the tranquil, mindful deep forest pine aesthetic of Wall o\' Pay?':
-      'Disconnect neural link from the Grid and return to Wall o\' Pay\'s tranquil deep forest sanctuary?',
-  'Return to Sanctuary': 'RETURN TO SANCTUARY',
-  'Stay in Grid': 'STAY IN GRID',
 };
 

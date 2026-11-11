@@ -58,16 +58,42 @@ class HomePage extends ConsumerWidget {
           MaterialPageRoute<void>(builder: (_) => const SettingsPage()),
         );
 
-    final colors = context.themeColors;
-    final isCyber = colors.isCyberpunk;
-
     return Scaffold(
-      backgroundColor: colors.heroBackground,
+      backgroundColor: AppColors.headerCanopyTop,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
         child: Stack(
           children: [
+            // Atmospheric Sunlit Conservatory Backdrop Header
             Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 220,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.asset(
+                    'assets/images/glasshouse_bg.jpg',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
+                  ),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          AppColors.headerCanopyTop.withValues(alpha: 0.78),
+                          AppColors.headerCanopyBottom.withValues(alpha: 0.96),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Positioned(
               top: 0,
               left: 0,
               right: 0,
@@ -75,11 +101,8 @@ class HomePage extends ConsumerWidget {
               child: IgnorePointer(
                 child: RepaintBoundary(
                   child: CustomPaint(
-                    key: ValueKey('homeCanopy_$isCyber'),
                     isComplex: true,
-                    painter: isCyber
-                        ? const CyberCanopyPainter()
-                        : const BotanicalCanopyPainter(opacity: 0.10),
+                    painter: BotanicalCanopyPainter(opacity: 0.12),
                   ),
                 ),
               ),
@@ -252,130 +275,99 @@ class _HomeHeader extends ConsumerWidget {
     final theme = Theme.of(context);
     final sync = ref.watch(syncStateProvider);
 
-    final isCyber = context.isCyberpunk;
-    (String, String?) effectiveGreeting() {
-      if (!isCyber) return (greeting(), null);
-      final h = DateTime.now().hour;
-      final isId = AppLocale.code == 'id';
-      if (h >= 5 && h < 11) {
-        return isId
-            ? ('BANGUN, CHOOM', '// GRID AKTIF')
-            : ('WAKE UP, CHOOM', '// NIGHT CITY AM');
-      } else if (h >= 11 && h < 18) {
-        return isId
-            ? ('NETRUNNER ONLINE', '// TRAFIK TINGGI')
-            : ('NETRUNNER ONLINE', '// GRID ACTIVE');
-      } else {
-        return isId
-            ? ('NIGHT CITY MEMANGGIL', '// LARUT MALAM')
-            : ('NIGHT CITY CALLS', '// AFTER HOURS');
-      }
-    }
-
-    final (greetingTop, greetingSub) = effectiveGreeting();
-
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 10, 8, 20),
+      padding: const EdgeInsets.fromLTRB(20, 10, 12, 18),
       child: Row(
         children: [
-          UserAvatar(size: 48, onTap: onProfile),
+          UserAvatar(size: 48, withGlassFrame: true, onTap: onProfile),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Baris 1: Sapaan status utama
+                // Baris 1: Sapaan
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Flexible(
                       child: Text(
-                        greetingTop,
+                        greeting(),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: isCyber ? const Color(0xFF00F0FF).withValues(alpha: 0.90) : Colors.white70,
-                          fontWeight: isCyber ? FontWeight.w700 : FontWeight.w500,
-                          letterSpacing: isCyber ? 0.6 : 0.0,
-                          fontSize: isCyber ? 10.5 : null,
+                          color: AppColors.freshSage,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                    if (!isCyber && sync.status == SyncStatus.syncing) ...[
+                    if (sync.status == SyncStatus.syncing) ...[
                       const SizedBox(width: 6),
                       const SizedBox(
                         width: 10,
                         height: 10,
                         child: CircularProgressIndicator(
                           strokeWidth: 1.8,
-                          color: Colors.white70,
+                          color: AppColors.dewMint,
                         ),
                       ),
                     ],
                   ],
                 ),
-                // Baris 2: Sub-sapaan / status siklus waktu Cyberpunk
-                if (greetingSub != null) ...[
-                  const SizedBox(height: 1),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          greetingSub,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF00F0FF).withValues(alpha: 0.65),
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.4,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ),
-                      if (sync.status == SyncStatus.syncing) ...[
-                        const SizedBox(width: 6),
-                        const SizedBox(
-                          width: 9,
-                          height: 9,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.6,
-                            color: Color(0xFF00F0FF),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
                 const SizedBox(height: 2),
-                // Baris 3: Nama Pengguna
+                // Baris 2: Nama Pengguna
                 Text(
                   (name != null && name!.trim().isNotEmpty)
                       ? name!.trim()
                       : context.tr('Wall o\' Pay'),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: (isCyber ? theme.textTheme.titleMedium : theme.textTheme.titleLarge)?.copyWith(
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    fontSize: isCyber ? 18 : null,
+                    color: AppColors.softIvory,
                   ),
                 ),
               ],
             ),
           ),
-          IconButton(
-            tooltip: context.tr('More Features'),
-            color: Colors.white,
-            icon: const Icon(Icons.grid_view_rounded, size: 22),
-            onPressed: onMore,
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.12),
+              border: Border.all(
+                color: AppColors.dewMint.withValues(alpha: 0.22),
+                width: 1.0,
+              ),
+            ),
+            child: IconButton(
+              tooltip: context.tr('More Features'),
+              padding: EdgeInsets.zero,
+              color: Colors.white,
+              icon: const Icon(Icons.grid_view_rounded, size: 20),
+              onPressed: onMore,
+            ),
           ),
-          IconButton(
-            tooltip: context.tr('Settings'),
-            color: Colors.white,
-            icon: const Icon(Icons.settings_outlined, size: 22),
-            onPressed: onSettings,
+          const SizedBox(width: 8),
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.12),
+              border: Border.all(
+                color: AppColors.dewMint.withValues(alpha: 0.22),
+                width: 1.0,
+              ),
+            ),
+            child: IconButton(
+              tooltip: context.tr('Settings'),
+              padding: EdgeInsets.zero,
+              color: Colors.white,
+              icon: const Icon(Icons.settings_outlined, size: 20),
+              onPressed: onSettings,
+            ),
           ),
         ],
       ),
@@ -383,7 +375,7 @@ class _HomeHeader extends ConsumerWidget {
   }
 }
 
-/// Lembar background berujung melengkung di bawah header hijau.
+/// Lembar background berujung melengkung di bawah header hijau bergaya Enchanted Glasshouse.
 class _Sheet extends StatelessWidget {
   const _Sheet({required this.child});
 
@@ -391,26 +383,47 @@ class _Sheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = Theme.of(context).scaffoldBackgroundColor;
-    final isCyber = context.isCyberpunk;
     return Container(
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
-        color: bgColor,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border(
+          top: BorderSide(
+            color: AppColors.dewMint.withValues(alpha: 0.28),
+            width: 1.2,
+          ),
+        ),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFF163228), // Deep emerald mist at the top
+            Color(0xFF11251E), // Subtle moss tint
+            Color(0xFF0C1914), // Deep grounding moss shadow
+          ],
+          stops: [0.0, 0.40, 1.0],
+        ),
       ),
       child: Stack(
         fit: StackFit.expand,
         children: [
+          // Suasana Rumah Kaca Alami dari Aset Fotorealistik
           Positioned.fill(
+            child: Opacity(
+              opacity: 0.10,
+              child: Image.asset(
+                'assets/images/glasshouse_bg.jpg',
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+              ),
+            ),
+          ),
+          const Positioned.fill(
             child: IgnorePointer(
               child: RepaintBoundary(
                 child: CustomPaint(
-                  key: ValueKey('homeSheet_$isCyber'),
                   isComplex: true,
-                  painter: isCyber
-                      ? const CyberBackgroundPainter()
-                      : const BotanicalBackgroundPainter(),
+                  painter: BotanicalBackgroundPainter(),
                 ),
               ),
             ),
@@ -428,8 +441,8 @@ class _Sheet extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      bgColor,
-                      bgColor.withValues(alpha: 0.0),
+                      const Color(0xFF163228).withValues(alpha: 0.85),
+                      const Color(0xFF163228).withValues(alpha: 0.0),
                     ],
                   ),
                 ),
@@ -462,7 +475,6 @@ class _BalanceCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isCyber = context.isCyberpunk;
     final isSurplus = periodFlow >= 0;
     final hidden = ref.watch(hideBalanceProvider);
     final wallets = ref.watch(walletsProvider).value ?? const [];
@@ -496,7 +508,6 @@ class _BalanceCard extends ConsumerWidget {
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: Colors.white70,
                                 fontWeight: FontWeight.w600,
-                                letterSpacing: isCyber ? 0.6 : 0.0,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -548,7 +559,6 @@ class _BalanceCard extends ConsumerWidget {
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
                 color: Colors.white,
-                letterSpacing: isCyber ? 0.8 : null,
               ),
             ),
           ),
@@ -556,14 +566,12 @@ class _BalanceCard extends ConsumerWidget {
           Builder(
             builder: (ctx) {
               final c = ctx.themeColors;
-              final isCyber = ctx.isCyberpunk;
               final flowColor = isSurplus ? c.income : c.expense;
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
-                  color: isCyber ? flowColor.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
-                  border: isCyber ? Border.all(color: flowColor.withValues(alpha: 0.35)) : null,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -597,15 +605,14 @@ class _BalanceCard extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isCyber ? const Color(0xFF0D1022).withValues(alpha: 0.7) : Colors.white.withValues(alpha: 0.08),
+              color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(16),
-              border: isCyber ? Border.all(color: const Color(0xFF00F0FF).withValues(alpha: 0.20)) : null,
             ),
             child: Row(
               children: [
                 Expanded(
                   child: _FlowTile(
-                    icon: isCyber ? Icons.arrow_downward_rounded : Icons.arrow_downward,
+                    icon: Icons.arrow_downward,
                     label: context.tr('Income'),
                     value: rupiah(income),
                     blurred: hidden,
@@ -615,7 +622,7 @@ class _BalanceCard extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _FlowTile(
-                    icon: isCyber ? Icons.arrow_upward_rounded : Icons.arrow_upward,
+                    icon: Icons.arrow_upward,
                     label: context.tr('Expense'),
                     value: rupiah(expense),
                     blurred: hidden,
@@ -647,16 +654,12 @@ class _AccountsQuickBar extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: context.isCyberpunk
-                ? const Color(0xFF0D1022).withValues(alpha: 0.6)
-                : Colors.white.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.black.withValues(alpha: 0.22),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: context.isCyberpunk
-                  ? const Color(0xFF00F0FF).withValues(alpha: 0.20)
-                  : Colors.white.withValues(alpha: 0.08),
+              color: AppColors.dewMint.withValues(alpha: 0.18),
               width: 1,
             ),
           ),
@@ -682,7 +685,7 @@ class _AccountsQuickBar extends StatelessWidget {
                     context.tr('Add accounts & wallets'),
                     style: const TextStyle(
                       fontSize: 12,
-                      color: Colors.white70,
+                      color: AppColors.freshSage,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -706,7 +709,7 @@ class _AccountsQuickBar extends StatelessWidget {
               const Icon(
                 Icons.chevron_right_rounded,
                 size: 16,
-                color: Colors.white70,
+                color: AppColors.dewMint,
               ),
             ],
           ),
@@ -796,7 +799,6 @@ class _FlowTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isCyber = context.isCyberpunk;
     final valueWidget = Text(
       value,
       maxLines: 1,
@@ -807,12 +809,26 @@ class _FlowTile extends StatelessWidget {
         color: Colors.white,
       ),
     );
+    final isIncome = icon == Icons.arrow_downward;
+    final accentColor = isIncome ? AppColors.incomeOnDark : AppColors.expenseOnDark;
+    final bgTint = isIncome
+        ? AppColors.income.withValues(alpha: 0.20)
+        : AppColors.expense.withValues(alpha: 0.20);
+    final borderTint = isIncome
+        ? AppColors.income.withValues(alpha: 0.35)
+        : AppColors.expense.withValues(alpha: 0.35);
+
     return Row(
       children: [
-        CircleAvatar(
-          radius: 15,
-          backgroundColor: Colors.white.withValues(alpha: 0.14),
-          child: Icon(icon, size: 16, color: Colors.white),
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: bgTint,
+            border: Border.all(color: borderTint, width: 1.0),
+          ),
+          child: Icon(icon, size: 16, color: accentColor),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -820,13 +836,13 @@ class _FlowTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isCyber ? label.toUpperCase() : label,
+                label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.white70,
+                  color: AppColors.freshSage,
                   fontSize: 11,
-                  letterSpacing: isCyber ? 0.6 : 0.0,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               blurred
@@ -854,31 +870,22 @@ class _UpdateBannerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.themeColors;
-    final isCyber = colors.isCyberpunk;
 
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             colors.heroBackground,
-            isCyber ? const Color(0xFF1E2240) : const Color(0xFF2C5A47),
+            const Color(0xFF2C5A47),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
-        border: isCyber
-            ? Border.all(
-                color: colors.primary.withValues(alpha: 0.40),
-                width: 1.2,
-              )
-            : null,
         boxShadow: [
           BoxShadow(
-            color: isCyber
-                ? colors.primary.withValues(alpha: 0.28)
-                : AppColors.deepForest.withValues(alpha: 0.28),
-            blurRadius: isCyber ? 20 : 16,
+            color: AppColors.deepForest.withValues(alpha: 0.28),
+            blurRadius: 16,
             offset: const Offset(0, 6),
           ),
         ],

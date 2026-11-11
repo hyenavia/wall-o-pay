@@ -10,6 +10,7 @@ import '../../core/brand.dart';
 import '../../core/format.dart';
 import '../../core/l10n.dart';
 import '../../core/period.dart';
+import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/prefs.dart';
 import '../../data/providers.dart';
@@ -217,7 +218,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final last = _step == _lastStep;
 
     return Scaffold(
@@ -232,6 +232,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   const BrandMark(size: 40),
                   const Spacer(),
                   TextButton(
+                    style: TextButton.styleFrom(foregroundColor: AppColors.dewMint),
                     onPressed: _saving ? null : widget.onDone,
                     child: Text(context.tr('Skip')),
                   ),
@@ -245,6 +246,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                 children: [
                   if (_step > 0)
                     TextButton(
+                      style: TextButton.styleFrom(foregroundColor: AppColors.dewMint),
                       onPressed: _saving ? null : () => setState(() => _step--),
                       child: Text(context.tr('Back')),
                     ),
@@ -259,21 +261,34 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                               setState(() => _step++);
                             }
                           },
-                    style: FilledButton.styleFrom(minimumSize: const Size(140, 52)),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(140, 52),
+                      backgroundColor: AppColors.glasshouseGreen,
+                      foregroundColor: AppColors.softIvory,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        side: BorderSide(
+                          color: AppColors.dewMint.withValues(alpha: 0.35),
+                        ),
+                      ),
+                    ),
                     child: _saving
                         ? const SizedBox(
                             height: 20,
                             width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.softIvory),
                           )
-                        : Text(context.tr(last ? 'Finish' : 'Next')),
+                        : Text(
+                            context.tr(last ? 'Finish' : 'Next'),
+                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                          ),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 context.tr('Step {n} of {total}', {'n': _step + 1, 'total': _lastStep + 1}),
-                style: theme.textTheme.bodySmall,
+                style: const TextStyle(fontSize: 12, color: AppColors.freshSage),
               ),
             ],
           ),

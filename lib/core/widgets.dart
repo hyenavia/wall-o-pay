@@ -12,11 +12,12 @@ import '../data/profile.dart';
 import '../data/providers.dart';
 import 'botanical_decorations.dart';
 import 'format.dart';
+import 'icons.dart';
 import 'l10n.dart';
 import 'period.dart';
 import 'theme.dart';
 
-/// AppBar dengan header hijau tua dan lembar berujung melengkung di bawahnya.
+/// AppBar dengan kanopi atmosferik dan lembar melengkung di bawahnya khusus untuk halaman tab utama (Transactions, Budget, Insights).
 PreferredSizeWidget pageAppBar(
   BuildContext context, {
   required Widget title,
@@ -24,13 +25,11 @@ PreferredSizeWidget pageAppBar(
   Widget? bottom,
   double bottomHeight = 0,
 }) {
-  final colors = context.themeColors;
-  final isCyber = colors.isCyberpunk;
   return AppBar(
     title: title,
     actions: actions,
     centerTitle: false,
-    backgroundColor: colors.heroBackground,
+    backgroundColor: AppColors.headerCanopyTop,
     foregroundColor: Colors.white,
     surfaceTintColor: Colors.transparent,
     elevation: 0,
@@ -42,22 +41,42 @@ PreferredSizeWidget pageAppBar(
         .textTheme
         .titleLarge
         ?.copyWith(fontWeight: FontWeight.w800, color: Colors.white),
-    flexibleSpace: IgnorePointer(
-      child: RepaintBoundary(
-        child: CustomPaint(
-          size: Size.infinite,
-          isComplex: true,
-          painter: isCyber
-              ? const CyberCanopyPainter()
-              : const BotanicalCanopyPainter(opacity: 0.10),
+    flexibleSpace: Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.asset(
+          'assets/images/glasshouse_bg.jpg',
+          fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
         ),
-      ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppColors.headerCanopyTop.withValues(alpha: 0.78),
+                AppColors.headerCanopyBottom.withValues(alpha: 0.96),
+              ],
+            ),
+          ),
+        ),
+        const IgnorePointer(
+          child: RepaintBoundary(
+            child: CustomPaint(
+              size: Size.infinite,
+              isComplex: true,
+              painter: BotanicalCanopyPainter(opacity: 0.12),
+            ),
+          ),
+        ),
+      ],
     ),
     bottom: _SheetEdge(childHeight: bottomHeight, child: bottom),
   );
 }
 
-/// Lengkungan atas lembar background di bawah header hijau / garis cyber divider.
+/// Lengkungan atas lembar background di bawah header hijau.
 class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
   const _SheetEdge({this.child, this.childHeight = 0});
 
@@ -71,7 +90,6 @@ class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isCyber = context.isCyberpunk;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -79,18 +97,14 @@ class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
         Container(
           height: edge,
           decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: isCyber
-                ? null
-                : const BorderRadius.vertical(top: Radius.circular(28)),
-            border: isCyber
-                ? Border(
-                    top: BorderSide(
-                      color: context.themeColors.primary.withValues(alpha: 0.35),
-                      width: 1.2,
-                    ),
-                  )
-                : null,
+            color: const Color(0xFF163228),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            border: Border(
+              top: BorderSide(
+                color: AppColors.dewMint.withValues(alpha: 0.28),
+                width: 1.2,
+              ),
+            ),
           ),
         ),
       ],
@@ -98,7 +112,35 @@ class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// Gaya field input yang seragam.
+/// AppBar bersih dan elegan untuk halaman sekunder/detail di luar tab utama.
+/// Menggunakan warna dasar mossShadow tanpa latar foto atau lengkungan lembar agar fokus penuh pada konten.
+PreferredSizeWidget secondaryAppBar(
+  BuildContext context, {
+  required Widget title,
+  List<Widget>? actions,
+  PreferredSizeWidget? bottom,
+}) {
+  return AppBar(
+    title: title,
+    actions: actions,
+    bottom: bottom,
+    centerTitle: false,
+    backgroundColor: AppColors.mossShadow,
+    foregroundColor: AppColors.softIvory,
+    surfaceTintColor: Colors.transparent,
+    elevation: 0,
+    scrolledUnderElevation: 0,
+    systemOverlayStyle: SystemUiOverlayStyle.light,
+    iconTheme: const IconThemeData(color: AppColors.softIvory),
+    actionsIconTheme: const IconThemeData(color: AppColors.softIvory),
+    titleTextStyle: Theme.of(context)
+        .textTheme
+        .titleLarge
+        ?.copyWith(fontWeight: FontWeight.w700, color: AppColors.softIvory),
+  );
+}
+
+/// Gaya field input yang seragam bergaya Enchanted Glasshouse.
 InputDecoration appInput(
   BuildContext context, {
   String? label,
@@ -109,24 +151,37 @@ InputDecoration appInput(
   Widget? suffixIcon,
 }) {
   final scheme = Theme.of(context).colorScheme;
-  final isCyber = context.isCyberpunk;
   OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(isCyber ? 6 : 14),
+        borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(color: c, width: w),
       );
   return InputDecoration(
     labelText: label,
+    labelStyle: TextStyle(
+      color: AppColors.freshSage.withValues(alpha: 0.9),
+      fontWeight: FontWeight.w600,
+    ),
     hintText: hint,
+    hintStyle: TextStyle(
+      color: scheme.onSurface.withValues(alpha: 0.45),
+    ),
     prefixIcon: prefixIcon,
     prefixText: prefixText,
+    prefixStyle: const TextStyle(
+      color: AppColors.dewMint,
+      fontWeight: FontWeight.w700,
+    ),
     helperText: helper,
+    helperStyle: TextStyle(
+      color: scheme.onSurface.withValues(alpha: 0.6),
+    ),
     suffixIcon: suffixIcon,
     filled: true,
-    fillColor: scheme.surface,
+    fillColor: AppColors.surfaceContainer.withValues(alpha: 0.70),
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    border: border(scheme.outlineVariant),
-    enabledBorder: border(scheme.outlineVariant),
-    focusedBorder: border(scheme.primary, 1.6),
+    border: border(AppColors.dewMint.withValues(alpha: 0.16)),
+    enabledBorder: border(AppColors.dewMint.withValues(alpha: 0.16)),
+    focusedBorder: border(AppColors.dewMint.withValues(alpha: 0.55), 1.5),
   );
 }
 
@@ -142,6 +197,7 @@ Color budgetColor(double ratio, ColorScheme scheme, [AppThemeColors? colors]) {
 }
 
 /// Kartu kontainer standar dengan sudut membulat dan garis tepi halus sesuai tema.
+/// Kartu standar dengan latar belakang kaca transparan bergaya Enchanted Glasshouse.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -156,45 +212,36 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final colors = context.themeColors;
-    final isCyber = colors.isCyberpunk;
-
-    final shape = isCyber
-        ? BeveledRectangleBorder(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(6),
-              topRight: Radius.circular(14),
-              bottomLeft: Radius.circular(14),
-              bottomRight: Radius.circular(6),
-            ),
-            side: BorderSide(
-              color: colors.primary.withValues(alpha: 0.32),
-              width: 1.0,
-            ),
-          )
-        : RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-            side: BorderSide(
-              color: scheme.outlineVariant,
-              width: 1.0,
-            ),
-          );
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+      side: BorderSide(
+        color: AppColors.dewMint.withValues(alpha: 0.16),
+        width: 1.0,
+      ),
+    );
 
     return Container(
-      decoration: ShapeDecoration(
-        color: scheme.surface,
-        shape: shape,
-        shadows: isCyber
-            ? [
-                BoxShadow(
-                  color: colors.primary.withValues(alpha: 0.12),
-                  blurRadius: 16,
-                  spreadRadius: 0,
-                  offset: const Offset(0, 3),
-                ),
-              ]
-            : null,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.dewMint.withValues(alpha: 0.15),
+          width: 1.0,
+        ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.cardSurface.withValues(alpha: 0.95),
+            AppColors.surfaceContainer.withValues(alpha: 0.88),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.20),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -209,7 +256,7 @@ class AppCard extends StatelessWidget {
   }
 }
 
-/// Kartu sorotan (HeroCard) untuk saldo, total anggaran, dan sorotan utama.
+/// Kartu sorotan (HeroCard) untuk saldo, total anggaran, dan sorotan utama bergaya Enchanted Glasshouse.
 class HeroCard extends StatelessWidget {
   const HeroCard({
     super.key,
@@ -222,68 +269,69 @@ class HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.themeColors;
-    final isCyber = colors.isCyberpunk;
-
-    final shape = isCyber
-        ? BeveledRectangleBorder(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(8),
-              topRight: Radius.circular(22),
-              bottomLeft: Radius.circular(22),
-              bottomRight: Radius.circular(8),
-            ),
-            side: BorderSide(
-              color: colors.primary.withValues(alpha: 0.55),
-              width: 1.4,
-            ),
-          )
-        : RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          );
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(24),
+    );
 
     return Container(
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
-        color: isCyber ? null : colors.heroBackground,
-        gradient: isCyber
-            ? const LinearGradient(
-                colors: [Color(0xFF13172E), Color(0xFF101326), Color(0xFF1A102B)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              )
-            : null,
         shape: shape,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF26503E), // Luminous Glasshouse Emerald
+            Color(0xFF132B21), // Deep Moss Shadow Glass
+          ],
+        ),
         shadows: [
           BoxShadow(
-            color: isCyber
-                ? colors.primary.withValues(alpha: 0.30)
-                : AppColors.deepForest.withValues(alpha: 0.25),
-            blurRadius: isCyber ? 22 : 18,
-            spreadRadius: isCyber ? -1 : 0,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
-          if (isCyber)
-            BoxShadow(
-              color: colors.expense.withValues(alpha: 0.16),
-              blurRadius: 28,
-              spreadRadius: -4,
-              offset: const Offset(0, 10),
-            ),
+          BoxShadow(
+            color: AppColors.emeraldLeaf.withValues(alpha: 0.22),
+            blurRadius: 16,
+            spreadRadius: -2,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Stack(
         children: [
+          // Background konservatori samar di dalam kartu
           Positioned.fill(
+            child: Opacity(
+              opacity: 0.14,
+              child: Image.asset(
+                'assets/images/glasshouse_bg.jpg',
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          // Garis tepi kaca spekular
+          Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: AppColors.dewMint.withValues(alpha: 0.28),
+                    width: 1.2,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const Positioned.fill(
             child: IgnorePointer(
               child: RepaintBoundary(
                 child: CustomPaint(
-                  key: ValueKey('heroCard_$isCyber'),
                   isComplex: true,
-                  painter: isCyber
-                      ? const CyberHeroCardPainter()
-                      : const BotanicalHeroCardPainter(),
+                  painter: BotanicalHeroCardPainter(),
                 ),
               ),
             ),
@@ -301,56 +349,67 @@ class HeroCard extends StatelessWidget {
   }
 }
 
-/// Lencana ikon kategori persegi membulat (Botanical) atau bersegi chamfer/tech-cut (Cyberpunk).
+/// Lencana ikon kategori persegi membulat bergaya Enchanted Glasshouse.
 class CategoryBadge extends StatelessWidget {
   const CategoryBadge({
     super.key,
     required this.icon,
     required this.color,
     this.size = 44,
+    this.categoryKey,
   });
 
   final IconData icon;
   final Color color;
   final double size;
+  final String? categoryKey;
 
   @override
   Widget build(BuildContext context) {
-    final isCyber = context.isCyberpunk;
-    final shape = isCyber
-        ? BeveledRectangleBorder(
-            borderRadius: BorderRadius.circular(size * 0.22),
-            side: BorderSide(
-              color: color.withValues(alpha: 0.50),
-              width: 1.2,
-            ),
-          )
-        : RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(size * 0.3),
-          );
+    final assetPath = glasshouseAssetFor(categoryKey) ?? glasshouseAssetForIcon(icon);
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(size * 0.32),
+      side: BorderSide(
+        color: AppColors.dewMint.withValues(alpha: 0.22),
+        width: 1.0,
+      ),
+    );
 
     return Container(
       width: size,
       height: size,
       decoration: ShapeDecoration(
-        color: color.withValues(alpha: isCyber ? 0.22 : 0.16),
+        color: AppColors.surfaceContainer.withValues(alpha: 0.85),
         shape: shape,
-        shadows: isCyber
-            ? [
-                BoxShadow(
-                  color: color.withValues(alpha: 0.25),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ]
-            : null,
+        shadows: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.22),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+          BoxShadow(
+            color: color.withValues(alpha: 0.18),
+            blurRadius: 6,
+            spreadRadius: -1,
+          ),
+        ],
       ),
-      child: Icon(icon, color: color, size: size * 0.5),
+      child: Center(
+        child: assetPath != null
+            ? Image.asset(
+                assetPath,
+                width: size * 0.72,
+                height: size * 0.72,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.medium,
+              )
+            : Icon(icon, color: color, size: size * 0.5),
+      ),
     );
   }
 }
 
-/// Indikator bilah progres horizontal dengan ujung membulat (Botanical) atau meter HUD datar (Cyberpunk).
+/// Indikator bilah progres horizontal dengan ujung membulat.
 class AppProgressBar extends StatelessWidget {
   const AppProgressBar({
     super.key,
@@ -368,9 +427,8 @@ class AppProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final isCyber = context.isCyberpunk;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(isCyber ? 2 : height),
+      borderRadius: BorderRadius.circular(height),
       child: LinearProgressIndicator(
         value: value.clamp(0.0, 1.0).toDouble(),
         minHeight: height,
@@ -381,7 +439,7 @@ class AppProgressBar extends StatelessWidget {
   }
 }
 
-/// Chip pilihan bergaya kapsul stadium (Botanical) atau modul chamfered (Cyberpunk).
+/// Chip pilihan bergaya kapsul stadium bertema Enchanted Glasshouse.
 class AppChip extends StatelessWidget {
   const AppChip({
     super.key,
@@ -389,36 +447,61 @@ class AppChip extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     this.icon,
+    this.categoryKey,
+    this.assetPath,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onSelected;
   final IconData? icon;
+  final String? categoryKey;
+  final String? assetPath;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isCyber = context.isCyberpunk;
-    final fg = selected ? scheme.onPrimary : scheme.onSurface;
+    final resolvedAsset = assetPath ??
+        glasshouseAssetFor(categoryKey) ??
+        (icon != null ? glasshouseAssetForIcon(icon!) : null);
+    final fg = selected ? Colors.white : AppColors.softIvory;
+
+    Widget? avatarWidget;
+    if (resolvedAsset != null) {
+      avatarWidget = Image.asset(
+        resolvedAsset,
+        width: 18,
+        height: 18,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.medium,
+      );
+    } else if (icon != null) {
+      avatarWidget = Icon(
+        icon,
+        size: 18,
+        color: selected ? AppColors.dewMint : AppColors.freshSage,
+      );
+    }
+
     return ChoiceChip(
-      avatar: icon == null ? null : Icon(icon, size: 18, color: fg),
+      avatar: avatarWidget,
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelected(),
       showCheckmark: false,
-      selectedColor: scheme.primary,
-      backgroundColor: scheme.surface,
-      side: BorderSide(color: selected ? scheme.primary : scheme.outlineVariant),
-      shape: isCyber
-          ? const BeveledRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(6)),
-            )
-          : const StadiumBorder(),
+      selectedColor: const Color(0xFF1B4434),
+      backgroundColor: AppColors.surfaceContainer.withValues(alpha: 0.70),
+      side: BorderSide(
+        color: selected
+            ? AppColors.dewMint.withValues(alpha: 0.60)
+            : AppColors.dewMint.withValues(alpha: 0.16),
+        width: selected ? 1.2 : 1.0,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       labelStyle: TextStyle(
         color: fg,
-        fontWeight: FontWeight.w700,
-        letterSpacing: isCyber ? 0.4 : 0.0,
+        fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
       ),
     );
   }
@@ -453,7 +536,21 @@ class SectionHeader extends StatelessWidget {
             ),
           ),
           if (actionLabel != null)
-            TextButton(onPressed: onAction, child: Text(actionLabel!)),
+            TextButton(
+              onPressed: onAction,
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.freshSage,
+                textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(actionLabel!),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.arrow_forward_ios_rounded, size: 11),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -483,7 +580,7 @@ class PeriodSwitcher extends ConsumerWidget {
           tooltip: context.tr('Previous period'),
           visualDensity: compact ? VisualDensity.compact : null,
           onPressed: () => notifier.step(-1),
-          color: onDark ? Colors.white : null,
+          color: onDark ? Colors.white : AppColors.freshSage,
           icon: const Icon(Icons.chevron_left),
         ),
         Flexible(
@@ -492,7 +589,7 @@ class PeriodSwitcher extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
             style: style?.copyWith(
               fontWeight: FontWeight.w700,
-              color: onDark ? Colors.white : null,
+              color: onDark ? Colors.white : AppColors.softIvory,
             ),
           ),
         ),
@@ -500,7 +597,7 @@ class PeriodSwitcher extends ConsumerWidget {
           tooltip: context.tr('Next period'),
           visualDensity: compact ? VisualDensity.compact : null,
           onPressed: () => notifier.step(1),
-          color: onDark ? Colors.white : null,
+          color: onDark ? Colors.white : AppColors.freshSage,
           icon: const Icon(Icons.chevron_right),
         ),
       ],
@@ -519,24 +616,13 @@ class PeriodTypeToggle extends ConsumerWidget {
     final type = ref.watch(appPrefsProvider.select((p) => p.periodType));
     if (compact) {
       final isMonthly = type == PeriodType.monthly;
-      final theme = Theme.of(context);
-      final colors = context.themeColors;
-      final isCyber = colors.isCyberpunk;
-      final shape = isCyber
-          ? BeveledRectangleBorder(
-              borderRadius: BorderRadius.circular(6),
-              side: BorderSide(
-                color: colors.primary.withValues(alpha: 0.35),
-                width: 1.0,
-              ),
-            )
-          : RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: BorderSide(
-                color: theme.colorScheme.outlineVariant,
-                width: 1.0,
-              ),
-            );
+      final shape = RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: AppColors.dewMint.withValues(alpha: 0.22),
+          width: 1.0,
+        ),
+      );
 
       return InkWell(
         customBorder: shape,
@@ -547,17 +633,8 @@ class PeriodTypeToggle extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: ShapeDecoration(
-            color: theme.colorScheme.surface,
+            color: AppColors.surfaceContainer.withValues(alpha: 0.85),
             shape: shape,
-            shadows: isCyber
-                ? [
-                    BoxShadow(
-                      color: colors.primary.withValues(alpha: 0.12),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -565,15 +642,15 @@ class PeriodTypeToggle extends ConsumerWidget {
               Icon(
                 isMonthly ? Icons.calendar_month_outlined : Icons.view_week_outlined,
                 size: 15,
-                color: theme.colorScheme.primary,
+                color: AppColors.freshSage,
               ),
               const SizedBox(width: 5),
               Text(
                 context.tr(isMonthly ? 'Monthly' : 'Weekly'),
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.primary,
+                  color: AppColors.softIvory,
                 ),
               ),
             ],
@@ -602,133 +679,75 @@ class PeriodTypeToggle extends ConsumerWidget {
   }
 }
 
-/// Foto profil: lingkaran organik pada Botanical, atau Chamfered HUD Badge pada Cyberpunk.
-/// Jika belum ada foto, tampil inisial nickname.
+/// Foto profil lingkaran organik pengguna. Jika belum ada foto, tampil inisial nickname.
+/// Mendukung bingkai kaca botani [withGlassFrame] (Enchanted Glasshouse wreath).
 class UserAvatar extends ConsumerWidget {
-  const UserAvatar({super.key, this.size = 48, this.onTap, this.heroTag});
+  const UserAvatar({
+    super.key,
+    this.size = 48,
+    this.onTap,
+    this.heroTag,
+    this.withGlassFrame = false,
+  });
 
   final double size;
   final VoidCallback? onTap;
   final String? heroTag;
+  final bool withGlassFrame;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final photoImage = ref.watch(profileProvider.select((s) => s.photoImage));
     final name = ref.watch(displayNameProvider) ?? '?';
-    final isCyber = context.isCyberpunk;
-    final colors = context.themeColors;
 
-    final Widget avatarCore;
-    if (isCyber) {
-      final bevel = size * 0.22;
-      final shape = BeveledRectangleBorder(
-        borderRadius: BorderRadius.circular(bevel),
-        side: BorderSide(
-          color: colors.primary,
-          width: size > 60 ? 2.0 : 1.4,
-        ),
-      );
+    final avatarCore = CircleAvatar(
+      radius: size / 2,
+      backgroundColor: scheme.primaryContainer,
+      backgroundImage: photoImage,
+      child: photoImage == null
+          ? Text(
+              (name.isEmpty ? '?' : String.fromCharCode(name.runes.first)).toUpperCase(),
+              style: TextStyle(
+                fontSize: size * 0.4,
+                fontWeight: FontWeight.w800,
+                color: scheme.onPrimaryContainer,
+              ),
+            )
+          : null,
+    );
 
-      final initialLetter =
-          (name.isEmpty ? '?' : String.fromCharCode(name.runes.first)).toUpperCase();
-
-      avatarCore = Container(
-        width: size,
-        height: size,
-        decoration: ShapeDecoration(
-          color: const Color(0xFF080912),
-          shape: shape,
-          shadows: [
-            BoxShadow(
-              color: colors.primary.withValues(alpha: 0.35),
-              blurRadius: size > 60 ? 10 : 5,
-              spreadRadius: 0.5,
-            ),
-          ],
-        ),
-        child: ClipPath(
-          clipper: ShapeBorderClipper(shape: shape),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              if (photoImage != null)
-                Image(
-                  image: photoImage,
-                  fit: BoxFit.cover,
-                  width: size,
-                  height: size,
-                )
-              else
-                Container(
-                  color: const Color(0xFF13172E),
-                  alignment: Alignment.center,
-                  child: Text(
-                    initialLetter,
-                    style: TextStyle(
-                      fontSize: size * 0.44,
-                      fontWeight: FontWeight.w800,
-                      color: colors.primary,
-                      shadows: [
-                        Shadow(
-                          color: colors.primary.withValues(alpha: 0.7),
-                          blurRadius: 6,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              if (size > 60)
-                Positioned(
-                  top: 5,
-                  left: 6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                    decoration: BoxDecoration(
-                      color: colors.primary.withValues(alpha: 0.22),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                    child: Text(
-                      'ID',
-                      style: TextStyle(
-                        fontSize: 8,
-                        fontWeight: FontWeight.w900,
-                        color: colors.primary,
-                        letterSpacing: 0.5,
+    final avatarDisplay = !withGlassFrame
+        ? avatarCore
+        : SizedBox(
+            width: size,
+            height: size,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                avatarCore,
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: Transform.scale(
+                      scale: 1.42,
+                      child: Image.asset(
+                        'assets/images/frame_glasshouse.png',
+                        fit: BoxFit.contain,
+                        filterQuality: FilterQuality.medium,
                       ),
                     ),
                   ),
                 ),
-            ],
-          ),
-        ),
-      );
-    } else {
-      avatarCore = CircleAvatar(
-        radius: size / 2,
-        backgroundColor: scheme.primaryContainer,
-        backgroundImage: photoImage,
-        child: photoImage == null
-            ? Text(
-                (name.isEmpty ? '?' : String.fromCharCode(name.runes.first)).toUpperCase(),
-                style: TextStyle(
-                  fontSize: size * 0.4,
-                  fontWeight: FontWeight.w800,
-                  color: scheme.onPrimaryContainer,
-                ),
-              )
-            : null,
-      );
-    }
+              ],
+            ),
+          );
 
-    final core = heroTag != null ? Hero(tag: heroTag!, child: avatarCore) : avatarCore;
-    final clickBorder = isCyber
-        ? BeveledRectangleBorder(borderRadius: BorderRadius.circular(size * 0.22))
-        : const CircleBorder();
+    final core = heroTag != null ? Hero(tag: heroTag!, child: avatarDisplay) : avatarDisplay;
 
     return onTap == null
         ? core
-        : InkWell(customBorder: clickBorder, onTap: onTap, child: core);
+        : InkWell(customBorder: const CircleBorder(), onTap: onTap, child: core);
   }
 }
 
@@ -839,8 +858,6 @@ class EmptyStateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = context.themeColors;
-    final isCyber = colors.isCyberpunk;
-    final displayIcon = isCyber && icon == Icons.eco_outlined ? Icons.electric_bolt_rounded : icon;
 
     return HeroCard(
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
@@ -851,25 +868,9 @@ class EmptyStateCard extends StatelessWidget {
             height: 72,
             decoration: ShapeDecoration(
               color: colors.primary.withValues(alpha: 0.22),
-              shape: isCyber
-                  ? BeveledRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(
-                        color: colors.primary.withValues(alpha: 0.60),
-                        width: 1.5,
-                      ),
-                    )
-                  : const CircleBorder(),
-              shadows: isCyber
-                  ? [
-                      BoxShadow(
-                        color: colors.primary.withValues(alpha: 0.35),
-                        blurRadius: 16,
-                      ),
-                    ]
-                  : null,
+              shape: const CircleBorder(),
             ),
-            child: Icon(displayIcon, size: 38, color: colors.primary),
+            child: Icon(icon, size: 38, color: colors.primary),
           ),
           const SizedBox(height: 16),
           Text(
@@ -943,8 +944,8 @@ void showUndoSnackBar({
   );
 }
 
-/// Container dengan latar belakang ambient (daun lembut untuk Botanical, grid & glow orbs untuk Cyberpunk)
-/// untuk lembar konten di bawah header.
+/// Container dengan latar belakang ambient daun botani lembut dan suasana rumah kaca fotorealistik
+/// yang identik dengan lembar halaman Beranda (Enchanted Glasshouse).
 class BotanicalBackgroundSheet extends StatelessWidget {
   const BotanicalBackgroundSheet({super.key, required this.child});
 
@@ -952,25 +953,66 @@ class BotanicalBackgroundSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isCyber = context.isCyberpunk;
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Positioned.fill(
-          child: IgnorePointer(
-            child: RepaintBoundary(
-              child: CustomPaint(
-                key: ValueKey('sheetBg_$isCyber'),
-                isComplex: true,
-                painter: isCyber
-                    ? const CyberBackgroundPainter()
-                    : const BotanicalBackgroundPainter(),
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFF163228), // Deep emerald mist at the top
+            Color(0xFF11251E), // Subtle moss tint
+            Color(0xFF0C1914), // Deep grounding moss shadow
+          ],
+          stops: [0.0, 0.40, 1.0],
+        ),
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Suasana Rumah Kaca Alami dari Aset Fotorealistik
+          Positioned.fill(
+            child: Opacity(
+              opacity: 0.10,
+              child: Image.asset(
+                'assets/images/glasshouse_bg.jpg',
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
               ),
             ),
           ),
-        ),
-        child,
-      ],
+          const Positioned.fill(
+            child: IgnorePointer(
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  isComplex: true,
+                  painter: BotanicalBackgroundPainter(),
+                ),
+              ),
+            ),
+          ),
+          child,
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 18,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      const Color(0xFF163228).withValues(alpha: 0.85),
+                      const Color(0xFF163228).withValues(alpha: 0.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -119,28 +119,21 @@ class PinPad extends StatelessWidget {
   final String? biometricTooltip;
 
   Widget _key(BuildContext context, Widget child, VoidCallback? tap) {
-    final isCyber = context.isCyberpunk;
-    final shape = isCyber
-        ? BeveledRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-            side: BorderSide(
-              color: tap == null
-                  ? Colors.transparent
-                  : context.themeColors.primary.withValues(alpha: 0.35),
-            ),
-          )
-        : const CircleBorder();
-
     return Padding(
       padding: const EdgeInsets.all(6),
       child: SizedBox(
         width: 72,
         height: 72,
         child: Material(
-          color: Colors.white.withValues(alpha: tap == null ? 0 : (isCyber ? 0.08 : 0.12)),
-          shape: shape,
+          color: Colors.white.withValues(alpha: tap == null ? 0 : 0.12),
+          shape: CircleBorder(
+            side: BorderSide(
+              color: Colors.white.withValues(alpha: tap == null ? 0 : 0.22),
+              width: 0.8,
+            ),
+          ),
           child: InkWell(
-            customBorder: shape,
+            customBorder: const CircleBorder(),
             onTap: tap,
             child: Center(child: child),
           ),
@@ -153,11 +146,10 @@ class PinPad extends StatelessWidget {
         context,
         Text(
           '$d',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.w700,
             color: Colors.white,
-            fontFamily: context.isCyberpunk ? 'Rajdhani' : null,
           ),
         ),
         value.length < length ? () => onChanged('$value$d') : null,
@@ -165,7 +157,6 @@ class PinPad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isCyber = context.isCyberpunk;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -179,21 +170,14 @@ class PinPad extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(horizontal: 7),
                 decoration: ShapeDecoration(
                   color: i < value.length
-                      ? (isCyber
-                          ? context.themeColors.primary
-                          : const Color(0xFF6EE7B7))
+                      ? const Color(0xFF6EE7B7)
                       : Colors.white.withValues(alpha: 0.22),
-                  shape: isCyber
-                      ? BeveledRectangleBorder(borderRadius: BorderRadius.circular(3.5))
-                      : const CircleBorder(),
+                  shape: const CircleBorder(),
                   shadows: i < value.length
                       ? [
                           BoxShadow(
-                            color: (isCyber
-                                    ? context.themeColors.primary
-                                    : const Color(0xFF6EE7B7))
-                                .withValues(alpha: 0.45),
-                            blurRadius: isCyber ? 12 : 8,
+                            color: const Color(0xFF6EE7B7).withValues(alpha: 0.45),
+                            blurRadius: 8,
                             spreadRadius: 1,
                           ),
                         ]
@@ -222,9 +206,7 @@ class PinPad extends StatelessWidget {
                       message: biometricTooltip ?? '',
                       child: Icon(
                         biometricIcon,
-                        color: isCyber
-                            ? context.themeColors.primary
-                            : const Color(0xFF6EE7B7),
+                        color: const Color(0xFF6EE7B7),
                         size: 28,
                       ),
                     ),
@@ -376,86 +358,92 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                     : context.tr('Enter 6-digit PIN or use biometric');
 
         return Scaffold(
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: context.isCyberpunk
-                    ? const [
-                        Color(0xFF13172E),
-                        Color(0xFF080912),
-                      ]
-                    : const [
-                        AppColors.deepForest,
-                        Color(0xFF0F241A),
-                      ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Atmospheric Conservatory Background
+              Image.asset(
+                'assets/images/glasshouse_bg.jpg',
+                fit: BoxFit.cover,
               ),
-            ),
-            child: SafeArea(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const BrandMark(size: 64),
-                      const SizedBox(height: 12),
-                      const Text(
-                        "Wall o' Pay",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        promptText,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      PinPad(
-                        value: pin,
-                        onChanged: _changed,
-                        onBiometricTap: st.biometricEnabled ? _tryBiometric : null,
-                        biometricIcon: st.isFaceOnly
-                            ? Icons.face_rounded
-                            : Icons.fingerprint_rounded,
-                        biometricTooltip: context.tr('Unlock with Biometric'),
-                      ),
-                      SizedBox(
-                        height: 44,
-                        child: msg == null
-                            ? null
-                            : Center(
-                                child: Text(
-                                  msg!,
-                                  style: const TextStyle(
-                                    color: Color(0xFFFFB3C7),
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                      ),
-                      TextButton(
-                        onPressed: _forgot,
-                        child: Text(
-                          context.tr('Forgot PIN?'),
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                      ),
+              // Emerald Conservatory Tint & Deep Shadow Gradient Overlay
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.mossShadow.withValues(alpha: 0.88),
+                      AppColors.mossShadow.withValues(alpha: 0.96),
                     ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                   ),
                 ),
               ),
-            ),
+              SafeArea(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const BrandMark(size: 64),
+                        const SizedBox(height: 12),
+                        const Text(
+                          "Wall o' Pay",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 26,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          promptText,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        PinPad(
+                          value: pin,
+                          onChanged: _changed,
+                          onBiometricTap: st.biometricEnabled ? _tryBiometric : null,
+                          biometricIcon: st.isFaceOnly
+                              ? Icons.face_rounded
+                              : Icons.fingerprint_rounded,
+                          biometricTooltip: context.tr('Unlock with Biometric'),
+                        ),
+                        SizedBox(
+                          height: 44,
+                          child: msg == null
+                              ? null
+                              : Center(
+                                  child: Text(
+                                    msg!,
+                                    style: const TextStyle(
+                                      color: Color(0xFFFFB3C7),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                        TextButton(
+                          onPressed: _forgot,
+                          child: Text(
+                            context.tr('Forgot PIN?'),
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -537,17 +525,12 @@ class _PinFlowState extends State<_PinFlow> {
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: context.isCyberpunk
-                ? const [
-                    Color(0xFF13172E),
-                    Color(0xFF080912),
-                  ]
-                : const [
-                    AppColors.deepForest,
-                    Color(0xFF0F241A),
-                  ],
+            colors: [
+              AppColors.deepForest,
+              Color(0xFF0F241A),
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

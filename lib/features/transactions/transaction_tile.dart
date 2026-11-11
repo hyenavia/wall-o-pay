@@ -56,7 +56,7 @@ class TransactionTile extends StatelessWidget {
       subtitle = (entry.note.isEmpty ? context.tr(isIncome ? 'Income' : 'Expense') : catName) + wName;
     }
 
-    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.55);
+    final muted = AppColors.freshSage.withValues(alpha: 0.75);
 
     return InkWell(
       onTap: onTap,
@@ -67,6 +67,7 @@ class TransactionTile extends StatelessWidget {
             CategoryBadge(
               icon: isTransfer ? Icons.swap_horiz_rounded : iconFor(category?.icon ?? 'more'),
               color: color,
+              categoryKey: isTransfer ? 'swap_horiz' : category?.icon,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -77,7 +78,10 @@ class TransactionTile extends StatelessWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.softIvory,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -98,11 +102,11 @@ class TransactionTile extends StatelessWidget {
                       ? '⇄ ${rupiah(entry.amount)}'
                       : '${isIncome ? '+' : '-'}${rupiah(entry.amount)}',
                   style: context.moneyStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w800,
                     color: isTransfer
-                        ? (context.isCyberpunk ? context.themeColors.secondaryNeon : const Color(0xFF00897B))
-                        : (isIncome ? context.themeColors.income : context.themeColors.expense),
+                        ? const Color(0xFF5EEAD4)
+                        : (isIncome ? AppColors.incomeOnDark : AppColors.expenseOnDark),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -110,12 +114,12 @@ class TransactionTile extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (entry.receiptPath != null) ...[
-                      Icon(Icons.receipt_long_outlined, size: 12, color: muted),
+                      Icon(Icons.receipt_long_rounded, size: 13, color: AppColors.dewMint.withValues(alpha: 0.85)),
                       const SizedBox(width: 3),
                     ],
                     Text(
                       trailingNote,
-                      style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                      style: theme.textTheme.bodySmall?.copyWith(color: muted, fontSize: 11),
                     ),
                   ],
                 ),
@@ -139,7 +143,7 @@ class TransactionGroupCard extends StatelessWidget {
     final divider = Divider(
       height: 1,
       indent: 70,
-      color: Theme.of(context).colorScheme.outlineVariant,
+      color: AppColors.borderOutline.withValues(alpha: 0.55),
     );
     return AppCard(
       padding: EdgeInsets.zero,

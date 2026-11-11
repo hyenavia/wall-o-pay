@@ -45,10 +45,315 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '2.5.6',
+      dateEn: 'November 11, 2026',
+      dateId: '11 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Freeform Transparent Android Home Screen Launcher Icon (Nesty Style) — Removed mipmap-anydpi-v26 adaptive icon wrapper to match the exact transparent icon configuration of the Nesty project. Android launchers (including Xiaomi/POCO Launcher) now render the transparent PNG launcher icon directly on the home screen wallpaper with zero background plates, masks, or container boxes.',
+          textId: 'Ikon Launcher Home Screen Android Transparan Bebas (Gaya Nesty) — Menghapus pembungkus adaptive icon mipmap-anydpi-v26 agar sama persis dengan konfigurasi ikon transparan pada proyek Nesty. Launcher Android (termasuk Xiaomi/POCO Launcher) kini menampilkan ikon launcher PNG transparan secara langsung di atas wallpaper layar utama tanpa piringan latar belakang, mask, maupun kotak pembungkus.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Enchanted Glasshouse Typography & Asset Hygiene — Standardized FilledButton to use DM Sans, removed unused Plus Jakarta Sans web font, and purged obsolete legacy hybrid assets.',
+          textId: 'Penyelarasan Tipografi & Pembersihan Aset Enchanted Glasshouse — Menyelaraskan FilledButton menggunakan DM Sans, menghapus impor font web Plus Jakarta Sans yang tidak terpakai, dan membersihkan aset usang tema hybrid.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.5.5',
+      dateEn: 'November 11, 2026',
+      dateId: '11 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Transparent Android Launcher Icons & Adaptive Layer Optimization — Replaced the dark green background container box with transparent background (#00000000) for Android adaptive icons. Configured authentic transparent PNG assets (assets/images/logo_foreground.png for adaptive foreground and assets/images/logo.png for legacy mipmaps) with calibrated 10% safe area inset to eliminate clipping on circular, squircle, and rounded rectangular OEM launcher masks while preserving the original Enchanted Glasshouse brand identity.',
+          textId: 'Ikon Launcher Android Transparan & Optimasi Layer Adaptif — Mengganti kotak background hijau gelap dengan konfigurasi background transparan (#00000000) untuk adaptive icon Android. Menggunakan aset PNG transparan asli (assets/images/logo_foreground.png untuk adaptive foreground dan assets/images/logo.png untuk mipmap legacy) dengan inset safe area 10% terkalibrasi guna mencegah pemotongan pada berbagai mask launcher OEM (lingkaran, squircle, dan rounded rectangle) serta mempertahankan identitas visual Enchanted Glasshouse asli.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.5.4',
+      dateEn: 'November 11, 2026',
+      dateId: '11 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Enchanted Glasshouse Profile Card for Settings Page — Designed and implemented a bespoke botanical glassmorphism profile card in the Settings screen. Features a horizontal rounded card (22px) with Moss Shadow & Glasshouse Green gradient, circular avatar with botanical glass frame, Outfit SemiBold user name, DM Sans email/handle, a frosted emerald "Personal Account" pill badge, an edit profile button at the top-right, and specular greenhouse architectural sheen lines.',
+          textId: 'Kartu Profil Pengguna Enchanted Glasshouse untuk Halaman Pengaturan — Merancang dan mengimplementasikan kartu profil pengguna botanical glassmorphism kustom pada layar Pengaturan. Menghadirkan kartu horizontal bersudut tumpul (22px) dengan gradien Moss Shadow & Glasshouse Green, avatar melingkar berbingkai kaca botani, nama pengguna Outfit SemiBold, email/username DM Sans, badge pill "Personal Account" beraksen mint, tombol edit profil di sudut kanan atas, serta garis arsitektur dan kilau kaca conservatory.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.5.3',
+      dateEn: 'November 11, 2026',
+      dateId: '11 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Enchanted Glasshouse App Launcher Icons & Web Favicons — Regenerated all launcher icons across Android (mipmap & adaptive background #10251F), iOS (AppIcon.appiconset), Windows, and Web. Generated crisp multi-resolution favicons (favicon.ico, favicon.png), apple-touch-icon, and icon.png for the documentation and landing page.',
+          textId: 'Ikon Launcher Aplikasi & Favicon Web Enchanted Glasshouse — Memperbarui seluruh ikon launcher aplikasi di Android (mipmap & adaptive icon dengan latar #10251F), iOS (AppIcon.appiconset), Windows, dan Web. Menghasilkan favicon multi-resolusi yang tajam (favicon.ico, favicon.png), apple-touch-icon, dan icon.png untuk dokumentasi dan landing page web.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.5.2',
+      dateEn: 'November 11, 2026',
+      dateId: '11 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Minimalist Clean 3D Botanical Navigation Bar — Streamlined the bottom navigation bar by removing the enclosed glass pill container around active tabs. The bespoke 3D botanical icons now breathe freely on the dark canvas, illuminating with smooth AnimatedOpacity to full brilliance (1.0) and bold dewMint typography when active, while resting gracefully at 0.38 opacity when passive.',
+          textId: 'Penyederhanaan Bersih Bilah Navigasi 3D Botani — Merapikan bilah navigasi bawah dengan meniadakan wadah pil kaca di sekitar tab aktif. Ikon 3D botani kustom kini tampil lebih lega dan leluasa tanpa bingkai kotak, menyala penuh (1.0) secara halus dengan AnimatedOpacity dan tipografi tegas dewMint saat aktif, serta bersandar tenang pada transparansi 0.38 saat pasif.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.5.1',
+      dateEn: 'November 11, 2026',
+      dateId: '11 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Unified 100% 3D Botanical Glasshouse Navigation Bar — Replaced the mixed Material line icons on unselected tabs with consistent 3D botanical glass icons across all states (Home, Transactions, Budget, Insights). Passive tabs now render with an elegant, soft opacity (0.38) and freshSage labels, while the active tab glows with full opacity, an animated translucent dewMint glass pill container, and vibrant mint typography.',
+          textId: 'Penyelarasan 100% Ikon 3D Botani pada Bilah Navigasi Bawah — Menghilangkan percampuran antara ikon garis bawaan dan ikon kustom dengan menerapkan ikon 3D botani kustom secara seragam di seluruh tab (Beranda, Transaksi, Anggaran, Analisis) baik dalam status aktif maupun pasif. Tab pasif tampil redup lembut (transparansi 0.38) dengan label freshSage, sementara tab aktif menyala penuh dengan wadah pil kaca dewMint berpendar animasi dan tipografi mint tegas.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.5.0',
+      dateEn: 'November 11, 2026',
+      dateId: '11 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Enchanted Glasshouse Visual Identity Splash Screen — Added dedicated mobile splash screen featuring a modern minimalist botanical glassmorphic theme. Displays a custom combination logo with a vaulted conservatory architectural arch enclosing a flourishing financial sprout with radiant dew droplet, high-contrast Outfit SemiBold and DM Sans typography, signature tagline "Grow Your Financial Habits.", and glowing minimalist loading capsule. Powered by EnchantedGlasshouseBackgroundPainter with subtle conservatory ceiling trusses, animated natural sunbeam caustics, edge foliage silhouettes, and ethereal floating dew motes. Added native dark launch splash for Android and iOS to prevent white-screen cold-boot flicker.',
+          textId: 'Layar Pembuka (Splash Screen) Identitas Visual Enchanted Glasshouse — Menambahkan layar pembuka aplikasi mobile bertema botanical glassmorphism modern minimalis. Menampilkan simbol kombinasi (combination logo) lengkungan arsitektur rumah kaca modern dengan tunas botani finansial bertumbuh di dalamnya, tipografi kontras tinggi Outfit SemiBold & DM Sans Regular, slogan "Grow Your Financial Habits." (Tumbuhkan Kebiasaan Finansialmu), dan kapsul indikator pemuatan minimalis berpendar. Didukung oleh EnchantedGlasshouseBackgroundPainter dengan struktur atap kaca konservatori, bias sinar matahari alami animasi, siluet dedaunan tepi, dan butiran embun berpendar. Ditambah konfigurasi native splash gelap untuk Android dan iOS demi mencegah kedipan layar putih saat cold boot.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Silky smooth transition from splash sequence to authentication and dashboard gates upon initialization, preserving instant bypass for pending shortcuts.',
+          textId: 'Transisi lembut dari layar pembuka menuju gerbang autentikasi dan dashboard utama setelah proses inisialisasi selesai, dengan jalan pintas instan untuk aksi cepat.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.13',
+      dateEn: 'November 11, 2026',
+      dateId: '11 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Phase 7 UI Redesign: Profile, Settings, Security, & Onboarding — Modernized Profile Page with dark moss surfaces, specular dewMint accents, and polished WhatsApp-style photo bottom sheet with circular action containers; refined About Wall o\' Pay sheet with botanical glasshouse identity and high-contrast typography; upgraded Settings & More hubs with high-contrast avatars, specular icon badges, and glowing chevrons; enhanced Security & Lock screens with specular biometric containers and high-contrast circular PIN keypad; polished Auth and Onboarding flows with botanical green CTA buttons and high-contrast step indicators.',
+          textId: 'Perombakan UI Fase 7: Profil, Pengaturan, Keamanan, & Onboarding — Pembaruan Halaman Profil dengan permukaan moss gelap, aksen dewMint reflektif, dan bottom sheet foto profil gaya WhatsApp dengan kontainer aksi melingkar; penyempurnaan lembar Tentang Wall o\' Pay dengan identitas botanical glasshouse dan tipografi kontras tinggi; peningkatan Pusat Pengaturan & Menu Lainnya dengan avatar kontras tinggi, badge ikon berbingkai reflektif, dan chevron berpendar; penyempurnaan Halaman Keamanan & Layar Kunci dengan wadah biometrik reflektif dan keypad PIN melingkar berkontras tinggi; polesan alur Masuk dan Onboarding dengan tombol aksi utama hijau botani dan indikator langkah berkontras tinggi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.12',
+      dateEn: 'November 11, 2026',
+      dateId: '11 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Consistent Account & Wallet Icons — Resolved icon mismatch in "Accounts & Wallets" where Digital Bank displayed default outline icons while others rendered bespoke 3D glass icons. All account kinds (Commercial Bank, Digital Bank, E-Wallet, Cash) and transfer records now render bespoke 3D Enchanted Glasshouse icons seamlessly.',
+          textId: 'Penyelarasan Ikon Akun & Rekening — Memperbaiki inkonsistensi ikon di "Akun & Rekening" di mana Bank Digital sempat menampilkan ikon outline bawaan sementara akun lain memakai ikon 3D botani kustom. Seluruh kategori akun (Bank Konvensional, Bank Digital, E-Wallet, Tunai) serta mutasi transfer kini seragam menampilkan ikon 3D Enchanted Glasshouse.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.11',
+      dateEn: 'November 11, 2026',
+      dateId: '11 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Phase 6 UI Redesign: Financial Utilities & Supporting Modules — Modernized Accounts Page with glowing mint icons, distinct category count pills, tabular figures, and teal transfer cards; refined Categories Page with specular borders and elevated buttons; upgraded Debts Page with SegmentedButton toggles and high-contrast settled/left badges; polished Goals Page with tabular progress metrics and deposit action buttons; enhanced Recurring Bills Page with glowing schedule badges and tabular income/expense indicators.',
+          textId: 'Perombakan UI Fase 6: Modul Finansial Pendukung (Akun, Kategori, Hutang, Target, & Berulang) — Pembaruan Halaman Akun dengan ikon mint berpendar, pill jumlah kategori, angka tabular, dan kartu transfer teal; penyempurnaan Halaman Kategori dengan garis reflektif dan tombol terangkat; modernisasi Halaman Hutang dengan toggle SegmentedButton dan badge status lunas berkontras tinggi; polesan Halaman Target Impian dengan metrik progres tabular dan tombol tambah dana; penyempurnaan Halaman Transaksi Berulang dengan badge jadwal pendar dan indikator pemasukan/pengeluaran tabular.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.10',
+      dateEn: 'November 11, 2026',
+      dateId: '11 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Phase 5 UI Redesign: Insights Page & Custom Chart Styling — Redesigned Net Balance card with glowing surplus/deficit badges and tabular metrics, modernized period comparison with reduced spending badges, upgraded expense and trend charts with dark glass tooltips and high-contrast colorways, refined Needs vs Wants card with jewel tones, and enhanced top category rows with rank pills.',
+          textId: 'Perombakan UI Fase 5: Halaman Analisis & Penyesuaian Grafik — Pembaruan kartu Saldo Bersih dengan badge surplus/defisit berpendar dan angka tabular, kartu perbandingan periode dengan badge penghematan pengeluaran, grafik batang pengeluaran dan tren dengan tooltip dark glass dan kontras tinggi, kartu Kebutuhan vs Keinginan bertema jewel tone, serta baris kategori teratas dengan pill peringkat.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.9',
+      dateEn: 'November 10, 2026',
+      dateId: '10 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Phase 4 UI Redesign: Budget Page & 50/30/20 Pillars — Redesigned Total Budget card with tabular currency figures, elevated 50/30/20 preview bar with jewel tones, refreshed Rollover banner with glowing mint accents, upgraded BudgetPillarCard with high-contrast text and specular borders, and restyled CategoryBudgetSheet and TotalBudgetDialog with dark glass aesthetics.',
+          textId: 'Perombakan UI Fase 4: Halaman Anggaran & Pilar 50/30/20 — Pembaruan kartu Total Anggaran dengan angka tabular, bilah pratinjau 50/30/20 warna jewel tone, banner Sisa Anggaran Bergulir (Rollover) beraksen mint bercahaya, kartu pilar anggaran berbingkai kaca reflektif, serta lembar bottom sheet dan dialog pengaturan anggaran bernuansa dark glass.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.8',
+      dateEn: 'November 10, 2026',
+      dateId: '10 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Phase 3 UI Redesign: Transactions Page & Interactive Cashflow Telemetry — Enhanced search bar with frosted glass surface, upgraded filter chips with tactile icons, elevated account & category dropdown pills with Dew Mint borders, added daily net cashflow badges on date headers, and polished interactive Cashflow Calendar with dual glowing indicators.',
+          textId: 'Perombakan UI Fase 3: Halaman Riwayat Transaksi & Telemetri Arus Kas — Pembaruan bilah pencarian berkaca frosted, chip filter dengan ikon taktil, tombol dropdown akun & kategori bergaris tepi Dew Mint, penambahan badge arus kas bersih harian pada header tanggal, serta penyempurnaan Kalender Arus Kas interaktif.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.7',
+      dateEn: 'November 10, 2026',
+      dateId: '10 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Scoped Atmospheric Canopy Exclusively to Main Tabs: Reserved the atmospheric header canopy and BotanicalBackgroundSheet for primary tabs (Home, Transactions, Budget, and Insights), introducing clean secondaryAppBar styling and removing decorative sheet overlays for all secondary screens.',
+          textId: 'Pemusatan Kanopi & Lembar Botani Khusus Tab Utama: Membatasi kanopi atmosferik dan BotanicalBackgroundSheet hanya untuk 4 tab utama (Beranda, Transaksi, Anggaran, Analisis), serta menerapkan secondaryAppBar yang bersih dan minimalis tanpa distraksi visual pada seluruh halaman sekunder.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.6',
+      dateEn: 'November 10, 2026',
+      dateId: '10 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Atmospheric Header Canopy Depth & Separation: Darkened the header backdrop gradient across HomePage and pageAppBar to provide distinct atmospheric depth and clear visual separation from the content sheet.',
+          textId: 'Peningkatan Kedalaman & Pemisahan Kanopi Header: Menggelapkan latar belakang header pada Beranda dan pageAppBar untuk memberikan kedalaman atmosferik serta pembeda yang tegas dengan lembaran konten di bawahnya.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.5',
+      dateEn: 'November 10, 2026',
+      dateId: '10 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Harmonized Enchanted Glasshouse Header & Atmospheric Background Across All Pages: Brought the sunlit conservatory canopy header and atmospheric multi-stop gradient background with precision botanical foliage to all application pages.',
+          textId: 'Penyelarasan Header & Latar Belakang Rumah Kaca di Seluruh Halaman: Menerapkan kanopi berkilau matahari pada header serta latar belakang gradien atmosferik dan dedaunan botani presisi ke seluruh halaman aplikasi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.4',
+      dateEn: 'November 10, 2026',
+      dateId: '10 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Phase 2 UI Redesign: Add / Edit Transaction Modal & Glass Keypad. Translucent glass calculator sheet with high-contrast figures, specular borders, 3D botanical glasshouse icon integration in AppChip, and elevated transaction bottom sheet.',
+          textId: 'Perombakan UI Fase 2: Modal Tambah/Edit Transaksi & Keypad Kaca. Kalkulator kaca transparan dengan kontras tinggi, border specular, integrasi ikon 3D glasshouse pada AppChip, dan bottom sheet transaksi yang disempurnakan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.3',
+      dateEn: 'November 10, 2026',
+      dateId: '10 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'High-Precision Botanical Foliage & Conservatory Backdrop: Redesigned botanical painter with 30+ meticulously detailed ovate leaves, midribs, lateral veins, cascading ivy garlands, and authentic photorealistic conservatory foliage backdrop.',
+          textId: 'Dedaunan Botani Presisi Tinggi & Latar Konservatori: Menggambar ulang painter botani dengan 30+ helai daun oval berurat presisi, juntaian tanaman merambat, dan latar belakang daun konservatori fotorealistik.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.2',
+      dateEn: 'November 10, 2026',
+      dateId: '10 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Atmospheric Glasshouse Background: Replaced solid dark background canvas with an atmospheric multi-stop vertical gradient, soft sunbeam glow, conservatory vaulted glass arches, and calibrated botanical leaf silhouettes.',
+          textId: 'Latar Belakang Rumah Kaca Atmosferik: Mengganti warna kanvas solid polos dengan gradasi vertikal multi-stop, pendar cahaya matahari lembut, lengkungan kubah kaca konservatori, dan siluet daun botani berembun.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.1',
+      dateEn: 'November 10, 2026',
+      dateId: '10 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Phase 1 UI Redesign Benchmark (Dashboard / Home): Upgraded header with frosted glass action buttons, elevated DailyFinancialPulseCard with translucent emerald glass depth and specular highlights, polished flow tiles and quick accounts bar.',
+          textId: 'Fase 1 Redesign UI Benchmark (Dashboard / Home): Menyempurnakan header dengan tombol kaca buram, mengangkat DailyFinancialPulseCard dengan kedalaman kaca zamrud dan highlight spekular, serta memoles tile arus kas dan bar dompet cepat.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.4.0',
+      dateEn: 'November 10, 2026',
+      dateId: '10 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Enchanted Glasshouse Visual Identity: Remade the botanical aesthetic into a modern enchanted conservatory with translucent glass surfaces, specular glass highlights, 24 bespoke 3D botanical glass icons, and vaulted glasshouse architectural accents.',
+          textId: 'Identitas Visual Enchanted Glasshouse: Me-remake estetika botani menjadi suasana rumah kaca magis modern dengan permukaan kaca transparan, highlight spekular kaca, 24 ikon 3D botanical glass, dan aksen arsitektur kubah konservatori.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Atmospheric Conservatory Lock Screen & Glass Avatar Frame: Implemented serene glasshouse background with ambient lighting on LockScreen and an intricate botanical glass wreath frame for profile photos.',
+          textId: 'Layar Kunci Konservatori & Bingkai Kaca Profil: Menghadirkan latar rumah kaca dengan pencahayaan lembut pada Layar Kunci serta bingkai karangan bunga kaca botani untuk foto profil.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Refined Glasshouse Typography & Palette: Integrated Google Fonts Outfit for headings and DM Sans with tabular figures for financial metrics, alongside the new Enchanted Glasshouse palette (Glasshouse Green, Emerald Leaf, Fresh Sage, Dew Mint, Soft Ivory, and Moss Shadow).',
+          textId: 'Tipografi & Palet Warna Glasshouse: Mengintegrasikan Google Fonts Outfit untuk judul dan DM Sans bertabular figures untuk angka finansial, didukung palet warna Enchanted Glasshouse (Glasshouse Green, Emerald Leaf, Fresh Sage, Dew Mint, Soft Ivory, dan Moss Shadow).',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.3.0',
+      dateEn: 'November 10, 2026',
+      dateId: '10 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Focused Botanical Forest Identity: Retired Cyberpunk mode and dual theme switching to unify Wall o\' Pay 100% around the calm, signature Botanical Forest design system, typography, and iconography.',
+          textId: 'Fokus Penuh Identitas Botanical Forest: Menghentikan mode Cyberpunk dan pengalih tema ganda agar Wall o\' Pay sepenuhnya menyatu pada estetika, tipografi, dan ikonografi khas Botanical Forest.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Lighter App Footprint & Backward Compatibility: Removed unused Cyberpunk visual assets, painters, and dictionaries while keeping legacy JSON backups and cloud preference sync compatible.',
+          textId: 'Aplikasi Lebih Ringan & Tetap Kompatibel: Menghapus aset visual, painter, dan kamus teks Cyberpunk yang tidak lagi digunakan dengan tetap menjaga kompatibilitas impor cadangan JSON dan sinkronisasi cloud lama.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '2.2.0',
       dateEn: 'November 7, 2026',
       dateId: '7 November 2026',
-      isCurrent: true,
       changes: [
         ChangeItem(
           type: ChangeType.added,
@@ -1137,23 +1442,17 @@ class AppChangelogSheet extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(20, 14, 16, 12),
                 child: Row(
                   children: [
-                    Builder(
-                      builder: (ctx) {
-                        final isCyber = ctx.isCyberpunk;
-                        final iconCol = isCyber ? ctx.themeColors.primary : AppColors.deepForest;
-                        return Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: iconCol.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.history_edu_rounded,
-                            color: iconCol,
-                            size: 24,
-                          ),
-                        );
-                      },
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.deepForest.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.history_edu_rounded,
+                        color: AppColors.deepForest,
+                        size: 24,
+                      ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -1223,8 +1522,7 @@ class _ReleaseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurface.withValues(alpha: 0.6);
-    final isCyber = context.isCyberpunk;
-    final primaryCol = isCyber ? context.themeColors.primary : AppColors.deepForest;
+    const primaryCol = AppColors.deepForest;
 
     return Container(
       decoration: BoxDecoration(
@@ -1260,8 +1558,8 @@ class _ReleaseCard extends StatelessWidget {
                   ),
                   child: Text(
                     isIndonesian ? 'TERBARU' : 'LATEST',
-                    style: TextStyle(
-                      color: isCyber ? const Color(0xFF080912) : Colors.white,
+                    style: const TextStyle(
+                      color: Colors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.5,

@@ -114,6 +114,22 @@ class BotanicalHeroCardPainter extends CustomPainter {
     canvas.drawCircle(center, w * 0.28, strokePaint);
     canvas.drawCircle(center, w * 0.44, strokePaint);
     canvas.drawCircle(center, w * 0.60, strokePaint);
+
+    // 3. Garis lengkung kubah kaca konservatori halus (Enchanted Glasshouse Vault Arch)
+    final archPaint = Paint()
+      ..color = lineColor.withValues(alpha: 0.045)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    final archPath = Path()
+      ..moveTo(0, h * 0.85)
+      ..quadraticBezierTo(w * 0.5, -h * 0.15, w, h * 0.85);
+    canvas.drawPath(archPath, archPaint);
+
+    final innerArch = Path()
+      ..moveTo(w * 0.12, h * 0.9)
+      ..quadraticBezierTo(w * 0.5, 0, w * 0.88, h * 0.9);
+    canvas.drawPath(innerArch, archPaint);
   }
 
   @override
@@ -121,10 +137,12 @@ class BotanicalHeroCardPainter extends CustomPainter {
       oldDelegate.glowColor != glowColor || oldDelegate.lineColor != lineColor;
 }
 
-/// Painter latar belakang utama (soft radial glow & siluet daun ekstra halus).
+/// Painter latar belakang utama bertema Enchanted Glasshouse:
+/// gradasi bias cahaya matahari (sunbeam glow), arsitektur kubah kaca konservatori,
+/// serta juntaian tanaman merambat rimbun dengan dedaunan presisi tinggi dan tetesan embun.
 class BotanicalBackgroundPainter extends CustomPainter {
   const BotanicalBackgroundPainter({
-    this.color = AppColors.sage,
+    this.color = AppColors.freshSage,
   });
 
   final Color color;
@@ -136,329 +154,217 @@ class BotanicalBackgroundPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // 1. Soft Emerald Radial Glow di kanan atas
-    final glowPaint = Paint()
+    // 1. Soft Sunbeam Radial Glow di bagian atas (cahaya menembus kaca konservatori)
+    final sunbeamPaint = Paint()
       ..shader = RadialGradient(
-        center: const Alignment(0.7, -0.6),
-        radius: 0.9,
+        center: const Alignment(0.4, -0.75),
+        radius: 1.1,
         colors: [
-          AppColors.sage.withValues(alpha: 0.04),
-          AppColors.deepForest.withValues(alpha: 0.02),
+          AppColors.dewMint.withValues(alpha: 0.10),
+          AppColors.emeraldLeaf.withValues(alpha: 0.06),
           Colors.transparent,
         ],
-        stops: const [0.0, 0.5, 1.0],
+        stops: const [0.0, 0.45, 1.0],
       ).createShader(Rect.fromLTWH(0, 0, w, h));
 
-    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), glowPaint);
+    canvas.drawRect(Rect.fromLTWH(0, 0, w, h), sunbeamPaint);
 
-    // 2. Siluet daun ekstra tipis (2.5% opacity) di sudut kiri bawah layar
-    final bgLeafPaint = Paint()
-      ..color = color.withValues(alpha: 0.025)
+    // 2. Lengkungan Kubah Kaca Konservatori (Vaulted Glass Arches)
+    final archPaint = Paint()
+      ..color = AppColors.dewMint.withValues(alpha: 0.08)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    final archCenter = Path();
+    archCenter.moveTo(w * 0.06, 0);
+    archCenter.cubicTo(w * 0.06, h * 0.28, w * 0.94, h * 0.28, w * 0.94, 0);
+    canvas.drawPath(archCenter, archPaint);
+
+    final archInner = Path();
+    archInner.moveTo(w * 0.20, 0);
+    archInner.cubicTo(w * 0.20, h * 0.20, w * 0.80, h * 0.20, w * 0.80, 0);
+    canvas.drawPath(archInner, archPaint);
+
+    final rayPaint = Paint()
+      ..color = AppColors.dewMint.withValues(alpha: 0.05)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.8;
+
+    canvas.drawLine(Offset(w * 0.5, 0), Offset(w * 0.5, h * 0.28), rayPaint);
+    canvas.drawLine(Offset(w * 0.32, 0), Offset(w * 0.25, h * 0.24), rayPaint);
+    canvas.drawLine(Offset(w * 0.68, 0), Offset(w * 0.75, h * 0.24), rayPaint);
+
+    // 3. Cat dan Kuas untuk Dedaunan Presisi Tinggi
+    final leafFill = Paint()
+      ..color = color.withValues(alpha: 0.085)
       ..style = PaintingStyle.fill;
 
-    final bgLeaf = Path();
-    bgLeaf.moveTo(-20, h + 20);
-    bgLeaf.cubicTo(
-      w * 0.10,
-      h * 0.85,
-      w * 0.25,
-      h * 0.75,
-      w * 0.35,
-      h * 0.88,
-    );
-    bgLeaf.cubicTo(
-      w * 0.20,
-      h * 0.95,
-      w * 0.10,
-      h * 1.05,
-      -20,
-      h + 20,
-    );
-    bgLeaf.close();
-    canvas.drawPath(bgLeaf, bgLeafPaint);
+    final leafFillDeep = Paint()
+      ..color = AppColors.emeraldLeaf.withValues(alpha: 0.075)
+      ..style = PaintingStyle.fill;
 
-    // Daun kedua tipis di kanan bawah
-    final bgLeaf2 = Path();
-    bgLeaf2.moveTo(w + 30, h * 0.75);
-    bgLeaf2.cubicTo(
-      w * 0.85,
-      h * 0.82,
-      w * 0.75,
-      h * 0.92,
-      w * 0.82,
-      h + 20,
-    );
-    bgLeaf2.cubicTo(
-      w * 0.92,
-      h * 0.95,
-      w * 0.98,
-      h * 0.85,
-      w + 30,
-      h * 0.75,
-    );
-    bgLeaf2.close();
-    canvas.drawPath(bgLeaf2, bgLeafPaint);
+    final ribPaint = Paint()
+      ..color = AppColors.dewMint.withValues(alpha: 0.12)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..strokeCap = StrokeCap.round;
+
+    final stemPaint = Paint()
+      ..color = color.withValues(alpha: 0.08)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.round;
+
+    final dewPaint = Paint()
+      ..color = AppColors.dewMint.withValues(alpha: 0.16)
+      ..style = PaintingStyle.fill;
+
+    final dewGlow = Paint()
+      ..color = Colors.white.withValues(alpha: 0.35)
+      ..style = PaintingStyle.fill;
+
+    // Helper untuk menggambar 1 helai daun presisi dengan tulang daun & urat lateral
+    void drawLeaf({
+      required Offset origin,
+      required double angle,
+      required double length,
+      required double width,
+      Paint? customFill,
+    }) {
+      canvas.save();
+      canvas.translate(origin.dx, origin.dy);
+      canvas.rotate(angle);
+
+      final p = Path();
+      p.moveTo(0, 0);
+      p.cubicTo(-width * 0.48, length * 0.32, -width * 0.52, length * 0.72, 0, length);
+      p.cubicTo(width * 0.52, length * 0.72, width * 0.48, length * 0.32, 0, 0);
+      p.close();
+      canvas.drawPath(p, customFill ?? leafFill);
+
+      // Tulang daun utama (midrib)
+      canvas.drawLine(const Offset(0, 0), Offset(0, length * 0.92), ribPaint);
+
+      // Urat daun lateral simetris
+      for (final t in [0.28, 0.50, 0.72]) {
+        final y = length * t;
+        final wVein = width * 0.35 * (1.0 - (t - 0.5).abs());
+        canvas.drawLine(Offset(0, y), Offset(-wVein, y - length * 0.09), ribPaint);
+        canvas.drawLine(Offset(0, y), Offset(wVein, y - length * 0.09), ribPaint);
+      }
+
+      canvas.restore();
+    }
+
+    void drawDewDrop(Offset center, double radius) {
+      canvas.drawCircle(center, radius, dewPaint);
+      canvas.drawCircle(Offset(center.dx - radius * 0.25, center.dy - radius * 0.25), radius * 0.35, dewGlow);
+    }
+
+    // --- A. Juntaian Ranting & Dedaunan Kanan Atas (Cascading Conservatory Ivy) ---
+    final ivyStemRight = Path();
+    ivyStemRight.moveTo(w, 0);
+    ivyStemRight.cubicTo(w - 30, h * 0.06, w - 55, h * 0.14, w - 25, h * 0.26);
+    ivyStemRight.cubicTo(w - 10, h * 0.32, w - 35, h * 0.40, w - 15, h * 0.48);
+    canvas.drawPath(ivyStemRight, stemPaint);
+
+    final rightLeaves = [
+      (Offset(w - 15, h * 0.04), 0.8, 28.0, 15.0),
+      (Offset(w - 38, h * 0.08), -0.6, 26.0, 14.0),
+      (Offset(w - 28, h * 0.12), 1.1, 25.0, 13.0),
+      (Offset(w - 52, h * 0.16), -0.9, 24.0, 13.0),
+      (Offset(w - 38, h * 0.21), 0.7, 22.0, 12.0),
+      (Offset(w - 20, h * 0.27), -0.4, 20.0, 11.0),
+      (Offset(w - 26, h * 0.34), 0.9, 19.0, 10.0),
+      (Offset(w - 18, h * 0.41), -0.6, 17.0, 9.5),
+      (Offset(w - 15, h * 0.48), 0.3, 14.0, 7.5),
+    ];
+    for (final l in rightLeaves) {
+      drawLeaf(origin: l.$1, angle: l.$2, length: l.$3, width: l.$4);
+    }
+    drawDewDrop(Offset(w - 40, h * 0.17), 2.2);
+    drawDewDrop(Offset(w - 28, h * 0.35), 1.8);
+
+    // --- B. Ranting Merambat Kiri Atas (Cascading Tendril) ---
+    final ivyStemLeft = Path();
+    ivyStemLeft.moveTo(0, h * 0.02);
+    ivyStemLeft.cubicTo(w * 0.08, h * 0.05, w * 0.14, h * 0.12, w * 0.06, h * 0.22);
+    canvas.drawPath(ivyStemLeft, stemPaint);
+
+    final leftLeaves = [
+      (Offset(w * 0.03, h * 0.04), -0.7, 25.0, 13.0),
+      (Offset(w * 0.09, h * 0.07), 0.9, 24.0, 13.0),
+      (Offset(w * 0.13, h * 0.12), -0.5, 22.0, 12.0),
+      (Offset(w * 0.10, h * 0.17), 1.2, 20.0, 11.0),
+      (Offset(w * 0.06, h * 0.22), -0.2, 16.0, 8.5),
+    ];
+    for (final l in leftLeaves) {
+      drawLeaf(origin: l.$1, angle: l.$2, length: l.$3, width: l.$4);
+    }
+    drawDewDrop(Offset(w * 0.11, h * 0.13), 2.0);
+
+    // --- C. Semak Dedaunan Botani Rimbun Kiri Bawah (Lush Understory Foliage) ---
+    final stemBottomLeft = Path();
+    stemBottomLeft.moveTo(-20, h + 10);
+    stemBottomLeft.cubicTo(w * 0.12, h * 0.90, w * 0.22, h * 0.85, w * 0.38, h * 0.88);
+    canvas.drawPath(stemBottomLeft, stemPaint);
+
+    final bottomLeftCluster = [
+      // Lapisan daun besar belakang (warna lebih gelap)
+      (Offset(w * 0.05, h * 0.88), -1.8, 48.0, 24.0, leafFillDeep),
+      (Offset(w * 0.14, h * 0.83), -1.4, 44.0, 22.0, leafFillDeep),
+      (Offset(w * 0.25, h * 0.82), -1.1, 40.0, 20.0, leafFillDeep),
+      (Offset(w * 0.35, h * 0.85), -0.8, 34.0, 17.0, leafFillDeep),
+      // Lapisan daun depan lebih cerah & bervariasi
+      (Offset(w * 0.02, h * 0.94), -2.2, 38.0, 20.0, leafFill),
+      (Offset(w * 0.10, h * 0.89), -1.6, 36.0, 18.0, leafFill),
+      (Offset(w * 0.18, h * 0.86), -1.2, 34.0, 17.0, leafFill),
+      (Offset(w * 0.28, h * 0.84), -0.9, 30.0, 15.0, leafFill),
+      (Offset(w * 0.38, h * 0.88), -0.5, 24.0, 12.0, leafFill),
+      // Daun aksen menjuntai ke bawah
+      (Offset(w * 0.12, h * 0.96), -2.6, 32.0, 16.0, leafFill),
+      (Offset(w * 0.22, h * 0.93), -2.1, 28.0, 14.0, leafFill),
+    ];
+    for (final l in bottomLeftCluster) {
+      drawLeaf(
+        origin: l.$1,
+        angle: l.$2,
+        length: l.$3,
+        width: l.$4,
+        customFill: l.$5,
+      );
+    }
+    drawDewDrop(Offset(w * 0.13, h * 0.85), 2.5);
+    drawDewDrop(Offset(w * 0.26, h * 0.84), 2.0);
+
+    // --- D. Semak Dedaunan Kanan Bawah (Lush Trailing Foliage) ---
+    final stemBottomRight = Path();
+    stemBottomRight.moveTo(w + 30, h * 0.80);
+    stemBottomRight.cubicTo(w * 0.84, h * 0.86, w * 0.76, h * 0.92, w * 0.68, h + 15);
+    canvas.drawPath(stemBottomRight, stemPaint);
+
+    final bottomRightCluster = [
+      (Offset(w * 0.92, h * 0.82), 1.9, 42.0, 21.0, leafFillDeep),
+      (Offset(w * 0.84, h * 0.85), 1.5, 38.0, 19.0, leafFillDeep),
+      (Offset(w * 0.75, h * 0.89), 1.1, 35.0, 18.0, leafFillDeep),
+      (Offset(w * 0.96, h * 0.88), 2.3, 34.0, 17.0, leafFill),
+      (Offset(w * 0.88, h * 0.90), 1.7, 32.0, 16.0, leafFill),
+      (Offset(w * 0.80, h * 0.93), 1.3, 28.0, 14.0, leafFill),
+      (Offset(w * 0.70, h * 0.97), 0.9, 22.0, 11.0, leafFill),
+    ];
+    for (final l in bottomRightCluster) {
+      drawLeaf(
+        origin: l.$1,
+        angle: l.$2,
+        length: l.$3,
+        width: l.$4,
+        customFill: l.$5,
+      );
+    }
+    drawDewDrop(Offset(w * 0.85, h * 0.87), 2.2);
   }
 
   @override
   bool shouldRepaint(covariant BotanicalBackgroundPainter oldDelegate) =>
       oldDelegate.color != color;
-}
-
-/// Painter ornamen sirkuit & grid Cyberpunk futuristik untuk [HeroCard].
-class CyberHeroCardPainter extends CustomPainter {
-  const CyberHeroCardPainter({
-    this.color = const Color(0xFF00F0FF),
-    this.opacity = 0.12,
-  });
-
-  final Color color;
-  final double opacity;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (size.width <= 0 || size.height <= 0) return;
-
-    final w = size.width;
-    final h = size.height;
-
-    // Grid garis halus (digabung ke satu Path agar beban GPU minimal)
-    final gridPaint = Paint()
-      ..color = color.withValues(alpha: opacity * 0.45)
-      ..strokeWidth = 0.8
-      ..style = PaintingStyle.stroke;
-
-    const step = 22.0;
-    final gridPath = Path();
-    for (double x = 0; x < w; x += step) {
-      gridPath.moveTo(x, 0);
-      gridPath.lineTo(x, h);
-    }
-    for (double y = 0; y < h; y += step) {
-      gridPath.moveTo(0, y);
-      gridPath.lineTo(w, y);
-    }
-    canvas.drawPath(gridPath, gridPaint);
-
-    // Subtle CRT scanlines overlay (digabung ke satu Path)
-    final scanlinePaint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.12)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-    final scanlinePath = Path();
-    for (double y = 1.5; y < h; y += 3.0) {
-      scanlinePath.moveTo(0, y);
-      scanlinePath.lineTo(w, y);
-    }
-    canvas.drawPath(scanlinePath, scanlinePaint);
-
-    // Jalur circuit trace sudut kanan atas
-    final tracePaint = Paint()
-      ..color = color.withValues(alpha: opacity)
-      ..strokeWidth = 1.4
-      ..style = PaintingStyle.stroke;
-
-    final trace = Path()
-      ..moveTo(w, h * 0.2)
-      ..lineTo(w - 45, h * 0.2)
-      ..lineTo(w - 75, h * 0.45)
-      ..lineTo(w - 120, h * 0.45);
-    canvas.drawPath(trace, tracePaint);
-
-    final nodePaint = Paint()
-      ..color = color.withValues(alpha: opacity * 1.8)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(w - 120, h * 0.45), 2.5, nodePaint);
-
-    // Aksen sudut kiri bawah
-    final cornerPath = Path()
-      ..moveTo(0, h * 0.7)
-      ..lineTo(35, h * 0.7)
-      ..lineTo(55, h * 0.85)
-      ..lineTo(90, h * 0.85);
-    canvas.drawPath(cornerPath, tracePaint);
-    canvas.drawCircle(Offset(90, h * 0.85), 2.2, nodePaint);
-
-    // HUD Corner Brackets
-    final bracketPaint = Paint()
-      ..color = color.withValues(alpha: opacity * 2.2)
-      ..strokeWidth = 1.6
-      ..style = PaintingStyle.stroke;
-
-    final tlBracket = Path()
-      ..moveTo(14, 24)
-      ..lineTo(14, 14)
-      ..lineTo(24, 14);
-    canvas.drawPath(tlBracket, bracketPaint);
-
-    final brBracket = Path()
-      ..moveTo(w - 24, h - 14)
-      ..lineTo(w - 14, h - 14)
-      ..lineTo(w - 14, h - 24);
-    canvas.drawPath(brBracket, bracketPaint);
-
-    // Grid crosshairs (+) at technical intersection points
-    final crossPaint = Paint()
-      ..color = color.withValues(alpha: opacity * 1.6)
-      ..strokeWidth = 1.0;
-    void drawCross(double cx, double cy, double arm) {
-      canvas.drawLine(Offset(cx - arm, cy), Offset(cx + arm, cy), crossPaint);
-      canvas.drawLine(Offset(cx, cy - arm), Offset(cx, cy + arm), crossPaint);
-    }
-
-    if (w > step * 4 && h > step * 4) {
-      drawCross(step * 2, step * 2, 3);
-      drawCross(w - step * 2, step * 2, 3);
-      drawCross(step * 3, h - step * 2, 3);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CyberHeroCardPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.opacity != opacity;
-}
-
-/// Painter aksen grid sirkuit untuk AppBar pada tema Cyberpunk (tanpa siluet daun).
-class CyberCanopyPainter extends CustomPainter {
-  const CyberCanopyPainter({
-    this.color = const Color(0xFF00F0FF),
-    this.magentaColor = const Color(0xFFFF2A6D),
-    this.opacity = 0.12,
-  });
-
-  final Color color;
-  final Color magentaColor;
-  final double opacity;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (size.width <= 0 || size.height <= 0) return;
-
-    final w = size.width;
-    final h = size.height;
-
-    final cyanStroke = Paint()
-      ..color = color.withValues(alpha: opacity)
-      ..strokeWidth = 1.2
-      ..style = PaintingStyle.stroke;
-
-    final magentaStroke = Paint()
-      ..color = magentaColor.withValues(alpha: opacity * 0.75)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-
-    // 1. Jalur trace sirkuit utama di sudut kanan atas
-    final trace1 = Path()
-      ..moveTo(w + 10, h * 0.2)
-      ..lineTo(w - 40, h * 0.2)
-      ..lineTo(w - 75, h * 0.55)
-      ..lineTo(w - 180, h * 0.55);
-    canvas.drawPath(trace1, cyanStroke);
-
-    // 2. Jalur paralel magenta
-    final trace2 = Path()
-      ..moveTo(w + 10, h * 0.35)
-      ..lineTo(w - 30, h * 0.35)
-      ..lineTo(w - 60, h * 0.70)
-      ..lineTo(w - 120, h * 0.70);
-    canvas.drawPath(trace2, magentaStroke);
-
-    // 3. Simpul LED cyber (terminal node)
-    final nodeCyan = Paint()
-      ..color = color.withValues(alpha: opacity * 2.2)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(w - 180, h * 0.55), 2.8, nodeCyan);
-
-    final nodeMagenta = Paint()
-      ..color = magentaColor.withValues(alpha: opacity * 2.2)
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(w - 120, h * 0.70), 2.2, nodeMagenta);
-
-    // 4. Bracket sudut futuristik di kanan atas
-    final bracket = Path()
-      ..moveTo(w - 15, 6)
-      ..lineTo(w - 6, 6)
-      ..lineTo(w - 6, 18);
-    canvas.drawPath(bracket, cyanStroke..strokeWidth = 1.8);
-  }
-
-  @override
-  bool shouldRepaint(covariant CyberCanopyPainter oldDelegate) =>
-      oldDelegate.color != color ||
-      oldDelegate.magentaColor != magentaColor ||
-      oldDelegate.opacity != opacity;
-}
-
-/// Painter latar belakang Cyberpunk (grid futuristik & ambient glow cyan-magenta, tanpa siluet daun).
-class CyberBackgroundPainter extends CustomPainter {
-  const CyberBackgroundPainter({
-    this.cyanColor = const Color(0xFF00F0FF),
-    this.magentaColor = const Color(0xFFFF2A6D),
-    this.gridOpacity = 0.04,
-  });
-
-  final Color cyanColor;
-  final Color magentaColor;
-  final double gridOpacity;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (size.width <= 0 || size.height <= 0) return;
-
-    final w = size.width;
-    final h = size.height;
-
-    // 1. Atmospheric Neon Ambient Glow (Cyan & Magenta Night City depth)
-    final cyanGlowPaint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          cyanColor.withValues(alpha: gridOpacity * 1.5),
-          cyanColor.withValues(alpha: 0.0),
-        ],
-      ).createShader(
-        Rect.fromCircle(
-          center: Offset(w * 0.15, h * 0.08),
-          radius: w * 0.85,
-        ),
-      );
-    canvas.drawCircle(Offset(w * 0.15, h * 0.08), w * 0.85, cyanGlowPaint);
-
-    final magentaGlowPaint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          magentaColor.withValues(alpha: gridOpacity * 1.2),
-          magentaColor.withValues(alpha: 0.0),
-        ],
-      ).createShader(
-        Rect.fromCircle(
-          center: Offset(w * 0.85, h * 0.65),
-          radius: w * 0.75,
-        ),
-      );
-    canvas.drawCircle(Offset(w * 0.85, h * 0.65), w * 0.75, magentaGlowPaint);
-
-    // 2. Futuristic Cyber Grid (24px step, digabung ke satu Path agar ringan di GPU)
-    final gridPaint = Paint()
-      ..color = cyanColor.withValues(alpha: gridOpacity)
-      ..strokeWidth = 0.7
-      ..style = PaintingStyle.stroke;
-
-    const step = 24.0;
-    final gridPath = Path();
-    for (double x = 0; x < w; x += step) {
-      gridPath.moveTo(x, 0);
-      gridPath.lineTo(x, h);
-    }
-    for (double y = 0; y < h; y += step) {
-      gridPath.moveTo(0, y);
-      gridPath.lineTo(w, y);
-    }
-    canvas.drawPath(gridPath, gridPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CyberBackgroundPainter oldDelegate) =>
-      oldDelegate.cyanColor != cyanColor ||
-      oldDelegate.magentaColor != magentaColor ||
-      oldDelegate.gridOpacity != gridOpacity;
 }
