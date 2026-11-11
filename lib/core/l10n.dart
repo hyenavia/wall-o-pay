@@ -80,6 +80,10 @@ const Map<String, String> _en = {
   'Kesehatan': 'Health',
   'Lainnya': 'Other',
   'Transfer': 'Transfer',
+  'Quick Finance': 'Quick Finance',
+  'Quick Finance Widget': 'Quick Finance Widget',
+  'Record Transaction': 'Record Transaction',
+  'Save Transaction': 'Save Transaction',
   '1 Akun': '1 Account',
   '{count} Akun': '{count} Accounts',
   'Tambah akun & rekening': 'Add accounts & wallets',
@@ -93,6 +97,10 @@ const Map<String, String> _en = {
 
 const Map<String, String> _id = {
   'Main Account': 'Rekening Utama',
+  'Quick Finance': 'Keuangan Cepat',
+  'Quick Finance Widget': 'Widget Keuangan Cepat',
+  'Record Transaction': 'Catat Transaksi',
+  'Save Transaction': 'Simpan Transaksi',
   'Commercial Bank': 'Bank Konvensional',
   'Digital Bank': 'Bank Digital',
   'Cash': 'Tunai',

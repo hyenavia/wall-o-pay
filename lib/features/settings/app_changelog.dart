@@ -45,10 +45,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '2.6.0',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Quick Finance Android Home Screen Widget (Enchanted Glasshouse) — Integrated an interactive Android Home Screen App Widget allowing instant recording of Income, Expense, or Transfer transactions directly from your home screen. Crafted in signature Enchanted Glasshouse styling with real-time balance sync and privacy sensor masking.',
+          textId: 'Widget Home Screen Android Keuangan Cepat (Enchanted Glasshouse) — Menghadirkan App Widget interaktif pada layar utama Android untuk mencatat transaksi Pemasukan, Pengeluaran, atau Transfer secara instan langsung dari beranda ponsel. Dirancang dengan identitas visual Enchanted Glasshouse lengkap dengan sinkronisasi saldo waktu nyata dan sensor privasi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '2.5.6',
       dateEn: 'November 11, 2026',
       dateId: '11 November 2026',
-      isCurrent: true,
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

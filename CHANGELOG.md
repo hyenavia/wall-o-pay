@@ -4,6 +4,17 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0] - 2026-11-12
+
+### Added
+- **Quick Finance Android Home Screen Widget (Enchanted Glasshouse):**
+  - Integrated a dedicated Android Home Screen App Widget (`QuickFinanceWidgetProvider`) allowing users to record Income, Expense, or Transfer transactions instantly from their home screen.
+  - Implemented authentic Enchanted Glasshouse visual design identity: Deep Moss Shadow canvas (`#10251F`), glass refraction border (`#2A4D3E`), transparent card surfaces, Soft Ivory (`#F7F8F4`) typography, and tailored botanical highlights (`#38B271` for Income, `#D64545` for Expense, `#00897B` for Transfer).
+  - Responsive layout supporting compact (2x2), medium (4x2), and expanded launcher dimensions with dynamic header, real-time balance display, interactive category segmented selector, and quick record button.
+  - Full privacy mode integration (`hideBalance`) dynamically masking sensitive account totals with `Rp ••••••••` on the widget surface when privacy sensor is enabled.
+  - Seamless two-way data synchronization via `QuickWidgetService` and MethodChannel (`com.example.wall_o_pay/widget`), updating home screen widget balance and state on any transaction mutation, balance recalculation, or app lifecycle resume.
+  - Interactive hybrid flow: in-widget category switcher coupled with direct intent dispatching (`QUICK_WIDGET_INCOME`, `QUICK_WIDGET_EXPENSE`, `QUICK_WIDGET_TRANSFER`) straight to `TransactionForm`, bypassing PIN lock delay and splash delay for immediate transaction entry.
+
 ## [2.5.6] - 2026-11-11
 
 ### Changed

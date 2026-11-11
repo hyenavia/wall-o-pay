@@ -21,6 +21,7 @@ import '../../data/prefs.dart';
 import '../../data/feature_prefs.dart';
 import '../../data/feature_providers.dart';
 import '../../data/notifications.dart';
+import '../../data/quick_widget_service.dart';
 import '../../data/tables.dart' show NeedWant, TxType;
 
 /// Buka form tambah transaksi, atau ubah jika [entry] diisi.
@@ -425,6 +426,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       );
     }
 
+    syncWidgetData(ref);
     if (mounted) Navigator.pop(context);
   }
 
@@ -449,10 +451,14 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     final id = widget.entry!.id;
     final db = ref.read(databaseProvider);
     await db.deleteTransaction(id);
+    syncWidgetData(ref);
     if (mounted) Navigator.pop(context);
     showUndoSnackBar(
       message: trG('Transaction deleted'),
-      onUndo: () => db.restoreTransaction(id),
+      onUndo: () async {
+        await db.restoreTransaction(id);
+        syncWidgetData(ref);
+      },
     );
   }
 

@@ -19,6 +19,7 @@ import 'data/cloud_sync.dart';
 import 'data/notifications.dart';
 import 'data/prefs.dart';
 import 'data/providers.dart';
+import 'data/quick_widget_service.dart';
 import 'data/update_checker.dart';
 import 'data/recurring_service.dart';
 import 'data/share_service.dart';
@@ -191,6 +192,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       if (user != null) {
         ref.read(autoSyncServiceProvider).startSync(user.uid);
       }
+      syncWidgetData(ref);
     });
     Future.delayed(const Duration(milliseconds: 1500), () async {
       if (!mounted) return;
@@ -209,6 +211,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       if (user != null) {
         ref.read(autoSyncServiceProvider).triggerTwoWaySync();
       }
+      syncWidgetData(ref);
     }
   }
 
@@ -227,6 +230,10 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
         ref.read(autoSyncServiceProvider).stopSync();
       }
     });
+
+    // Sinkronisasi data widget setiap kali total saldo atau status sensor berubah.
+    ref.listen<int>(totalCurrentBalanceProvider, (_, _) => syncWidgetData(ref));
+    ref.listen<bool>(hideBalanceProvider, (_, _) => syncWidgetData(ref));
 
     final colors = context.themeColors;
     final index = ref.watch(tabIndexProvider);

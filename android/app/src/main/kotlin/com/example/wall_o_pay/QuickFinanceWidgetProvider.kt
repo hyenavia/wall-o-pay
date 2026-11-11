@@ -74,7 +74,7 @@ class QuickFinanceWidgetProvider : AppWidgetProvider() {
             ACTION_RECORD -> {
                 val selectedTab = prefs.getString(KEY_SELECTED_TAB, "income") ?: "income"
                 val launchIntent = Intent(context, MainActivity::class.java).apply {
-                    action = "com.example.wall_o_pay.QUICK_WIDGET_$selectedTab".uppercase()
+                    action = "com.example.wall_o_pay.QUICK_WIDGET_${selectedTab.uppercase()}"
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 }
                 context.startActivity(launchIntent)
