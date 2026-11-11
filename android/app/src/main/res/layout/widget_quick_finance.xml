@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@drawable/widget_background">
+
+    <!-- Header Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp">
+
+        <ImageView
+            android:id="@+id/widget_logo"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@mipmap/ic_launcher"
+            android:contentDescription="@string/app_name" />
+
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="@string/widget_title"
+            android:textColor="@color/widget_soft_ivory"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+
+        <ImageView
+            android:id="@+id/widget_open_app"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@android:drawable/ic_menu_more"
+            android:contentDescription="@string/app_name"
+            android:tint="@color/widget_fresh_sage" />
+    </LinearLayout>
+
+    <!-- Balance Row -->
+    <TextView
+        android:id="@+id/widget_balance_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/widget_balance_label"
+        android:textColor="@color/widget_text_secondary"
+        android:textSize="11sp"
+        android:fontFamily="sans-serif" />
+
+    <TextView
+        android:id="@+id/widget_balance_value"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/widget_balance_hidden"
+        android:textColor="@color/widget_soft_ivory"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:maxLines="1"
+        android:layout_marginBottom="10dp" />
+
+    <!-- Tab Selector Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp"
+        android:baselineAligned="false">
+
+        <FrameLayout
+            android:id="@+id/tab_income"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/widget_tab_bg_income">
+            <TextView
+                android:id="@+id/tab_income_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/widget_income"
+                android:textColor="@color/widget_income_on_dark"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:drawableStart="@android:drawable/ic_input_add"
+                android:drawablePadding="3dp"
+                android:drawableTint="@color/widget_income_on_dark" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/tab_expense"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/widget_tab_bg_inactive">
+            <TextView
+                android:id="@+id/tab_expense_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/widget_expense"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/tab_transfer"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:background="@drawable/widget_tab_bg_inactive">
+            <TextView
+                android:id="@+id/tab_transfer_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/widget_transfer"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <!-- Record Button -->
+    <FrameLayout
+        android:id="@+id/btn_record"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@drawable/widget_btn_record">
+        <TextView
+            android:id="@+id/btn_record_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/widget_record"
+            android:textColor="@color/widget_soft_ivory"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+</LinearLayout>

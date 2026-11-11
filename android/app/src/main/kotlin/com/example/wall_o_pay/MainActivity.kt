@@ -87,6 +87,18 @@ class MainActivity : FlutterFragmentActivity() {
     private fun handleSendIntent(intent: Intent?) {
         if (intent == null) return
         when (intent.action) {
+            "com.example.wall_o_pay.QUICK_WIDGET_INCOME" -> {
+                latestSharedData = mapOf("shortcutType" to "income")
+                return
+            }
+            "com.example.wall_o_pay.QUICK_WIDGET_EXPENSE" -> {
+                latestSharedData = mapOf("shortcutType" to "expense")
+                return
+            }
+            "com.example.wall_o_pay.QUICK_WIDGET_TRANSFER" -> {
+                latestSharedData = mapOf("shortcutType" to "transfer")
+                return
+            }
             "com.example.wall_o_pay.SHORTCUT_EXPENSE" -> {
                 latestSharedData = mapOf("shortcutType" to "expense")
                 return
@@ -155,6 +167,26 @@ class MainActivity : FlutterFragmentActivity() {
                     }
                     "clearSharedData" -> {
                         latestSharedData = null
+                        result.success(true)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
+        }
+
+        // Channel for Quick Finance Widget data sync
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.example.wall_o_pay/widget").apply {
+            setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "updateWidgetData" -> {
+                        val balance = call.argument<Number>("balance")?.toLong() ?: 0L
+                        val hideBalance = call.argument<Boolean>("hideBalance") ?: false
+                        val prefs = getSharedPreferences("quick_finance_widget", MODE_PRIVATE)
+                        prefs.edit()
+                            .putLong("total_balance", balance)
+                            .putBoolean("hide_balance", hideBalance)
+                            .apply()
+                        QuickFinanceWidgetProvider.updateAllWidgets(this@MainActivity)
                         result.success(true)
                     }
                     else -> result.notImplemented()

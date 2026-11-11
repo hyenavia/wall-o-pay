@@ -2,4 +2,26 @@
 <resources>
     <color name="ic_launcher_background">#00000000</color>
     <color name="splash_background">#10251F</color>
+    <!-- Quick Finance Widget Enchanted Glasshouse palette -->
+    <color name="widget_bg">#10251F</color>
+    <color name="widget_card_surface">#162A22</color>
+    <color name="widget_surface_container">#1D372D</color>
+    <color name="widget_border">#2A4D3E</color>
+    <color name="widget_glasshouse_green">#23483B</color>
+    <color name="widget_emerald_leaf">#39745A</color>
+    <color name="widget_fresh_sage">#A9C5B1</color>
+    <color name="widget_dew_mint">#D5E8DC</color>
+    <color name="widget_soft_ivory">#F7F8F4</color>
+    <color name="widget_moss_shadow">#10251F</color>
+    <color name="widget_income">#38B271</color>
+    <color name="widget_income_on_dark">#6EE7B7</color>
+    <color name="widget_expense">#D64545</color>
+    <color name="widget_expense_on_dark">#FCA5A5</color>
+    <color name="widget_transfer_teal">#00897B</color>
+    <color name="widget_text_primary">#F7F8F4</color>
+    <color name="widget_text_secondary">#A9C5B1</color>
+    <color name="widget_tab_inactive_bg">#1D372D</color>
+    <color name="widget_tab_active_income">#1A3D2A</color>
+    <color name="widget_tab_active_expense">#3D1A1A</color>
+    <color name="widget_tab_active_transfer">#1A3333</color>
 </resources>
