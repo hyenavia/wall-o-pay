@@ -45,6 +45,15 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
+        <!-- Translucent Floating Dialog for Quick Finance Widget custom entry -->
+        <activity
+            android:name=".QuickTransactionActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:taskAffinity="${applicationId}.quickdialog"
+            android:theme="@style/QuickDialogTheme"
+            android:windowSoftInputMode="adjustResize" />
         <!-- Quick Finance Home Screen Widget -->
         <receiver
             android:name=".QuickFinanceWidgetProvider"
@@ -55,6 +64,16 @@
                 <action android:name="com.example.wall_o_pay.WIDGET_TAB_INCOME" />
                 <action android:name="com.example.wall_o_pay.WIDGET_TAB_EXPENSE" />
                 <action android:name="com.example.wall_o_pay.WIDGET_TAB_TRANSFER" />
+                <action android:name="com.example.wall_o_pay.WIDGET_PRESET_10K" />
+                <action android:name="com.example.wall_o_pay.WIDGET_PRESET_20K" />
+                <action android:name="com.example.wall_o_pay.WIDGET_PRESET_50K" />
+                <action android:name="com.example.wall_o_pay.WIDGET_PRESET_100K" />
+                <action android:name="com.example.wall_o_pay.WIDGET_CLEAR_AMOUNT" />
+                <action android:name="com.example.wall_o_pay.WIDGET_CYCLE_CATEGORY" />
+                <action android:name="com.example.wall_o_pay.WIDGET_CYCLE_WALLET_FROM" />
+                <action android:name="com.example.wall_o_pay.WIDGET_CYCLE_WALLET_TO" />
+                <action android:name="com.example.wall_o_pay.WIDGET_DISMISS_FEEDBACK" />
+                <action android:name="com.example.wall_o_pay.WIDGET_OPEN_DETAIL" />
                 <action android:name="com.example.wall_o_pay.WIDGET_RECORD" />
                 <action android:name="com.example.wall_o_pay.WIDGET_OPEN_APP" />
                 <action android:name="com.example.wall_o_pay.WIDGET_UPDATE_DATA" />

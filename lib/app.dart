@@ -187,12 +187,13 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     ShareService.initialize(context, ref);
     RecurringService.checkAndGenerateDue(ref.read(databaseProvider));
     checkDebtDueReminders(ref.read(databaseProvider));
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final user = ref.read(currentUserProvider);
       if (user != null) {
         ref.read(autoSyncServiceProvider).startSync(user.uid);
       }
-      syncWidgetData(ref);
+      await checkNativeWidgetDbDirty(ref);
+      await syncWidgetData(ref);
     });
     Future.delayed(const Duration(milliseconds: 1500), () async {
       if (!mounted) return;
@@ -203,6 +204,9 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      checkNativeWidgetDbDirty(ref).then((_) {
+        if (mounted) syncWidgetData(ref);
+      });
       UpdateCheckerService.checkAndNotify(ref, context: context);
       RecurringService.checkAndGenerateDue(ref.read(databaseProvider));
       checkDebtDueReminders(ref.read(databaseProvider));
@@ -211,7 +215,6 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       if (user != null) {
         ref.read(autoSyncServiceProvider).triggerTwoWaySync();
       }
-      syncWidgetData(ref);
     }
   }
 
@@ -231,9 +234,12 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       }
     });
 
-    // Sinkronisasi data widget setiap kali total saldo atau status sensor berubah.
+    // Sinkronisasi data widget setiap kali total saldo, status sensor, bahasa, akun, atau kategori berubah.
     ref.listen<int>(totalCurrentBalanceProvider, (_, _) => syncWidgetData(ref));
     ref.listen<bool>(hideBalanceProvider, (_, _) => syncWidgetData(ref));
+    ref.listen<String>(appPrefsProvider.select((p) => p.localeCode), (_, _) => syncWidgetData(ref));
+    ref.listen(walletsProvider, (_, _) => syncWidgetData(ref));
+    ref.listen(categoriesProvider, (_, _) => syncWidgetData(ref));
 
     final colors = context.themeColors;
     final index = ref.watch(tabIndexProvider);

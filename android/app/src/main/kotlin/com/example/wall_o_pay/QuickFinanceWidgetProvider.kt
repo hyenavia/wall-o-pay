@@ -6,25 +6,39 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.os.Bundle
+import android.os.SystemClock
+import android.view.View
 import android.widget.RemoteViews
-import java.text.DecimalFormat
-import java.text.DecimalFormatSymbols
-import java.util.Locale
 
 class QuickFinanceWidgetProvider : AppWidgetProvider() {
 
     companion object {
-        private const val PREFS_NAME = "quick_finance_widget"
-        private const val KEY_SELECTED_TAB = "selected_tab"
-        private const val KEY_BALANCE = "total_balance"
-        private const val KEY_HIDE_BALANCE = "hide_balance"
-
         const val ACTION_TAB_INCOME = "com.example.wall_o_pay.WIDGET_TAB_INCOME"
         const val ACTION_TAB_EXPENSE = "com.example.wall_o_pay.WIDGET_TAB_EXPENSE"
         const val ACTION_TAB_TRANSFER = "com.example.wall_o_pay.WIDGET_TAB_TRANSFER"
+
+        const val ACTION_PRESET_10K = "com.example.wall_o_pay.WIDGET_PRESET_10K"
+        const val ACTION_PRESET_20K = "com.example.wall_o_pay.WIDGET_PRESET_20K"
+        const val ACTION_PRESET_50K = "com.example.wall_o_pay.WIDGET_PRESET_50K"
+        const val ACTION_PRESET_100K = "com.example.wall_o_pay.WIDGET_PRESET_100K"
+        const val ACTION_CLEAR_AMOUNT = "com.example.wall_o_pay.WIDGET_CLEAR_AMOUNT"
+
+        const val ACTION_CYCLE_CATEGORY = "com.example.wall_o_pay.WIDGET_CYCLE_CATEGORY"
+        const val ACTION_CYCLE_WALLET_FROM = "com.example.wall_o_pay.WIDGET_CYCLE_WALLET_FROM"
+        const val ACTION_CYCLE_WALLET_TO = "com.example.wall_o_pay.WIDGET_CYCLE_WALLET_TO"
+
         const val ACTION_RECORD = "com.example.wall_o_pay.WIDGET_RECORD"
+        const val ACTION_OPEN_DETAIL = "com.example.wall_o_pay.WIDGET_OPEN_DETAIL"
         const val ACTION_OPEN_APP = "com.example.wall_o_pay.WIDGET_OPEN_APP"
+        const val ACTION_DISMISS_FEEDBACK = "com.example.wall_o_pay.WIDGET_DISMISS_FEEDBACK"
         const val ACTION_UPDATE_DATA = "com.example.wall_o_pay.WIDGET_UPDATE_DATA"
+
+        private const val MAX_QUEUED_AMOUNT = 999_999_999_999L
+        private val saveLock = Any()
+        @Volatile
+        private var lastSaveElapsedMs: Long = 0L
 
         fun updateAllWidgets(context: Context) {
             val manager = AppWidgetManager.getInstance(context)
@@ -32,18 +46,8 @@ class QuickFinanceWidgetProvider : AppWidgetProvider() {
                 ComponentName(context, QuickFinanceWidgetProvider::class.java)
             )
             if (ids.isNotEmpty()) {
-                val intent = Intent(context, QuickFinanceWidgetProvider::class.java).apply {
-                    action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-                }
-                context.sendBroadcast(intent)
+                QuickFinanceWidgetProvider().onUpdate(context, manager, ids)
             }
-        }
-
-        private fun formatRupiah(amount: Long): String {
-            val symbols = DecimalFormatSymbols(Locale("id", "ID"))
-            val formatter = DecimalFormat("#,###", symbols)
-            return "Rp ${formatter.format(amount)}"
         }
     }
 
@@ -53,31 +57,78 @@ class QuickFinanceWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle,
+    ) {
+        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+        updateWidget(context, appWidgetManager, appWidgetId)
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
 
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(WidgetDatabaseHelper.PREFS_NAME, Context.MODE_PRIVATE)
+        val locale = WidgetDatabaseHelper.getLocale(context)
+        val isId = locale == "id"
 
         when (intent.action) {
             ACTION_TAB_INCOME -> {
-                prefs.edit().putString(KEY_SELECTED_TAB, "income").apply()
+                prefs.edit()
+                    .putString(WidgetDatabaseHelper.KEY_SELECTED_TAB, "income")
+                    .remove(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT)
+                    .apply()
                 updateAllWidgets(context)
             }
             ACTION_TAB_EXPENSE -> {
-                prefs.edit().putString(KEY_SELECTED_TAB, "expense").apply()
+                prefs.edit()
+                    .putString(WidgetDatabaseHelper.KEY_SELECTED_TAB, "expense")
+                    .remove(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT)
+                    .apply()
                 updateAllWidgets(context)
             }
             ACTION_TAB_TRANSFER -> {
-                prefs.edit().putString(KEY_SELECTED_TAB, "transfer").apply()
+                prefs.edit()
+                    .putString(WidgetDatabaseHelper.KEY_SELECTED_TAB, "transfer")
+                    .remove(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT)
+                    .apply()
+                updateAllWidgets(context)
+            }
+            ACTION_PRESET_10K -> addPresetAmount(context, 10_000L)
+            ACTION_PRESET_20K -> addPresetAmount(context, 20_000L)
+            ACTION_PRESET_50K -> addPresetAmount(context, 50_000L)
+            ACTION_PRESET_100K -> addPresetAmount(context, 100_000L)
+            ACTION_CLEAR_AMOUNT -> {
+                prefs.edit()
+                    .putLong(WidgetDatabaseHelper.KEY_QUEUED_AMOUNT, 0L)
+                    .remove(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT)
+                    .apply()
+                updateAllWidgets(context)
+            }
+            ACTION_CYCLE_CATEGORY -> {
+                cycleCategory(context)
+                updateAllWidgets(context)
+            }
+            ACTION_CYCLE_WALLET_FROM -> {
+                cycleWallet(context, isDestination = false)
+                updateAllWidgets(context)
+            }
+            ACTION_CYCLE_WALLET_TO -> {
+                cycleWallet(context, isDestination = true)
+                updateAllWidgets(context)
+            }
+            ACTION_DISMISS_FEEDBACK -> {
+                prefs.edit().remove(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT).apply()
                 updateAllWidgets(context)
             }
             ACTION_RECORD -> {
-                val selectedTab = prefs.getString(KEY_SELECTED_TAB, "income") ?: "income"
-                val launchIntent = Intent(context, MainActivity::class.java).apply {
-                    action = "com.example.wall_o_pay.QUICK_WIDGET_${selectedTab.uppercase()}"
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                }
-                context.startActivity(launchIntent)
+                handleDirectSave(context, isId)
+                updateAllWidgets(context)
+            }
+            ACTION_OPEN_DETAIL -> {
+                launchFloatingDialog(context)
             }
             ACTION_OPEN_APP -> {
                 val launchIntent = Intent(context, MainActivity::class.java).apply {
@@ -91,57 +142,440 @@ class QuickFinanceWidgetProvider : AppWidgetProvider() {
         }
     }
 
-    private fun updateWidget(context: Context, appWidgetManager: AppWidgetManager, widgetId: Int) {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val selectedTab = prefs.getString(KEY_SELECTED_TAB, "income") ?: "income"
-        val balance = prefs.getLong(KEY_BALANCE, 0L)
-        val hideBalance = prefs.getBoolean(KEY_HIDE_BALANCE, false)
+    private fun addPresetAmount(context: Context, delta: Long) {
+        val prefs = context.getSharedPreferences(WidgetDatabaseHelper.PREFS_NAME, Context.MODE_PRIVATE)
+        val current = prefs.getLong(WidgetDatabaseHelper.KEY_QUEUED_AMOUNT, 0L).coerceAtLeast(0L)
+        val next = (current + delta).coerceAtMost(MAX_QUEUED_AMOUNT)
+        prefs.edit()
+            .putLong(WidgetDatabaseHelper.KEY_QUEUED_AMOUNT, next)
+            .remove(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT)
+            .apply()
+        updateAllWidgets(context)
+    }
 
-        val views = RemoteViews(context.packageName, R.layout.widget_quick_finance)
+    private fun cycleCategory(context: Context) {
+        val prefs = context.getSharedPreferences(WidgetDatabaseHelper.PREFS_NAME, Context.MODE_PRIVATE)
+        val selectedTab = prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TAB, "expense") ?: "expense"
+        if (selectedTab != "income" && selectedTab != "expense") return
 
-        // Balance display
-        if (hideBalance) {
-            views.setTextViewText(R.id.widget_balance_value, context.getString(R.string.widget_balance_hidden))
+        val categories = WidgetDatabaseHelper.getActiveCategories(context, selectedTab)
+        if (categories.isEmpty()) return
+
+        val key = if (selectedTab == "income") {
+            WidgetDatabaseHelper.KEY_SELECTED_INCOME_CAT_ID
         } else {
-            views.setTextViewText(R.id.widget_balance_value, formatRupiah(balance))
+            WidgetDatabaseHelper.KEY_SELECTED_EXPENSE_CAT_ID
+        }
+        val currentId = prefs.getString(key, null)
+        val currentIndex = categories.indexOfFirst { it.id == currentId }
+        val nextIndex = if (currentIndex < 0) 0 else (currentIndex + 1) % categories.size
+        prefs.edit()
+            .putString(key, categories[nextIndex].id)
+            .remove(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT)
+            .apply()
+    }
+
+    private fun cycleWallet(context: Context, isDestination: Boolean) {
+        val prefs = context.getSharedPreferences(WidgetDatabaseHelper.PREFS_NAME, Context.MODE_PRIVATE)
+        val wallets = WidgetDatabaseHelper.getActiveWallets(context)
+        if (wallets.isEmpty()) return
+
+        val selectedTab = prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TAB, "expense") ?: "expense"
+        val currentFromId = resolveWallet(wallets, prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_WALLET_ID, null))?.id
+        val currentToId = resolveToWallet(wallets, currentFromId, prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TO_WALLET_ID, null))?.id
+
+        if (!isDestination) {
+            val idx = wallets.indexOfFirst { it.id == currentFromId }
+            val nextWallet = wallets[(idx + 1) % wallets.size]
+            val editor = prefs.edit()
+                .putString(WidgetDatabaseHelper.KEY_SELECTED_WALLET_ID, nextWallet.id)
+                .remove(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT)
+
+            if (selectedTab == "transfer" && wallets.size > 1 && nextWallet.id == currentToId) {
+                val nextToIdx = (wallets.indexOfFirst { it.id == nextWallet.id } + 1) % wallets.size
+                editor.putString(WidgetDatabaseHelper.KEY_SELECTED_TO_WALLET_ID, wallets[nextToIdx].id)
+            }
+            editor.apply()
+        } else {
+            if (wallets.size <= 1) return
+            val idx = wallets.indexOfFirst { it.id == currentToId }
+            var nextIdx = (idx + 1) % wallets.size
+            if (wallets[nextIdx].id == currentFromId) {
+                nextIdx = (nextIdx + 1) % wallets.size
+            }
+            prefs.edit()
+                .putString(WidgetDatabaseHelper.KEY_SELECTED_TO_WALLET_ID, wallets[nextIdx].id)
+                .remove(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT)
+                .apply()
+        }
+    }
+
+    private fun handleDirectSave(context: Context, isId: Boolean) {
+        synchronized(saveLock) {
+            val nowElapsed = SystemClock.elapsedRealtime()
+            if (nowElapsed - lastSaveElapsedMs < 1200L) {
+                return
+            }
+
+            val prefs = context.getSharedPreferences(WidgetDatabaseHelper.PREFS_NAME, Context.MODE_PRIVATE)
+            val selectedTab = prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TAB, "expense") ?: "expense"
+            val amount = prefs.getLong(WidgetDatabaseHelper.KEY_QUEUED_AMOUNT, 0L)
+
+            if (amount <= 0L) {
+                val msg = if (isId) "Pilih nominal atau ketuk Detail" else "Select amount or tap Detail"
+                prefs.edit()
+                    .putString(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT, msg)
+                    .putBoolean(WidgetDatabaseHelper.KEY_FEEDBACK_IS_ERROR, true)
+                    .apply()
+                return
+            }
+
+            if (!WidgetDatabaseHelper.isDatabaseReady(context)) {
+                val msg = if (isId) "Buka Wall o' Pay sekali dulu" else "Open Wall o' Pay once first"
+                prefs.edit()
+                    .putString(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT, msg)
+                    .putBoolean(WidgetDatabaseHelper.KEY_FEEDBACK_IS_ERROR, true)
+                    .apply()
+                return
+            }
+
+            val wallets = WidgetDatabaseHelper.getActiveWallets(context)
+            val fromWallet = resolveWallet(wallets, prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_WALLET_ID, null))
+            if (fromWallet == null) {
+                val msg = if (isId) "Akun tidak ditemukan" else "No active account found"
+                prefs.edit()
+                    .putString(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT, msg)
+                    .putBoolean(WidgetDatabaseHelper.KEY_FEEDBACK_IS_ERROR, true)
+                    .apply()
+                return
+            }
+
+            var categoryId: String? = null
+            var toWalletId: String? = null
+
+            if (selectedTab == "transfer") {
+                if (wallets.size < 2) {
+                    val msg = if (isId) "Butuh min. 2 akun untuk transfer" else "Need 2+ accounts for transfer"
+                    prefs.edit()
+                        .putString(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT, msg)
+                        .putBoolean(WidgetDatabaseHelper.KEY_FEEDBACK_IS_ERROR, true)
+                        .apply()
+                    return
+                }
+                val toWallet = resolveToWallet(wallets, fromWallet.id, prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TO_WALLET_ID, null))
+                if (toWallet == null || toWallet.id == fromWallet.id) {
+                    val msg = if (isId) "Akun sumber & tujuan harus beda" else "Source & dest accounts must differ"
+                    prefs.edit()
+                        .putString(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT, msg)
+                        .putBoolean(WidgetDatabaseHelper.KEY_FEEDBACK_IS_ERROR, true)
+                        .apply()
+                    return
+                }
+                toWalletId = toWallet.id
+            } else {
+                val cats = WidgetDatabaseHelper.getActiveCategories(context, selectedTab)
+                val key = if (selectedTab == "income") {
+                    WidgetDatabaseHelper.KEY_SELECTED_INCOME_CAT_ID
+                } else {
+                    WidgetDatabaseHelper.KEY_SELECTED_EXPENSE_CAT_ID
+                }
+                val cat = resolveCategory(cats, prefs.getString(key, null))
+                if (cat == null) {
+                    val msg = if (isId) "Kategori tidak ditemukan" else "Category not found"
+                    prefs.edit()
+                        .putString(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT, msg)
+                        .putBoolean(WidgetDatabaseHelper.KEY_FEEDBACK_IS_ERROR, true)
+                        .apply()
+                    return
+                }
+                categoryId = cat.id
+            }
+
+            lastSaveElapsedMs = nowElapsed
+
+            when (val result = WidgetDatabaseHelper.insertTransaction(
+                context = context,
+                type = selectedTab,
+                amount = amount,
+                categoryId = categoryId,
+                walletId = fromWallet.id,
+                toWalletId = toWalletId,
+                note = "",
+            )) {
+                is TxInsertResult.Success -> {
+                    val okMsg = if (isId) {
+                        "✓ Tersimpan ${WidgetDatabaseHelper.formatRupiah(result.amount)}"
+                    } else {
+                        "✓ Saved ${WidgetDatabaseHelper.formatRupiah(result.amount)}"
+                    }
+                    prefs.edit()
+                        .putLong(WidgetDatabaseHelper.KEY_QUEUED_AMOUNT, 0L)
+                        .putString(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT, okMsg)
+                        .putBoolean(WidgetDatabaseHelper.KEY_FEEDBACK_IS_ERROR, false)
+                        .apply()
+                }
+                is TxInsertResult.Error -> {
+                    prefs.edit()
+                        .putString(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT, result.message)
+                        .putBoolean(WidgetDatabaseHelper.KEY_FEEDBACK_IS_ERROR, true)
+                        .apply()
+                }
+            }
+        }
+    }
+
+    private fun launchFloatingDialog(context: Context) {
+        val prefs = context.getSharedPreferences(WidgetDatabaseHelper.PREFS_NAME, Context.MODE_PRIVATE)
+        val selectedTab = prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TAB, "expense") ?: "expense"
+        val queuedAmount = prefs.getLong(WidgetDatabaseHelper.KEY_QUEUED_AMOUNT, 0L)
+        val wallets = WidgetDatabaseHelper.getActiveWallets(context)
+        val fromWallet = resolveWallet(wallets, prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_WALLET_ID, null))
+        val toWallet = resolveToWallet(wallets, fromWallet?.id, prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TO_WALLET_ID, null))
+
+        val catId = if (selectedTab == "income" || selectedTab == "expense") {
+            val key = if (selectedTab == "income") {
+                WidgetDatabaseHelper.KEY_SELECTED_INCOME_CAT_ID
+            } else {
+                WidgetDatabaseHelper.KEY_SELECTED_EXPENSE_CAT_ID
+            }
+            val cats = WidgetDatabaseHelper.getActiveCategories(context, selectedTab)
+            resolveCategory(cats, prefs.getString(key, null))?.id
+        } else null
+
+        val dialogIntent = Intent(context, QuickTransactionActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(QuickTransactionActivity.EXTRA_TYPE, selectedTab)
+            putExtra(QuickTransactionActivity.EXTRA_AMOUNT, queuedAmount)
+            if (catId != null) putExtra(QuickTransactionActivity.EXTRA_CATEGORY_ID, catId)
+            if (fromWallet != null) putExtra(QuickTransactionActivity.EXTRA_WALLET_ID, fromWallet.id)
+            if (toWallet != null) putExtra(QuickTransactionActivity.EXTRA_TO_WALLET_ID, toWallet.id)
+        }
+        context.startActivity(dialogIntent)
+    }
+
+    private fun resolveWallet(wallets: List<WidgetWallet>, preferredId: String?): WidgetWallet? {
+        if (wallets.isEmpty()) return null
+        return wallets.firstOrNull { it.id == preferredId } ?: wallets.first()
+    }
+
+    private fun resolveToWallet(
+        wallets: List<WidgetWallet>,
+        fromId: String?,
+        preferredToId: String?,
+    ): WidgetWallet? {
+        if (wallets.size < 2) return wallets.firstOrNull()
+        val candidate = wallets.firstOrNull { it.id == preferredToId && it.id != fromId }
+        if (candidate != null) return candidate
+        return wallets.firstOrNull { it.id != fromId } ?: wallets.first()
+    }
+
+    private fun resolveCategory(cats: List<WidgetCategory>, preferredId: String?): WidgetCategory? {
+        if (cats.isEmpty()) return null
+        return cats.firstOrNull { it.id == preferredId } ?: cats.first()
+    }
+
+    private fun updateWidget(context: Context, appWidgetManager: AppWidgetManager, widgetId: Int) {
+        val prefs = context.getSharedPreferences(WidgetDatabaseHelper.PREFS_NAME, Context.MODE_PRIVATE)
+        val locale = WidgetDatabaseHelper.getLocale(context)
+        val isId = locale == "id"
+
+        val selectedTab = (prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TAB, "expense") ?: "expense").let {
+            if (it == "income" || it == "expense" || it == "transfer") it else "expense"
+        }
+        val hideBalance = prefs.getBoolean(WidgetDatabaseHelper.KEY_HIDE_BALANCE, false)
+        val queuedAmount = prefs.getLong(WidgetDatabaseHelper.KEY_QUEUED_AMOUNT, 0L).coerceAtLeast(0L)
+        val feedbackText = prefs.getString(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT, null)
+        val feedbackIsError = prefs.getBoolean(WidgetDatabaseHelper.KEY_FEEDBACK_IS_ERROR, false)
+
+        val dbReady = WidgetDatabaseHelper.isDatabaseReady(context)
+        val liveBalance = if (!hideBalance && dbReady) {
+            WidgetDatabaseHelper.getTotalBalance(context) ?: prefs.getLong(WidgetDatabaseHelper.KEY_BALANCE, 0L)
+        } else {
+            prefs.getLong(WidgetDatabaseHelper.KEY_BALANCE, 0L)
         }
 
-        // Tab states — reset all to inactive first
-        views.setInt(R.id.tab_income, "setBackgroundResource", R.drawable.widget_tab_bg_inactive)
-        views.setTextColor(R.id.tab_income_text, context.getColor(R.color.widget_text_secondary))
-        views.setInt(R.id.tab_expense, "setBackgroundResource", R.drawable.widget_tab_bg_inactive)
-        views.setTextColor(R.id.tab_expense_text, context.getColor(R.color.widget_text_secondary))
-        views.setInt(R.id.tab_transfer, "setBackgroundResource", R.drawable.widget_tab_bg_inactive)
-        views.setTextColor(R.id.tab_transfer_text, context.getColor(R.color.widget_text_secondary))
+        val views = RemoteViews(context.packageName, R.layout.widget_quick_finance)
+        val options = appWidgetManager.getAppWidgetOptions(widgetId)
+        val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 280)
+        val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 200)
+        val isNarrow = minWidth in 1..265
 
-        // Activate selected tab
+        // Localization & width-responsive labels
+        views.setTextViewText(R.id.widget_title, "Quick Finance")
+        views.setTextViewText(
+            R.id.tab_income_text,
+            when {
+                isNarrow && isId -> "+ Masuk"
+                isNarrow -> "+ In"
+                isId -> "+ Pemasukan"
+                else -> "+ Income"
+            }
+        )
+        views.setTextViewText(
+            R.id.tab_expense_text,
+            when {
+                isNarrow && isId -> "- Keluar"
+                isNarrow -> "- Out"
+                isId -> "- Pengeluaran"
+                else -> "- Expense"
+            }
+        )
+        views.setTextViewText(R.id.tab_transfer_text, "⇄ Transfer")
+        views.setTextViewText(R.id.widget_queued_label, "Nominal")
+        views.setTextViewText(R.id.btn_detail_text, "✎ Detail")
+        views.setTextViewText(
+            R.id.btn_record_text,
+            when {
+                minWidth in 1..225 && isId -> "Simpan"
+                minWidth in 1..225 -> "Save"
+                isId -> "Simpan Transaksi"
+                else -> "Save Transaction"
+            }
+        )
+
+        // Balance header display
+        if (hideBalance) {
+            views.setTextViewText(R.id.widget_balance_value, "Rp ••••••••")
+        } else {
+            views.setTextViewText(R.id.widget_balance_value, WidgetDatabaseHelper.formatRupiah(liveBalance))
+        }
+
+        // Feedback banner
+        if (!feedbackText.isNullOrBlank()) {
+            views.setViewVisibility(R.id.widget_feedback, View.VISIBLE)
+            views.setTextViewText(R.id.widget_feedback, feedbackText)
+            if (feedbackIsError) {
+                views.setInt(R.id.widget_feedback, "setBackgroundResource", R.drawable.widget_error_bg)
+                views.setTextColor(R.id.widget_feedback, resolveColor(context, R.color.widget_expense_on_dark))
+            } else {
+                views.setInt(R.id.widget_feedback, "setBackgroundResource", R.drawable.widget_success_bg)
+                views.setTextColor(R.id.widget_feedback, resolveColor(context, R.color.widget_income_on_dark))
+            }
+        } else {
+            views.setViewVisibility(R.id.widget_feedback, View.GONE)
+        }
+
+        // Queued amount
+        views.setTextViewText(R.id.widget_queued_amount, WidgetDatabaseHelper.formatRupiah(queuedAmount))
+        views.setViewVisibility(R.id.btn_clear_amount, if (queuedAmount > 0L) View.VISIBLE else View.GONE)
+
+        // Reset tabs
+        views.setInt(R.id.tab_income, "setBackgroundResource", R.drawable.widget_tab_bg_inactive)
+        views.setTextColor(R.id.tab_income_text, resolveColor(context, R.color.widget_text_secondary))
+        views.setInt(R.id.tab_expense, "setBackgroundResource", R.drawable.widget_tab_bg_inactive)
+        views.setTextColor(R.id.tab_expense_text, resolveColor(context, R.color.widget_text_secondary))
+        views.setInt(R.id.tab_transfer, "setBackgroundResource", R.drawable.widget_tab_bg_inactive)
+        views.setTextColor(R.id.tab_transfer_text, resolveColor(context, R.color.widget_text_secondary))
+
+        // Activate selected tab & color queued amount
         when (selectedTab) {
             "income" -> {
                 views.setInt(R.id.tab_income, "setBackgroundResource", R.drawable.widget_tab_bg_income)
-                views.setTextColor(R.id.tab_income_text, context.getColor(R.color.widget_income_on_dark))
+                views.setTextColor(R.id.tab_income_text, resolveColor(context, R.color.widget_income_on_dark))
+                views.setTextColor(R.id.widget_queued_amount, resolveColor(context, R.color.widget_income_on_dark))
             }
             "expense" -> {
                 views.setInt(R.id.tab_expense, "setBackgroundResource", R.drawable.widget_tab_bg_expense)
-                views.setTextColor(R.id.tab_expense_text, context.getColor(R.color.widget_expense_on_dark))
+                views.setTextColor(R.id.tab_expense_text, resolveColor(context, R.color.widget_expense_on_dark))
+                views.setTextColor(R.id.widget_queued_amount, resolveColor(context, R.color.widget_expense_on_dark))
             }
             "transfer" -> {
                 views.setInt(R.id.tab_transfer, "setBackgroundResource", R.drawable.widget_tab_bg_transfer)
-                views.setTextColor(R.id.tab_transfer_text, context.getColor(R.color.widget_dew_mint))
+                views.setTextColor(R.id.tab_transfer_text, resolveColor(context, R.color.widget_dew_mint))
+                views.setTextColor(R.id.widget_queued_amount, resolveColor(context, R.color.widget_dew_mint))
             }
         }
 
-        // PendingIntents for tabs
+        // Dynamic context chips
+        if (!dbReady) {
+            views.setViewVisibility(R.id.chip_category, View.VISIBLE)
+            views.setViewVisibility(R.id.chip_wallet_from, View.GONE)
+            views.setViewVisibility(R.id.transfer_arrow, View.GONE)
+            views.setViewVisibility(R.id.chip_wallet_to, View.GONE)
+            views.setTextViewText(
+                R.id.chip_category,
+                if (isId) "Buka aplikasi untuk inisialisasi" else "Open app to initialize"
+            )
+        } else {
+            val wallets = WidgetDatabaseHelper.getActiveWallets(context)
+            val fromWallet = resolveWallet(wallets, prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_WALLET_ID, null))
+            val fromLabel = fromWallet?.let { WidgetDatabaseHelper.localizeLabel(it.name, locale) }
+                ?: (if (isId) "Akun" else "Account")
+
+            if (selectedTab == "transfer") {
+                views.setViewVisibility(R.id.chip_category, View.GONE)
+                views.setViewVisibility(R.id.chip_wallet_from, View.VISIBLE)
+                views.setViewVisibility(R.id.transfer_arrow, View.VISIBLE)
+                views.setViewVisibility(R.id.chip_wallet_to, View.VISIBLE)
+
+                val toWallet = resolveToWallet(
+                    wallets,
+                    fromWallet?.id,
+                    prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TO_WALLET_ID, null)
+                )
+                val toLabel = if (wallets.size < 2) {
+                    if (isId) "Butuh 2 Akun" else "Need 2 Accounts"
+                } else {
+                    toWallet?.let { WidgetDatabaseHelper.localizeLabel(it.name, locale) }
+                        ?: (if (isId) "Tujuan" else "Dest")
+                }
+
+                views.setTextViewText(R.id.chip_wallet_from, fromLabel)
+                views.setTextViewText(R.id.chip_wallet_to, toLabel)
+            } else {
+                views.setViewVisibility(R.id.chip_category, View.VISIBLE)
+                views.setViewVisibility(R.id.chip_wallet_from, View.VISIBLE)
+                views.setViewVisibility(R.id.transfer_arrow, View.GONE)
+                views.setViewVisibility(R.id.chip_wallet_to, View.GONE)
+
+                val cats = WidgetDatabaseHelper.getActiveCategories(context, selectedTab)
+                val key = if (selectedTab == "income") {
+                    WidgetDatabaseHelper.KEY_SELECTED_INCOME_CAT_ID
+                } else {
+                    WidgetDatabaseHelper.KEY_SELECTED_EXPENSE_CAT_ID
+                }
+                val cat = resolveCategory(cats, prefs.getString(key, null))
+                val catLabel = cat?.let { WidgetDatabaseHelper.localizeLabel(it.name, locale) }
+                    ?: (if (isId) "Kategori" else "Category")
+
+                views.setTextViewText(R.id.chip_category, catLabel)
+                views.setTextViewText(R.id.chip_wallet_from, fromLabel)
+            }
+        }
+
+        // Responsive height sizing: adapt seamlessly across compact, medium, and expanded widgets
+        views.setViewVisibility(
+            R.id.presets_row,
+            if (minHeight in 1..174) View.GONE else View.VISIBLE
+        )
+        views.setViewVisibility(
+            R.id.context_row,
+            if (minHeight in 1..130) View.GONE else View.VISIBLE
+        )
+
+        // PendingIntents
         views.setOnClickPendingIntent(R.id.tab_income, getBroadcastIntent(context, ACTION_TAB_INCOME, 1))
         views.setOnClickPendingIntent(R.id.tab_expense, getBroadcastIntent(context, ACTION_TAB_EXPENSE, 2))
         views.setOnClickPendingIntent(R.id.tab_transfer, getBroadcastIntent(context, ACTION_TAB_TRANSFER, 3))
 
-        // Record button
-        views.setOnClickPendingIntent(R.id.btn_record, getBroadcastIntent(context, ACTION_RECORD, 4))
+        views.setOnClickPendingIntent(R.id.btn_preset_10k, getBroadcastIntent(context, ACTION_PRESET_10K, 10))
+        views.setOnClickPendingIntent(R.id.btn_preset_20k, getBroadcastIntent(context, ACTION_PRESET_20K, 11))
+        views.setOnClickPendingIntent(R.id.btn_preset_50k, getBroadcastIntent(context, ACTION_PRESET_50K, 12))
+        views.setOnClickPendingIntent(R.id.btn_preset_100k, getBroadcastIntent(context, ACTION_PRESET_100K, 13))
+        views.setOnClickPendingIntent(R.id.btn_clear_amount, getBroadcastIntent(context, ACTION_CLEAR_AMOUNT, 14))
 
-        // Open app (header logo & open icon)
-        views.setOnClickPendingIntent(R.id.widget_logo, getBroadcastIntent(context, ACTION_OPEN_APP, 5))
-        views.setOnClickPendingIntent(R.id.widget_open_app, getBroadcastIntent(context, ACTION_OPEN_APP, 6))
-        views.setOnClickPendingIntent(R.id.widget_balance_value, getBroadcastIntent(context, ACTION_OPEN_APP, 7))
+        views.setOnClickPendingIntent(R.id.chip_category, getBroadcastIntent(context, ACTION_CYCLE_CATEGORY, 20))
+        views.setOnClickPendingIntent(R.id.chip_wallet_from, getBroadcastIntent(context, ACTION_CYCLE_WALLET_FROM, 21))
+        views.setOnClickPendingIntent(R.id.chip_wallet_to, getBroadcastIntent(context, ACTION_CYCLE_WALLET_TO, 22))
+
+        views.setOnClickPendingIntent(R.id.widget_feedback, getBroadcastIntent(context, ACTION_DISMISS_FEEDBACK, 25))
+        views.setOnClickPendingIntent(R.id.widget_queued_amount, getBroadcastIntent(context, ACTION_OPEN_DETAIL, 30))
+        views.setOnClickPendingIntent(R.id.btn_detail, getBroadcastIntent(context, ACTION_OPEN_DETAIL, 31))
+        views.setOnClickPendingIntent(R.id.btn_record, getBroadcastIntent(context, ACTION_RECORD, 32))
+
+        views.setOnClickPendingIntent(R.id.widget_logo, getBroadcastIntent(context, ACTION_OPEN_APP, 40))
+        views.setOnClickPendingIntent(R.id.widget_open_app, getBroadcastIntent(context, ACTION_OPEN_APP, 41))
+        views.setOnClickPendingIntent(R.id.widget_balance_value, getBroadcastIntent(context, ACTION_OPEN_APP, 42))
 
         appWidgetManager.updateAppWidget(widgetId, views)
     }
@@ -151,8 +585,19 @@ class QuickFinanceWidgetProvider : AppWidgetProvider() {
             this.action = action
         }
         return PendingIntent.getBroadcast(
-            context, requestCode, intent,
+            context,
+            requestCode,
+            intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+    }
+
+    @Suppress("DEPRECATION")
+    private fun resolveColor(context: Context, resId: Int): Int {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            context.getColor(resId)
+        } else {
+            context.resources.getColor(resId)
+        }
     }
 }

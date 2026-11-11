@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="12dp"
+    android:padding="10dp"
     android:background="@drawable/widget_background">
 
     <!-- Header Row -->
@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="8dp">
+        android:layout_marginBottom="6dp">
 
         <ImageView
             android:id="@+id/widget_logo"
@@ -27,96 +27,109 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="6dp"
             android:text="@string/widget_title"
             android:textColor="@color/widget_soft_ivory"
-            android:textSize="15sp"
+            android:textSize="14sp"
             android:textStyle="bold"
             android:fontFamily="sans-serif-medium"
-            android:maxLines="1" />
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/widget_balance_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
+            android:text="@string/widget_balance_hidden"
+            android:textColor="@color/widget_dew_mint"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:ellipsize="end" />
 
         <ImageView
             android:id="@+id/widget_open_app"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:src="@android:drawable/ic_menu_more"
-            android:contentDescription="@string/app_name"
-            android:tint="@color/widget_fresh_sage" />
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_widget_open_app"
+            android:contentDescription="@string/app_name" />
     </LinearLayout>
 
-    <!-- Balance Row -->
+    <!-- Feedback Banner (shown on save / validation feedback) -->
     <TextView
-        android:id="@+id/widget_balance_label"
+        android:id="@+id/widget_feedback"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/widget_balance_label"
-        android:textColor="@color/widget_text_secondary"
+        android:layout_marginBottom="6dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:background="@drawable/widget_success_bg"
+        android:textColor="@color/widget_income_on_dark"
         android:textSize="11sp"
-        android:fontFamily="sans-serif" />
-
-    <TextView
-        android:id="@+id/widget_balance_value"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/widget_balance_hidden"
-        android:textColor="@color/widget_soft_ivory"
-        android:textSize="18sp"
         android:textStyle="bold"
         android:fontFamily="sans-serif-medium"
         android:maxLines="1"
-        android:layout_marginBottom="10dp" />
+        android:ellipsize="end"
+        android:visibility="gone" />
 
-    <!-- Tab Selector Row -->
+    <!-- Segmented Tab Selector Row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="6dp"
         android:baselineAligned="false">
 
         <FrameLayout
             android:id="@+id/tab_income"
             android:layout_width="0dp"
-            android:layout_height="38dp"
+            android:layout_height="30dp"
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
-            android:background="@drawable/widget_tab_bg_income">
+            android:background="@drawable/widget_tab_bg_inactive">
             <TextView
                 android:id="@+id/tab_income_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/widget_income"
-                android:textColor="@color/widget_income_on_dark"
-                android:textSize="12sp"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="11sp"
                 android:textStyle="bold"
-                android:drawableStart="@android:drawable/ic_input_add"
-                android:drawablePadding="3dp"
-                android:drawableTint="@color/widget_income_on_dark" />
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
         </FrameLayout>
 
         <FrameLayout
             android:id="@+id/tab_expense"
             android:layout_width="0dp"
-            android:layout_height="38dp"
+            android:layout_height="30dp"
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
-            android:background="@drawable/widget_tab_bg_inactive">
+            android:background="@drawable/widget_tab_bg_expense">
             <TextView
                 android:id="@+id/tab_expense_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/widget_expense"
-                android:textColor="@color/widget_text_secondary"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textColor="@color/widget_expense_on_dark"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
         </FrameLayout>
 
         <FrameLayout
             android:id="@+id/tab_transfer"
             android:layout_width="0dp"
-            android:layout_height="38dp"
+            android:layout_height="30dp"
             android:layout_weight="1"
             android:background="@drawable/widget_tab_bg_inactive">
             <TextView
@@ -126,25 +139,264 @@
                 android:layout_gravity="center"
                 android:text="@string/widget_transfer"
                 android:textColor="@color/widget_text_secondary"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
         </FrameLayout>
     </LinearLayout>
 
-    <!-- Record Button -->
-    <FrameLayout
-        android:id="@+id/btn_record"
+    <!-- Dynamic Quick Form Card -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@drawable/widget_btn_record">
-        <TextView
-            android:id="@+id/btn_record_text"
-            android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="6dp"
+        android:layout_marginBottom="6dp"
+        android:background="@drawable/widget_card_inner">
+
+        <!-- Nominal Display Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/widget_record"
-            android:textColor="@color/widget_soft_ivory"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-    </FrameLayout>
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/widget_queued_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nominal"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif" />
+
+            <TextView
+                android:id="@+id/widget_queued_amount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="Rp 0"
+                android:textColor="@color/widget_expense_on_dark"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/btn_clear_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:background="@drawable/widget_chip_bg"
+                android:text="✕"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Dynamic Context Selector Row (Category & Account OR From -> To) -->
+        <LinearLayout
+            android:id="@+id/context_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/chip_category"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:background="@drawable/widget_chip_bg"
+                android:gravity="center"
+                android:text="Category"
+                android:textColor="@color/widget_soft_ivory"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/chip_wallet_from"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:background="@drawable/widget_chip_bg"
+                android:gravity="center"
+                android:text="Main Account"
+                android:textColor="@color/widget_dew_mint"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/transfer_arrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:text="→"
+                android:textColor="@color/widget_dew_mint"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/chip_wallet_to"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:background="@drawable/widget_chip_bg"
+                android:gravity="center"
+                android:text="Digital Bank"
+                android:textColor="@color/widget_dew_mint"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Quick Preset Chips Row -->
+    <LinearLayout
+        android:id="@+id/presets_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="6dp"
+        android:baselineAligned="false">
+
+        <TextView
+            android:id="@+id/btn_preset_10k"
+            android:layout_width="0dp"
+            android:layout_height="26dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/widget_chip_bg"
+            android:gravity="center"
+            android:text="+10k"
+            android:textColor="@color/widget_dew_mint"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/btn_preset_20k"
+            android:layout_width="0dp"
+            android:layout_height="26dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/widget_chip_bg"
+            android:gravity="center"
+            android:text="+20k"
+            android:textColor="@color/widget_dew_mint"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/btn_preset_50k"
+            android:layout_width="0dp"
+            android:layout_height="26dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            android:background="@drawable/widget_chip_bg"
+            android:gravity="center"
+            android:text="+50k"
+            android:textColor="@color/widget_dew_mint"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+
+        <TextView
+            android:id="@+id/btn_preset_100k"
+            android:layout_width="0dp"
+            android:layout_height="26dp"
+            android:layout_weight="1"
+            android:background="@drawable/widget_chip_bg"
+            android:gravity="center"
+            android:text="+100k"
+            android:textColor="@color/widget_dew_mint"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1" />
+    </LinearLayout>
+
+    <!-- Bottom Action Buttons Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
+
+        <FrameLayout
+            android:id="@+id/btn_detail"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/widget_btn_secondary">
+            <TextView
+                android:id="@+id/btn_detail_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/widget_detail"
+                android:textColor="@color/widget_dew_mint"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/btn_record"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1.7"
+            android:background="@drawable/widget_btn_record">
+            <TextView
+                android:id="@+id/btn_record_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/widget_record"
+                android:textColor="@color/widget_soft_ivory"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </FrameLayout>
+    </LinearLayout>
 </LinearLayout>

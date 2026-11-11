@@ -8,13 +8,14 @@
     <string name="shortcut_transfer_short">Transfer Dana</string>
     <string name="shortcut_transfer_long">Transfer Antar Dompet</string>
     <!-- Quick Finance Widget -->
-    <string name="widget_name">Keuangan Cepat</string>
-    <string name="widget_description">Catat pemasukan, pengeluaran, atau transfer dengan cepat</string>
-    <string name="widget_title">Keuangan Cepat</string>
+    <string name="widget_name">Quick Finance</string>
+    <string name="widget_description">Catat pemasukan, pengeluaran, atau transfer langsung dari layar beranda</string>
+    <string name="widget_title">Quick Finance</string>
     <string name="widget_income">Pemasukan</string>
     <string name="widget_expense">Pengeluaran</string>
     <string name="widget_transfer">Transfer</string>
-    <string name="widget_record">Catat</string>
+    <string name="widget_record">Simpan Transaksi</string>
+    <string name="widget_detail">Detail</string>
     <string name="widget_balance_label">Total Saldo</string>
     <string name="widget_balance_hidden">Rp ••••••••</string>
 </resources>

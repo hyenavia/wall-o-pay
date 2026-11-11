@@ -4,6 +4,17 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-11-12
+
+### Added
+- **Direct Home Screen Recording for Quick Finance Widget (Option C):**
+  - Added full 100% in-widget transaction entry (`QuickFinanceWidgetProvider` + `WidgetDatabaseHelper`) directly to the local Drift SQLite database (`wall_o_pay.sqlite`) without opening the main Wall o' Pay application.
+  - Added quick nominal preset chips (`+10k`, `+20k`, `+50k`, `+100k`) with clear (`✕`) button, live queued nominal counter, and one-tap interactive cyclers for Income/Expense categories and Source/Destination wallets fetched dynamically from SQLite.
+  - Added a translucent floating Quick Transaction dialog (`QuickTransactionActivity`) launched over the home screen wallpaper via the `Detail` button or by tapping the nominal area, providing numeric Rupiah-formatted keyboard input, full Category and Wallet spinners, and optional transaction description.
+  - Implemented strict transaction validation (`amount > 0`, active account/category existence checks, source != destination wallet validation on Transfer), duplicate-tap save protection, instant recalculated balance header update, and inline success/error banner feedback.
+  - Implemented seamless two-way synchronization (`checkNativeWidgetDbDirty` & `consumeNativeDbDirty` via `com.example.wall_o_pay/widget`), automatically triggering Drift table stream updates (`db.markTablesUpdated`) and Cloud Sync when the main app resumes or starts.
+  - Enhanced adaptive layout responsiveness across compact, medium, and expanded home screen launcher grid sizes without text truncation or clipping.
+
 ## [2.6.0] - 2026-11-12
 
 ### Added

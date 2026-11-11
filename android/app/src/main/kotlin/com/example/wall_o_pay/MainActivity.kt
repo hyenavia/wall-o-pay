@@ -177,17 +177,32 @@ class MainActivity : FlutterFragmentActivity() {
         // Channel for Quick Finance Widget data sync
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.example.wall_o_pay/widget").apply {
             setMethodCallHandler { call, result ->
+                val prefs = getSharedPreferences(WidgetDatabaseHelper.PREFS_NAME, MODE_PRIVATE)
                 when (call.method) {
                     "updateWidgetData" -> {
                         val balance = call.argument<Number>("balance")?.toLong() ?: 0L
                         val hideBalance = call.argument<Boolean>("hideBalance") ?: false
-                        val prefs = getSharedPreferences("quick_finance_widget", MODE_PRIVATE)
-                        prefs.edit()
-                            .putLong("total_balance", balance)
-                            .putBoolean("hide_balance", hideBalance)
-                            .apply()
+                        val locale = call.argument<String>("locale")
+                        val editor = prefs.edit()
+                            .putBoolean(WidgetDatabaseHelper.KEY_HIDE_BALANCE, hideBalance)
+                        if (hideBalance) {
+                            editor.remove(WidgetDatabaseHelper.KEY_BALANCE)
+                        } else {
+                            editor.putLong(WidgetDatabaseHelper.KEY_BALANCE, balance)
+                        }
+                        if (locale == "id" || locale == "en") {
+                            editor.putString(WidgetDatabaseHelper.KEY_LOCALE, locale)
+                        }
+                        editor.apply()
                         QuickFinanceWidgetProvider.updateAllWidgets(this@MainActivity)
                         result.success(true)
+                    }
+                    "consumeNativeDbDirty" -> {
+                        val isDirty = prefs.getBoolean(WidgetDatabaseHelper.KEY_NATIVE_DB_DIRTY, false)
+                        if (isDirty) {
+                            prefs.edit().putBoolean(WidgetDatabaseHelper.KEY_NATIVE_DB_DIRTY, false).apply()
+                        }
+                        result.success(isDirty)
                     }
                     else -> result.notImplemented()
                 }

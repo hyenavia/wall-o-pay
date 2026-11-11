@@ -9,12 +9,13 @@
     <string name="shortcut_transfer_long">Transfer Between Wallets</string>
     <!-- Quick Finance Widget -->
     <string name="widget_name">Quick Finance</string>
-    <string name="widget_description">Record income, expense, or transfer quickly</string>
+    <string name="widget_description">Record income, expense, or transfer right from your home screen</string>
     <string name="widget_title">Quick Finance</string>
     <string name="widget_income">Income</string>
     <string name="widget_expense">Expense</string>
     <string name="widget_transfer">Transfer</string>
-    <string name="widget_record">Record</string>
+    <string name="widget_record">Save Transaction</string>
+    <string name="widget_detail">Detail</string>
     <string name="widget_balance_label">Total Balance</string>
     <string name="widget_balance_hidden">Rp ••••••••</string>
 </resources>

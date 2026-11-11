@@ -45,10 +45,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.6.0',
+      version: '2.7.0',
       dateEn: 'November 12, 2026',
       dateId: '12 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Direct Home Screen Quick Finance Recording & Floating Dialog — Record Income, Expense, and Transfer transactions directly on the Home Screen widget using preset amounts (+10k/+20k/+50k/+100k) and category/wallet chips, or open the translucent floating Quick Transaction dialog for custom nominal & descriptions without launching the main app, with automatic two-way Drift SQLite & cloud synchronization.',
+          textId: 'Pencatatan Langsung dari Widget Home Screen & Dialog Melayang — Catat transaksi Pemasukan, Pengeluaran, dan Transfer langsung dari widget layar utama menggunakan chip nominal cepat (+10k/+20k/+50k/+100k) serta pemilih kategori/akun, atau buka dialog melayang transparan untuk nominal kustom & keterangan tanpa membuka aplikasi utama, lengkap dengan sinkronisasi otomatis ke Drift SQLite dan cloud.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.6.0',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

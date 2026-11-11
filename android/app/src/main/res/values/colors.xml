@@ -20,6 +20,7 @@
     <color name="widget_transfer_teal">#00897B</color>
     <color name="widget_text_primary">#F7F8F4</color>
     <color name="widget_text_secondary">#A9C5B1</color>
+    <color name="widget_hint_text">#7A9B87</color>
     <color name="widget_tab_inactive_bg">#1D372D</color>
     <color name="widget_tab_active_income">#1A3D2A</color>
     <color name="widget_tab_active_expense">#3D1A1A</color>
