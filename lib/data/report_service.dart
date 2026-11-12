@@ -21,11 +21,33 @@ class ReportService {
 
   final AppDatabase _db;
 
+  /// Memformat nominal baris transaksi pada laporan PDF sesuai tipe transaksi.
+  static String formatTransactionAmount(TxType type, int amount) {
+    final prefix = switch (type) {
+      TxType.income => '+',
+      TxType.expense => '-',
+      TxType.transfer => '<-> ',
+    };
+    return '$prefix${rupiah(amount)}';
+  }
+
+  /// Menyaring transaksi berdasarkan rekening sumber atau tujuan ([walletId]).
+  static List<TransactionEntry> filterTransactionsByWallet(
+    List<TransactionEntry> txs,
+    String? walletId,
+  ) {
+    if (walletId == null) return txs;
+    return txs
+        .where((t) => t.walletId == walletId || t.toWalletId == walletId)
+        .toList();
+  }
+
   /// [range.end] bersifat inklusif (hari terakhir yang ikut dihitung).
-  Future<void> shareReport(DateTimeRange range) async {
+  Future<void> shareReport(DateTimeRange range, {String? walletId}) async {
     final start = DateTime(range.start.year, range.start.month, range.start.day);
     final end = DateTime(range.end.year, range.end.month, range.end.day + 1);
-    final txs = await _db.transactionsBetween(start, end);
+    final rawTxs = await _db.transactionsBetween(start, end);
+    final txs = filterTransactionsByWallet(rawTxs, walletId);
     final cats = {for (final cat in await _db.allCategories()) cat.id: cat};
     final wallets = {for (final w in await _db.watchWallets().first) w.id: w};
 
@@ -87,6 +109,14 @@ class ReportService {
           pw.Text(trG('Financial report'), style: const pw.TextStyle(fontSize: 12)),
           pw.Text('${df.format(start)} - ${df.format(range.end)}',
               style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+          if (walletId != null)
+            pw.Padding(
+              padding: const pw.EdgeInsets.only(top: 2),
+              child: pw.Text(
+                '${trG('Account / Wallet')}: ${walletName(walletId)}',
+                style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+              ),
+            ),
           h(trG('Summary')),
           pw.Table(
             border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
@@ -158,7 +188,7 @@ class ReportService {
                     c(catName(t.categoryId)),
                     c(t.note),
                     c(walletName(t.walletId)),
-                    c('${t.type == TxType.income ? '+' : '-'}${rupiah(t.amount)}', right: true),
+                    c(formatTransactionAmount(t.type, t.amount), right: true),
                   ]),
               ],
             ),

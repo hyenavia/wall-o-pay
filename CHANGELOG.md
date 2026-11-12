@@ -4,6 +4,167 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.16.0] - 2026-11-12
+
+### Added
+- **Home Screen Widget Glass Style Presets (`Deep` / `Frosted` / `Clear`):**
+  - Added selectable background translucency presets synced from **Settings -> Android Home Widgets** (`setWidgetGlassStyle`) across all 6 Enchanted Glasshouse Home Screen widgets (`WidgetSnapshotStore.resolveBackgroundRes`).
+- **Live Mini-Previews & Module Guardrails in Widget Hub (`WidgetHubSheet`):**
+  - Added real-time data-backed mini-previews inside each of the 6 widget cards reacting live to Glass Style presets and balance-privacy masking.
+  - Added smart module-disabled warning banners with one-tap **Enable** shortcuts when required backing modules (`budget`, `goals`, `recurring`) are turned off.
+- **Static Launcher Previews (`android:previewImage`):**
+  - Added crisp static `preview_widget_*.png` assets across all 6 `*_widget_info.xml` manifests for Android 8–11 and third-party launchers alongside Android 12+ `previewLayout`.
+
+### Changed
+- **Widget Touch Feedback, Targets & Quick Privacy Toggle:**
+  - Upgraded all Home Screen widget interactive buttons and template chips to native Material `<ripple>` feedback and enlarged `Goals & Bills` inline goal-switcher touch target to `28dp × 28dp`.
+  - Enabled one-tap balance privacy masking toggle directly from the `Quick Action Bar` balance pill (`ACTION_BAR_TOGGLE_PRIVACY`).
+  - Added an automatic 15-second alarm-based auto-dismiss (`ACTION_AUTO_DISMISS_FEEDBACK`) for the `One-Tap Favorites` Undo confirmation banner so it cleanly returns to template chips.
+
+## [2.15.0] - 2026-11-12
+
+### Added
+- **Android Home Screen Widget Ecosystem — Phase 3 (`GoalsAndBillsWidgetProvider`, In-App Widget Hub):**
+  - Added **Goals & Upcoming Bills** Home Screen widget (`2×2` & `4×2` responsive layouts) showing active `SavingsGoal` progress with an inline goal switcher (`↻`), upcoming/overdue expense `RecurringRule` & `PendingTransaction` bills with live midnight countdowns, privacy masking, and lock-aware deep links (`route_goals`, `route_recurring`).
+  - Added **Android Home Widgets Hub** (`WidgetHubSheet`) inside **Settings -> Preferences**, listing all 6 Enchanted Glasshouse widgets with live active instance counts, one-tap Home Screen pinning (Android 8.0+ via `AppWidgetManager.requestPinAppWidget`), and instant snapshot sync.
+
+## [2.14.0] - 2026-11-12
+
+### Added
+- **Android Home Screen Widget Ecosystem — Phase 2 (`FavoriteTemplatesWidgetProvider`, `BudgetGuardrailWidgetProvider`, `widget_route` Deep Linking):**
+  - Added **One-Tap Favorites** Home Screen widget (`4×1` & `4×2` responsive layouts) backed by `tx_templates`, allowing one-tap instant transaction recording offline into SQLite (`need_want` preserved) with an immediate confirmation banner and one-tap **Undo** (`softDeleteTransaction`).
+  - Added **Budget Guardrail** Home Screen widget (`2×2` & `4×2` responsive layouts) displaying active-period remaining budget, usage percentage with tier alerts (*Safe* / *Near 85%+* / *Over 100%*), top 3 critical expense categories with progress bars, rollover carryover support, and full balance-privacy masking.
+  - Added secure `widget_route` deep-link routing (`tab_home`, `tab_transactions`, `tab_budget`, `tab_insight`, `new_transaction`) in `MainActivity.kt` and `quick_widget_service.dart`, queueing navigation until `LockGate` (PIN / biometrics) is unlocked.
+
+## [2.13.0] - 2026-11-12
+
+### Added
+- **Android Home Screen Widget Ecosystem — Phase 1 (`DailyPulseWidgetProvider`, `QuickActionWidgetProvider`, `WidgetSnapshotStore`, `WidgetMidnightWorker`):**
+  - Added **Daily Pulse & Balance** Home Screen widget (`2×2` & `4×2` responsive layouts) styled in Enchanted Glasshouse glassmorphism, displaying the safe daily spending quota, progress bar & today's expense, health tier badge (*Safe* / *Caution* / *Limit*), total balance, remaining period days, one-tap `+` quick entry, and a direct privacy eye toggle synced with the app.
+  - Added **Quick Action Bar** Home Screen widget (`2×1` & `4×1` responsive layouts) with balance pill and one-tap **Income**, **Expense**, and **Transfer** triggers launching `QuickTransactionActivity`.
+  - Added `WidgetSnapshotStore` shared snapshot bridge (`updateWidgetSnapshot`, `consumeNativeHideBalance` in `quick_widget_service.dart` & `MainActivity.kt`) and `WidgetMidnightWorker` (`WorkManager`) to automatically refresh daily quotas and spent totals at midnight when widgets are active.
+
+## [2.12.0] - 2026-11-12
+
+### Added
+- **Wave 1 — Transaction Efficiency (`TransactionForm`, `TransactionParser`, `ShareService`, `TransactionTile`):**
+  - Added compact wallet balance subtitles (`compactRupiah`, respecting balance privacy mode) directly inside `AppChip` wallet selectors in `TransactionForm`.
+  - Enabled full shared-text prefill (`parseSharedText` extracting type, category ID, amount, and cleaned merchant note) for incoming Android shares via `ShareService`.
+  - Added one-tap `"Record again"` duplication (`showDuplicateTransactionForm`) from transaction long-press on Home/Transactions tiles and the Edit transaction header, while surfacing `"Save as template"` outside expandable details.
+- **Wave 2 — Budget Continuity & Clarity (`BudgetPage`, `BudgetRule`, `NotificationService`):**
+  - Added a one-tap `"Copy from {period}"` banner inside `BudgetPage` (`copyFromPeriod` in `BudgetRuleNotifier`) whenever the active period has no budget configured and the previous period does, copying both the 50/30/20/custom pool and category limits.
+  - Updated `checkBudgetAfterExpense` to account for active category rollover carryover (`rolloverEnabled`) and emit 80%/100% threshold alerts for configured total budget pools (`totalBudgetPool`).
+- **Wave 3 — Insights Drill-Down, Pulse Shortcuts & Export Polish (`InsightsPage`, `DailyFinancialPulseCard`, `TransactionsPage`, `HomePage`):**
+  - Made `SmartInsightItem` cards interactive in `InsightsPage`, tapping opens a transaction drill-down modal filtered by category, need/want tag, peak spending day, micro purchases, or largest transaction.
+  - Made the scheduled upcoming bills reserve row in `DailyFinancialPulseCard` tappable to jump directly to `RecurringPage`.
+  - Added an **Export** (`PDF report` / `CSV`) menu inside the `TransactionsPage` AppBar and surfaced the reusable `GuestBackupNudgeBanner` on `HomePage` for guest accounts meeting the local backup threshold.
+
+### Changed
+- **Consistent Thousands Input Formatting (`TotalBudgetDialog`, `CategoryBudgetSheet`):**
+  - Applied `amountFormatters()` (`ThousandsInputFormatter`) and `formatThousands` initial formatting across all total budget and category limit inputs.
+
+### Fixed
+- **Default Transfer Wallets Pre-Selection (`TransactionForm`):**
+  - Fixed `resolveTransferWallets` validation in `_save()` so default displayed source and destination transfer wallets save directly without re-tapping wallet chips.
+- **PDF Transfer Formatting (`ReportService`):**
+  - Fixed `TxType.transfer` rows in generated PDF tables to format with `<-> ` instead of `-`.
+
+## [2.11.1] - 2026-11-12
+
+### Added
+- **Final Release Hardening & UI Verification (`test/phase5_final_polish_test.dart`):**
+  - Added widget smoke tests covering `InsightsPage` (*Net Worth & Vitality Score* card + breakdown sheet), `GoalsPage` (goal savings pace chips & *Use pace* quick-fill), `SettingsPage` (`Harvest recap notifications` toggle in Indonesian locale), and EN/ID localization key verification.
+
+### Changed
+- **Documentation & Landing Page Synchronization (`docs/index.html`, `README.md`, `ARCHITECTURE.md`):**
+  - Aligned security references with `2,048-iteration salted HMAC-SHA256 (v2)`, typography with `Outfit & DM Sans`, and feature highlights covering Net Worth & Vitality Score, Weekly/Monthly Harvest Recaps, Goal Savings Pace, Custom Split Bills, and Active Modules.
+- **Repository Hygiene (`.gitignore`):**
+  - Ignored `/android/build/` local Gradle build output directory.
+
+## [2.11.0] - 2026-11-12
+
+### Added
+- **Net Worth & Glasshouse Vitality Score (`InsightsPage`, `InsightEngine`):**
+  - Added unified `NetWorthSummary` (`Liquid Assets + Receivables - Liabilities`, tracking `allocatedGoalReserve` separately to avoid double-counting) and deterministic 0–100 `VitalityScoreSummary` across 4 normalized pillars (*Savings Rate*, *Budget Discipline*, *Needs vs Wants Balance*, and *Debt Cushion*) inside `InsightsPage` Overview and its breakdown sheet.
+- **Goal Savings Pace & Projection (`GoalsPage`):**
+  - Added `computeGoalPace` for active goals with target dates, showing status pills (*On Track*, *Behind Schedule*, *Due Today*, *Overdue*), recommended weekly/monthly contribution pace, and a one-tap *"Use pace"* fill chip inside the *Add funds* dialog.
+- **Contextual Harvest Recap Notifications (`SettingsPage`, `NotificationService`):**
+  - Added the `Harvest recap notifications` toggle in **Budget & reminders** (synced via `FeaturePrefs` and `AppPrefs`) that alerts once per newly completed period when an unseen recap with recorded activity is ready to review.
+- **Automated CI Quality Gate (`.github/workflows/release.yml`):**
+  - Enforced `flutter analyze --no-pub` and `flutter test --no-pub` in the GitHub Actions release pipeline prior to APK compilation.
+
+## [2.10.0] - 2026-11-12
+
+### Added
+- **Weekly & Monthly Financial Recap (`InsightsPage`):**
+  - Added `InsightEngine.computeRecap` and the **Glasshouse Harvest Review** modal bottom sheet accessible from the `InsightsPage` header and Overview banner, allowing instant switching between completed Weekly and Monthly recaps (income, expenses, net savings rate, Needs vs Wants split, top 3 categories, biggest saving & surge highlights, and Savings Goals progress).
+- **Interactive Category & Chart Drill-Down (`InsightsPage`):**
+  - Made top category rows and `ExpensePieChart` sections/legend pills tappable to inspect the underlying period transactions directly via `TransactionTile` drill-down sheets.
+- **Flexible PDF/CSV Exports & Guest Backup Nudge (`SettingsPage`, `ReportService`, `ExportService`):**
+  - Added account (`walletId`) filtering to PDF reports and both date-range + account filtering with enriched 8-column export (`Date,Type,Category,Wallet,ToWallet,NeedWant,Amount,Note`) to CSV export.
+  - Added an unobtrusive Guest Mode JSON backup reminder inside `SettingsPage` when local transactions reach 10+ without a recent backup (>14 days).
+- **Custom (Non-Equal) Split Bill (`DebtsPage`):**
+  - Added **Equal Split** / **Custom Split** mode toggle on `_SplitSheet` with pre-filled per-friend amount fields, live user-share calculation, and validation (`computeCustomSplit`).
+- **Modular Features & Active Modules Manager (`ModulePrefs`):**
+  - Activated `modulePrefsProvider` inside `SettingsPage` (**Active Modules & Features** with **All Features** / **Minimalist** presets and 5 toggles), wiring visibility cleanly into `MorePage`, `HomeShell` navigation bar, `TransactionForm` transfer type, and `HomePage`.
+- **Incremental Cloud Sync Pull Cursor (`AutoSyncService`):**
+  - Persisted per-user `sync_pull_cursor_<uid>` with a 30s clock-skew overlap buffer for incremental Firestore queries (`where('updatedAt', isGreaterThan: ...)`) while keeping full sync escapes (*Fetch from Cloud* / initial sync) and automatic cursor cleanup on logout, account deletion, or account switch.
+
+## [2.9.1] - 2026-11-12
+
+### Removed
+- **Simplified Home Screen Layout (`HomePage`):**
+  - Removed the 4-button Home Quick Actions row (`Transfer`, `Recurring`, `Debts`, `Goals`) to keep the Home dashboard clean, focused, and efficient, as these destinations remain directly accessible from the transaction action bar and dedicated navigation hubs.
+
+## [2.9.0] - 2026-11-12
+
+### Added
+- **SQL Multi-Filter Transaction Search & Net Summary (`TransactionsPage`):**
+  - Extended `AppDatabase.watchSearchTransactions` with SQL-level `walletId` (including incoming `toWalletId` transfers), `categoryId`, `needWant`, localized `matchedCategoryIds`, and expanded result window (`limit = 250`).
+  - Added Needs/Wants filter dropdown chip, one-tap search clear (`x`), clear *"Searching across all dates"* header badge, result count + **Net flow** summary strip, and actionable *"Clear filters"* empty state CTA.
+- **Pending Recurring Confirmation Queue & Full Lifecycle Control (`RecurringPage` & `HomePage`):**
+  - Added Drift schema v9 (`PendingTransactions`) so due recurring schedules queue for user review with **Confirm**, **Edit & Confirm** (override amount/wallets/note), and **Skip** (with Undo) both on the Home banner and top of `RecurringPage`.
+  - Added editing (`updateRecurringRule`), `TxType.transfer` recurring schedules (`toWalletId`), **Record now**, **Skip next due**, and soft-delete with **Undo** (`restoreRecurringRule`).
+  - Included unconfirmed pending expense items in `upcomingRecurringExpenseProvider` so Daily Financial Pulse stays accurate until confirmed or skipped.
+- **Itemized Debt Payment History (`DebtsPage`):**
+  - Added Drift schema v9 (`DebtPayments`) recording every installment with optional linked wallet transaction, live **Payment History** section on `_DebtDetail`, and safe delete + **Undo** (`deleteDebtPayment` / `restoreDebtPayment`) keeping paid totals and wallet balances synchronized.
+- **Home Quick Actions & Actionable Empty States:**
+  - Added compact Home Quick Actions strip (**Transfer**, **Recurring** with live pending badge, **Debts**, **Goals**) plus unified `EmptyStateCard` CTAs on `DebtsPage` and `GoalsPage`.
+- **Backup, Cloud Sync & Strict Firestore Validation (`schemaVersion => 9`):**
+  - Added `debtPayments` and `pendingTransactions` to JSON backup export/import, real-time `CloudSync`, legacy pre-v1.11.15 `pending_transactions` upgrade guard, and strict exact-field `firestore.rules` validators.
+
+## [2.8.0] - 2026-11-12
+
+### Added
+- **Daily Financial Pulse Breakdown & Scheduled Bill Awareness:**
+  - Added a pure `calculateDailyPulse` engine incorporating active upcoming recurring expenses (`upcomingRecurringExpenseProvider`) and total account balance fallback when period income and budgets are not yet set.
+  - Added an interactive *"How your quota is calculated"* breakdown card inside the Daily Financial Pulse guide bottom sheet showing funding basis, upcoming scheduled bills deducted, remaining days, and safe daily quota.
+- **Debt Record Editing & Dedicated Full-Settlement Flow:**
+  - Added `AppDatabase.updateDebt` and an inline edit button on debt detail sheets so amount, direction, counterparty, due date, and notes can be modified anytime.
+  - Replaced the ambiguous *"Mark as fully paid"* dialog with a dedicated full-settlement confirmation prompt that settles the exact remaining balance cleanly.
+- **System Categories for Admin Fees & Savings Flows:**
+  - Seeded fixed-ID system categories (`cat-exp-admin` *Admin Fee*, `cat-exp-savings` *Savings Deposit*, and `cat-inc-savings` *Savings Withdrawal*) automatically in `beforeOpen` without altering database schema version, mapping savings deposits directly to the 50/30/20 Savings pillar.
+- **Template Management & Phase 1 Regression Tests:**
+  - Added discoverable one-tap delete icons (`onDeleted`) and long-press delete confirmation on quick transaction templates in `TransactionForm`.
+  - Added comprehensive unit and integration tests for `needWant` persistence, custom payday monthly chart bucketing, `DailyFinancialPulse` edge cases, recurring upcoming deductions, `updateDebt`, and `deleteTemplate`.
+
+### Changed
+- **Unified Account Transfer Flow:**
+  - Consolidated `AccountsPage` transfers onto `showTransactionForm(context, initialType: TxType.transfer)` (matching `MorePage`) and removed the redundant `TransferSheet` modal, bringing admin fees, receipts, and wallet selection cleanly into one flow.
+- **Enchanted Glasshouse Color Token Cleanup:**
+  - Replaced remaining hardcoded Material colors (`Colors.green`, `Colors.red.shade800`, `0xFF1E4238`, `0xFFE65100`, `0xFFD65D5D`) across Settings and Pulse UI with canonical `AppColors` tokens.
+
+### Fixed
+- **Need/Want Persistence on Transaction Save & Edit:**
+  - Fixed `AppDatabase.addTransaction` and `AppDatabase.updateTransaction` silently dropping `_needWant` selected in `TransactionForm`, restoring accurate Needs vs. Wants 50/30/20 analysis.
+- **Custom Payday (`firstDayOfMonth`) Consistency:**
+  - Passed `firstDayOfMonth` into `SelectedAnchor.step()`, `OnboardingPage` initial budgets, and `checkBudgetAfterExpense()` budget threshold notifications.
+  - Fixed `InsightEngine.computeChartPoints` monthly bucketing so custom payday periods spanning across two calendar months slice expenses accurately into 7-day intervals starting from `period.start`.
+- **Accidental Duplicate Admin Fee Prevention:**
+  - Disabled re-creating secondary admin fee transactions when editing existing transactions or transfers in `TransactionForm`.
+- **False `Limit` Pulse State:**
+  - Prevented `DailyFinancialPulseCard` from falsely showing *"Limit"* on initial purchases made before salary/income arrives when users have positive account balances or active period budgets.
+
 ## [2.7.3] - 2026-11-12
 
 ### Fixed

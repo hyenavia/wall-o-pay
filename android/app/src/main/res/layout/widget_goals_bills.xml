@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/gb_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:clipToOutline="true">
+
+    <!-- Subtle Enchanted Glasshouse Botanical Canopy -->
+    <ImageView
+        android:layout_width="135dp"
+        android:layout_height="90dp"
+        android:layout_gravity="top|end"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_botanical_canopy"
+        android:importantForAccessibility="no" />
+
+    <ImageView
+        android:layout_width="115dp"
+        android:layout_height="72dp"
+        android:layout_gravity="bottom|start"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_botanical_corner"
+        android:importantForAccessibility="no" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
+
+        <!-- Header Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/gb_logo"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@mipmap/ic_launcher"
+                android:contentDescription="@string/app_name" />
+
+            <TextView
+                android:id="@+id/gb_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:text="@string/widget_goals_bills_title"
+                android:textColor="@color/widget_soft_ivory"
+                android:textSize="13.5sp"
+                android:textStyle="bold"
+                android:letterSpacing="-0.02"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/gb_status_pill"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="2.5dp"
+                android:paddingBottom="2.5dp"
+                android:background="@drawable/widget_pill_safe"
+                android:text="0"
+                android:textColor="@color/widget_income_on_dark"
+                android:textSize="10.5sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1" />
+
+            <FrameLayout
+                android:id="@+id/gb_btn_privacy"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/widget_circle_glass_btn">
+
+                <ImageView
+                    android:id="@+id/gb_btn_privacy_icon"
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_widget_eye_on"
+                    android:contentDescription="Toggle privacy" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/gb_btn_add"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:background="@drawable/widget_circle_glass_btn">
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_widget_plus"
+                    android:contentDescription="@string/shortcut_expense_short" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Main Dual Split Content (2x2 shows Left Goal Card + compact bill footer; 4x2 shows both side-by-side) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="7dp"
+            android:orientation="horizontal">
+
+            <!-- Left Card: Savings Goal Tracker -->
+            <LinearLayout
+                android:id="@+id/gb_goal_card"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center_vertical"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:background="@drawable/widget_card_inner">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/gb_goal_kicker"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/widget_goal_kicker"
+                        android:textColor="@color/widget_fresh_sage"
+                        android:textSize="10.5sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                    <FrameLayout
+                        android:id="@+id/gb_goal_btn_cycle"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginStart="4dp"
+                        android:background="@drawable/widget_circle_glass_btn"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_widget_cycle"
+                            android:contentDescription="Next goal" />
+                    </FrameLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/gb_goal_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/widget_goal_empty"
+                    android:textColor="@color/widget_soft_ivory"
+                    android:textSize="13.5sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ProgressBar
+                        android:id="@+id/gb_goal_progress"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="0dp"
+                        android:layout_height="5dp"
+                        android:layout_weight="1"
+                        android:max="100"
+                        android:progress="0"
+                        android:progressDrawable="@drawable/widget_pulse_progress_safe" />
+
+                    <TextView
+                        android:id="@+id/gb_goal_pct"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="0%"
+                        android:textColor="@color/widget_income_on_dark"
+                        android:textSize="10.5sp"
+                        android:textStyle="bold"
+                        android:fontFeatureSettings="tnum"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/gb_goal_subline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="@string/widget_goal_empty_hint"
+                    android:textColor="@color/widget_dew_mint"
+                    android:textSize="10.5sp"
+                    android:fontFeatureSettings="tnum"
+                    android:fontFamily="sans-serif"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+            </LinearLayout>
+
+            <!-- Right Card (4x2 only): Upcoming & Due Bills -->
+            <LinearLayout
+                android:id="@+id/gb_bills_card"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="7dp"
+                android:orientation="vertical"
+                android:gravity="center_vertical"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:background="@drawable/widget_card_inner"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/gb_bills_kicker"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/widget_bills_kicker"
+                        android:textColor="@color/widget_fresh_sage"
+                        android:textSize="10.5sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                    <TextView
+                        android:id="@+id/gb_bills_total_badge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:textColor="@color/widget_warning_on_dark"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:fontFeatureSettings="tnum"
+                        android:maxLines="1" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/gb_bills_empty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/widget_bills_empty"
+                    android:textColor="@color/widget_fresh_sage"
+                    android:textSize="11sp"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:visibility="gone" />
+
+                <!-- Bill Row 0 -->
+                <LinearLayout
+                    android:id="@+id/gb_bill_row_0"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/gb_bill_title_0"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@color/widget_soft_ivory"
+                            android:textSize="11.5sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
+
+                        <TextView
+                            android:id="@+id/gb_bill_due_0"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:textColor="@color/widget_warning_on_dark"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:maxLines="1" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/gb_bill_amount_0"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/widget_expense_on_dark"
+                        android:textSize="10.5sp"
+                        android:fontFeatureSettings="tnum"
+                        android:maxLines="1" />
+                </LinearLayout>
+
+                <!-- Bill Row 1 -->
+                <LinearLayout
+                    android:id="@+id/gb_bill_row_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/gb_bill_title_1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@color/widget_soft_ivory"
+                            android:textSize="11.5sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
+
+                        <TextView
+                            android:id="@+id/gb_bill_due_1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:textColor="@color/widget_warning_on_dark"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:maxLines="1" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/gb_bill_amount_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/widget_expense_on_dark"
+                        android:textSize="10.5sp"
+                        android:fontFeatureSettings="tnum"
+                        android:maxLines="1" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Compact 2x2 Next Bill Footer -->
+        <LinearLayout
+            android:id="@+id/gb_compact_bill_footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/gb_compact_bill_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/widget_dew_mint"
+                android:textSize="10.5sp"
+                android:fontFeatureSettings="tnum"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/gb_compact_bill_due"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:textColor="@color/widget_warning_on_dark"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>
+

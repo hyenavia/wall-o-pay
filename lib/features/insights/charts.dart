@@ -16,7 +16,8 @@ import '../../data/tables.dart' show TxType;
 import 'insight_engine.dart';
 
 class _Slice {
-  const _Slice(this.label, this.color, this.value);
+  const _Slice(this.categoryId, this.label, this.color, this.value);
+  final String? categoryId;
   final String label;
   final Color color;
   final int value;
@@ -24,10 +25,16 @@ class _Slice {
 
 /// Komposisi pengeluaran per kategori (5 teratas + sisanya digabung).
 class ExpensePieChart extends StatelessWidget {
-  const ExpensePieChart({super.key, required this.spent, required this.cats});
+  const ExpensePieChart({
+    super.key,
+    required this.spent,
+    required this.cats,
+    this.onCategoryTap,
+  });
 
   final Map<String, int> spent;
   final Map<String, Category> cats;
+  final ValueChanged<String>? onCategoryTap;
 
   @override
   Widget build(BuildContext context) {
@@ -40,11 +47,12 @@ class ExpensePieChart extends StatelessWidget {
     final slices = <_Slice>[
       for (final e in sorted.take(5))
         _Slice(
+          e.key,
           context.tr(cats[e.key]?.name ?? 'Uncategorized'),
           Color(cats[e.key]?.colorValue ?? 0xFF607D8B),
           e.value,
         ),
-      if (rest > 0) _Slice(context.tr('Other categories'), Colors.blueGrey, rest),
+      if (rest > 0) _Slice(null, context.tr('Other categories'), Colors.blueGrey, rest),
     ];
 
     return Column(
@@ -55,6 +63,20 @@ class ExpensePieChart extends StatelessWidget {
             PieChartData(
               sectionsSpace: 2,
               centerSpaceRadius: 38,
+              pieTouchData: onCategoryTap == null
+                  ? PieTouchData(enabled: false)
+                  : PieTouchData(
+                      touchCallback: (event, response) {
+                        if (event is FlTapUpEvent &&
+                            response?.touchedSection != null) {
+                          final idx = response!.touchedSection!.touchedSectionIndex;
+                          if (idx >= 0 && idx < slices.length) {
+                            final catId = slices[idx].categoryId;
+                            if (catId != null) onCategoryTap!(catId);
+                          }
+                        }
+                      },
+                    ),
               sections: [
                 for (final s in slices)
                   PieChartSectionData(
@@ -77,11 +99,24 @@ class ExpensePieChart extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Wrap(
-          spacing: 16,
+          spacing: 12,
           runSpacing: 6,
           children: [
             for (final s in slices)
-              _Dot(color: s.color, label: '${s.label} • ${rupiah(s.value)}'),
+              if (s.categoryId != null && onCategoryTap != null)
+                InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: () => onCategoryTap!(s.categoryId!),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    child: _Dot(
+                      color: s.color,
+                      label: '${s.label} • ${rupiah(s.value)}',
+                    ),
+                  ),
+                )
+              else
+                _Dot(color: s.color, label: '${s.label} • ${rupiah(s.value)}'),
           ],
         ),
       ],

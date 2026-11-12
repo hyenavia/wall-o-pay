@@ -61,6 +61,18 @@
     <color name="widget_expense_on_dark">#FCA5A5</color>
     <color name="widget_transfer_teal">#00897B</color>
     <color name="widget_transfer_on_dark">#5EEAD4</color>
+    <color name="widget_warning">#E8A33D</color>
+    <color name="widget_warning_on_dark">#FBBF24</color>
+
+    <!-- Status & Quick Action Glass Pill Tokens -->
+    <color name="widget_pill_safe_bg">#2938B271</color>
+    <color name="widget_pill_safe_rim">#736EE7B7</color>
+    <color name="widget_pill_caution_bg">#29E8A33D</color>
+    <color name="widget_pill_caution_rim">#73FBBF24</color>
+    <color name="widget_pill_limit_bg">#29D64545</color>
+    <color name="widget_pill_limit_rim">#73FCA5A5</color>
+    <color name="widget_pill_transfer_bg">#2900897B</color>
+    <color name="widget_pill_transfer_rim">#735EEAD4</color>
 
     <!-- Typography & Feedback Surfaces -->
     <color name="widget_text_primary">#F7F8F4</color>

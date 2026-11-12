@@ -22,6 +22,7 @@ class TransactionTile extends StatelessWidget {
     this.wallet,
     this.toWallet,
     this.onTap,
+    this.onLongPress,
   });
 
   final TransactionEntry entry;
@@ -30,6 +31,7 @@ class TransactionTile extends StatelessWidget {
   final Wallet? toWallet;
   final String trailingNote;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +62,7 @@ class TransactionTile extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(

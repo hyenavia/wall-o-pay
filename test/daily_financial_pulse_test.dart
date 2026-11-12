@@ -167,6 +167,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Daily Financial Pulse Guide'), findsOneWidget);
+      expect(find.text('How your quota is calculated'), findsOneWidget);
       expect(find.text('Phase 1: Safe Financial Health'), findsOneWidget);
       expect(find.text('Phase 2: Spending Velocity Warning'), findsOneWidget);
       expect(find.text('Phase 3: Budget Limit Reached'), findsOneWidget);
@@ -204,11 +205,79 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Panduan Ritme Keuangan Harian'), findsOneWidget);
+      expect(find.text('Cara perhitungan kuota harianmu'), findsOneWidget);
       expect(find.text('Fase 1: Kondisi Finansial Aman'), findsOneWidget);
       expect(find.text('Fase 2: Laju Pengeluaran Meningkat'), findsOneWidget);
       expect(find.text('Fase 3: Batas Anggaran Tercapai'), findsOneWidget);
       expect(find.text('Kondisi: Belanja harian < kuota aman & anggaran terjaga.'), findsOneWidget);
       expect(find.text('Mengerti'), findsOneWidget);
+    });
+
+    test('calculateDailyPulse avoids false Limit when spending from wallet balance without period income or budget', () {
+      final res = calculateDailyPulse(
+        income: 0,
+        expense: 30000,
+        totalWalletBalance: 3000000,
+        totalBudget: 0,
+        budgetSpent: 0,
+        todayExpense: 30000,
+        daysLeft: 15,
+        upcomingBills: 0,
+        txCount: 1,
+      );
+
+      expect(res.tier, DailyHealthTier.safe);
+      expect(res.fundingBasis, PulseFundingBasis.walletBalance);
+      expect(res.dailyAllowance, 200000);
+    });
+
+    test('calculateDailyPulse deducts upcoming recurring bills from remaining budget before dividing by daysLeft', () {
+      final res = calculateDailyPulse(
+        income: 0,
+        expense: 500000,
+        totalWalletBalance: 5000000,
+        totalBudget: 3000000,
+        budgetSpent: 500000,
+        todayExpense: 50000,
+        daysLeft: 10,
+        upcomingBills: 500000,
+        txCount: 4,
+      );
+
+      expect(res.tier, DailyHealthTier.safe);
+      expect(res.fundingBasis, PulseFundingBasis.periodBudget);
+      expect(res.basisAmount, 2500000);
+      expect(res.availablePool, 2000000);
+      expect(res.dailyAllowance, 200000);
+    });
+
+    test('calculateDailyPulse triggers Limit when budget exhausted and Caution when upcoming bills consume remaining budget', () {
+      final exhausted = calculateDailyPulse(
+        income: 5000000,
+        expense: 3000000,
+        totalWalletBalance: 2000000,
+        totalBudget: 3000000,
+        budgetSpent: 3000000,
+        todayExpense: 10000,
+        daysLeft: 10,
+        upcomingBills: 0,
+        txCount: 12,
+      );
+      expect(exhausted.tier, DailyHealthTier.limit);
+
+      final billsEatAll = calculateDailyPulse(
+        income: 0,
+        expense: 200000,
+        totalWalletBalance: 2000000,
+        totalBudget: 1000000,
+        budgetSpent: 200000,
+        todayExpense: 10000,
+        daysLeft: 10,
+        upcomingBills: 900000,
+        txCount: 2,
+      );
+      expect(billsEatAll.tier, DailyHealthTier.caution);
+      expect(billsEatAll.dailyAllowance, 0);
     });
   });
 }

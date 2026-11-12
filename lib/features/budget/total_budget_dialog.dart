@@ -20,30 +20,27 @@ Future<void> showTotalBudgetDialog(
   int mode = currentBreakdown.isCustom ? 1 : 0; // 0 = Standar 50/30/20, 1 = Kustom Nominal
 
   final totalCtrl = TextEditingController(
-    text: currentBreakdown.totalBudget > 0 ? currentBreakdown.totalBudget.toString() : '',
+    text: formatThousands(currentBreakdown.totalBudget),
   );
   final savingsCtrl = TextEditingController(
-    text: currentBreakdown.savingsBudget > 0 ? currentBreakdown.savingsBudget.toString() : '',
+    text: formatThousands(currentBreakdown.savingsBudget),
   );
   final needsCtrl = TextEditingController(
-    text: currentBreakdown.needsBudget > 0 ? currentBreakdown.needsBudget.toString() : '',
+    text: formatThousands(currentBreakdown.needsBudget),
   );
   final wantsCtrl = TextEditingController(
-    text: currentBreakdown.wantsBudget > 0 ? currentBreakdown.wantsBudget.toString() : '',
+    text: formatThousands(currentBreakdown.wantsBudget),
   );
-
-  int parse(TextEditingController c) =>
-      int.tryParse(c.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
 
   await showDialog<void>(
     context: context,
     builder: (ctx) {
       return StatefulBuilder(
         builder: (ctx, setState) {
-          final totalVal = parse(totalCtrl);
-          final savingsVal = parse(savingsCtrl);
-          final needsVal = parse(needsCtrl);
-          final wantsVal = parse(wantsCtrl);
+          final totalVal = parseAmount(totalCtrl.text);
+          final savingsVal = parseAmount(savingsCtrl.text);
+          final needsVal = parseAmount(needsCtrl.text);
+          final wantsVal = parseAmount(wantsCtrl.text);
 
           // Alokasi standar
           final stdNeeds = (totalVal * 0.50).round();
@@ -122,9 +119,9 @@ Future<void> showTotalBudgetDialog(
                       setState(() {
                         mode = s.first;
                         if (mode == 1 && totalVal > 0) {
-                          if (savingsVal == 0) savingsCtrl.text = stdSavings.toString();
-                          if (needsVal == 0) needsCtrl.text = stdNeeds.toString();
-                          if (wantsVal == 0) wantsCtrl.text = stdWants.toString();
+                          if (savingsVal == 0) savingsCtrl.text = formatThousands(stdSavings);
+                          if (needsVal == 0) needsCtrl.text = formatThousands(stdNeeds);
+                          if (wantsVal == 0) wantsCtrl.text = formatThousands(stdWants);
                         }
                       });
                     },
@@ -144,6 +141,7 @@ Future<void> showTotalBudgetDialog(
                   TextField(
                     controller: totalCtrl,
                     keyboardType: TextInputType.number,
+                    inputFormatters: amountFormatters(),
                     autofocus: totalVal == 0,
                     style: const TextStyle(
                       color: AppColors.softIvory,
@@ -242,6 +240,7 @@ Future<void> showTotalBudgetDialog(
                     TextField(
                       controller: savingsCtrl,
                       keyboardType: TextInputType.number,
+                      inputFormatters: amountFormatters(),
                       style: const TextStyle(
                         color: AppColors.softIvory,
                         fontWeight: FontWeight.w600,
@@ -253,7 +252,7 @@ Future<void> showTotalBudgetDialog(
                           color: BudgetBucket.savings.colorIn(ctx),
                           fontWeight: FontWeight.w700,
                         ),
-                        hintText: '100000',
+                        hintText: '100.000',
                         hintStyle: TextStyle(
                           color: AppColors.freshSage.withValues(alpha: 0.5),
                         ),
@@ -302,8 +301,8 @@ Future<void> showTotalBudgetDialog(
                             final n = (rem * 0.70).round();
                             final w = rem - n;
                             setState(() {
-                              needsCtrl.text = n.toString();
-                              wantsCtrl.text = w.toString();
+                              needsCtrl.text = formatThousands(n);
+                              wantsCtrl.text = formatThousands(w);
                             });
                           },
                         ),
@@ -321,6 +320,7 @@ Future<void> showTotalBudgetDialog(
                     TextField(
                       controller: needsCtrl,
                       keyboardType: TextInputType.number,
+                      inputFormatters: amountFormatters(),
                       style: const TextStyle(
                         color: AppColors.softIvory,
                         fontWeight: FontWeight.w600,
@@ -332,7 +332,7 @@ Future<void> showTotalBudgetDialog(
                           color: BudgetBucket.needs.colorIn(ctx),
                           fontWeight: FontWeight.w700,
                         ),
-                        hintText: '350000',
+                        hintText: '350.000',
                         hintStyle: TextStyle(
                           color: AppColors.freshSage.withValues(alpha: 0.5),
                         ),
@@ -374,6 +374,7 @@ Future<void> showTotalBudgetDialog(
                     TextField(
                       controller: wantsCtrl,
                       keyboardType: TextInputType.number,
+                      inputFormatters: amountFormatters(),
                       style: const TextStyle(
                         color: AppColors.softIvory,
                         fontWeight: FontWeight.w600,
@@ -385,7 +386,7 @@ Future<void> showTotalBudgetDialog(
                           color: BudgetBucket.wants.colorIn(ctx),
                           fontWeight: FontWeight.w700,
                         ),
-                        hintText: '150000',
+                        hintText: '150.000',
                         hintStyle: TextStyle(
                           color: AppColors.freshSage.withValues(alpha: 0.5),
                         ),

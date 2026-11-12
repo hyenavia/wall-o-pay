@@ -16,6 +16,7 @@ import '../../core/widgets.dart';
 import '../../data/app_database.dart';
 import '../../data/providers.dart';
 import '../../data/tables.dart' show TxType;
+import '../transactions/transaction_form.dart';
 
 IconData accountIcon(String type) {
   switch (type.toLowerCase()) {
@@ -253,7 +254,7 @@ class AccountsPage extends ConsumerWidget {
           IconButton(
             tooltip: context.tr('Transfer'),
             icon: const Icon(Icons.swap_horiz),
-            onPressed: () => showTransferSheet(context),
+            onPressed: () => showTransactionForm(context, initialType: TxType.transfer),
           ),
         ],
       ),
@@ -702,166 +703,6 @@ class _AccountFormState extends ConsumerState<AccountForm> {
                 icon: const Icon(Icons.archive_outlined),
                 label: Text(context.tr('Archive account')),
               ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Transfer antar akun
-// ---------------------------------------------------------------------------
-
-Future<void> showTransferSheet(BuildContext context) {
-  return showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    showDragHandle: true,
-    builder: (_) => const TransferSheet(),
-  );
-}
-
-class TransferSheet extends ConsumerStatefulWidget {
-  const TransferSheet({super.key});
-
-  @override
-  ConsumerState<TransferSheet> createState() => _TransferSheetState();
-}
-
-class _TransferSheetState extends ConsumerState<TransferSheet> {
-  final _amount = TextEditingController();
-  final _note = TextEditingController();
-  String? _from;
-  String? _to;
-  DateTime _date = DateTime.now();
-  String? _error;
-
-  @override
-  void dispose() {
-    _amount.dispose();
-    _note.dispose();
-    super.dispose();
-  }
-
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _date,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null) setState(() => _date = picked);
-  }
-
-  Future<void> _save() async {
-    final amount = parseAmount(_amount.text);
-    if (_from == null || _to == null) {
-      setState(() => _error = context.tr('Choose both accounts.'));
-      return;
-    }
-    if (_from == _to) {
-      setState(() => _error = context.tr('Choose two different accounts.'));
-      return;
-    }
-    if (amount <= 0) {
-      setState(() => _error = context.tr('Amount must be greater than 0.'));
-      return;
-    }
-    await ref.read(databaseProvider).transferBetweenWallets(
-          fromWalletId: _from!,
-          toWalletId: _to!,
-          amount: amount,
-          date: DateTime(_date.year, _date.month, _date.day),
-          note: _note.text.trim(),
-        );
-    if (mounted) Navigator.pop(context);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final accounts = ref.watch(walletsProvider).maybeWhen(
-          data: (l) => l,
-          orElse: () => const <Wallet>[],
-        );
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
-    Widget picker(String label, String? value, ValueChanged<String> onPick) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: theme.textTheme.labelMedium),
-          const SizedBox(height: 6),
-          DropdownButtonFormField<String>(
-            initialValue: value,
-            decoration: appInput(context),
-            items: [
-              for (final a in accounts)
-                DropdownMenuItem(
-                  value: a.id,
-                  child: Row(
-                    children: [
-                      Icon(accountIcon(a.type), size: 18, color: Color(a.colorValue)),
-                      const SizedBox(width: 8),
-                      Text(context.tr(a.name)),
-                    ],
-                  ),
-                ),
-            ],
-            onChanged: (v) {
-              if (v != null) onPick(v);
-            },
-          ),
-        ],
-      );
-    }
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + bottomInset),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              context.tr('Transfer Between Accounts'),
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 16),
-            picker(context.tr('From'), _from, (v) => setState(() => _from = v)),
-            const SizedBox(height: 12),
-            picker(context.tr('To'), _to, (v) => setState(() => _to = v)),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _amount,
-              keyboardType: TextInputType.number,
-              inputFormatters: amountFormatters(),
-              decoration: appInput(context, label: context.tr('Amount'), prefixText: 'Rp '),
-            ),
-            const SizedBox(height: 12),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.calendar_today_outlined),
-              title: Text(shortDate(_date)),
-              trailing: TextButton(
-                onPressed: _pickDate,
-                child: Text(context.tr('Change')),
-              ),
-            ),
-            TextField(
-              controller: _note,
-              decoration: appInput(context, label: context.tr('Note (optional)')),
-            ),
-            if (_error != null) ...[
-              const SizedBox(height: 12),
-              Text(_error!, style: TextStyle(color: context.themeColors.expense)),
-            ],
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: _save,
-              child: Text(context.tr('Transfer')),
-            ),
           ],
         ),
       ),

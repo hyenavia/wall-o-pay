@@ -98,6 +98,63 @@ void main() {
       expect(points.length, greaterThanOrEqualTo(4));
     });
 
+    test('computeChartPoints buckets custom firstDayOfMonth period accurately across calendar months', () {
+      // Payday 25th: 25 Oct 2026 -> 25 Nov 2026 (31 days -> 5 buckets)
+      final period = Period.containing(
+        PeriodType.monthly,
+        DateTime(2026, 11, 10),
+        firstDayOfMonth: 25,
+      );
+      final txs = [
+        TransactionEntry(
+          id: 'oct26',
+          amount: 100000,
+          type: TxType.expense,
+          categoryId: 'cat-exp-food',
+          note: 'Late Oct expense',
+          date: DateTime(2026, 10, 26),
+          createdAt: DateTime(2026, 10, 26),
+          updatedAt: DateTime(2026, 10, 26),
+        ),
+        TransactionEntry(
+          id: 'nov12',
+          amount: 250000,
+          type: TxType.expense,
+          categoryId: 'cat-exp-food',
+          note: 'Mid Nov expense',
+          date: DateTime(2026, 11, 12),
+          createdAt: DateTime(2026, 11, 12),
+          updatedAt: DateTime(2026, 11, 12),
+        ),
+        TransactionEntry(
+          id: 'nov24',
+          amount: 75000,
+          type: TxType.expense,
+          categoryId: 'cat-exp-transport',
+          note: 'End of custom period',
+          date: DateTime(2026, 11, 24),
+          createdAt: DateTime(2026, 11, 24),
+          updatedAt: DateTime(2026, 11, 24),
+        ),
+      ];
+
+      final points = InsightEngine.computeChartPoints(
+        currentTxs: txs,
+        period: period,
+      );
+
+      expect(points.length, 5);
+      // W1: 25 Oct - 31 Oct -> includes Oct 26
+      expect(points[0].amount, 100000);
+      // W2: 1 Nov - 7 Nov -> 0
+      expect(points[1].amount, 0);
+      // W3: 8 Nov - 14 Nov -> includes Nov 12
+      expect(points[2].amount, 250000);
+      // W5: 22 Nov - 24 Nov -> includes Nov 24
+      expect(points[4].amount, 75000);
+      expect(points.fold<int>(0, (s, p) => s + p.amount), 425000);
+    });
+
     test('Insight localization returns English in en and Indonesian in id', () {
       AppLocale.code = 'en';
       expect(trG('Weekly Summary'), 'Weekly Summary');

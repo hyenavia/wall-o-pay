@@ -446,12 +446,14 @@ class AppChip extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onSelected,
+    this.subtitle,
     this.icon,
     this.categoryKey,
     this.assetPath,
   });
 
   final String label;
+  final String? subtitle;
   final bool selected;
   final VoidCallback onSelected;
   final IconData? icon;
@@ -484,7 +486,24 @@ class AppChip extends StatelessWidget {
 
     return ChoiceChip(
       avatar: avatarWidget,
-      label: Text(label),
+      label: subtitle == null
+          ? Text(label)
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label),
+                Text(
+                  subtitle!,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                    color: selected ? AppColors.dewMint : AppColors.freshSage,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+            ),
       selected: selected,
       onSelected: (_) => onSelected(),
       showCheckmark: false,

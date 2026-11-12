@@ -22,8 +22,19 @@ data class WidgetCategory(
     val type: String,
 )
 
+data class WidgetTemplate(
+    val id: String,
+    val name: String,
+    val type: String,
+    val amount: Long,
+    val categoryId: String,
+    val walletId: String?,
+    val needWant: String?,
+    val note: String,
+)
+
 sealed class TxInsertResult {
-    data class Success(val newBalance: Long, val amount: Long) : TxInsertResult()
+    data class Success(val newBalance: Long, val amount: Long, val txId: String = "") : TxInsertResult()
     data class Error(val message: String, val isDbMissing: Boolean = false) : TxInsertResult()
 }
 
@@ -77,6 +88,29 @@ object WidgetDatabaseHelper {
             amount >= 1_000_000L -> "+${amount / 1_000_000L}M"
             amount >= 1_000L -> "+${amount / 1_000L}k"
             else -> "+$amount"
+        }
+    }
+
+    fun formatCompactRupiah(value: Long, isId: Boolean): String {
+        val absVal = kotlin.math.abs(value)
+        val sign = if (value < 0L) "-" else ""
+
+        fun fmt(n: Double): String {
+            val rounded = kotlin.math.round(n * 10.0) / 10.0
+            val str = if (rounded == kotlin.math.round(rounded)) {
+                rounded.toLong().toString()
+            } else {
+                String.format(Locale.US, "%.1f", rounded)
+            }
+            return if (isId) str.replace('.', ',') else str
+        }
+
+        return when {
+            absVal >= 1_000_000_000L -> "${sign}Rp ${fmt(absVal / 1_000_000_000.0)}${if (isId) "M" else "B"}"
+            absVal >= 1_000_000L -> "${sign}Rp ${fmt(absVal / 1_000_000.0)}${if (isId) "jt" else "M"}"
+            absVal >= 10_000L -> "${sign}Rp ${fmt(absVal / 1_000.0)}${if (isId) "rb" else "K"}"
+            absVal >= 1_000L && absVal % 1_000L == 0L -> "${sign}Rp ${absVal / 1_000L}${if (isId) "rb" else "K"}"
+            else -> "${sign}${formatRupiah(absVal)}"
         }
     }
 
@@ -270,6 +304,104 @@ object WidgetDatabaseHelper {
         return result
     }
 
+    fun getActiveTemplates(context: Context, limit: Int = 4): List<WidgetTemplate> {
+        val dbFile = getDatabaseFile(context)
+        if (!dbFile.exists() || dbFile.length() == 0L) return emptyList()
+        return synchronized(dbLock) {
+            try {
+                SQLiteDatabase.openDatabase(
+                    dbFile.absolutePath,
+                    null,
+                    SQLiteDatabase.OPEN_READONLY
+                ).use { db ->
+                    if (!hasRequiredTables(db)) return@synchronized emptyList()
+                    var hasTemplatesTable = false
+                    db.rawQuery(
+                        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='tx_templates' LIMIT 1",
+                        null
+                    ).use { c -> hasTemplatesTable = c.moveToFirst() }
+                    if (!hasTemplatesTable) return@synchronized emptyList()
+                    queryActiveTemplates(db, limit)
+                }
+            } catch (_: Exception) {
+                emptyList()
+            }
+        }
+    }
+
+    private fun queryActiveTemplates(db: SQLiteDatabase, limit: Int): List<WidgetTemplate> {
+        val result = mutableListOf<WidgetTemplate>()
+        db.rawQuery(
+            """
+            SELECT id, name, type, amount, category_id, wallet_id, need_want, note
+            FROM tx_templates
+            WHERE deleted_at IS NULL
+            ORDER BY LOWER(name) ASC, created_at ASC
+            LIMIT ?
+            """.trimIndent(),
+            arrayOf(limit.toString())
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                result.add(
+                    WidgetTemplate(
+                        id = cursor.getString(0),
+                        name = cursor.getString(1),
+                        type = cursor.getString(2),
+                        amount = cursor.getLong(3),
+                        categoryId = cursor.getString(4),
+                        walletId = if (cursor.isNull(5)) null else cursor.getString(5),
+                        needWant = if (cursor.isNull(6)) null else cursor.getString(6),
+                        note = if (cursor.isNull(7)) "" else cursor.getString(7),
+                    )
+                )
+            }
+        }
+        return result
+    }
+
+    fun getTodayExpense(context: Context): Long {
+        val dbFile = getDatabaseFile(context)
+        if (!dbFile.exists()) return 0L
+        return synchronized(dbLock) {
+            try {
+                SQLiteDatabase.openDatabase(
+                    dbFile.absolutePath,
+                    null,
+                    SQLiteDatabase.OPEN_READONLY
+                ).use { db ->
+                    if (!hasRequiredTables(db)) return@synchronized 0L
+                    queryTodayExpense(db)
+                }
+            } catch (_: Exception) {
+                0L
+            }
+        }
+    }
+
+    private fun queryTodayExpense(db: SQLiteDatabase): Long {
+        val startCal = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val startSec = startCal.timeInMillis / 1000L
+        val endSec = startSec + 86400L
+        db.rawQuery(
+            """
+            SELECT COALESCE(SUM(amount), 0)
+            FROM transactions
+            WHERE deleted_at IS NULL
+              AND type = 'expense'
+              AND date >= ?
+              AND date < ?
+            """.trimIndent(),
+            arrayOf(startSec.toString(), endSec.toString())
+        ).use { c ->
+            return if (c.moveToFirst()) c.getLong(0) else 0L
+        }
+    }
+
     fun getTotalBalance(context: Context): Long? {
         val dbFile = getDatabaseFile(context)
         if (!dbFile.exists()) return null
@@ -330,6 +462,7 @@ object WidgetDatabaseHelper {
         walletId: String?,
         toWalletId: String?,
         note: String,
+        needWant: String? = null,
     ): TxInsertResult {
         val locale = getLocale(context)
         val isId = locale == "id"
@@ -374,8 +507,15 @@ object WidgetDatabaseHelper {
                         )
                     }
 
-                    // Validate source/primary wallet
-                    if (walletId.isNullOrBlank() || !existsActiveRow(db, "wallets", walletId)) {
+                    // Validate source/primary wallet (or resolve fallback first active wallet when omitted)
+                    val resolvedWalletId = if (!walletId.isNullOrBlank() && existsActiveRow(db, "wallets", walletId)) {
+                        walletId
+                    } else if (walletId.isNullOrBlank()) {
+                        queryActiveWallets(db).firstOrNull()?.id
+                    } else {
+                        null
+                    }
+                    if (resolvedWalletId.isNullOrBlank()) {
                         return@synchronized TxInsertResult.Error(
                             if (isId) "Akun tidak ditemukan." else "Account not found."
                         )
@@ -390,7 +530,7 @@ object WidgetDatabaseHelper {
                                 if (isId) "Akun tujuan tidak ditemukan." else "Destination account not found."
                             )
                         }
-                        if (walletId == toWalletId) {
+                        if (resolvedWalletId == toWalletId) {
                             return@synchronized TxInsertResult.Error(
                                 if (isId) "Akun sumber dan tujuan tidak boleh sama." else "Source and destination accounts must be different."
                             )
@@ -426,14 +566,18 @@ object WidgetDatabaseHelper {
                         put("category_id", effectiveCategoryId)
                         put("note", note.trim())
                         put("date", daySeconds)
-                        put("wallet_id", walletId)
+                        put("wallet_id", resolvedWalletId)
                         if (effectiveToWalletId != null) {
                             put("to_wallet_id", effectiveToWalletId)
                         } else {
                             putNull("to_wallet_id")
                         }
                         putNull("receipt_path")
-                        putNull("need_want")
+                        if (!needWant.isNullOrBlank() && (needWant == "need" || needWant == "want") && type == "expense") {
+                            put("need_want", needWant)
+                        } else {
+                            putNull("need_want")
+                        }
                     }
 
                     db.beginTransaction()
@@ -448,6 +592,7 @@ object WidgetDatabaseHelper {
                     }
 
                     val newBalance = queryTotalBalance(db)
+                    val newTodayExpense = queryTodayExpense(db)
 
                     val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
                     val hideBalance = prefs.getBoolean(KEY_HIDE_BALANCE, false)
@@ -455,18 +600,111 @@ object WidgetDatabaseHelper {
                         .putBoolean(KEY_NATIVE_DB_DIRTY, true)
                     if (!hideBalance) {
                         editor.putLong(KEY_BALANCE, newBalance)
+                        editor.putLong(WidgetSnapshotStore.KEY_TODAY_EXPENSE, newTodayExpense)
+                        editor.putString(WidgetSnapshotStore.KEY_SNAPSHOT_DATE_YMD, WidgetSnapshotStore.todayYmd())
                     } else {
                         editor.remove(KEY_BALANCE)
+                        editor.remove(WidgetSnapshotStore.KEY_TODAY_EXPENSE)
+                    }
+                    val dailyAllowance = prefs.getLong(WidgetSnapshotStore.KEY_DAILY_ALLOWANCE, 0L)
+                    val currentTier = prefs.getString(WidgetSnapshotStore.KEY_PULSE_TIER, "safe")
+                    if (!hideBalance && type == "expense" && dailyAllowance > 0L && newTodayExpense > dailyAllowance && currentTier == "safe") {
+                        editor.putString(WidgetSnapshotStore.KEY_PULSE_TIER, "caution")
+                    }
+                    if (!hideBalance && type == "expense") {
+                        WidgetSnapshotStore.adjustBudgetOnNativeTx(
+                            prefs = prefs,
+                            editor = editor,
+                            amountDelta = amount,
+                            categoryId = effectiveCategoryId,
+                            txDateSec = daySeconds,
+                        )
                     }
                     editor.commit()
 
-                    TxInsertResult.Success(newBalance = newBalance, amount = amount)
+                    TxInsertResult.Success(newBalance = newBalance, amount = amount, txId = txId)
                 }
             } catch (e: Exception) {
                 TxInsertResult.Error(
                     if (isId) "Gagal menyimpan transaksi: ${e.localizedMessage ?: "kesalahan"}"
                     else "Failed to save transaction: ${e.localizedMessage ?: "error"}"
                 )
+            }
+        }
+    }
+
+    fun softDeleteTransaction(context: Context, txId: String): Boolean {
+        if (txId.isBlank()) return false
+        val dbFile = getDatabaseFile(context)
+        if (!dbFile.exists() || dbFile.length() == 0L) return false
+        return synchronized(dbLock) {
+            try {
+                SQLiteDatabase.openDatabase(
+                    dbFile.absolutePath,
+                    null,
+                    SQLiteDatabase.OPEN_READWRITE
+                ).use { db ->
+                    db.rawQuery("PRAGMA busy_timeout = 3000", null).use { it.moveToFirst() }
+                    if (!hasRequiredTables(db)) return@synchronized false
+
+                    var txType: String? = null
+                    var txAmount = 0L
+                    var txCatId = ""
+                    var txDateSec = 0L
+                    db.rawQuery(
+                        "SELECT type, amount, category_id, date FROM transactions WHERE id = ? AND deleted_at IS NULL LIMIT 1",
+                        arrayOf(txId)
+                    ).use { c ->
+                        if (c.moveToFirst()) {
+                            txType = c.getString(0)
+                            txAmount = c.getLong(1)
+                            txCatId = c.getString(2)
+                            txDateSec = c.getLong(3)
+                        }
+                    }
+                    if (txType == null) return@synchronized false
+
+                    val nowSeconds = System.currentTimeMillis() / 1000L
+                    val values = ContentValues().apply {
+                        put("deleted_at", nowSeconds)
+                        put("updated_at", nowSeconds)
+                    }
+                    val updatedRows = db.update("transactions", values, "id = ? AND deleted_at IS NULL", arrayOf(txId))
+                    if (updatedRows <= 0) return@synchronized false
+
+                    val newBalance = queryTotalBalance(db)
+                    val newTodayExpense = queryTodayExpense(db)
+
+                    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                    val hideBalance = prefs.getBoolean(KEY_HIDE_BALANCE, false)
+                    val editor = prefs.edit().putBoolean(KEY_NATIVE_DB_DIRTY, true)
+                    if (!hideBalance) {
+                        editor.putLong(KEY_BALANCE, newBalance)
+                        editor.putLong(WidgetSnapshotStore.KEY_TODAY_EXPENSE, newTodayExpense)
+                        editor.putString(WidgetSnapshotStore.KEY_SNAPSHOT_DATE_YMD, WidgetSnapshotStore.todayYmd())
+                        val dailyAllowance = prefs.getLong(WidgetSnapshotStore.KEY_DAILY_ALLOWANCE, 0L)
+                        val currentTier = prefs.getString(WidgetSnapshotStore.KEY_PULSE_TIER, "safe")
+                        if (txType == "expense" && dailyAllowance > 0L && newTodayExpense <= dailyAllowance && currentTier == "caution") {
+                            editor.putString(WidgetSnapshotStore.KEY_PULSE_TIER, "safe")
+                        }
+                        if (txType == "expense") {
+                            WidgetSnapshotStore.adjustBudgetOnNativeTx(
+                                prefs = prefs,
+                                editor = editor,
+                                amountDelta = -txAmount,
+                                categoryId = txCatId,
+                                txDateSec = txDateSec,
+                            )
+                        }
+                    } else {
+                        editor.remove(KEY_BALANCE)
+                        editor.remove(WidgetSnapshotStore.KEY_TODAY_EXPENSE)
+                    }
+                    editor.commit()
+                    true
+                }
+            } catch (_: Exception) {
+                false
             }
         }
     }
@@ -503,6 +741,9 @@ object WidgetDatabaseHelper {
                 "Belanja" -> "Shopping"
                 "Hiburan" -> "Entertainment"
                 "Kesehatan" -> "Health"
+                "Biaya Admin" -> "Admin Fee"
+                "Setoran Tabungan" -> "Savings Deposit"
+                "Penarikan Tabungan" -> "Savings Withdrawal"
                 "Lainnya" -> "Other"
                 "Kiriman orang tua", "Kiriman Orang Tua" -> "Parents' allowance"
                 "Beasiswa" -> "Scholarship"
@@ -522,6 +763,9 @@ object WidgetDatabaseHelper {
             "Shopping" -> "Belanja"
             "Entertainment" -> "Hiburan"
             "Health" -> "Kesehatan"
+            "Admin Fee" -> "Biaya Admin"
+            "Savings Deposit" -> "Setoran Tabungan"
+            "Savings Withdrawal" -> "Penarikan Tabungan"
             "Other" -> "Lainnya"
             "Parents' allowance" -> "Kiriman orang tua"
             "Scholarship" -> "Beasiswa"

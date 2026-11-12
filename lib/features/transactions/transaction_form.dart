@@ -13,16 +13,56 @@ import '../../core/calculator_sheet.dart';
 import '../../core/format.dart';
 import '../../core/icons.dart';
 import '../../core/l10n.dart';
+import '../../core/period.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/app_database.dart';
+import '../../data/budget_rule.dart';
 import '../../data/providers.dart';
 import '../../data/prefs.dart';
 import '../../data/feature_prefs.dart';
 import '../../data/feature_providers.dart';
+import '../../data/module_prefs.dart';
 import '../../data/notifications.dart';
 import '../../data/quick_widget_service.dart';
 import '../../data/tables.dart' show NeedWant, TxType;
+
+enum _TxFormAction { duplicate }
+
+/// Menyelesaikan pasangan dompet asal dan tujuan untuk mode Transfer agar pilihan
+/// bawaan yang tampak aktif pada chip selalu sinkron saat disimpan.
+({String? fromId, String? toId}) resolveTransferWallets(
+  List<Wallet> wallets, {
+  String? walletId,
+  String? toWalletId,
+}) {
+  if (wallets.isEmpty) return (fromId: null, toId: null);
+  final hasWallet = walletId != null && wallets.any((w) => w.id == walletId);
+  final fromId = hasWallet ? walletId : wallets.first.id;
+  final hasTo = toWalletId != null && wallets.any((w) => w.id == toWalletId);
+  final toId = hasTo
+      ? toWalletId
+      : wallets.where((w) => w.id != fromId).firstOrNull?.id;
+  return (fromId: fromId, toId: toId);
+}
+
+/// Buka form tambah transaksi baru hasil duplikasi dari [entry] untuk hari ini.
+Future<void> showDuplicateTransactionForm(
+  BuildContext context,
+  TransactionEntry entry,
+) {
+  return showTransactionForm(
+    context,
+    initialType: entry.type,
+    initialAmount: entry.amount,
+    initialCategoryId: entry.categoryId,
+    initialWalletId: entry.walletId,
+    initialToWalletId: entry.toWalletId,
+    initialNeedWant: entry.needWant,
+    initialNote: entry.note,
+    initialDate: DateTime.now(),
+  );
+}
 
 /// Buka form tambah transaksi, atau ubah jika [entry] diisi.
 Future<void> showTransactionForm(
@@ -30,11 +70,15 @@ Future<void> showTransactionForm(
   TransactionEntry? entry,
   TxType? initialType,
   int? initialAmount,
+  String? initialCategoryId,
   String? initialNote,
   String? initialReceiptPath,
   String? initialWalletId,
-}) {
-  return showModalBottomSheet<void>(
+  String? initialToWalletId,
+  NeedWant? initialNeedWant,
+  DateTime? initialDate,
+}) async {
+  final action = await showModalBottomSheet<_TxFormAction>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
@@ -42,11 +86,18 @@ Future<void> showTransactionForm(
       entry: entry,
       initialType: initialType,
       initialAmount: initialAmount,
+      initialCategoryId: initialCategoryId,
       initialNote: initialNote,
       initialReceiptPath: initialReceiptPath,
       initialWalletId: initialWalletId,
+      initialToWalletId: initialToWalletId,
+      initialNeedWant: initialNeedWant,
+      initialDate: initialDate,
     ),
   );
+  if (action == _TxFormAction.duplicate && entry != null && context.mounted) {
+    await showDuplicateTransactionForm(context, entry);
+  }
 }
 
 /// Widget form input/edit transaksi di dalam modal bottom sheet.
@@ -56,17 +107,25 @@ class TransactionForm extends ConsumerStatefulWidget {
     this.entry,
     this.initialType,
     this.initialAmount,
+    this.initialCategoryId,
     this.initialNote,
     this.initialReceiptPath,
     this.initialWalletId,
+    this.initialToWalletId,
+    this.initialNeedWant,
+    this.initialDate,
   });
 
   final TransactionEntry? entry;
   final TxType? initialType;
   final int? initialAmount;
+  final String? initialCategoryId;
   final String? initialNote;
   final String? initialReceiptPath;
   final String? initialWalletId;
+  final String? initialToWalletId;
+  final NeedWant? initialNeedWant;
+  final DateTime? initialDate;
 
   @override
   ConsumerState<TransactionForm> createState() => _TransactionFormState();
@@ -96,9 +155,10 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     final now = DateTime.now();
     final isNotToday = e != null && (e.date.year != now.year || e.date.month != now.month || e.date.day != now.day);
     final hasReceipt = (e?.receiptPath != null) || (widget.initialReceiptPath != null);
-    final hasNeedWant = e?.needWant != null;
+    final hasNeedWant = (e?.needWant ?? widget.initialNeedWant) != null;
 
-    _showMoreDetails = isEdit && (isNotToday || hasReceipt || hasNeedWant);
+    _showMoreDetails = (isEdit && (isNotToday || hasReceipt || hasNeedWant)) ||
+        (!isEdit && widget.initialNeedWant != null);
     _showAdminFee = false;
     _type = e?.type ?? widget.initialType ?? TxType.expense;
     _amount = TextEditingController(
@@ -110,12 +170,12 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     );
     _note = TextEditingController(text: e?.note ?? widget.initialNote ?? '');
     _fee = TextEditingController();
-    _categoryId = e?.categoryId;
+    _categoryId = e?.categoryId ?? widget.initialCategoryId;
     _walletId = e?.walletId ?? widget.initialWalletId;
-    _toWalletId = e?.toWalletId;
-    _date = e?.date ?? DateTime.now();
+    _toWalletId = e?.toWalletId ?? widget.initialToWalletId;
+    _date = e?.date ?? widget.initialDate ?? DateTime.now();
     _receiptPath = e?.receiptPath ?? widget.initialReceiptPath;
-    _needWant = e?.needWant;
+    _needWant = e?.needWant ?? widget.initialNeedWant;
 
     ref.read(databaseProvider).categoryUsageCounts().then((u) {
       if (mounted) setState(() => _usage = u);
@@ -257,10 +317,45 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           needWant: _type == TxType.expense ? _needWant : null,
           note: _note.text.trim(),
         );
+    syncWidgetSnapshot(ref);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.tr('Template saved.'))),
       );
+    }
+  }
+
+  Future<void> _confirmDeleteTemplate(TxTemplate t) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.tr('Delete template?')),
+        content: Text(
+          context.tr('Remove "{name}" from your saved templates?', {
+            'name': context.tr(t.name),
+          }),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(context.tr('Cancel')),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: ctx.themeColors.expense),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(context.tr('Delete')),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) {
+      await ref.read(databaseProvider).deleteTemplate(t.id);
+      syncWidgetSnapshot(ref);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.tr('Template deleted.'))),
+        );
+      }
     }
   }
 
@@ -277,11 +372,20 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     final feeAmount = parseAmount(_fee.text);
 
     if (_type == TxType.transfer) {
-      if (_walletId == null || _toWalletId == null) {
+      final activeWallets = ref.read(walletsProvider).value ?? const [];
+      final resolved = resolveTransferWallets(
+        activeWallets,
+        walletId: _walletId,
+        toWalletId: _toWalletId,
+      );
+      final fromWalletId = resolved.fromId;
+      final toWalletId = resolved.toId;
+
+      if (fromWalletId == null || toWalletId == null) {
         setState(() => _error = context.tr('Please choose source and destination wallets.'));
         return;
       }
-      if (_walletId == _toWalletId) {
+      if (fromWalletId == toWalletId) {
         setState(() => _error = context.tr('Source and destination wallets must be different.'));
         return;
       }
@@ -289,23 +393,23 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       if (e == null) {
         await db.transferBetweenWallets(
           amount: amount,
-          fromWalletId: _walletId!,
-          toWalletId: _toWalletId!,
+          fromWalletId: fromWalletId,
+          toWalletId: toWalletId,
           date: day,
           note: _note.text.trim(),
           receiptPath: _receiptPath,
         );
         if (feeAmount > 0) {
-          final toWalletName = (ref.read(walletsProvider).value ?? const [])
-              .where((w) => w.id == _toWalletId)
+          final toWalletName = activeWallets
+              .where((w) => w.id == toWalletId)
               .firstOrNull
               ?.name ?? '';
           await db.addTransaction(
             amount: feeAmount,
             type: TxType.expense,
-            categoryId: 'cat-exp-other',
+            categoryId: 'cat-exp-admin',
             date: day,
-            walletId: _walletId!,
+            walletId: fromWalletId,
             note: trG('Admin fee: transfer to {wallet}', {
               'wallet': toWalletName.isNotEmpty ? trG(toWalletName) : trG('Destination'),
             }),
@@ -319,30 +423,21 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           categoryId: 'cat-tra-transfer',
           date: day,
           note: _note.text.trim(),
-          walletId: _walletId,
-          toWalletId: _toWalletId,
+          walletId: fromWalletId,
+          toWalletId: toWalletId,
           receiptPath: _receiptPath,
           clearReceipt: _receiptPath == null,
+          clearNeedWant: true,
         );
-        if (feeAmount > 0) {
-          final toWalletName = (ref.read(walletsProvider).value ?? const [])
-              .where((w) => w.id == _toWalletId)
-              .firstOrNull
-              ?.name ?? '';
-          await db.addTransaction(
-            amount: feeAmount,
-            type: TxType.expense,
-            categoryId: 'cat-exp-other',
-            date: day,
-            walletId: _walletId!,
-            note: trG('Admin fee: transfer to {wallet}', {
-              'wallet': toWalletName.isNotEmpty ? trG(toWalletName) : trG('Destination'),
-            }),
-          );
-        }
       }
     } else {
-      if (_categoryId == null) {
+      final activeCats = ref.read(categoriesProvider).value;
+      final effectiveCategoryId = activeCats == null
+          ? _categoryId
+          : (activeCats.any((c) => c.id == _categoryId && c.type == _type)
+              ? _categoryId
+              : null);
+      if (effectiveCategoryId == null) {
         setState(() => _error = context.tr('Please choose a category.'));
         return;
       }
@@ -355,15 +450,16 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
         await db.addTransaction(
           amount: amount,
           type: _type,
-          categoryId: _categoryId!,
+          categoryId: effectiveCategoryId,
           date: day,
           note: _note.text.trim(),
           walletId: actualWalletId,
           receiptPath: _receiptPath,
+          needWant: _type == TxType.expense ? _needWant : null,
         );
         if (_type == TxType.expense && feeAmount > 0) {
-          final cat = (ref.read(categoriesProvider).value ?? const [])
-              .where((c) => c.id == _categoryId)
+          final cat = (activeCats ?? const <Category>[])
+              .where((c) => c.id == effectiveCategoryId)
               .firstOrNull;
           final catName = cat?.name ?? 'Expense';
           final noteContext = _note.text.trim().isNotEmpty
@@ -372,7 +468,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           await db.addTransaction(
             amount: feeAmount,
             type: TxType.expense,
-            categoryId: 'cat-exp-other',
+            categoryId: 'cat-exp-admin',
             date: day,
             walletId: actualWalletId,
             note: trG('Admin fee: {context}', {'context': noteContext}),
@@ -383,30 +479,15 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           e.id,
           amount: amount,
           type: _type,
-          categoryId: _categoryId!,
+          categoryId: effectiveCategoryId,
           date: day,
           note: _note.text.trim(),
           walletId: actualWalletId,
           receiptPath: _receiptPath,
           clearReceipt: _receiptPath == null,
+          needWant: _type == TxType.expense ? _needWant : null,
+          clearNeedWant: _type != TxType.expense || _needWant == null,
         );
-        if (_type == TxType.expense && feeAmount > 0) {
-          final cat = (ref.read(categoriesProvider).value ?? const [])
-              .where((c) => c.id == _categoryId)
-              .firstOrNull;
-          final catName = cat?.name ?? 'Expense';
-          final noteContext = _note.text.trim().isNotEmpty
-              ? _note.text.trim()
-              : trG(catName);
-          await db.addTransaction(
-            amount: feeAmount,
-            type: TxType.expense,
-            categoryId: 'cat-exp-other',
-            date: day,
-            walletId: actualWalletId,
-            note: trG('Admin fee: {context}', {'context': noteContext}),
-          );
-        }
       }
     }
 
@@ -416,17 +497,29 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
             orElse: () => const <Category>[],
           );
       final cat = cats.where((c) => c.id == _categoryId).firstOrNull;
+      final appPrefs = ref.read(appPrefsProvider);
+      final txPeriod = Period.containing(
+        appPrefs.periodType,
+        day,
+        firstDayOfWeek: appPrefs.firstDayOfWeek,
+        firstDayOfMonth: appPrefs.firstDayOfMonth,
+      );
       await checkBudgetAfterExpense(
         db: db,
         prefs: ref.read(sharedPreferencesProvider),
-        periodType: ref.read(appPrefsProvider).periodType,
+        periodType: appPrefs.periodType,
         categoryId: _categoryId!,
         categoryName: cat?.name ?? 'Uncategorized',
         date: day,
+        firstDayOfWeek: appPrefs.firstDayOfWeek,
+        firstDayOfMonth: appPrefs.firstDayOfMonth,
+        rolloverEnabled: ref.read(featurePrefsProvider).rollover,
+        totalBudgetPool: ref.read(budgetRuleProvider).getTotalBudget(txPeriod.key),
       );
     }
 
     syncWidgetData(ref);
+    syncWidgetSnapshot(ref);
     if (mounted) Navigator.pop(context);
   }
 
@@ -452,12 +545,14 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     final db = ref.read(databaseProvider);
     await db.deleteTransaction(id);
     syncWidgetData(ref);
+    syncWidgetSnapshot(ref);
     if (mounted) Navigator.pop(context);
     showUndoSnackBar(
       message: trG('Transaction deleted'),
       onUndo: () async {
         await db.restoreTransaction(id);
         syncWidgetData(ref);
+        syncWidgetSnapshot(ref);
       },
     );
   }
@@ -483,6 +578,16 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           data: (list) => list,
           orElse: () => const <TxTemplate>[],
         );
+    final transferEnabled =
+        ref.watch(modulePrefsProvider.select((m) => m.transfer));
+    final showTransferSegment = transferEnabled || _type == TxType.transfer;
+    final walletBalances = ref.watch(walletBalancesProvider);
+    final hideBalance = ref.watch(hideBalanceProvider);
+    final resolvedTransfer = resolveTransferWallets(
+      wallets,
+      walletId: _walletId,
+      toWalletId: _toWalletId,
+    );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + bottomInset),
@@ -509,31 +614,43 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     ),
                   ),
                 ),
-                if (isEdit)
+                if (isEdit) ...[
+                  IconButton(
+                    icon: const Icon(Icons.copy_rounded, color: AppColors.dewMint),
+                    tooltip: context.tr('Record again'),
+                    onPressed: () => Navigator.pop(context, _TxFormAction.duplicate),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.delete_outline, color: AppColors.expenseOnDark),
                     tooltip: context.tr('Delete transaction'),
                     onPressed: _delete,
                   ),
+                ],
               ],
             ),
             const SizedBox(height: 16),
             if (widget.entry == null && templates.isNotEmpty) ...[
               SizedBox(
-                height: 38,
+                height: 40,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
                     for (final t in templates)
                       Padding(
                         padding: const EdgeInsets.only(right: 8),
-                        child: ActionChip(
-                          avatar: const Icon(Icons.flash_on, size: 16, color: AppColors.dewMint),
-                          label: Text(context.tr(t.name)),
-                          backgroundColor: AppColors.surfaceContainer.withValues(alpha: 0.65),
-                          side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.18)),
-                          labelStyle: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.softIvory),
-                          onPressed: () => _applyTemplate(t),
+                        child: GestureDetector(
+                          onLongPress: () => _confirmDeleteTemplate(t),
+                          child: InputChip(
+                            avatar: const Icon(Icons.flash_on, size: 16, color: AppColors.dewMint),
+                            label: Text(context.tr(t.name)),
+                            backgroundColor: AppColors.surfaceContainer.withValues(alpha: 0.65),
+                            side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.18)),
+                            labelStyle: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.softIvory),
+                            deleteIcon: const Icon(Icons.close, size: 15, color: AppColors.freshSage),
+                            deleteButtonTooltipMessage: context.tr('Delete template'),
+                            onDeleted: () => _confirmDeleteTemplate(t),
+                            onPressed: () => _applyTemplate(t),
+                          ),
                         ),
                       ),
                   ],
@@ -551,10 +668,11 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   value: TxType.income,
                   label: Text(context.tr('Income')),
                 ),
-                ButtonSegment(
-                  value: TxType.transfer,
-                  label: Text(context.tr('Transfer')),
-                ),
+                if (showTransferSegment)
+                  ButtonSegment(
+                    value: TxType.transfer,
+                    label: Text(context.tr('Transfer')),
+                  ),
               ],
               selected: {_type},
               onSelectionChanged: (s) => setState(() {
@@ -654,8 +772,12 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                       icon: iconFor(w.icon),
                       categoryKey: w.icon,
                       label: context.tr(w.name),
-                      selected: (_walletId ?? (wallets.isNotEmpty ? wallets.first.id : '')) == w.id,
-                      onSelected: () => setState(() => _walletId = w.id),
+                      subtitle: hideBalance ? null : compactRupiah(walletBalances[w.id] ?? 0),
+                      selected: resolvedTransfer.fromId == w.id,
+                      onSelected: () => setState(() {
+                        _walletId = w.id;
+                        _error = null;
+                      }),
                     ),
                 ],
               ),
@@ -671,87 +793,93 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                       icon: iconFor(w.icon),
                       categoryKey: w.icon,
                       label: context.tr(w.name),
-                      selected: (_toWalletId ?? (wallets.length > 1 ? wallets[1].id : '')) == w.id,
-                      onSelected: () => setState(() => _toWalletId = w.id),
+                      subtitle: hideBalance ? null : compactRupiah(walletBalances[w.id] ?? 0),
+                      selected: resolvedTransfer.toId == w.id,
+                      onSelected: () => setState(() {
+                        _toWalletId = w.id;
+                        _error = null;
+                      }),
                     ),
                 ],
               ),
-              const SizedBox(height: 12),
-              if (!_showAdminFee && parseAmount(_fee.text) == 0)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    style: TextButton.styleFrom(
-                      visualDensity: VisualDensity.compact,
-                      padding: EdgeInsets.zero,
-                    ),
-                    onPressed: () => setState(() => _showAdminFee = true),
-                    icon: Icon(Icons.add_circle_outline, size: 16, color: context.themeColors.primary),
-                    label: Text(context.tr('+ Add admin fee'), style: TextStyle(color: context.themeColors.primary, fontSize: 13)),
-                  ),
-                )
-              else ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(context.tr('Admin Fee (Optional)'), style: theme.textTheme.labelLarge),
-                    TextButton(
+              if (!isEdit) ...[
+                const SizedBox(height: 12),
+                if (!_showAdminFee && parseAmount(_fee.text) == 0)
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton.icon(
                       style: TextButton.styleFrom(
                         visualDensity: VisualDensity.compact,
                         padding: EdgeInsets.zero,
                       ),
-                      onPressed: () => setState(() {
-                        _fee.clear();
-                        _showAdminFee = false;
-                      }),
-                      child: Text(
-                        parseAmount(_fee.text) > 0 ? context.tr('Free / Rp 0') : context.tr('Hide admin fee'),
-                        style: const TextStyle(fontSize: 12),
-                      ),
+                      onPressed: () => setState(() => _showAdminFee = true),
+                      icon: Icon(Icons.add_circle_outline, size: 16, color: context.themeColors.primary),
+                      label: Text(context.tr('+ Add admin fee'), style: TextStyle(color: context.themeColors.primary, fontSize: 13)),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _fee,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: amountFormatters(),
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    prefixText: 'Rp ',
-                    hintText: '0 (${context.tr("Free (Rp 0)")})',
-                    helperText: context.tr('Deducted from source wallet as an admin fee expense'),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final opt in [
-                      (amount: 0, label: 'Free (Rp 0)'),
-                      (amount: 1000, label: 'Rp 1.000'),
-                      (amount: 2500, label: 'Rp 2.500'),
-                      (amount: 6500, label: 'Rp 6.500'),
-                    ])
-                      ActionChip(
-                        label: Text(context.tr(opt.label)),
-                        avatar: (opt.amount == 0 && parseAmount(_fee.text) == 0) ||
-                                (opt.amount > 0 && parseAmount(_fee.text) == opt.amount)
-                            ? const Icon(Icons.check, size: 16)
-                            : null,
-                        onPressed: () {
-                          setState(() {
-                            if (opt.amount == 0) {
-                              _fee.clear();
-                            } else {
-                              _fee.text = formatThousands(opt.amount);
-                            }
-                          });
-                        },
+                  )
+                else ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(context.tr('Admin Fee (Optional)'), style: theme.textTheme.labelLarge),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                        ),
+                        onPressed: () => setState(() {
+                          _fee.clear();
+                          _showAdminFee = false;
+                        }),
+                        child: Text(
+                          parseAmount(_fee.text) > 0 ? context.tr('Free / Rp 0') : context.tr('Hide admin fee'),
+                          style: const TextStyle(fontSize: 12),
+                        ),
                       ),
-                  ],
-                ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _fee,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: amountFormatters(),
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      prefixText: 'Rp ',
+                      hintText: '0 (${context.tr("Free (Rp 0)")})',
+                      helperText: context.tr('Deducted from source wallet as an admin fee expense'),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final opt in [
+                        (amount: 0, label: 'Free (Rp 0)'),
+                        (amount: 1000, label: 'Rp 1.000'),
+                        (amount: 2500, label: 'Rp 2.500'),
+                        (amount: 6500, label: 'Rp 6.500'),
+                      ])
+                        ActionChip(
+                          label: Text(context.tr(opt.label)),
+                          avatar: (opt.amount == 0 && parseAmount(_fee.text) == 0) ||
+                                  (opt.amount > 0 && parseAmount(_fee.text) == opt.amount)
+                              ? const Icon(Icons.check, size: 16)
+                              : null,
+                          onPressed: () {
+                            setState(() {
+                              if (opt.amount == 0) {
+                                _fee.clear();
+                              } else {
+                                _fee.text = formatThousands(opt.amount);
+                              }
+                            });
+                          },
+                        ),
+                    ],
+                  ),
+                ],
               ],
             ] else ...[
               Text(context.tr('Category'), style: theme.textTheme.labelLarge),
@@ -787,6 +915,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                       icon: iconFor(w.icon),
                       categoryKey: w.icon,
                       label: context.tr(w.name),
+                      subtitle: hideBalance ? null : compactRupiah(walletBalances[w.id] ?? 0),
                       selected: (_walletId ?? (wallets.isNotEmpty ? wallets.first.id : '')) == w.id,
                       onSelected: () => setState(() => _walletId = w.id),
                     ),
@@ -846,23 +975,28 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: AppColors.dewMint.withValues(alpha: 0.14)),
                 ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14),
-                  leading: Image.asset(
-                    'assets/icons/glasshouse/calendar.png',
-                    width: 22,
-                    height: 22,
-                    fit: BoxFit.contain,
-                  ),
-                  title: Text(
-                    dateLabel(_date),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.softIvory,
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(14),
+                  clipBehavior: Clip.antiAlias,
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                    leading: Image.asset(
+                      'assets/icons/glasshouse/calendar.png',
+                      width: 22,
+                      height: 22,
+                      fit: BoxFit.contain,
                     ),
+                    title: Text(
+                      dateLabel(_date),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.softIvory,
+                      ),
+                    ),
+                    trailing: const Icon(Icons.chevron_right, color: AppColors.freshSage),
+                    onTap: _pickDate,
                   ),
-                  trailing: const Icon(Icons.chevron_right, color: AppColors.freshSage),
-                  onTap: _pickDate,
                 ),
               ),
               if (_type == TxType.expense) ...[
@@ -890,63 +1024,65 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     onSelectionChanged: (s) => setState(() => _needWant = s.isEmpty ? null : s.first),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(context.tr('Admin Fee (Optional)'), style: theme.textTheme.labelLarge),
-                    if (parseAmount(_fee.text) > 0)
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          padding: EdgeInsets.zero,
+                if (!isEdit) ...[
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(context.tr('Admin Fee (Optional)'), style: theme.textTheme.labelLarge),
+                      if (parseAmount(_fee.text) > 0)
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                          ),
+                          onPressed: () => setState(() => _fee.clear()),
+                          child: Text(context.tr('Free / Rp 0'), style: const TextStyle(fontSize: 12)),
                         ),
-                        onPressed: () => setState(() => _fee.clear()),
-                        child: Text(context.tr('Free / Rp 0'), style: const TextStyle(fontSize: 12)),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _fee,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: amountFormatters(),
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    prefixText: 'Rp ',
-                    hintText: '0 (${context.tr("Free (Rp 0)")})',
-                    helperText: context.tr('Recorded as an additional admin fee expense'),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final opt in [
-                      (amount: 0, label: 'Free (Rp 0)'),
-                      (amount: 1000, label: 'Rp 1.000'),
-                      (amount: 2500, label: 'Rp 2.500'),
-                      (amount: 5000, label: 'Rp 5.000'),
-                    ])
-                      ActionChip(
-                        label: Text(context.tr(opt.label)),
-                        avatar: (opt.amount == 0 && parseAmount(_fee.text) == 0) ||
-                                (opt.amount > 0 && parseAmount(_fee.text) == opt.amount)
-                            ? const Icon(Icons.check, size: 16)
-                            : null,
-                        onPressed: () {
-                          setState(() {
-                            if (opt.amount == 0) {
-                              _fee.clear();
-                            } else {
-                              _fee.text = formatThousands(opt.amount);
-                            }
-                          });
-                        },
-                      ),
-                  ],
-                ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _fee,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: amountFormatters(),
+                    onChanged: (_) => setState(() {}),
+                    decoration: InputDecoration(
+                      prefixText: 'Rp ',
+                      hintText: '0 (${context.tr("Free (Rp 0)")})',
+                      helperText: context.tr('Recorded as an additional admin fee expense'),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final opt in [
+                        (amount: 0, label: 'Free (Rp 0)'),
+                        (amount: 1000, label: 'Rp 1.000'),
+                        (amount: 2500, label: 'Rp 2.500'),
+                        (amount: 5000, label: 'Rp 5.000'),
+                      ])
+                        ActionChip(
+                          label: Text(context.tr(opt.label)),
+                          avatar: (opt.amount == 0 && parseAmount(_fee.text) == 0) ||
+                                  (opt.amount > 0 && parseAmount(_fee.text) == opt.amount)
+                              ? const Icon(Icons.check, size: 16)
+                              : null,
+                          onPressed: () {
+                            setState(() {
+                              if (opt.amount == 0) {
+                                _fee.clear();
+                              } else {
+                                _fee.text = formatThousands(opt.amount);
+                              }
+                            });
+                          },
+                        ),
+                    ],
+                  ),
+                ],
               ],
               const SizedBox(height: 16),
               // Lampiran Struk / Receipt Attachment
@@ -1039,20 +1175,25 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   ],
                 ),
               ],
-              if (!isEdit && _type != TxType.transfer) ...[
-                const SizedBox(height: 16),
-                OutlinedButton.icon(
+            ],
+            if (!isEdit && _type != TxType.transfer) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
                   onPressed: _saveAsTemplate,
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.18)),
-                    backgroundColor: AppColors.surfaceContainer.withValues(alpha: 0.40),
-                    foregroundColor: AppColors.freshSage,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.dewMint,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   ),
-                  icon: const Icon(Icons.bolt, size: 18, color: AppColors.dewMint),
-                  label: Text(context.tr('Save as template')),
+                  icon: const Icon(Icons.bolt_rounded, size: 17),
+                  label: Text(
+                    context.tr('Save as template'),
+                    style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+                  ),
                 ),
-              ],
+              ),
             ],
             if (_error != null) ...[
               const SizedBox(height: 12),

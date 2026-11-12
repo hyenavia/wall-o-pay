@@ -8,11 +8,104 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/format.dart';
 import '../../core/icons.dart';
 import '../../core/l10n.dart';
+import '../../core/period.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/app_database.dart';
+import '../../data/prefs.dart';
 import '../../data/providers.dart';
 import '../../data/tables.dart' show TxType;
+
+enum GoalPaceStatus { onTrack, behindSchedule, dueToday, overdue }
+
+class GoalPaceSummary {
+  const GoalPaceSummary({
+    required this.remainingAmount,
+    required this.daysLeft,
+    required this.periodsLeft,
+    required this.recommendedPerPeriod,
+    required this.periodType,
+    required this.status,
+  });
+
+  final int remainingAmount;
+  final int daysLeft;
+  final int periodsLeft;
+  final int recommendedPerPeriod;
+  final PeriodType periodType;
+  final GoalPaceStatus status;
+}
+
+/// Menghitung proyeksi setoran per periode ([PeriodType.weekly] / [PeriodType.monthly]) dan status ritme tabungan goal.
+GoalPaceSummary? computeGoalPace(
+  SavingsGoal goal,
+  PeriodType periodType, {
+  DateTime? now,
+}) {
+  final targetDate = goal.targetDate;
+  if (targetDate == null || goal.currentAmount >= goal.targetAmount) {
+    return null;
+  }
+
+  final refNow = now ?? DateTime.now();
+  final today = DateTime(refNow.year, refNow.month, refNow.day);
+  final due = DateTime(targetDate.year, targetDate.month, targetDate.day);
+  final remaining = goal.targetAmount - goal.currentAmount;
+  final daysLeft = due.difference(today).inDays;
+
+  if (daysLeft < 0) {
+    return GoalPaceSummary(
+      remainingAmount: remaining,
+      daysLeft: daysLeft,
+      periodsLeft: 1,
+      recommendedPerPeriod: remaining,
+      periodType: periodType,
+      status: GoalPaceStatus.overdue,
+    );
+  }
+  if (daysLeft == 0) {
+    return GoalPaceSummary(
+      remainingAmount: remaining,
+      daysLeft: 0,
+      periodsLeft: 1,
+      recommendedPerPeriod: remaining,
+      periodType: periodType,
+      status: GoalPaceStatus.dueToday,
+    );
+  }
+
+  final cycleDays = periodType == PeriodType.weekly ? 7 : 30;
+  final periodsLeft = (daysLeft / cycleDays).ceil().clamp(1, 10000);
+  final recommendedPerPeriod = (remaining / periodsLeft).ceil();
+
+  final createdDay = DateTime(
+    goal.createdAt.year,
+    goal.createdAt.month,
+    goal.createdAt.day,
+  );
+  final totalSpan = due.difference(createdDay).inDays;
+  final GoalPaceStatus status;
+  if (totalSpan <= 0) {
+    status = GoalPaceStatus.onTrack;
+  } else {
+    final elapsed = today.difference(createdDay).inDays.clamp(0, totalSpan);
+    final expectedRatio = elapsed / totalSpan;
+    final actualRatio =
+        goal.targetAmount > 0 ? goal.currentAmount / goal.targetAmount : 0.0;
+    status = (actualRatio + 0.05 >= expectedRatio)
+        ? GoalPaceStatus.onTrack
+        : GoalPaceStatus.behindSchedule;
+  }
+
+  return GoalPaceSummary(
+    remainingAmount: remaining,
+    daysLeft: daysLeft,
+    periodsLeft: periodsLeft,
+    recommendedPerPeriod: recommendedPerPeriod,
+    periodType: periodType,
+    status: status,
+  );
+}
 
 /// Halaman daftar target tabungan aktif dan selesai.
 class GoalsPage extends ConsumerWidget {
@@ -84,19 +177,14 @@ class GoalsPage extends ConsumerWidget {
                 onAction: () => _addGoal(context, ref),
               ),
               if (active.isEmpty)
-                AppCard(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: Text(
-                        context.tr('No active goals yet.\nCreate one, like an emergency fund.'),
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                        ),
-                      ),
-                    ),
+                EmptyStateCard(
+                  icon: Icons.flag_outlined,
+                  title: context.tr('No active goals yet.'),
+                  subtitle: context.tr(
+                    'Create one, like an emergency fund or your next milestone.',
                   ),
+                  actionLabel: context.tr('New goal'),
+                  onAction: () => _addGoal(context, ref),
                 )
               else
                 for (final g in active)
@@ -172,7 +260,7 @@ class _GoalCard extends ConsumerWidget {
         await db.addTransaction(
           amount: amount,
           type: isDeposit ? TxType.expense : TxType.income,
-          categoryId: isDeposit ? 'cat-exp-other' : 'cat-inc-other',
+          categoryId: isDeposit ? 'cat-exp-savings' : 'cat-inc-savings',
           walletId: walletId,
           date: DateTime.now(),
           note: isDeposit
@@ -204,6 +292,30 @@ class _GoalCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ratio = goal.targetAmount == 0 ? 0.0 : goal.currentAmount / goal.targetAmount;
     final left = _timeLeft(context, goal.targetDate);
+    final periodType = ref.watch(appPrefsProvider.select((p) => p.periodType));
+    final pace = computeGoalPace(goal, periodType);
+
+    final (String statusKey, Color statusColor)? paceBadge = pace == null
+        ? null
+        : switch (pace.status) {
+            GoalPaceStatus.onTrack => ('On Track', AppColors.incomeOnDark),
+            GoalPaceStatus.behindSchedule => ('Behind Schedule', AppColors.warning),
+            GoalPaceStatus.dueToday => ('Due Today', AppColors.warning),
+            GoalPaceStatus.overdue => ('Overdue', AppColors.expenseOnDark),
+          };
+    final String? paceText = pace == null
+        ? null
+        : (pace.status == GoalPaceStatus.dueToday ||
+                pace.status == GoalPaceStatus.overdue)
+            ? context.tr('Remaining: {amount}', {
+                'amount': rupiah(pace.remainingAmount),
+              })
+            : context.tr(
+                pace.periodType == PeriodType.weekly
+                    ? 'Pace: {amount} / wk'
+                    : 'Pace: {amount} / mo',
+                {'amount': rupiah(pace.recommendedPerPeriod)},
+              );
 
     return AppCard(
       child: Column(
@@ -274,6 +386,42 @@ class _GoalCard extends ConsumerWidget {
             color: AppColors.dewMint,
             backgroundColor: AppColors.mossShadow.withValues(alpha: 0.6),
           ),
+          if (paceBadge != null && paceText != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: paceBadge.$2.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: paceBadge.$2.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Text(
+                    context.tr(paceBadge.$1),
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: paceBadge.$2,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    paceText,
+                    style: context.moneyStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.softIvory,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 4),
           Row(
             children: [
@@ -497,6 +645,10 @@ class _GoalFundsDialogState extends ConsumerState<_GoalFundsDialog> {
     }
 
     final maxWithdraw = widget.goal.currentAmount;
+    final periodType = ref.watch(appPrefsProvider.select((p) => p.periodType));
+    final pace = widget.isDeposit
+        ? computeGoalPace(widget.goal, periodType)
+        : null;
 
     return AlertDialog(
       title: Text(context.tr(
@@ -519,6 +671,34 @@ class _GoalFundsDialogState extends ConsumerState<_GoalFundsDialog> {
                 hint: widget.isDeposit ? '0' : formatThousands(maxWithdraw),
               ),
             ),
+            if (pace != null && pace.recommendedPerPeriod > 0) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ActionChip(
+                  avatar: const Icon(
+                    Icons.bolt_rounded,
+                    size: 16,
+                    color: AppColors.dewMint,
+                  ),
+                  label: Text(
+                    context.tr('Use pace: {amount}', {
+                      'amount': rupiah(pace.recommendedPerPeriod),
+                    }),
+                    style: context.moneyStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.dewMint,
+                    ),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _amount.text = formatThousands(pace.recommendedPerPeriod);
+                    });
+                  },
+                ),
+              ),
+            ],
             const SizedBox(height: 8),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,

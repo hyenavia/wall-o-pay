@@ -9,6 +9,7 @@ import '../../core/format.dart';
 import '../../core/l10n.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import '../../data/app_database.dart' show Budget;
 import '../../data/budget_rule.dart';
 import '../../data/feature_prefs.dart';
 import '../../data/feature_providers.dart';
@@ -26,8 +27,14 @@ class BudgetPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final period = ref.watch(selectedPeriodProvider);
+    final prevPeriod = ref.watch(prevPeriodProvider);
     final catsAsync = ref.watch(categoriesProvider);
+    final baseBudgets = ref.watch(budgetByCategoryProvider);
     final budgets = ref.watch(effectiveBudgetProvider);
+    final prevBudgets = ref.watch(prevBudgetsProvider).maybeWhen(
+          data: (l) => l.where((b) => b.amount > 0).toList(),
+          orElse: () => const <Budget>[],
+        );
     final carry = ref.watch(carryOverProvider);
     final totalCarry = ref.watch(totalCarryOverProvider);
     final rolloverActive = ref.watch(
@@ -35,6 +42,11 @@ class BudgetPage extends ConsumerWidget {
     );
     final spent = ref.watch(spentByCategoryProvider);
     final breakdown = ref.watch(budget503020BreakdownProvider);
+    final budgetRule = ref.watch(budgetRuleProvider);
+    final prevPool = budgetRule.getTotalBudget(prevPeriod.key);
+    final canCopyPrev = breakdown.totalBudget <= 0 &&
+        !baseBudgets.values.any((v) => v > 0) &&
+        (budgetRule.hasPeriodConfig(prevPeriod.key) || prevBudgets.isNotEmpty);
 
     return Scaffold(
       appBar: pageAppBar(
@@ -295,6 +307,130 @@ class BudgetPage extends ConsumerWidget {
                     ],
                   ),
                 ),
+
+                // Banner Salin Anggaran dari Periode Sebelumnya (jika periode ini masih kosong)
+                if (canCopyPrev)
+                  Container(
+                    margin: const EdgeInsets.only(top: 10, bottom: 2),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.mossShadow.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppColors.dewMint.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                color: AppColors.dewMint.withValues(alpha: 0.16),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.content_copy_rounded,
+                                color: AppColors.dewMint,
+                                size: 16,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    context.tr('No budget set for this period'),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13,
+                                      color: AppColors.softIvory,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    prevPool > 0
+                                        ? context.tr(
+                                            'Reuse budget setup from {period} ({amount})',
+                                            {
+                                              'period': prevPeriod.label,
+                                              'amount': rupiah(prevPool),
+                                            },
+                                          )
+                                        : context.tr(
+                                            'Reuse budget setup from {period}',
+                                            {'period': prevPeriod.label},
+                                          ),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.freshSage,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.tonalIcon(
+                            icon: const Icon(Icons.copy_all_rounded, size: 16),
+                            label: Text(
+                              context.tr('Copy from {period}', {
+                                'period': prevPeriod.label,
+                              }),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                            style: FilledButton.styleFrom(
+                              backgroundColor:
+                                  AppColors.dewMint.withValues(alpha: 0.18),
+                              foregroundColor: AppColors.dewMint,
+                              side: BorderSide(
+                                color: AppColors.dewMint.withValues(alpha: 0.35),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: () async {
+                              await ref
+                                  .read(budgetRuleProvider.notifier)
+                                  .copyFromPeriod(prevPeriod.key, period.key);
+                              final db = ref.read(databaseProvider);
+                              for (final b in prevBudgets) {
+                                await db.setBudget(
+                                  b.categoryId,
+                                  period.key,
+                                  b.amount,
+                                );
+                              }
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      context.tr(
+                                        'Copied budget from {period}',
+                                        {'period': prevPeriod.label},
+                                      ),
+                                    ),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
 
                 // Banner Sisa Anggaran Bergulir (Rollover)
                 if (rolloverActive && totalCarry > 0)

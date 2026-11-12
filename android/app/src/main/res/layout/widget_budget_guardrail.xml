@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/budget_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:clipToOutline="true">
+
+    <!-- Subtle Enchanted Glasshouse Botanical Canopy -->
+    <ImageView
+        android:layout_width="135dp"
+        android:layout_height="90dp"
+        android:layout_gravity="top|end"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_botanical_canopy"
+        android:importantForAccessibility="no" />
+
+    <ImageView
+        android:layout_width="115dp"
+        android:layout_height="72dp"
+        android:layout_gravity="bottom|start"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_botanical_corner"
+        android:importantForAccessibility="no" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="13dp"
+        android:paddingEnd="13dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
+
+        <!-- Header Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/budget_logo"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@mipmap/ic_launcher"
+                android:contentDescription="@string/app_name" />
+
+            <TextView
+                android:id="@+id/budget_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:text="@string/widget_budget_title"
+                android:textColor="@color/widget_soft_ivory"
+                android:textSize="13.5sp"
+                android:textStyle="bold"
+                android:letterSpacing="-0.02"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/budget_alert_pill"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="2.5dp"
+                android:paddingBottom="2.5dp"
+                android:background="@drawable/widget_pill_safe"
+                android:text="@string/widget_pulse_status_safe"
+                android:textColor="@color/widget_income_on_dark"
+                android:textSize="10.5sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1" />
+
+            <FrameLayout
+                android:id="@+id/budget_btn_privacy"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/widget_circle_glass_btn">
+
+                <ImageView
+                    android:id="@+id/budget_btn_privacy_icon"
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_widget_eye_on"
+                    android:contentDescription="Toggle privacy" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/budget_btn_add"
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:background="@drawable/widget_circle_glass_btn">
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_widget_plus"
+                    android:contentDescription="@string/shortcut_expense_short" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- Main Summary Inner Glass Card -->
+        <LinearLayout
+            android:id="@+id/budget_summary_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:orientation="vertical"
+            android:paddingStart="11dp"
+            android:paddingEnd="11dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:background="@drawable/widget_card_inner">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/budget_remaining_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/widget_budget_remaining"
+                    android:textColor="@color/widget_fresh_sage"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/budget_days_left"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:text="0d left"
+                    android:textColor="@color/widget_fresh_sage"
+                    android:textSize="10.5sp"
+                    android:fontFeatureSettings="tnum"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/budget_remaining_amount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:text="Rp 0"
+                android:textColor="@color/widget_soft_ivory"
+                android:textSize="18.5sp"
+                android:textStyle="bold"
+                android:fontFeatureSettings="tnum"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- Progress Bars -->
+            <ProgressBar
+                android:id="@+id/budget_progress_safe"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginTop="5dp"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@drawable/widget_pulse_progress_safe"
+                android:visibility="visible" />
+
+            <ProgressBar
+                android:id="@+id/budget_progress_caution"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginTop="5dp"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@drawable/widget_pulse_progress_caution"
+                android:visibility="gone" />
+
+            <ProgressBar
+                android:id="@+id/budget_progress_limit"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginTop="5dp"
+                android:max="100"
+                android:progress="0"
+                android:progressDrawable="@drawable/widget_pulse_progress_limit"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/budget_spent_subline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Rp 0 / Rp 0"
+                android:textColor="@color/widget_fresh_sage"
+                android:textSize="10.5sp"
+                android:fontFeatureSettings="tnum"
+                android:fontFamily="sans-serif"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </LinearLayout>
+
+        <!-- Expanded 4x2 Top Categories Breakdown -->
+        <LinearLayout
+            android:id="@+id/budget_categories_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="6dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <!-- Category Row 0 -->
+            <LinearLayout
+                android:id="@+id/budget_cat_row_0"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/budget_cat_name_0"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/widget_dew_mint"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                    <TextView
+                        android:id="@+id/budget_cat_amount_0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:textColor="@color/widget_fresh_sage"
+                        android:textSize="10sp"
+                        android:fontFeatureSettings="tnum"
+                        android:maxLines="1" />
+
+                    <TextView
+                        android:id="@+id/budget_cat_pct_0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:textColor="@color/widget_income_on_dark"
+                        android:textSize="10.5sp"
+                        android:textStyle="bold"
+                        android:fontFeatureSettings="tnum"
+                        android:maxLines="1" />
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/budget_cat_prog_safe_0"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="3.5dp"
+                    android:layout_marginTop="2dp"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/widget_pulse_progress_safe" />
+
+                <ProgressBar
+                    android:id="@+id/budget_cat_prog_caution_0"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="3.5dp"
+                    android:layout_marginTop="2dp"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/widget_pulse_progress_caution"
+                    android:visibility="gone" />
+
+                <ProgressBar
+                    android:id="@+id/budget_cat_prog_limit_0"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="3.5dp"
+                    android:layout_marginTop="2dp"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/widget_pulse_progress_limit"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Category Row 1 -->
+            <LinearLayout
+                android:id="@+id/budget_cat_row_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/budget_cat_name_1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/widget_dew_mint"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                    <TextView
+                        android:id="@+id/budget_cat_amount_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:textColor="@color/widget_fresh_sage"
+                        android:textSize="10sp"
+                        android:fontFeatureSettings="tnum"
+                        android:maxLines="1" />
+
+                    <TextView
+                        android:id="@+id/budget_cat_pct_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:textColor="@color/widget_income_on_dark"
+                        android:textSize="10.5sp"
+                        android:textStyle="bold"
+                        android:fontFeatureSettings="tnum"
+                        android:maxLines="1" />
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/budget_cat_prog_safe_1"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="3.5dp"
+                    android:layout_marginTop="2dp"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/widget_pulse_progress_safe" />
+
+                <ProgressBar
+                    android:id="@+id/budget_cat_prog_caution_1"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="3.5dp"
+                    android:layout_marginTop="2dp"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/widget_pulse_progress_caution"
+                    android:visibility="gone" />
+
+                <ProgressBar
+                    android:id="@+id/budget_cat_prog_limit_1"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="3.5dp"
+                    android:layout_marginTop="2dp"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/widget_pulse_progress_limit"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Category Row 2 -->
+            <LinearLayout
+                android:id="@+id/budget_cat_row_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/budget_cat_name_2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/widget_dew_mint"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                    <TextView
+                        android:id="@+id/budget_cat_amount_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:textColor="@color/widget_fresh_sage"
+                        android:textSize="10sp"
+                        android:fontFeatureSettings="tnum"
+                        android:maxLines="1" />
+
+                    <TextView
+                        android:id="@+id/budget_cat_pct_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:textColor="@color/widget_income_on_dark"
+                        android:textSize="10.5sp"
+                        android:textStyle="bold"
+                        android:fontFeatureSettings="tnum"
+                        android:maxLines="1" />
+                </LinearLayout>
+
+                <ProgressBar
+                    android:id="@+id/budget_cat_prog_safe_2"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="3.5dp"
+                    android:layout_marginTop="2dp"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/widget_pulse_progress_safe" />
+
+                <ProgressBar
+                    android:id="@+id/budget_cat_prog_caution_2"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="3.5dp"
+                    android:layout_marginTop="2dp"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/widget_pulse_progress_caution"
+                    android:visibility="gone" />
+
+                <ProgressBar
+                    android:id="@+id/budget_cat_prog_limit_2"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="3.5dp"
+                    android:layout_marginTop="2dp"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/widget_pulse_progress_limit"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>
+

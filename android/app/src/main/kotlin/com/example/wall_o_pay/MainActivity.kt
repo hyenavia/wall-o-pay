@@ -1,5 +1,7 @@
 package com.example.wall_o_pay
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
@@ -15,11 +17,17 @@ import io.flutter.plugin.common.MethodChannel
 import java.io.File
 
 class MainActivity : FlutterFragmentActivity() {
+    companion object {
+        const val EXTRA_WIDGET_ROUTE = "widget_route"
+    }
+
     private val CHANNEL = "com.example.wall_o_pay/notifications"
     private val SHARE_CHANNEL = "com.example.wall_o_pay/share"
 
     private var latestSharedData: Map<String, Any?>? = null
+    private var pendingWidgetRoute: String? = null
     private var shareChannel: MethodChannel? = null
+    private var widgetChannel: MethodChannel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,10 +90,18 @@ class MainActivity : FlutterFragmentActivity() {
         latestSharedData?.let {
             shareChannel?.invokeMethod("onShareReceived", it)
         }
+        pendingWidgetRoute?.let {
+            widgetChannel?.invokeMethod("onWidgetRoute", it)
+        }
     }
 
     private fun handleSendIntent(intent: Intent?) {
         if (intent == null) return
+        val widgetRoute = intent.getStringExtra(EXTRA_WIDGET_ROUTE)
+        if (!widgetRoute.isNullOrBlank()) {
+            pendingWidgetRoute = widgetRoute
+            return
+        }
         when (intent.action) {
             "com.example.wall_o_pay.QUICK_WIDGET_INCOME" -> {
                 latestSharedData = mapOf("shortcutType" to "income")
@@ -174,8 +190,8 @@ class MainActivity : FlutterFragmentActivity() {
             }
         }
 
-        // Channel for Quick Finance Widget data sync
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.example.wall_o_pay/widget").apply {
+        // Channel for Quick Finance & Ecosystem Widget data sync
+        widgetChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.example.wall_o_pay/widget").apply {
             setMethodCallHandler { call, result ->
                 val prefs = getSharedPreferences(WidgetDatabaseHelper.PREFS_NAME, MODE_PRIVATE)
                 when (call.method) {
@@ -194,8 +210,71 @@ class MainActivity : FlutterFragmentActivity() {
                             editor.putString(WidgetDatabaseHelper.KEY_LOCALE, locale)
                         }
                         editor.apply()
-                        QuickFinanceWidgetProvider.updateAllWidgets(this@MainActivity)
+                        WidgetSnapshotStore.refreshAllWidgets(this@MainActivity)
+                        WidgetMidnightWorker.scheduleIfNeeded(this@MainActivity)
                         result.success(true)
+                    }
+                    "updateWidgetSnapshot" -> {
+                        val balance = call.argument<Number>("balance")?.toLong() ?: 0L
+                        val hideBalance = call.argument<Boolean>("hideBalance") ?: false
+                        val locale = call.argument<String>("locale")
+                        val dailyAllowance = call.argument<Number>("dailyAllowance")?.toLong() ?: 0L
+                        val todayExpense = call.argument<Number>("todayExpense")?.toLong() ?: 0L
+                        val tier = call.argument<String>("tier") ?: "safe"
+                        val fundingBasis = call.argument<String>("fundingBasis") ?: "none"
+                        val daysLeft = call.argument<Number>("daysLeft")?.toInt() ?: 0
+                        val periodStartMs = call.argument<Number>("periodStartMs")?.toLong() ?: 0L
+                        val periodEndMs = call.argument<Number>("periodEndMs")?.toLong() ?: 0L
+                        val dateYmd = call.argument<String>("dateYmd") ?: WidgetSnapshotStore.todayYmd()
+                        val updatedAtMs = call.argument<Number>("updatedAtMs")?.toLong() ?: System.currentTimeMillis()
+
+                        val budgetHasConfig = call.argument<Boolean>("budgetHasConfig") ?: false
+                        val totalBudget = call.argument<Number>("totalBudget")?.toLong() ?: 0L
+                        val budgetSpent = call.argument<Number>("budgetSpent")?.toLong() ?: 0L
+                        val budgetPct = call.argument<Number>("budgetPct")?.toInt() ?: 0
+                        val budgetAlertLevel = call.argument<String>("budgetAlertLevel") ?: "none"
+                        val budgetCategoriesJson = call.argument<String>("budgetCategoriesJson") ?: "[]"
+
+                        val goalsJson = call.argument<String>("goalsJson") ?: "[]"
+                        val goalsActiveCount = call.argument<Number>("goalsActiveCount")?.toInt() ?: 0
+                        val goalsDoneCount = call.argument<Number>("goalsDoneCount")?.toInt() ?: 0
+                        val billsJson = call.argument<String>("billsJson") ?: "[]"
+                        val billsDueCount = call.argument<Number>("billsDueCount")?.toInt() ?: 0
+                        val billsDueAmount = call.argument<Number>("billsDueAmount")?.toLong() ?: 0L
+
+                        WidgetSnapshotStore.saveSnapshot(
+                            context = this@MainActivity,
+                            balance = balance,
+                            hideBalance = hideBalance,
+                            locale = locale,
+                            dailyAllowance = dailyAllowance,
+                            todayExpense = todayExpense,
+                            tier = tier,
+                            fundingBasis = fundingBasis,
+                            daysLeft = daysLeft,
+                            periodStartMs = periodStartMs,
+                            periodEndMs = periodEndMs,
+                            dateYmd = dateYmd,
+                            updatedAtMs = updatedAtMs,
+                            budgetHasConfig = budgetHasConfig,
+                            totalBudget = totalBudget,
+                            budgetSpent = budgetSpent,
+                            budgetPct = budgetPct,
+                            budgetAlertLevel = budgetAlertLevel,
+                            budgetCategoriesJson = budgetCategoriesJson,
+                            goalsJson = goalsJson,
+                            goalsActiveCount = goalsActiveCount,
+                            goalsDoneCount = goalsDoneCount,
+                            billsJson = billsJson,
+                            billsDueCount = billsDueCount,
+                            billsDueAmount = billsDueAmount,
+                        )
+                        WidgetSnapshotStore.refreshAllWidgets(this@MainActivity)
+                        WidgetMidnightWorker.scheduleIfNeeded(this@MainActivity)
+                        result.success(true)
+                    }
+                    "consumeNativeHideBalance" -> {
+                        result.success(WidgetSnapshotStore.consumeNativeHideBalancePending(this@MainActivity))
                     }
                     "consumeNativeDbDirty" -> {
                         val isDirty = prefs.getBoolean(WidgetDatabaseHelper.KEY_NATIVE_DB_DIRTY, false)
@@ -203,6 +282,77 @@ class MainActivity : FlutterFragmentActivity() {
                             prefs.edit().putBoolean(WidgetDatabaseHelper.KEY_NATIVE_DB_DIRTY, false).apply()
                         }
                         result.success(isDirty)
+                    }
+                    "getPendingWidgetRoute" -> {
+                        result.success(pendingWidgetRoute)
+                    }
+                    "clearWidgetRoute" -> {
+                        pendingWidgetRoute = null
+                        result.success(true)
+                    }
+                    "getActiveWidgetCounts" -> {
+                        val manager = AppWidgetManager.getInstance(this@MainActivity)
+                        val counts = mapOf(
+                            "quick_finance" to manager.getAppWidgetIds(
+                                ComponentName(this@MainActivity, QuickFinanceWidgetProvider::class.java)
+                            ).size,
+                            "daily_pulse" to manager.getAppWidgetIds(
+                                ComponentName(this@MainActivity, DailyPulseWidgetProvider::class.java)
+                            ).size,
+                            "quick_action" to manager.getAppWidgetIds(
+                                ComponentName(this@MainActivity, QuickActionWidgetProvider::class.java)
+                            ).size,
+                            "favorite_templates" to manager.getAppWidgetIds(
+                                ComponentName(this@MainActivity, FavoriteTemplatesWidgetProvider::class.java)
+                            ).size,
+                            "budget_guardrail" to manager.getAppWidgetIds(
+                                ComponentName(this@MainActivity, BudgetGuardrailWidgetProvider::class.java)
+                            ).size,
+                            "goals_bills" to manager.getAppWidgetIds(
+                                ComponentName(this@MainActivity, GoalsAndBillsWidgetProvider::class.java)
+                            ).size,
+                        )
+                        result.success(counts)
+                    }
+                    "isPinWidgetSupported" -> {
+                        val supported = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            AppWidgetManager.getInstance(this@MainActivity).isRequestPinAppWidgetSupported
+                        } else {
+                            false
+                        }
+                        result.success(supported)
+                    }
+                    "requestPinWidget" -> {
+                        val key = call.argument<String>("key")
+                        val component = when (key) {
+                            "quick_finance" -> ComponentName(this@MainActivity, QuickFinanceWidgetProvider::class.java)
+                            "daily_pulse" -> ComponentName(this@MainActivity, DailyPulseWidgetProvider::class.java)
+                            "quick_action" -> ComponentName(this@MainActivity, QuickActionWidgetProvider::class.java)
+                            "favorite_templates" -> ComponentName(this@MainActivity, FavoriteTemplatesWidgetProvider::class.java)
+                            "budget_guardrail" -> ComponentName(this@MainActivity, BudgetGuardrailWidgetProvider::class.java)
+                            "goals_bills" -> ComponentName(this@MainActivity, GoalsAndBillsWidgetProvider::class.java)
+                            else -> null
+                        }
+                        if (component == null) {
+                            result.success(false)
+                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            val manager = AppWidgetManager.getInstance(this@MainActivity)
+                            val pinned = if (manager.isRequestPinAppWidgetSupported) {
+                                manager.requestPinAppWidget(component, null, null)
+                            } else {
+                                false
+                            }
+                            result.success(pinned)
+                        } else {
+                            result.success(false)
+                        }
+                    }
+                    "getWidgetGlassStyle" -> {
+                        result.success(WidgetSnapshotStore.getGlassStyle(this@MainActivity))
+                    }
+                    "setWidgetGlassStyle" -> {
+                        val style = call.argument<String>("style") ?: "deep"
+                        result.success(WidgetSnapshotStore.setGlassStyle(this@MainActivity, style))
                     }
                     else -> result.notImplemented()
                 }

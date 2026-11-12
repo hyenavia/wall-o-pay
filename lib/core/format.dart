@@ -16,6 +16,32 @@ final NumberFormat _thousands = NumberFormat.decimalPattern('id_ID');
 /// Mengubah nilai integer menjadi teks mata uang Rupiah (contoh: `15000` -> `"Rp 15.000"`).
 String rupiah(int value) => _rupiah.format(value);
 
+/// Format Rupiah ringkas untuk ruang sempit seperti chip dompet (contoh: `1500000` -> `"Rp 1,5jt"`).
+String compactRupiah(int value) {
+  final abs = value.abs();
+  final sign = value < 0 ? '-' : '';
+  final isId = AppLocale.code == 'id';
+
+  String fmt(double n) {
+    final rounded = (n * 10).round() / 10;
+    final str = rounded == rounded.roundToDouble()
+        ? rounded.toInt().toString()
+        : rounded.toStringAsFixed(1);
+    return isId ? str.replaceAll('.', ',') : str;
+  }
+
+  if (abs >= 1000000000) {
+    return '${sign}Rp ${fmt(abs / 1000000000)}${isId ? 'M' : 'B'}';
+  }
+  if (abs >= 1000000) {
+    return '${sign}Rp ${fmt(abs / 1000000)}${isId ? 'jt' : 'M'}';
+  }
+  if (abs >= 10000) {
+    return '${sign}Rp ${fmt(abs / 1000)}${isId ? 'rb' : 'K'}';
+  }
+  return rupiah(value);
+}
+
 /// Format tanggal lengkap dengan nama hari singkat (contoh: `"Kam, 5 Nov 2026"`).
 String dateLabel(DateTime d) =>
     DateFormat('EEE, d MMM yyyy', AppLocale.code).format(d);

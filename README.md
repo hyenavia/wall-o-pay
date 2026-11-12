@@ -2,7 +2,8 @@
 
 <div align="center">
 
-### *Your Money, Under Your Control*
+### _Your Money, Under Your Control_
+
 **Modern, Lightning-Fast & Offline-First Personal Finance Tracker**
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.47+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
@@ -11,7 +12,7 @@
 [![Security](https://img.shields.io/badge/Security-Keystore%20%7C%20Biometrics-38B271?logo=android&logoColor=white)](https://github.com/hyenavia/wall-o-pay)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.7.3-234B3B.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-2.16.0-234B3B.svg)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://hyenavia.github.io/wall-o-pay/) • [📥 Download Latest APK](https://github.com/hyenavia/wall-o-pay/releases/latest) • [📐 Architecture Guide](ARCHITECTURE.md) • [📋 Changelog](CHANGELOG.md)
 
@@ -27,9 +28,9 @@ When you're ready to back up or sync across devices, Wall o' Pay offers optional
 
 ---
 
-## 🚀 Highlights in Latest Release (v2.5)
+## 🚀 Highlights in Latest Release (v2.14)
 
-Wall o' Pay v2.5 combines hardware-grade security, smooth performance, and the enchanting **Enchanted Glasshouse** visual identity:
+Wall o' Pay v2.14 expands the **Enchanted Glasshouse Android Home Screen Widget** ecosystem with **One-Tap Favorites** (instant template logging + Undo) and **Budget Guardrail** (period budget tracking, near/over threshold alerts, and top categories) alongside secure lock-aware deep-link routing, complementing **Daily Pulse & Balance**, **Quick Action Bar**, and **Quick Finance**:
 
 - 🏛️ **Enchanted Glasshouse Visual Identity:** Modern botanical conservatory aesthetic featuring translucent emerald glassmorphic surfaces, specular glass highlights, 24 bespoke 3D botanical glass icons, and vaulted architectural accents.
 - 🌿 **Atmospheric Lock Screen & Profile Wreath:** Serene sunlit glasshouse background with ambient lighting on `LockScreen` and an intricate botanical glass wreath frame for user profile photos.
@@ -45,59 +46,62 @@ Wall o' Pay v2.5 combines hardware-grade security, smooth performance, and the e
 ## ✨ Key Capabilities
 
 ### ⚡ Offline-First Speed & Privacy
+
 - **Instantaneous 5-Second Logging:** Record income and expenses in seconds with smart auto-categorization and a built-in mini calculator.
 - **Guest Mode by Default:** Full access to all features without requiring an internet connection, account creation, or phone number.
 - **Privacy Shield:** Your data stays on your device. Zero analytics trackers or invasive third-party SDKs.
 
 ### 💳 Multi-Account & Wallets
+
 - **Flexible Account Management:** Track physical cash, bank accounts, and digital e-wallets in one unified view.
 - **Inter-Account Transfers:** Transfer funds between wallets with dedicated records and instant balance updates.
 - **Accounts Quick Bar:** View your portfolio overview and active wallet balances right from the Home header card.
 
 ### 📊 Smart Budgeting & 50/30/20 Rule
+
 - **Period & Category Budgets:** Configure monthly or weekly budgets with custom payday cycle dates.
 - **Needs vs. Wants Allocation:** Tag expenses to automatically track your 50/30/20 financial balance.
 - **Daily Financial Pulse:** Real-time visual allowance meters with alert indicators when spending crosses 80% and 100% thresholds.
 
 ### 🎯 Dedicated Savings Goals
-- **Target Tracking:** Set goals for emergency funds, gadgets, travel, or investments.
-- **Linked Account Deposits:** Fund savings goals directly from designated wallets with progress percentages and milestone markers.
+- **Target Tracking & Pace Projection:** Set goals for emergency funds, gadgets, travel, or investments with recommended weekly/monthly contribution pace, status badges (*On Track*, *Behind Schedule*, *Due Today*, *Overdue*), and one-tap pace quick-fill.
+- **Linked Account Deposits:** Fund savings goals directly from designated wallets (or track virtual allocations) with progress percentages and milestone markers.
 
-### 🤝 Debts & Split Bills
-- **Lend & Borrow Tracking:** Keep track of who owes whom with due dates and payment status.
-- **Partial & Full Repayments:** Log settlement payments seamlessly with one-tap transaction recording.
-- **Group Bill Splitting:** Split dining or shared expenses evenly among friends and immediately log your share.
+### 🤝 Debts & Custom Split Bills
+- **Lend & Borrow Tracking:** Keep track of who owes whom with due dates, overdue alerts, and settlement history.
+- **Equal & Custom Split Bills:** Split bills evenly or customize exact per-friend amounts (`CustomSplitResult`) with live user-share validation.
 
-### 📈 Visual Insights & PDF Reports
-- **Interactive Charts:** Comprehensive spending trends, category distributions, and income vs. expense breakdowns powered by `fl_chart`.
-- **Exportable PDF Reports:** Generate clean, printable PDF financial statements for any custom date range or month.
-- **Data Portability:** Export your complete financial history to standard CSV and JSON formats anytime.
+### 📈 Visual Insights, Vitality Score & Filtered Reports
+- **Net Worth & Vitality Score:** Track unified net worth (`Liquid Assets + Receivables - Liabilities`) alongside a 0–100 four-pillar *Glasshouse Vitality Score* without double-counting goal allocations.
+- **Weekly & Monthly Harvest Recaps & Drill-Down:** Review completed period recaps, tap category rows or pie chart slices to inspect matching transactions, and explore 6-period trend charts powered by `fl_chart`.
+- **Filtered PDF, CSV & Guest Backup:** Export wallet-filtered PDF statements, date- and wallet-filtered 8-column CSVs, and complete JSON backups with unobtrusive Guest Mode backup reminders.
 
-### ⏰ Automation & Reminders
-- **Recurring Transactions:** Automate recurring subscriptions, bills, salaries, and routine expenses.
-- **Quick Transaction Templates:** Save favorite spending routines (e.g., daily coffee, routine lunch) for one-tap entry.
-- **Smart Local Notifications:** Customizable daily reminders and budget threshold warnings scheduled directly via device alarms.
+### ⏰ Automation, Modules & Reminders
+- **Recurring Transactions:** Automate subscriptions, bills, and salaries with due confirmation queues inside Home and Recurring Schedules.
+- **Active Modules Manager:** Enable or disable optional feature pillars (`Goals`, `Debts & Splits`, `Recurring`, `Budget`, `Transfers`) dynamically via presets (**All Features** / **Minimalist**).
+- **Smart Local Notifications:** Customizable daily reminders, 80%/100% budget warnings, debt due reminders, and contextual Harvest Recap alerts scheduled cleanly on-device.
 
 ### 🌐 Bilingual Localization
+
 - Complete native support for both **English** and **Bahasa Indonesia** with seamless in-app switching.
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Layer | Technology | Details |
-| :--- | :--- | :--- |
-| **Framework** | Flutter 3.47+ (Stable Channel) | High-performance cross-platform UI |
-| **Language** | Dart 3.13+ | Null-safe, modern reactive language |
-| **State Management** | Flutter Riverpod (`flutter_riverpod` 3.x) | Predictable, reactive dependency injection |
-| **Local Database** | Drift SQLite (`drift`, `drift_flutter`) | Type-safe SQL engine with reactive streams |
-| **Hardware Security** | `flutter_secure_storage` & `local_auth` | Android Keystore / iOS Keychain & Biometrics |
-| **Cloud & Auth** | Firebase Core, Firebase Auth, Firestore | Optional real-time cloud backup & cross-device sync |
-| **Charts & Analytics** | `fl_chart` | Interactive, animated vector charts |
-| **Reporting & Export** | `pdf` & `printing` | Custom PDF generation & print-ready statements |
-| **Local Notifications**| `flutter_local_notifications` & `timezone` | Offline scheduled notifications & threshold alerts |
-| **Typography & Icons** | Plus Jakarta Sans (`google_fonts`) | Material 3 & tabular figures for number alignment |
-| **CI / CD Pipeline** | GitHub Actions | Automated release tagging, APK builds, and GitHub Releases |
+| Layer                   | Technology                                 | Details                                                    |
+| :---------------------- | :----------------------------------------- | :--------------------------------------------------------- |
+| **Framework**           | Flutter 3.47+ (Stable Channel)             | High-performance cross-platform UI                         |
+| **Language**            | Dart 3.13+                                 | Null-safe, modern reactive language                        |
+| **State Management**    | Flutter Riverpod (`flutter_riverpod` 3.x)  | Predictable, reactive dependency injection                 |
+| **Local Database**      | Drift SQLite (`drift`, `drift_flutter`)    | Type-safe SQL engine with reactive streams                 |
+| **Hardware Security**   | `flutter_secure_storage` & `local_auth`    | Android Keystore / iOS Keychain & Biometrics               |
+| **Cloud & Auth**        | Firebase Core, Firebase Auth, Firestore    | Optional real-time cloud backup & cross-device sync        |
+| **Charts & Analytics**  | `fl_chart`                                 | Interactive, animated vector charts                        |
+| **Reporting & Export**  | `pdf` & `printing`                         | Custom PDF generation & print-ready statements             |
+| **Local Notifications** | `flutter_local_notifications` & `timezone` | Offline scheduled notifications & threshold alerts         |
+| **Typography & Icons**  | Outfit & DM Sans (`google_fonts`)          | Material 3 & tabular figures for number alignment          |
+| **CI / CD Pipeline**    | GitHub Actions                             | Automated `flutter analyze` & `flutter test` gate + APK build |
 
 ---
 
@@ -135,6 +139,7 @@ Wall o' Pay follows a decoupled **Offline-First Reactive Architecture**:
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (version 3.47.0 or higher)
 - [Dart SDK](https://dart.dev/get-dart) (version 3.13.0 or higher)
 - Android Studio / VS Code with Flutter & Dart extensions
@@ -143,22 +148,26 @@ Wall o' Pay follows a decoupled **Offline-First Reactive Architecture**:
 ### Installation & Local Run
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/hyenavia/wall-o-pay.git
    cd wall_o_pay
    ```
 
 2. **Install project dependencies:**
+
    ```bash
    flutter pub get
    ```
 
 3. **Generate Drift Database code (Code Generation):**
+
    ```bash
    dart run build_runner build --delete-conflicting-outputs
    ```
 
 4. **Run code analysis and tests:**
+
    ```bash
    flutter analyze
    flutter test

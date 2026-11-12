@@ -14,20 +14,26 @@ import 'core/l10n.dart';
 import 'core/theme.dart';
 import 'core/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'data/budget_rule.dart';
 import 'data/cloud.dart';
 import 'data/cloud_sync.dart';
+import 'data/feature_prefs.dart';
+import 'data/feature_providers.dart';
+import 'data/module_prefs.dart';
 import 'data/notifications.dart';
 import 'data/prefs.dart';
 import 'data/providers.dart';
 import 'data/quick_widget_service.dart';
 import 'data/update_checker.dart';
-import 'data/recurring_service.dart';
+import 'data/recurring_service.dart' hide recurringRulesProvider;
 import 'data/share_service.dart';
 import 'features/auth/auth_page.dart';
 import 'features/budget/budget_page.dart';
+import 'features/goals/goals_page.dart';
 import 'features/insights/insights_page.dart';
 import 'features/home/home_page.dart';
 import 'features/onboarding/onboarding_gate.dart';
+import 'features/recurring/recurring_page.dart';
 import 'features/security/lock_screen.dart';
 import 'features/transactions/transaction_form.dart';
 import 'features/transactions/transactions_page.dart';
@@ -185,8 +191,30 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     ShareService.initialize(context, ref);
+    initializeWidgetRouting(
+      context,
+      ref,
+      onOpenNewTransaction: () {
+        if (mounted) showTransactionForm(context);
+      },
+      onOpenGoals: () {
+        if (mounted) {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const GoalsPage()),
+          );
+        }
+      },
+      onOpenRecurring: () {
+        if (mounted) {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(builder: (_) => const RecurringPage()),
+          );
+        }
+      },
+    );
     RecurringService.checkAndGenerateDue(ref.read(databaseProvider));
     checkDebtDueReminders(ref.read(databaseProvider));
+    _checkRecapNotification();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final user = ref.read(currentUserProvider);
       if (user != null) {
@@ -194,6 +222,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       }
       await checkNativeWidgetDbDirty(ref);
       await syncWidgetData(ref);
+      await syncWidgetSnapshot(ref);
     });
     Future.delayed(const Duration(milliseconds: 1500), () async {
       if (!mounted) return;
@@ -201,16 +230,38 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     });
   }
 
+  void _checkRecapNotification() {
+    final features = ref.read(featurePrefsProvider);
+    final appPrefs = ref.read(appPrefsProvider);
+    checkHarvestRecapNotification(
+      db: ref.read(databaseProvider),
+      prefs: ref.read(sharedPreferencesProvider),
+      enabled: features.recapAlerts,
+      periodType: appPrefs.periodType,
+      firstDayOfWeek: appPrefs.firstDayOfWeek,
+      firstDayOfMonth: appPrefs.firstDayOfMonth,
+    );
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       checkNativeWidgetDbDirty(ref).then((_) {
-        if (mounted) syncWidgetData(ref);
+        if (mounted) {
+          syncWidgetData(ref);
+          syncWidgetSnapshot(ref);
+        }
       });
       UpdateCheckerService.checkAndNotify(ref, context: context);
       RecurringService.checkAndGenerateDue(ref.read(databaseProvider));
       checkDebtDueReminders(ref.read(databaseProvider));
+      _checkRecapNotification();
       ShareService.checkSharedData(context);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          checkPendingWidgetRoute(context, ref);
+        }
+      });
       final user = ref.read(currentUserProvider);
       if (user != null) {
         ref.read(autoSyncServiceProvider).triggerTwoWaySync();
@@ -234,15 +285,47 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       }
     });
 
-    // Sinkronisasi data widget setiap kali total saldo, status sensor, bahasa, akun, atau kategori berubah.
-    ref.listen<int>(totalCurrentBalanceProvider, (_, _) => syncWidgetData(ref));
-    ref.listen<bool>(hideBalanceProvider, (_, _) => syncWidgetData(ref));
-    ref.listen<String>(appPrefsProvider.select((p) => p.localeCode), (_, _) => syncWidgetData(ref));
-    ref.listen(walletsProvider, (_, _) => syncWidgetData(ref));
-    ref.listen(categoriesProvider, (_, _) => syncWidgetData(ref));
+    // Sinkronisasi data widget & snapshot Daily Pulse setiap kali data terkait berubah.
+    ref.listen<int>(totalCurrentBalanceProvider, (_, _) {
+      syncWidgetData(ref);
+      scheduleWidgetSnapshotSync(ref);
+    });
+    ref.listen<bool>(hideBalanceProvider, (_, _) {
+      syncWidgetData(ref);
+      scheduleWidgetSnapshotSync(ref);
+    });
+    ref.listen<String>(appPrefsProvider.select((p) => p.localeCode), (_, _) {
+      syncWidgetData(ref);
+      scheduleWidgetSnapshotSync(ref);
+    });
+    ref.listen(appPrefsProvider, (_, _) => scheduleWidgetSnapshotSync(ref));
+    ref.listen(walletsProvider, (_, _) {
+      syncWidgetData(ref);
+      scheduleWidgetSnapshotSync(ref);
+    });
+    ref.listen(categoriesProvider, (_, _) {
+      syncWidgetData(ref);
+      scheduleWidgetSnapshotSync(ref);
+    });
+    ref.listen(transactionsProvider, (_, _) => scheduleWidgetSnapshotSync(ref));
+    ref.listen(budgetsProvider, (_, _) => scheduleWidgetSnapshotSync(ref));
+    ref.listen(budgetRuleProvider, (_, _) => scheduleWidgetSnapshotSync(ref));
+    ref.listen(featurePrefsProvider, (_, _) => scheduleWidgetSnapshotSync(ref));
+    ref.listen(templatesProvider, (_, _) => scheduleWidgetSnapshotSync(ref));
+    ref.listen(savingsGoalsProvider, (_, _) => scheduleWidgetSnapshotSync(ref));
+    ref.listen(recurringRulesProvider, (_, _) => scheduleWidgetSnapshotSync(ref));
+    ref.listen(pendingTransactionsProvider, (_, _) => scheduleWidgetSnapshotSync(ref));
+    ref.listen<int>(upcomingRecurringExpenseProvider, (_, _) => scheduleWidgetSnapshotSync(ref));
+    ref.listen<bool>(modulePrefsProvider.select((m) => m.budget), (_, enabled) {
+      if (!enabled && ref.read(tabIndexProvider) == 2) {
+        ref.read(tabIndexProvider.notifier).set(0);
+      }
+    });
 
     final colors = context.themeColors;
-    final index = ref.watch(tabIndexProvider);
+    final budgetEnabled = ref.watch(modulePrefsProvider.select((m) => m.budget));
+    final rawIndex = ref.watch(tabIndexProvider);
+    final index = (!budgetEnabled && rawIndex == 2) ? 0 : rawIndex;
     _visitedTabs.add(index);
     final notifier = ref.read(tabIndexProvider.notifier);
 
@@ -446,13 +529,14 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
                   glassIcon: 'assets/icons/glasshouse/receipt.png',
                 ),
                 const SizedBox(width: 64),
-                item(
-                  2,
-                  Icons.pie_chart_outline,
-                  Icons.pie_chart,
-                  context.tr('Budget'),
-                  glassIcon: 'assets/icons/glasshouse/savings.png',
-                ),
+                if (budgetEnabled)
+                  item(
+                    2,
+                    Icons.pie_chart_outline,
+                    Icons.pie_chart,
+                    context.tr('Budget'),
+                    glassIcon: 'assets/icons/glasshouse/savings.png',
+                  ),
                 item(
                   3,
                   Icons.insights_outlined,

@@ -15,7 +15,8 @@ import '../../core/widgets.dart';
 import '../../data/app_database.dart';
 import '../../data/feature_providers.dart';
 import '../../data/providers.dart';
-import '../../data/tables.dart' show TxType;
+import '../../data/tables.dart' show NeedWant, TxType;
+import '../settings/report_dialog.dart';
 import 'transaction_form.dart';
 import 'transaction_tile.dart';
 
@@ -28,19 +29,45 @@ class TransactionsPage extends ConsumerStatefulWidget {
 }
 
 class _TransactionsPageState extends ConsumerState<TransactionsPage> {
+  final TextEditingController _searchController = TextEditingController();
   String _query = '';
   Timer? _searchDebounce;
   TxType? _filter;
   DateTimeRange? _range;
   String? _selectedWalletId;
   String? _selectedCategoryId;
+  NeedWant? _needWant;
   bool _showCalendar = false;
   DateTime? _selectedDay;
 
   @override
   void dispose() {
     _searchDebounce?.cancel();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  bool get _hasAnyFilter =>
+      _query.isNotEmpty ||
+      _filter != null ||
+      _selectedWalletId != null ||
+      _selectedCategoryId != null ||
+      _needWant != null ||
+      _selectedDay != null ||
+      _range != null;
+
+  void _clearAllFilters() {
+    _searchDebounce?.cancel();
+    _searchController.clear();
+    setState(() {
+      _query = '';
+      _filter = null;
+      _selectedWalletId = null;
+      _selectedCategoryId = null;
+      _needWant = null;
+      _selectedDay = null;
+      _range = null;
+    });
   }
 
   void _onSearchChanged(String value) {
@@ -68,17 +95,35 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
   @override
   Widget build(BuildContext context) {
     final isSearching = _query.isNotEmpty;
+    final cats = ref.watch(categoryMapProvider);
+    final wallets = ref.watch(walletMapProvider);
+    final period = ref.watch(selectedPeriodProvider);
+
+    final matchedCategoryIds = isSearching
+        ? [
+            for (final c in cats.values)
+              if (c.name.toLowerCase().contains(_query) ||
+                  context.tr(c.name).toLowerCase().contains(_query))
+                c.id,
+          ]
+        : const <String>[];
+
     final txAsync = (isSearching
             ? ref.watch(searchTransactionsProvider(
-                TxSearchParams(query: _query, type: _filter, range: _range),
+                TxSearchParams(
+                  query: _query,
+                  type: _filter,
+                  range: _range,
+                  walletId: _selectedWalletId,
+                  categoryId: _selectedCategoryId,
+                  needWant: _needWant,
+                  matchedCategoryIds: matchedCategoryIds,
+                ),
               ))
             : (_range == null
                 ? ref.watch(transactionsProvider)
                 : ref.watch(rangeTransactionsProvider(_range!))))
         .unwrapPrevious();
-    final cats = ref.watch(categoryMapProvider);
-    final wallets = ref.watch(walletMapProvider);
-    final period = ref.watch(selectedPeriodProvider);
 
     return Scaffold(
       appBar: pageAppBar(
@@ -104,11 +149,53 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             ),
             onPressed: _pickRange,
           ),
+          PopupMenuButton<String>(
+            tooltip: context.tr('Export'),
+            icon: const Icon(Icons.ios_share_rounded, color: Colors.white),
+            onSelected: (choice) {
+              if (choice == 'pdf') {
+                showReportDialog(context);
+              } else if (choice == 'csv') {
+                showCsvExportDialog(context, ref);
+              }
+            },
+            itemBuilder: (ctx) => [
+              PopupMenuItem<String>(
+                value: 'pdf',
+                child: Row(
+                  children: [
+                    const Icon(Icons.picture_as_pdf_outlined, size: 18, color: AppColors.dewMint),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        ctx.tr('Export PDF report'),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem<String>(
+                value: 'csv',
+                child: Row(
+                  children: [
+                    const Icon(Icons.table_view_outlined, size: 18, color: AppColors.dewMint),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        ctx.tr('Export transactions (CSV)'),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
         bottom: Center(
-          child: _range == null
-              ? const PeriodSwitcher(onDark: true)
-              : InputChip(
+          child: _range != null
+              ? InputChip(
                   avatar: const Icon(Icons.date_range_rounded, size: 18, color: AppColors.dewMint),
                   label: Text(
                     '${shortDate(_range!.start)} - ${shortDate(_range!.end)}',
@@ -118,7 +205,34 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                   backgroundColor: AppColors.emeraldLeaf.withValues(alpha: 0.35),
                   side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.40)),
                   onDeleted: () => setState(() => _range = null),
-                ),
+                )
+              : isSearching
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.emeraldLeaf.withValues(alpha: 0.28),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: AppColors.dewMint.withValues(alpha: 0.35),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.history_rounded, size: 15, color: AppColors.dewMint),
+                          const SizedBox(width: 6),
+                          Text(
+                            context.tr('Searching across all dates'),
+                            style: const TextStyle(
+                              color: AppColors.dewMint,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : const PeriodSwitcher(onDark: true),
         ),
         bottomHeight: 44,
       ),
@@ -139,6 +253,9 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
               if (_selectedCategoryId != null && t.categoryId != _selectedCategoryId) {
                 return false;
               }
+              if (_needWant != null && t.needWant != _needWant) {
+                return false;
+              }
               if (_selectedDay != null &&
                   (t.date.year != _selectedDay!.year ||
                       t.date.month != _selectedDay!.month ||
@@ -154,6 +271,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
             final totalExpense = shown
                 .where((t) => t.type == TxType.expense)
                 .fold<int>(0, (a, t) => a + t.amount);
+            final netFlow = totalIncome - totalExpense;
 
             // Kelompokkan per hari (urutan sudah dari terbaru).
             final groups = <DateTime, List<TransactionEntry>>{};
@@ -172,11 +290,23 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         TextField(
+                          controller: _searchController,
                           onChanged: _onSearchChanged,
                           decoration: appInput(
                             context,
                             hint: context.tr('Search transaction...'),
                             prefixIcon: const Icon(Icons.search_rounded, color: AppColors.freshSage),
+                            suffixIcon: (_query.isNotEmpty || _searchController.text.isNotEmpty)
+                                ? IconButton(
+                                    tooltip: context.tr('Clear search'),
+                                    icon: const Icon(Icons.close_rounded, color: AppColors.freshSage, size: 18),
+                                    onPressed: () {
+                                      _searchDebounce?.cancel();
+                                      _searchController.clear();
+                                      setState(() => _query = '');
+                                    },
+                                  )
+                                : null,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -358,16 +488,96 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                   ),
                                 ),
                               ),
-                              if (_selectedWalletId != null ||
-                                  _selectedCategoryId != null ||
-                                  _selectedDay != null) ...[
+                              const SizedBox(width: 8),
+                              // Need / Want filter button
+                              PopupMenuButton<NeedWant?>(
+                                tooltip: context.tr('Filter by Need / Want'),
+                                onSelected: (val) => setState(() => _needWant = val),
+                                itemBuilder: (context) => [
+                                  PopupMenuItem<NeedWant?>(
+                                    value: null,
+                                    child: Text(context.tr('All Needs & Wants')),
+                                  ),
+                                  PopupMenuItem<NeedWant?>(
+                                    value: NeedWant.need,
+                                    child: Row(
+                                      children: [
+                                        if (_needWant == NeedWant.need)
+                                          const Icon(Icons.check, size: 16, color: AppColors.incomeOnDark)
+                                        else
+                                          const SizedBox(width: 16),
+                                        const SizedBox(width: 8),
+                                        Text(context.tr('Needs')),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem<NeedWant?>(
+                                    value: NeedWant.want,
+                                    child: Row(
+                                      children: [
+                                        if (_needWant == NeedWant.want)
+                                          const Icon(Icons.check, size: 16, color: AppColors.incomeOnDark)
+                                        else
+                                          const SizedBox(width: 16),
+                                        const SizedBox(width: 8),
+                                        Text(context.tr('Wants')),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                                  decoration: BoxDecoration(
+                                    color: _needWant != null
+                                        ? AppColors.emeraldLeaf.withValues(alpha: 0.35)
+                                        : AppColors.cardSurface.withValues(alpha: 0.85),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: _needWant != null
+                                          ? AppColors.dewMint
+                                          : AppColors.dewMint.withValues(alpha: 0.22),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.balance_outlined,
+                                        size: 15,
+                                        color: _needWant != null
+                                            ? AppColors.dewMint
+                                            : AppColors.freshSage,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        _needWant == null
+                                            ? context.tr('Need / Want')
+                                            : context.tr(_needWant == NeedWant.need ? 'Needs' : 'Wants'),
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.w600,
+                                          color: _needWant != null
+                                              ? AppColors.dewMint
+                                              : AppColors.softIvory,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Icon(
+                                        Icons.arrow_drop_down,
+                                        size: 16,
+                                        color: _needWant != null
+                                            ? AppColors.dewMint
+                                            : AppColors.freshSage,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              if (_hasAnyFilter) ...[
                                 const SizedBox(width: 8),
                                 InkWell(
-                                  onTap: () => setState(() {
-                                    _selectedWalletId = null;
-                                    _selectedCategoryId = null;
-                                    _selectedDay = null;
-                                  }),
+                                  onTap: _clearAllFilters,
                                   borderRadius: BorderRadius.circular(16),
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -441,36 +651,87 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: AppColors.cardSurface.withValues(alpha: 0.72),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: AppColors.dewMint.withValues(alpha: 0.14),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.receipt_long_outlined,
+                                size: 14,
+                                color: AppColors.freshSage,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                shown.length == 1
+                                    ? context.tr('1 transaction')
+                                    : context.tr('{count} transactions', {'count': shown.length}),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.freshSage,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const Spacer(),
+                              Text(
+                                '${context.tr('Net flow')}: ',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.freshSage,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                '${netFlow >= 0 ? '+' : '-'}${rupiah(netFlow.abs())}',
+                                style: context.moneyStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w800,
+                                  color: netFlow >= 0
+                                      ? AppColors.incomeOnDark
+                                      : AppColors.expenseOnDark,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
-                if (txs.isEmpty)
+                if (txs.isEmpty && !_hasAnyFilter)
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
                     sliver: SliverToBoxAdapter(
-                      child: isSearching
-                          ? EmptyState(
-                              icon: Icons.search_off,
-                              message: context.tr('No matching transactions.'),
-                            )
-                          : EmptyStateCard(
-                              title: context.tr('Start recording your first transaction!'),
-                              subtitle: context.tr(
-                                'Every small transaction brings you closer to your financial goals.',
-                              ),
-                              actionLabel: context.tr('Add transaction'),
-                              onAction: () => showTransactionForm(context),
-                            ),
+                      child: EmptyStateCard(
+                        title: context.tr('Start recording your first transaction!'),
+                        subtitle: context.tr(
+                          'Every small transaction brings you closer to your financial goals.',
+                        ),
+                        actionLabel: context.tr('Add transaction'),
+                        onAction: () => showTransactionForm(context),
+                      ),
                     ),
                   )
                 else if (shown.isEmpty)
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 48, 20, 96),
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
                     sliver: SliverToBoxAdapter(
-                      child: EmptyState(
-                        icon: Icons.search_off,
-                        message: context.tr('No matching transactions.'),
+                      child: EmptyStateCard(
+                        icon: Icons.search_off_rounded,
+                        title: context.tr('No matching transactions.'),
+                        subtitle: context.tr(
+                          'Try adjusting your search keywords or active filters.',
+                        ),
+                        actionLabel: context.tr('Clear filters'),
+                        onAction: _clearAllFilters,
                       ),
                     ),
                   )
@@ -540,6 +801,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                     toWallet: t.toWalletId != null ? wallets[t.toWalletId!] : null,
                                     trailingNote: timeLabel(t.createdAt),
                                     onTap: () => showTransactionForm(context, entry: t),
+                                    onLongPress: () => showDuplicateTransactionForm(context, t),
                                   ),
                               ],
                             ),

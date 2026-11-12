@@ -14,6 +14,7 @@ class FeaturePrefs {
     required this.rollover,
     required this.budgetAlerts,
     required this.dailyReminder,
+    this.recapAlerts = false,
     required this.reminderHour,
     required this.reminderMinute,
   });
@@ -21,6 +22,7 @@ class FeaturePrefs {
   final bool rollover;
   final bool budgetAlerts;
   final bool dailyReminder;
+  final bool recapAlerts;
   final int reminderHour;
   final int reminderMinute;
 
@@ -30,6 +32,7 @@ class FeaturePrefs {
     bool? rollover,
     bool? budgetAlerts,
     bool? dailyReminder,
+    bool? recapAlerts,
     int? reminderHour,
     int? reminderMinute,
   }) {
@@ -37,6 +40,7 @@ class FeaturePrefs {
       rollover: rollover ?? this.rollover,
       budgetAlerts: budgetAlerts ?? this.budgetAlerts,
       dailyReminder: dailyReminder ?? this.dailyReminder,
+      recapAlerts: recapAlerts ?? this.recapAlerts,
       reminderHour: reminderHour ?? this.reminderHour,
       reminderMinute: reminderMinute ?? this.reminderMinute,
     );
@@ -47,6 +51,7 @@ class FeaturePrefsController extends Notifier<FeaturePrefs> {
   static const _kRollover = 'pref_rollover';
   static const _kAlerts = 'pref_budget_alerts';
   static const _kReminder = 'pref_daily_reminder';
+  static const _kRecapAlerts = 'pref_recap_alerts';
   static const _kHour = 'pref_reminder_hour';
   static const _kMinute = 'pref_reminder_minute';
 
@@ -57,6 +62,7 @@ class FeaturePrefsController extends Notifier<FeaturePrefs> {
       rollover: p.getBool(_kRollover) ?? false,
       budgetAlerts: p.getBool(_kAlerts) ?? false,
       dailyReminder: p.getBool(_kReminder) ?? false,
+      recapAlerts: p.getBool(_kRecapAlerts) ?? false,
       reminderHour: p.getInt(_kHour) ?? 20,
       reminderMinute: p.getInt(_kMinute) ?? 0,
     );
@@ -75,6 +81,7 @@ class FeaturePrefsController extends Notifier<FeaturePrefs> {
     bool? rollover,
     bool? budgetAlerts,
     bool? dailyReminder,
+    bool? recapAlerts,
     int? reminderHour,
     int? reminderMinute,
   }) {
@@ -82,6 +89,7 @@ class FeaturePrefsController extends Notifier<FeaturePrefs> {
       rollover: rollover,
       budgetAlerts: budgetAlerts,
       dailyReminder: dailyReminder,
+      recapAlerts: recapAlerts,
       reminderHour: reminderHour,
       reminderMinute: reminderMinute,
     );
@@ -89,6 +97,7 @@ class FeaturePrefsController extends Notifier<FeaturePrefs> {
     if (rollover != null) p.setBool(_kRollover, rollover);
     if (budgetAlerts != null) p.setBool(_kAlerts, budgetAlerts);
     if (dailyReminder != null) p.setBool(_kReminder, dailyReminder);
+    if (recapAlerts != null) p.setBool(_kRecapAlerts, recapAlerts);
     if (reminderHour != null) p.setInt(_kHour, reminderHour);
     if (reminderMinute != null) p.setInt(_kMinute, reminderMinute);
   }
@@ -108,6 +117,12 @@ class FeaturePrefsController extends Notifier<FeaturePrefs> {
   Future<void> setDailyReminder(bool v) async {
     state = state.copyWith(dailyReminder: v);
     await ref.read(sharedPreferencesProvider).setBool(_kReminder, v);
+    _syncToCloud();
+  }
+
+  Future<void> setRecapAlerts(bool v) async {
+    state = state.copyWith(recapAlerts: v);
+    await ref.read(sharedPreferencesProvider).setBool(_kRecapAlerts, v);
     _syncToCloud();
   }
 

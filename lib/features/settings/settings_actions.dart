@@ -36,7 +36,7 @@ class SettingsActions {
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.cloud_done_rounded, color: Colors.green, size: 20),
+                const Icon(Icons.cloud_done_rounded, color: AppColors.incomeOnDark, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -48,7 +48,7 @@ class SettingsActions {
                 ),
               ],
             ),
-            backgroundColor: const Color(0xFF1E4238),
+            backgroundColor: AppColors.glasshouseGreen,
           ),
         );
       }
@@ -59,7 +59,7 @@ class SettingsActions {
             content: Text(
               context.tr('Failed to send data: {error}', {'error': e.toString()}),
             ),
-            backgroundColor: Colors.red.shade800,
+            backgroundColor: AppColors.expense,
           ),
         );
       }
@@ -80,7 +80,7 @@ class SettingsActions {
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.cloud_done_rounded, color: Colors.green, size: 20),
+                const Icon(Icons.cloud_done_rounded, color: AppColors.incomeOnDark, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -92,7 +92,7 @@ class SettingsActions {
                 ),
               ],
             ),
-            backgroundColor: const Color(0xFF1E4238),
+            backgroundColor: AppColors.glasshouseGreen,
           ),
         );
       }
@@ -103,7 +103,7 @@ class SettingsActions {
             content: Text(
               context.tr('Failed to fetch data: {error}', {'error': e.toString()}),
             ),
-            backgroundColor: Colors.red.shade800,
+            backgroundColor: AppColors.expense,
           ),
         );
       }
@@ -117,7 +117,7 @@ class SettingsActions {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.tr('Synced with cloud.')),
-            backgroundColor: const Color(0xFF1E4238),
+            backgroundColor: AppColors.glasshouseGreen,
           ),
         );
       }
@@ -126,7 +126,7 @@ class SettingsActions {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.tr('Sync failed: {error}', {'error': e.toString()})),
-            backgroundColor: Colors.red.shade800,
+            backgroundColor: AppColors.expense,
           ),
         );
       }
@@ -242,6 +242,10 @@ class SettingsActions {
       }
 
       final prefs = ref.read(sharedPreferencesProvider);
+      final prevSyncUid = prefs.getString('current_sync_user_id');
+      if (prevSyncUid != null) {
+        await AutoSyncService.clearPullCursor(prefs, prevSyncUid);
+      }
       await prefs.remove('current_sync_user_id');
       await ref.read(skipAuthProvider.notifier).reset();
 
@@ -394,9 +398,14 @@ class SettingsActions {
       }
 
       final prefs = ref.read(sharedPreferencesProvider);
+      final prevSyncUid = prefs.getString('current_sync_user_id');
+      if (prevSyncUid != null) {
+        await AutoSyncService.clearPullCursor(prefs, prevSyncUid);
+      }
       await prefs.remove('current_sync_user_id');
       await ref.read(skipAuthProvider.notifier).reset();
       if (userUid != null) {
+        await AutoSyncService.clearPullCursor(prefs, userUid);
         await prefs.remove('onboarding_done_$userUid');
       }
 

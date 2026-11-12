@@ -481,7 +481,7 @@ class QuickTransactionActivity : Activity() {
                     .putBoolean(WidgetDatabaseHelper.KEY_FEEDBACK_IS_ERROR, false)
                     .commit()
 
-                QuickFinanceWidgetProvider.updateAllWidgets(this)
+                WidgetSnapshotStore.refreshAllWidgets(this)
                 hideKeyboard()
                 Toast.makeText(this, successMsg, Toast.LENGTH_SHORT).show()
                 finish()

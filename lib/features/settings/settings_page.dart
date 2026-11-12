@@ -16,9 +16,12 @@ import '../../data/cloud.dart';
 import '../../data/cloud_backup.dart';
 import '../../data/cloud_sync.dart';
 import '../../data/feature_prefs.dart';
+import '../../data/module_prefs.dart';
 import '../../data/notifications.dart';
 import 'app_changelog.dart';
 import 'about_sheet.dart';
+import 'guest_backup_nudge_banner.dart';
+import 'report_dialog.dart';
 import '../../data/export_service.dart';
 import '../../data/prefs.dart';
 import '../../data/profile.dart';
@@ -30,6 +33,7 @@ import '../profile/profile_page.dart';
 import '../../data/lock.dart';
 import '../security/security_page.dart';
 import 'settings_actions.dart';
+import 'widget_hub_sheet.dart';
 
 /// Widget halaman Pengaturan aplikasi.
 class SettingsPage extends ConsumerWidget {
@@ -48,6 +52,7 @@ class SettingsPage extends ConsumerWidget {
     final prefsCtl = ref.read(appPrefsProvider.notifier);
     final features = ref.watch(featurePrefsProvider);
     final featuresCtl = ref.read(featurePrefsProvider.notifier);
+    final modules = ref.watch(modulePrefsProvider);
     final name = ref.watch(displayNameProvider);
     final username = ref.watch(usernameProvider);
     final canUseCloud = ready && user != null && !isSyncing;
@@ -196,6 +201,40 @@ class SettingsPage extends ConsumerWidget {
                     onSelectionChanged: (s) => prefsCtl.setLocale(s.first),
                   ),
                 ),
+                const SizedBox(height: 16),
+                const Divider(height: 1),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: iconBadge(Icons.tune_rounded, AppColors.dewMint),
+                  title: Text(
+                    context.tr('Active Modules & Features'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                  subtitle: Text(
+                    context.tr('{count} of {total} modules active', {
+                      'count': modules.activeCount,
+                      'total': 5,
+                    }),
+                    style: TextStyle(fontSize: 12, color: muted),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  onTap: () => _showModulePrefsSheet(context),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: iconBadge(Icons.widgets_outlined, AppColors.sage),
+                  title: Text(
+                    context.tr('Android Home Widgets'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                  subtitle: Text(
+                    context.tr('6 Enchanted Glasshouse widgets for your Home Screen'),
+                    style: TextStyle(fontSize: 12, color: muted),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  onTap: () => showWidgetHubSheet(context, ref),
+                ),
               ],
             ),
           ),
@@ -300,6 +339,30 @@ class SettingsPage extends ConsumerWidget {
                     },
                   ),
                 ],
+                const Divider(height: 1, indent: 68),
+                SwitchListTile(
+                  secondary: iconBadge(Icons.auto_stories_outlined, AppColors.dewMint),
+                  title: Text(
+                    context.tr('Harvest recap notifications'),
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                  subtitle: Text(
+                    context.tr('Notify once when a weekly or monthly recap is ready to review.'),
+                    style: TextStyle(fontSize: 12, color: muted),
+                  ),
+                  value: features.recapAlerts,
+                  onChanged: (v) async {
+                    if (v && !await NotificationService.instance.requestPermission()) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(context.tr('Notification permission was not granted.'))),
+                        );
+                      }
+                      return;
+                    }
+                    await featuresCtl.setRecapAlerts(v);
+                  },
+                ),
               ],
             ),
           ),
@@ -552,6 +615,10 @@ class SettingsPage extends ConsumerWidget {
               ],
             ),
           ),
+          if (user == null)
+            GuestBackupNudgeBanner(
+              onBackupNow: () => triggerGuestJsonBackup(context, ref),
+            ),
           SectionHeader(title: context.tr('Manual Backup & Export')),
           AppCard(
             padding: EdgeInsets.zero,
@@ -576,6 +643,10 @@ class SettingsPage extends ConsumerWidget {
                       preferences: prefs,
                       budgetConfig: budget,
                     );
+                    await ref.read(sharedPreferencesProvider).setInt(
+                          kLastJsonBackupMsKey,
+                          DateTime.now().millisecondsSinceEpoch,
+                        );
                     return trG('Backup file ready to share.');
                   }),
                 ),
@@ -648,10 +719,7 @@ class SettingsPage extends ConsumerWidget {
                     style: TextStyle(fontSize: 12, color: muted),
                   ),
                   trailing: const Icon(Icons.chevron_right, size: 20),
-                  onTap: () => SettingsActions.runAction(context, () async {
-                    await ExportService(ref.read(databaseProvider)).shareCsv();
-                    return trG('CSV file ready to share.');
-                  }),
+                  onTap: () => showCsvExportDialog(context, ref),
                 ),
               ],
             ),
@@ -819,6 +887,15 @@ class SettingsPage extends ConsumerWidget {
       _ => context.tr('Monday'),
     };
   }
+
+  Future<void> _showModulePrefsSheet(BuildContext context) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => const _ModulePrefsSheet(),
+    );
+  }
 }
 
 class _UpdateTile extends StatelessWidget {
@@ -870,13 +947,13 @@ class _UpdateTile extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE65100),
+                    color: colors.warning,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     context.tr('NEW'),
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: AppColors.mossShadow,
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                     ),
@@ -891,7 +968,7 @@ class _UpdateTile extends StatelessWidget {
                 : 'Wall o\' Pay v${UpdateCheckerService.currentVersion} • ${context.tr('Latest Release')}',
             style: TextStyle(
               fontSize: 12,
-              color: updateInfo != null ? const Color(0xFFE65100) : muted,
+              color: updateInfo != null ? colors.warning : muted,
               fontWeight: updateInfo != null ? FontWeight.w700 : null,
             ),
           ),
@@ -1166,4 +1243,136 @@ class _ProfileCardGlassPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _ModulePrefsSheet extends ConsumerWidget {
+  const _ModulePrefsSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modules = ref.watch(modulePrefsProvider);
+    final ctl = ref.read(modulePrefsProvider.notifier);
+    final theme = Theme.of(context);
+    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.65);
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                context.tr('Choose your features'),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                context.tr(
+                  'Pick the modules you want to use. You can change them anytime in Settings.',
+                ),
+                style: theme.textTheme.bodySmall?.copyWith(color: muted),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => ctl.setAll(
+                        goals: true,
+                        debts: true,
+                        recurring: true,
+                        transfer: true,
+                        budget: true,
+                      ),
+                      child: Text(context.tr('All Features')),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => ctl.setAll(
+                        goals: false,
+                        debts: false,
+                        recurring: false,
+                        transfer: false,
+                        budget: false,
+                      ),
+                      child: Text(context.tr('Minimalist')),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                secondary: const Icon(Icons.flag_outlined, color: AppColors.sage),
+                title: Text(context.tr('Savings Goals')),
+                subtitle: Text(
+                  context.tr('Set targets for emergency funds, gadgets, or vacations.'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                value: modules.goals,
+                onChanged: (v) => ctl.setModule('goals', v),
+              ),
+              const Divider(height: 1),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                secondary: const Icon(Icons.handshake_outlined, color: AppColors.warning),
+                title: Text(context.tr('Debts & Split Bills')),
+                subtitle: Text(
+                  context.tr('Track who owes whom and split group dining bills.'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                value: modules.debts,
+                onChanged: (v) => ctl.setModule('debts', v),
+              ),
+              const Divider(height: 1),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                secondary: const Icon(Icons.event_repeat_rounded, color: Color(0xFF60A5FA)),
+                title: Text(context.tr('Recurring Schedules')),
+                subtitle: Text(
+                  context.tr('Automate allowance, subscriptions, and rent reminders.'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                value: modules.recurring,
+                onChanged: (v) => ctl.setModule('recurring', v),
+              ),
+              const Divider(height: 1),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                secondary: const Icon(Icons.swap_horiz_rounded, color: AppColors.incomeOnDark),
+                title: Text(context.tr('Account Transfers')),
+                subtitle: Text(
+                  context.tr('Move funds between cash, bank, and digital wallets.'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                value: modules.transfer,
+                onChanged: (v) => ctl.setModule('transfer', v),
+              ),
+              const Divider(height: 1),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                secondary: const Icon(Icons.pie_chart_outline_rounded, color: AppColors.dewMint),
+                title: Text(context.tr('Category Budgets')),
+                subtitle: Text(
+                  context.tr('Set monthly or weekly spending limits per category.'),
+                  style: TextStyle(fontSize: 12, color: muted),
+                ),
+                value: modules.budget,
+                onChanged: (v) => ctl.setModule('budget', v),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

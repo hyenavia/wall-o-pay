@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/period.dart';
 import 'app_database.dart';
 import 'prefs.dart';
+import 'recurring_service.dart';
 import 'tables.dart';
 
 /// Provider singleton untuk koneksi database SQLite lokal ([AppDatabase]).
@@ -32,18 +33,22 @@ class SelectedAnchor extends Notifier<DateTime> {
       prefs.periodType,
       state,
       firstDayOfWeek: prefs.firstDayOfWeek,
+      firstDayOfMonth: prefs.firstDayOfMonth,
     ).shift(n).start;
   }
 }
 
-final selectedAnchorProvider =
-    NotifierProvider<SelectedAnchor, DateTime>(SelectedAnchor.new);
+final selectedAnchorProvider = NotifierProvider<SelectedAnchor, DateTime>(
+  SelectedAnchor.new,
+);
 
 /// Periode yang sedang dilihat (satu bulan atau satu minggu).
 final selectedPeriodProvider = Provider<Period>((ref) {
   final type = ref.watch(appPrefsProvider.select((p) => p.periodType));
   final firstDay = ref.watch(appPrefsProvider.select((p) => p.firstDayOfWeek));
-  final firstDayMonth = ref.watch(appPrefsProvider.select((p) => p.firstDayOfMonth));
+  final firstDayMonth = ref.watch(
+    appPrefsProvider.select((p) => p.firstDayOfMonth),
+  );
   final anchor = ref.watch(selectedAnchorProvider);
   return Period.containing(
     type,
@@ -88,8 +93,9 @@ class HideBalanceNotifier extends Notifier<bool> {
   }
 }
 
-final hideBalanceProvider =
-    NotifierProvider<HideBalanceNotifier, bool>(HideBalanceNotifier.new);
+final hideBalanceProvider = NotifierProvider<HideBalanceNotifier, bool>(
+  HideBalanceNotifier.new,
+);
 
 /// Tab aktif di navigasi bawah (0 Home, 1 Transactions, 2 Budget, 3 Goals).
 class TabIndex extends Notifier<int> {
@@ -118,12 +124,13 @@ final transactionsProvider = StreamProvider<List<TransactionEntry>>((ref) {
 });
 
 /// Transaksi periode sebelumnya (untuk perbandingan periode di tab Insight).
-final previousPeriodTransactionsProvider = StreamProvider<List<TransactionEntry>>((ref) {
-  final period = ref.watch(selectedPeriodProvider).shift(-1);
-  return ref
-      .watch(databaseProvider)
-      .watchTransactionsBetween(period.start, period.end);
-});
+final previousPeriodTransactionsProvider =
+    StreamProvider<List<TransactionEntry>>((ref) {
+      final period = ref.watch(selectedPeriodProvider).shift(-1);
+      return ref
+          .watch(databaseProvider)
+          .watchTransactionsBetween(period.start, period.end);
+    });
 
 /// Transaksi 6 periode terakhir (berakhir di periode terpilih), untuk grafik tren.
 final trendTransactionsProvider = StreamProvider<List<TransactionEntry>>((ref) {
@@ -144,7 +151,9 @@ final savingsGoalsProvider = StreamProvider<List<SavingsGoal>>((ref) {
 
 /// id kategori -> kategori (termasuk yang sudah dihapus, untuk nama dan ikon).
 final categoryMapProvider = Provider<Map<String, Category>>((ref) {
-  return ref.watch(allCategoriesProvider).maybeWhen(
+  return ref
+      .watch(allCategoriesProvider)
+      .maybeWhen(
         data: (list) => {for (final c in list) c.id: c},
         orElse: () => const <String, Category>{},
       );
@@ -153,10 +162,13 @@ final categoryMapProvider = Provider<Map<String, Category>>((ref) {
 /// id kategori -> nominal anggaran periode ini (hanya kategori yang masih aktif).
 final budgetByCategoryProvider = Provider<Map<String, int>>((ref) {
   final cats = ref.watch(categoryMapProvider);
-  return ref.watch(budgetsProvider).maybeWhen(
+  return ref
+      .watch(budgetsProvider)
+      .maybeWhen(
         data: (list) => {
           for (final b in list)
-            if (cats[b.categoryId] != null && cats[b.categoryId]!.deletedAt == null)
+            if (cats[b.categoryId] != null &&
+                cats[b.categoryId]!.deletedAt == null)
               b.categoryId: b.amount,
         },
         orElse: () => const <String, int>{},
@@ -165,7 +177,9 @@ final budgetByCategoryProvider = Provider<Map<String, int>>((ref) {
 
 /// id kategori -> total pengeluaran periode ini.
 final spentByCategoryProvider = Provider<Map<String, int>>((ref) {
-  return ref.watch(transactionsProvider).maybeWhen(
+  return ref
+      .watch(transactionsProvider)
+      .maybeWhen(
         data: (list) {
           final result = <String, int>{};
           for (final t in list) {
@@ -203,7 +217,9 @@ final walletsProvider = StreamProvider<List<Wallet>>((ref) {
 
 /// Map id dompet -> Wallet.
 final walletMapProvider = Provider<Map<String, Wallet>>((ref) {
-  return ref.watch(walletsProvider).maybeWhen(
+  return ref
+      .watch(walletsProvider)
+      .maybeWhen(
         data: (list) => {for (final w in list) w.id: w},
         orElse: () => const <String, Wallet>{},
       );
@@ -222,7 +238,8 @@ final walletNetFlowsProvider = StreamProvider<Map<String, int>>((ref) {
 /// Map id dompet -> saldo saat ini (initialBalance + income - expense + transfer_in - transfer_out).
 final walletBalancesProvider = Provider<Map<String, int>>((ref) {
   final wallets = ref.watch(walletsProvider).value ?? const [];
-  final netFlows = ref.watch(walletNetFlowsProvider).value ?? const <String, int>{};
+  final netFlows =
+      ref.watch(walletNetFlowsProvider).value ?? const <String, int>{};
 
   return <String, int>{
     for (final w in wallets) w.id: w.initialBalance + (netFlows[w.id] ?? 0),
@@ -236,4 +253,22 @@ final totalCurrentBalanceProvider = Provider<int>((ref) {
   return wallets.fold<int>(0, (sum, w) => sum + (balances[w.id] ?? 0));
 });
 
+/// Total tagihan berulang (expense) aktif + antrean tertunda yang masih jatuh tempo di sisa periode berjalan.
+final upcomingRecurringExpenseProvider = Provider<int>((ref) {
+  final rules =
+      ref.watch(recurringRulesProvider).value ?? const <RecurringRule>[];
+  final pendingList =
+      ref.watch(_upcomingPendingProvider).value ?? const <PendingTransaction>[];
+  final period = ref.watch(selectedPeriodProvider);
+  return RecurringService.calculateUpcomingExpense(
+    rules,
+    period,
+    pending: pendingList,
+  );
+});
 
+final _upcomingPendingProvider = StreamProvider<List<PendingTransaction>>((
+  ref,
+) {
+  return ref.watch(databaseProvider).watchPendingTransactions();
+});

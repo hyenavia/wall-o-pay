@@ -138,6 +138,39 @@ class Debts extends Table with SyncColumns {
   Set<Column> get primaryKey => {id};
 }
 
+/// Riwayat cicilan / pembayaran utang-piutang secara terperinci per transaksi.
+@TableIndex(name: 'debt_payments_debt_idx', columns: {#debtId, #deletedAt})
+@DataClassName('DebtPayment')
+class DebtPayments extends Table with SyncColumns {
+  TextColumn get debtId => text()();
+  IntColumn get amount => integer()();
+  DateTimeColumn get date => dateTime()();
+  TextColumn get walletId => text().nullable()();
+  TextColumn get transactionId => text().nullable()();
+  TextColumn get note => text().withDefault(const Constant(''))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Antrean transaksi berulang yang menunggu konfirmasi pengguna sebelum dicatat resmi.
+@TableIndex(name: 'pending_tx_rule_idx', columns: {#recurringRuleId, #deletedAt})
+@DataClassName('PendingTransaction')
+class PendingTransactions extends Table with SyncColumns {
+  TextColumn get recurringRuleId => text().nullable()();
+  TextColumn get title => text().withLength(min: 1, max: 120)();
+  IntColumn get amount => integer()();
+  TextColumn get type => textEnum<TxType>()();
+  TextColumn get categoryId => text()();
+  TextColumn get walletId => text().nullable()();
+  TextColumn get toWalletId => text().nullable()();
+  DateTimeColumn get dueDate => dateTime()();
+  TextColumn get note => text().withDefault(const Constant(''))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// Template transaksi favorit untuk input sekali ketuk.
 @DataClassName('TxTemplate')
 class TxTemplates extends Table with SyncColumns {

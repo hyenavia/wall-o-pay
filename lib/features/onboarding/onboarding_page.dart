@@ -57,7 +57,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     setState(() => _saving = true);
     try {
       final db = ref.read(databaseProvider);
-      final type = ref.read(appPrefsProvider).periodType;
+      final prefs = ref.read(appPrefsProvider);
+      final type = prefs.periodType;
 
       final cash = parseAmount(_cash.text);
       if (cash > 0) await db.updateWalletInitialBalance('wallet-cash', cash);
@@ -83,7 +84,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         await RecurringService.checkAndGenerateDue(db);
       }
 
-      final key = Period.containing(type, DateTime.now()).key;
+      final key = Period.containing(
+        type,
+        DateTime.now(),
+        firstDayOfWeek: prefs.firstDayOfWeek,
+        firstDayOfMonth: prefs.firstDayOfMonth,
+      ).key;
       for (final e in {
         'cat-exp-food': parseAmount(_food.text),
         'cat-exp-transport': parseAmount(_transport.text),

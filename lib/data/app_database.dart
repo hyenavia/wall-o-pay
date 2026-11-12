@@ -25,6 +25,8 @@ const _expenseSeed = <(String, String, String, int, String)>[
   ('cat-exp-shopping', 'Shopping', 'shopping', 0xFFD81B60, 'Belanja'),
   ('cat-exp-fun', 'Entertainment', 'movie', 0xFF8E24AA, 'Hiburan'),
   ('cat-exp-health', 'Health', 'health', 0xFFE53935, 'Kesehatan'),
+  ('cat-exp-admin', 'Admin Fee', 'receipt', 0xFF607D8B, 'Biaya Admin'),
+  ('cat-exp-savings', 'Savings Deposit', 'savings', 0xFF00897B, 'Setoran Tabungan'),
   ('cat-exp-other', 'Other', 'more', 0xFF607D8B, 'Lainnya'),
 ];
 
@@ -32,6 +34,7 @@ const _incomeSeed = <(String, String, String, int, String)>[
   ('cat-inc-parents', "Parents' allowance", 'family', 0xFF2E7D32, 'Kiriman orang tua'),
   ('cat-inc-scholarship', 'Scholarship', 'award', 0xFF00897B, 'Beasiswa'),
   ('cat-inc-parttime', 'Part-time job', 'work', 0xFF558B2F, 'Part-time'),
+  ('cat-inc-savings', 'Savings Withdrawal', 'savings', 0xFF00897B, 'Penarikan Tabungan'),
   ('cat-inc-other', 'Other', 'payments', 0xFF607D8B, 'Lainnya'),
 ];
 
@@ -68,13 +71,24 @@ class SyncTable {
 }
 
 /// Kelas utama database SQLite lokal yang mengelola seluruh tabel data keuangan pengguna.
-@DriftDatabase(tables: [Categories, Wallets, Transactions, Budgets, SavingsGoals, RecurringRules, Debts, TxTemplates])
+@DriftDatabase(tables: [
+  Categories,
+  Wallets,
+  Transactions,
+  Budgets,
+  SavingsGoals,
+  RecurringRules,
+  Debts,
+  DebtPayments,
+  PendingTransactions,
+  TxTemplates,
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
       : super(executor ?? driftDatabase(name: 'wall_o_pay'));
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -119,6 +133,15 @@ class AppDatabase extends _$AppDatabase {
               await m.createTable(txTemplates);
             } catch (_) {}
           }
+          if (from < 9) {
+            await _dropLegacyPendingTableIfIncompatible();
+            try {
+              await m.createTable(debtPayments);
+            } catch (_) {}
+            try {
+              await m.createTable(pendingTransactions);
+            } catch (_) {}
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
@@ -132,7 +155,7 @@ class AppDatabase extends _$AppDatabase {
           await customStatement("UPDATE wallets SET name = 'Main Account' WHERE id = 'wallet-main' AND name = 'Rekening Utama'");
           await customStatement("UPDATE wallets SET name = 'Digital Bank' WHERE id = 'wallet-digital' AND name = 'Bank Digital'");
           await customStatement("UPDATE wallets SET name = 'Cash' WHERE id = 'wallet-cash' AND name = 'Tunai'");
-          // Self-healing: pastikan tabel debts dan tx_templates selalu tersedia
+          // Self-healing: pastikan tabel debts, debt_payments, pending_transactions, dan tx_templates selalu tersedia
           await customStatement('''
             CREATE TABLE IF NOT EXISTS debts (
               id TEXT NOT NULL PRIMARY KEY,
@@ -149,6 +172,44 @@ class AppDatabase extends _$AppDatabase {
             );
           ''');
           await customStatement('''
+            CREATE TABLE IF NOT EXISTS debt_payments (
+              id TEXT NOT NULL PRIMARY KEY,
+              created_at INTEGER NOT NULL,
+              updated_at INTEGER NOT NULL,
+              deleted_at INTEGER,
+              debt_id TEXT NOT NULL,
+              amount INTEGER NOT NULL,
+              date INTEGER NOT NULL,
+              wallet_id TEXT,
+              transaction_id TEXT,
+              note TEXT NOT NULL DEFAULT ''
+            );
+          ''');
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS debt_payments_debt_idx ON debt_payments (debt_id, deleted_at)',
+          );
+          await _dropLegacyPendingTableIfIncompatible();
+          await customStatement('''
+            CREATE TABLE IF NOT EXISTS pending_transactions (
+              id TEXT NOT NULL PRIMARY KEY,
+              created_at INTEGER NOT NULL,
+              updated_at INTEGER NOT NULL,
+              deleted_at INTEGER,
+              recurring_rule_id TEXT,
+              title TEXT NOT NULL,
+              amount INTEGER NOT NULL,
+              type TEXT NOT NULL,
+              category_id TEXT NOT NULL,
+              wallet_id TEXT,
+              to_wallet_id TEXT,
+              due_date INTEGER NOT NULL,
+              note TEXT NOT NULL DEFAULT ''
+            );
+          ''');
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS pending_tx_rule_idx ON pending_transactions (recurring_rule_id, deleted_at)',
+          );
+          await customStatement('''
             CREATE TABLE IF NOT EXISTS tx_templates (
               id TEXT NOT NULL PRIMARY KEY,
               created_at INTEGER NOT NULL,
@@ -163,8 +224,41 @@ class AppDatabase extends _$AppDatabase {
               note TEXT NOT NULL DEFAULT ''
             );
           ''');
+          await _ensureSystemCategories();
         },
       );
+
+  /// Hapus tabel legacy `pending_transactions` dari v1.11.14 ke bawah jika tidak punya
+  /// kolom `updated_at` / `due_date`, agar skema v9 SyncColumns dapat dibuat bersih.
+  Future<void> _dropLegacyPendingTableIfIncompatible() async {
+    try {
+      final cols = await customSelect("PRAGMA table_info('pending_transactions')").get();
+      if (cols.isEmpty) return;
+      final names = cols.map((c) => c.read<String>('name')).toSet();
+      if (!names.contains('updated_at') || !names.contains('due_date')) {
+        await customStatement('DROP TABLE IF EXISTS pending_transactions');
+      }
+    } catch (_) {}
+  }
+
+  /// Memastikan kategori sistem tambahan (`cat-exp-admin`, `cat-exp-savings`, `cat-inc-savings`)
+  /// tersedia pada database lama tanpa menaikkan schemaVersion.
+  Future<void> _ensureSystemCategories() async {
+    const extraExpenseIds = {'cat-exp-admin', 'cat-exp-savings'};
+    const extraIncomeIds = {'cat-inc-savings'};
+    await batch((b) {
+      b.insertAll(
+        categories,
+        [
+          for (final s in _expenseSeed)
+            if (extraExpenseIds.contains(s.$1)) _seedRow(s, TxType.expense),
+          for (final s in _incomeSeed)
+            if (extraIncomeIds.contains(s.$1)) _seedRow(s, TxType.income),
+        ],
+        mode: InsertMode.insertOrIgnore,
+      );
+    });
+  }
 
   Future<void> _seedCategories() async {
     await batch((b) {
@@ -503,30 +597,53 @@ class AppDatabase extends _$AppDatabase {
   }
 
   /// Mencari transaksi langsung pada database SQLite berdasarkan catatan (note) atau kategori,
-  /// dengan filter tipe transaksi dan rentang tanggal opsional.
+  /// dengan filter tipe transaksi, dompet, kategori, need/want, dan rentang tanggal opsional.
   Stream<List<TransactionEntry>> watchSearchTransactions({
     required String query,
     TxType? type,
     DateTime? start,
     DateTime? end,
-    int limit = 100,
+    String? walletId,
+    String? categoryId,
+    NeedWant? needWant,
+    List<String> matchedCategoryIds = const [],
+    int limit = 250,
   }) {
-    final pattern = '%${query.toLowerCase()}%';
+    final trimmed = query.trim();
+    final pattern = '%${trimmed.toLowerCase()}%';
     final q = select(transactions).join([
       innerJoin(categories, categories.id.equalsExp(transactions.categoryId)),
     ]);
 
     q.where(transactions.deletedAt.isNull());
 
-    if (query.trim().isNotEmpty) {
-      q.where(
-        transactions.note.lower().like(pattern) |
-        categories.name.lower().like(pattern),
-      );
+    if (trimmed.isNotEmpty) {
+      Expression<bool> expr =
+          transactions.note.lower().like(pattern) |
+          categories.name.lower().like(pattern);
+      if (matchedCategoryIds.isNotEmpty) {
+        expr = expr | transactions.categoryId.isIn(matchedCategoryIds);
+      }
+      q.where(expr);
     }
 
     if (type != null) {
       q.where(transactions.type.equalsValue(type));
+    }
+
+    if (walletId != null) {
+      q.where(
+        transactions.walletId.equals(walletId) |
+            transactions.toWalletId.equals(walletId),
+      );
+    }
+
+    if (categoryId != null) {
+      q.where(transactions.categoryId.equals(categoryId));
+    }
+
+    if (needWant != null) {
+      q.where(transactions.needWant.equalsValue(needWant));
     }
 
     if (start != null) {
@@ -546,7 +663,7 @@ class AppDatabase extends _$AppDatabase {
     return q.watch().map((rows) => rows.map((row) => row.readTable(transactions)).toList());
   }
 
-  Future<void> addTransaction({
+  Future<String> addTransaction({
     required int amount,
     required TxType type,
     required String categoryId,
@@ -555,8 +672,11 @@ class AppDatabase extends _$AppDatabase {
     String? walletId,
     String? toWalletId,
     String? receiptPath,
+    NeedWant? needWant,
   }) async {
+    final txId = newId();
     await into(transactions).insert(TransactionsCompanion.insert(
+      id: Value(txId),
       amount: amount,
       type: type,
       categoryId: categoryId,
@@ -565,7 +685,9 @@ class AppDatabase extends _$AppDatabase {
       walletId: Value(walletId ?? 'wallet-main'),
       toWalletId: Value(toWalletId),
       receiptPath: Value(receiptPath),
+      needWant: Value(needWant),
     ));
+    return txId;
   }
 
   Future<void> updateTransaction(
@@ -579,6 +701,8 @@ class AppDatabase extends _$AppDatabase {
     String? toWalletId,
     String? receiptPath,
     bool clearReceipt = false,
+    NeedWant? needWant,
+    bool clearNeedWant = false,
   }) async {
     await (update(transactions)..where((t) => t.id.equals(id))).write(
       TransactionsCompanion(
@@ -592,6 +716,9 @@ class AppDatabase extends _$AppDatabase {
         receiptPath: clearReceipt
             ? const Value(null)
             : (receiptPath != null ? Value(receiptPath) : const Value.absent()),
+        needWant: clearNeedWant
+            ? const Value(null)
+            : (needWant != null ? Value(needWant) : const Value.absent()),
         updatedAt: Value(DateTime.now()),
       ),
     );
@@ -784,6 +911,10 @@ class AppDatabase extends _$AppDatabase {
           (await select(recurringRules).get()).map((r) => r.toJson()).toList(),
       'debts':
           (await select(debts).get()).map((r) => r.toJson()).toList(),
+      'debtPayments':
+          (await select(debtPayments).get()).map((r) => r.toJson()).toList(),
+      'pendingTransactions':
+          (await select(pendingTransactions).get()).map((r) => r.toJson()).toList(),
       'txTemplates':
           (await select(txTemplates).get()).map((r) => r.toJson()).toList(),
     };
@@ -829,9 +960,19 @@ class AppDatabase extends _$AppDatabase {
       await delete(savingsGoals).go();
       await delete(recurringRules).go();
       try {
+        await delete(debtPayments).go();
+      } catch (e) {
+        debugPrint('[AppDatabase] Warning resetting debtPayments: $e');
+      }
+      try {
         await delete(debts).go();
       } catch (e) {
         debugPrint('[AppDatabase] Warning resetting debts: $e');
+      }
+      try {
+        await delete(pendingTransactions).go();
+      } catch (e) {
+        debugPrint('[AppDatabase] Warning resetting pendingTransactions: $e');
       }
       try {
         await delete(txTemplates).go();
@@ -840,7 +981,6 @@ class AppDatabase extends _$AppDatabase {
       }
       await delete(categories).go();
       await delete(wallets).go();
-      await customStatement('DROP TABLE IF EXISTS pending_transactions');
       await _seedCategories();
       await _seedWallets();
     });
@@ -1040,6 +1180,48 @@ class AppDatabase extends _$AppDatabase {
           },
         ),
         SyncTable(
+          name: 'debtPayments',
+          changed: (since) async => (await (select(debtPayments)
+                    ..where((r) => r.updatedAt.isBiggerThanValue(since)))
+                  .get())
+              .map((r) => r.toJson())
+              .toList(),
+          applyRemote: (json) async {
+            final remote = DebtPayment.fromJson(json);
+            final local = await (select(debtPayments)
+                  ..where((r) => r.id.equals(remote.id)))
+                .getSingleOrNull();
+            if (local != null && !remote.updatedAt.isAfter(local.updatedAt)) {
+              return false;
+            }
+            await into(debtPayments).insertOnConflictUpdate(remote);
+            return true;
+          },
+        ),
+        SyncTable(
+          name: 'pendingTransactions',
+          changed: (since) async => (await (select(pendingTransactions)
+                    ..where((r) => r.updatedAt.isBiggerThanValue(since)))
+                  .get())
+              .map((r) => r.toJson())
+              .toList(),
+          applyRemote: (json) async {
+            // Abaikan dokumen legacy pre-v9 yang tidak memiliki `title` / `dueDate`
+            if (!json.containsKey('title') || !json.containsKey('dueDate')) {
+              return false;
+            }
+            final remote = PendingTransaction.fromJson(json);
+            final local = await (select(pendingTransactions)
+                  ..where((r) => r.id.equals(remote.id)))
+                .getSingleOrNull();
+            if (local != null && !remote.updatedAt.isAfter(local.updatedAt)) {
+              return false;
+            }
+            await into(pendingTransactions).insertOnConflictUpdate(remote);
+            return true;
+          },
+        ),
+        SyncTable(
           name: 'txTemplates',
           changed: (since) async => (await (select(txTemplates)
                     ..where((r) => r.updatedAt.isBiggerThanValue(since)))
@@ -1110,6 +1292,41 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Future<void> updateRecurringRule(
+    String id, {
+    required String title,
+    required int amount,
+    required TxType type,
+    required String categoryId,
+    String? walletId,
+    String? toWalletId,
+    bool clearToWalletId = false,
+    required RecurFrequency frequency,
+    int? dayOfWeek,
+    int? dayOfMonth,
+    DateTime? nextDueDate,
+    String note = '',
+  }) async {
+    await (update(recurringRules)..where((r) => r.id.equals(id))).write(
+      RecurringRulesCompanion(
+        title: Value(title),
+        amount: Value(amount),
+        type: Value(type),
+        categoryId: Value(categoryId),
+        walletId: Value(walletId ?? 'wallet-main'),
+        toWalletId: clearToWalletId
+            ? const Value(null)
+            : (toWalletId != null ? Value(toWalletId) : const Value.absent()),
+        frequency: Value(frequency),
+        dayOfWeek: Value(dayOfWeek),
+        dayOfMonth: Value(dayOfMonth),
+        nextDueDate: nextDueDate != null ? Value(nextDueDate) : const Value.absent(),
+        note: Value(note),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   Future<void> updateRecurringNextDueDate(
     String id,
     DateTime nextDue,
@@ -1142,6 +1359,160 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Future<void> restoreRecurringRule(String id) async {
+    await (update(recurringRules)..where((r) => r.id.equals(id))).write(
+      RecurringRulesCompanion(
+        deletedAt: const Value(null),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Pending Transactions (Antrean Konfirmasi Transaksi Berulang)
+  // ---------------------------------------------------------------------------
+
+  Stream<List<PendingTransaction>> watchPendingTransactions() =>
+      (select(pendingTransactions)
+            ..where((p) => p.deletedAt.isNull())
+            ..orderBy([
+              (p) => OrderingTerm.asc(p.dueDate),
+              (p) => OrderingTerm.desc(p.createdAt),
+            ]))
+          .watch();
+
+  Future<List<PendingTransaction>> getPendingTransactions() =>
+      (select(pendingTransactions)
+            ..where((p) => p.deletedAt.isNull())
+            ..orderBy([(p) => OrderingTerm.asc(p.dueDate)]))
+          .get();
+
+  Future<String> addPendingTransaction({
+    String? recurringRuleId,
+    required String title,
+    required int amount,
+    required TxType type,
+    required String categoryId,
+    String? walletId,
+    String? toWalletId,
+    required DateTime dueDate,
+    String note = '',
+  }) async {
+    if (amount <= 0) {
+      throw ArgumentError.value(amount, 'amount', 'Must be positive');
+    }
+    final id = newId();
+    await into(pendingTransactions).insert(
+      PendingTransactionsCompanion.insert(
+        id: Value(id),
+        recurringRuleId: Value(recurringRuleId),
+        title: title,
+        amount: amount,
+        type: type,
+        categoryId: categoryId,
+        walletId: Value(walletId ?? 'wallet-main'),
+        toWalletId: Value(toWalletId),
+        dueDate: dueDate,
+        note: Value(note),
+      ),
+    );
+    return id;
+  }
+
+  Future<void> updatePendingTransaction(
+    String id, {
+    int? amount,
+    String? walletId,
+    String? toWalletId,
+    String? note,
+  }) async {
+    await (update(pendingTransactions)..where((p) => p.id.equals(id))).write(
+      PendingTransactionsCompanion(
+        amount: amount != null && amount > 0 ? Value(amount) : const Value.absent(),
+        walletId: walletId != null ? Value(walletId) : const Value.absent(),
+        toWalletId: toWalletId != null ? Value(toWalletId) : const Value.absent(),
+        note: note != null ? Value(note) : const Value.absent(),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  /// Konfirmasi dan catat transaksi tertunda ke buku kas resmi secara atomik.
+  /// Mengembalikan data transaksi yang dicatat, atau `null` jika sudah dihapus/dikonfirmasi.
+  Future<TransactionEntry?> confirmPendingTransaction(
+    String pendingId, {
+    DateTime? txDate,
+    int? amountOverride,
+    String? walletIdOverride,
+    String? toWalletIdOverride,
+    String? noteOverride,
+  }) async {
+    return transaction<TransactionEntry?>(() async {
+      final pending = await (select(pendingTransactions)
+            ..where((p) => p.id.equals(pendingId) & p.deletedAt.isNull()))
+          .getSingleOrNull();
+      if (pending == null) return null;
+
+      final effectiveAmount = amountOverride ?? pending.amount;
+      if (effectiveAmount <= 0) return null;
+      final effectiveWallet = walletIdOverride ?? pending.walletId ?? 'wallet-main';
+      final effectiveToWallet = toWalletIdOverride ?? pending.toWalletId;
+      final effectiveNote = noteOverride ??
+          (pending.note.isNotEmpty ? pending.note : pending.title);
+      final effectiveDate = txDate ??
+          DateTime(
+            pending.dueDate.year,
+            pending.dueDate.month,
+            pending.dueDate.day,
+          );
+
+      final txId = newId();
+      final effectiveCategory =
+          pending.type == TxType.transfer ? 'cat-tra-transfer' : pending.categoryId;
+
+      await into(transactions).insert(
+        TransactionsCompanion.insert(
+          id: Value(txId),
+          amount: effectiveAmount,
+          type: pending.type,
+          categoryId: effectiveCategory,
+          date: effectiveDate,
+          note: Value(effectiveNote),
+          walletId: Value(effectiveWallet),
+          toWalletId: Value(pending.type == TxType.transfer ? effectiveToWallet : null),
+        ),
+      );
+
+      final now = DateTime.now();
+      await (update(pendingTransactions)..where((p) => p.id.equals(pendingId))).write(
+        PendingTransactionsCompanion(
+          deletedAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
+
+      return (select(transactions)..where((t) => t.id.equals(txId))).getSingleOrNull();
+    });
+  }
+
+  Future<void> dismissPendingTransaction(String id) async {
+    await (update(pendingTransactions)..where((p) => p.id.equals(id))).write(
+      PendingTransactionsCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> restorePendingTransaction(String id) async {
+    await (update(pendingTransactions)..where((p) => p.id.equals(id))).write(
+      PendingTransactionsCompanion(
+        deletedAt: const Value(null),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   // ---------- Utang-piutang dan patungan ----------
 
   Stream<List<Debt>> watchDebts() {
@@ -1168,16 +1539,219 @@ class AppDatabase extends _$AppDatabase {
     ));
   }
 
-  /// Catat pembayaran sebagian atau pelunasan (tidak melebihi total utang).
-  Future<void> addDebtPayment(String id, int amount) async {
-    final d = await (select(debts)..where((x) => x.id.equals(id))).getSingle();
-    final paid = (d.paidAmount + amount).clamp(0, d.amount).toInt();
+  /// Memperbarui data utang-piutang yang sudah ada, sekaligus menyesuaikan paidAmount jika melebihi nominal baru.
+  Future<void> updateDebt(
+    String id, {
+    required String person,
+    required DebtDirection direction,
+    required int amount,
+    DateTime? dueDate,
+    bool clearDueDate = false,
+    String note = '',
+  }) async {
+    final existing = await (select(debts)..where((x) => x.id.equals(id))).getSingleOrNull();
+    final clampedPaid = existing != null && existing.paidAmount > amount ? amount : null;
     await (update(debts)..where((x) => x.id.equals(id))).write(
       DebtsCompanion(
-        paidAmount: Value(paid),
+        person: Value(person),
+        direction: Value(direction),
+        amount: Value(amount),
+        paidAmount: clampedPaid != null ? Value(clampedPaid) : const Value.absent(),
+        dueDate: clearDueDate
+            ? const Value(null)
+            : (dueDate != null ? Value(dueDate) : const Value.absent()),
+        note: Value(note),
         updatedAt: Value(DateTime.now()),
       ),
     );
+  }
+
+  Stream<List<DebtPayment>> watchDebtPayments(String debtId) {
+    return (select(debtPayments)
+          ..where((p) => p.debtId.equals(debtId) & p.deletedAt.isNull())
+          ..orderBy([
+            (p) => OrderingTerm.desc(p.date),
+            (p) => OrderingTerm.desc(p.createdAt),
+          ]))
+        .watch();
+  }
+
+  /// Catat pembayaran sebagian atau pelunasan (tidak melebihi sisa utang) sekaligus
+  /// menyimpan riwayat cicilan pada tabel [debtPayments].
+  Future<void> addDebtPayment(
+    String id,
+    int amount, {
+    DateTime? date,
+    String? walletId,
+    String? transactionId,
+    String note = '',
+  }) async {
+    if (amount <= 0) return;
+    await transaction(() async {
+      final d = await (select(debts)..where((x) => x.id.equals(id))).getSingle();
+      final remaining = (d.amount - d.paidAmount).clamp(0, d.amount).toInt();
+      if (remaining <= 0) return;
+      final applied = amount.clamp(0, remaining).toInt();
+      if (applied <= 0) return;
+      final now = DateTime.now();
+
+      await into(debtPayments).insert(
+        DebtPaymentsCompanion.insert(
+          debtId: id,
+          amount: applied,
+          date: date ?? now,
+          walletId: Value(walletId),
+          transactionId: Value(transactionId),
+          note: Value(note),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
+
+      await (update(debts)..where((x) => x.id.equals(id))).write(
+        DebtsCompanion(
+          paidAmount: Value(d.paidAmount + applied),
+          updatedAt: Value(now),
+        ),
+      );
+    });
+  }
+
+  /// Catat cicilan utang beserta transaksi dompet tertaut (opsional) secara atomik.
+  Future<void> recordDebtPayment({
+    required String debtId,
+    required int amount,
+    required bool createWalletTransaction,
+    String? walletId,
+    String transactionNote = '',
+    String paymentNote = '',
+    DateTime? date,
+  }) async {
+    if (amount <= 0) return;
+    await transaction(() async {
+      final d = await (select(debts)..where((x) => x.id.equals(debtId))).getSingle();
+      final remaining = (d.amount - d.paidAmount).clamp(0, d.amount).toInt();
+      if (remaining <= 0) return;
+      final applied = amount.clamp(0, remaining).toInt();
+      if (applied <= 0) return;
+
+      final now = date ?? DateTime.now();
+      String? linkedTxId;
+      if (createWalletTransaction) {
+        linkedTxId = newId();
+        final lent = d.direction == DebtDirection.lent;
+        await into(transactions).insert(
+          TransactionsCompanion.insert(
+            id: Value(linkedTxId),
+            amount: applied,
+            type: lent ? TxType.income : TxType.expense,
+            categoryId: lent ? 'cat-inc-other' : 'cat-exp-other',
+            date: DateTime(now.year, now.month, now.day),
+            note: Value(transactionNote),
+            walletId: Value(walletId ?? 'wallet-main'),
+          ),
+        );
+      }
+
+      await into(debtPayments).insert(
+        DebtPaymentsCompanion.insert(
+          debtId: debtId,
+          amount: applied,
+          date: now,
+          walletId: Value(createWalletTransaction ? (walletId ?? 'wallet-main') : null),
+          transactionId: Value(linkedTxId),
+          note: Value(paymentNote),
+          createdAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
+
+      await (update(debts)..where((x) => x.id.equals(debtId))).write(
+        DebtsCompanion(
+          paidAmount: Value(d.paidAmount + applied),
+          updatedAt: Value(now),
+        ),
+      );
+    });
+  }
+
+  /// Hapus riwayat cicilan tertentu secara lunak dan kurangi `paidAmount` utang terkait.
+  Future<void> deleteDebtPayment(String paymentId) async {
+    await transaction(() async {
+      final payment = await (select(debtPayments)
+            ..where((p) => p.id.equals(paymentId) & p.deletedAt.isNull()))
+          .getSingleOrNull();
+      if (payment == null) return;
+
+      final now = DateTime.now();
+      await (update(debtPayments)..where((p) => p.id.equals(paymentId))).write(
+        DebtPaymentsCompanion(
+          deletedAt: Value(now),
+          updatedAt: Value(now),
+        ),
+      );
+
+      final debt = await (select(debts)..where((d) => d.id.equals(payment.debtId)))
+          .getSingleOrNull();
+      if (debt != null) {
+        final nextPaid = (debt.paidAmount - payment.amount).clamp(0, debt.amount).toInt();
+        await (update(debts)..where((d) => d.id.equals(debt.id))).write(
+          DebtsCompanion(
+            paidAmount: Value(nextPaid),
+            updatedAt: Value(now),
+          ),
+        );
+      }
+
+      if (payment.transactionId != null) {
+        await (update(transactions)..where((t) => t.id.equals(payment.transactionId!)))
+            .write(
+          TransactionsCompanion(
+            deletedAt: Value(now),
+            updatedAt: Value(now),
+          ),
+        );
+      }
+    });
+  }
+
+  /// Pulihkan riwayat cicilan utang yang baru dihapus (untuk fitur Undo).
+  Future<void> restoreDebtPayment(String paymentId) async {
+    await transaction(() async {
+      final payment = await (select(debtPayments)..where((p) => p.id.equals(paymentId)))
+          .getSingleOrNull();
+      if (payment == null || payment.deletedAt == null) return;
+
+      final now = DateTime.now();
+      await (update(debtPayments)..where((p) => p.id.equals(paymentId))).write(
+        DebtPaymentsCompanion(
+          deletedAt: const Value(null),
+          updatedAt: Value(now),
+        ),
+      );
+
+      final debt = await (select(debts)..where((d) => d.id.equals(payment.debtId)))
+          .getSingleOrNull();
+      if (debt != null) {
+        final nextPaid = (debt.paidAmount + payment.amount).clamp(0, debt.amount).toInt();
+        await (update(debts)..where((d) => d.id.equals(debt.id))).write(
+          DebtsCompanion(
+            paidAmount: Value(nextPaid),
+            updatedAt: Value(now),
+          ),
+        );
+      }
+
+      if (payment.transactionId != null) {
+        await (update(transactions)..where((t) => t.id.equals(payment.transactionId!)))
+            .write(
+          TransactionsCompanion(
+            deletedAt: const Value(null),
+            updatedAt: Value(now),
+          ),
+        );
+      }
+    });
   }
 
   Future<void> deleteDebt(String id) async {

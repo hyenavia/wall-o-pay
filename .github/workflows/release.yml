@@ -116,6 +116,14 @@ jobs:
         if: steps.check_release.outputs.exists == 'false'
         run: flutter pub get
 
+      - name: Run Static Analysis
+        if: steps.check_release.outputs.exists == 'false'
+        run: flutter analyze --no-pub
+
+      - name: Run Automated Tests
+        if: steps.check_release.outputs.exists == 'false'
+        run: flutter test --no-pub
+
       - name: Configure Release Signing (from GitHub Secrets if available)
         if: steps.check_release.outputs.exists == 'false'
         env:

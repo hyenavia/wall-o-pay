@@ -192,6 +192,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
       final rollover = data['rollover'] as bool?;
       final budgetAlerts = data['budgetAlerts'] as bool?;
       final dailyReminder = data['dailyReminder'] as bool?;
+      final recapAlerts = data['recapAlerts'] as bool?;
       final reminderHour = (data['reminderHour'] as num?)?.toInt();
       final reminderMinute = (data['reminderMinute'] as num?)?.toInt();
 
@@ -199,6 +200,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
         rollover: rollover,
         budgetAlerts: budgetAlerts,
         dailyReminder: dailyReminder,
+        recapAlerts: recapAlerts,
         reminderHour: reminderHour,
         reminderMinute: reminderMinute,
       );
@@ -247,6 +249,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
         'rollover': feat.rollover,
         'budgetAlerts': feat.budgetAlerts,
         'dailyReminder': feat.dailyReminder,
+        'recapAlerts': feat.recapAlerts,
         'reminderHour': feat.reminderHour,
         'reminderMinute': feat.reminderMinute,
         'hideBalance': hide,

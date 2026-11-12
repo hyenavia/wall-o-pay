@@ -18,4 +18,44 @@
     <string name="widget_detail">Detail</string>
     <string name="widget_balance_label">Total Balance</string>
     <string name="widget_balance_hidden">Rp ••••••••</string>
+
+    <!-- Daily Pulse Widget -->
+    <string name="widget_pulse_name">Daily Pulse &amp; Balance</string>
+    <string name="widget_pulse_description">Monitor your safe daily spending quota, today\'s expense, and total balance</string>
+    <string name="widget_pulse_title">Daily Pulse</string>
+    <string name="widget_pulse_quota_label">Safe Daily Quota</string>
+    <string name="widget_pulse_spent_prefix">Spent today:</string>
+    <string name="widget_pulse_status_safe">Safe</string>
+    <string name="widget_pulse_status_caution">Caution</string>
+    <string name="widget_pulse_status_limit">Limit</string>
+
+    <!-- Quick Action Bar Widget -->
+    <string name="widget_action_name">Quick Action Bar</string>
+    <string name="widget_action_description">Compact bar to record income, expense, or transfer in one tap</string>
+
+    <!-- One-Tap Favorites Widget -->
+    <string name="widget_favorites_name">One-Tap Favorites</string>
+    <string name="widget_favorites_description">Record your saved transaction templates in one tap with instant undo</string>
+    <string name="widget_favorites_title">Quick Favorites</string>
+    <string name="widget_favorites_empty">No templates yet</string>
+    <string name="widget_favorites_empty_hint">Tap to create a saved template in Wall o\' Pay</string>
+    <string name="widget_undo">Undo</string>
+
+    <!-- Budget Guardrail Widget -->
+    <string name="widget_budget_name">Budget Guardrail</string>
+    <string name="widget_budget_description">Track remaining period budget, warning thresholds, and top spending categories</string>
+    <string name="widget_budget_title">Budget Guardrail</string>
+    <string name="widget_budget_remaining">Remaining Budget</string>
+    <string name="widget_budget_empty">No budget set</string>
+    <string name="widget_budget_empty_hint">Tap to set up your period budget</string>
+
+    <!-- Goals & Upcoming Bills Widget -->
+    <string name="widget_goals_bills_name">Goals &amp; Upcoming Bills</string>
+    <string name="widget_goals_bills_description">Monitor your active savings goal progress and upcoming recurring bills</string>
+    <string name="widget_goals_bills_title">Goals &amp; Bills</string>
+    <string name="widget_goal_kicker">Savings Goal</string>
+    <string name="widget_goal_empty">No active goal</string>
+    <string name="widget_goal_empty_hint">Tap to create a target</string>
+    <string name="widget_bills_kicker">Upcoming Bills</string>
+    <string name="widget_bills_empty">No upcoming bills</string>
 </resources>

@@ -5,7 +5,7 @@
  * and GitHub Releases API Version Sync.
  */
 
-const APP_VERSION = "2.7.3";
+const APP_VERSION = "2.16.0";
 
 // Helper to compare semver strings (e.g. "2.5.4" vs "v2.5.3")
 function isVersionGreater(v1, v2) {

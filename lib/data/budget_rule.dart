@@ -132,6 +132,9 @@ class BudgetRuleState {
 
   Map<String, int>? getCustomAllocation(String periodKey) => customAllocations[periodKey];
 
+  bool hasPeriodConfig(String periodKey) =>
+      (totalPools[periodKey] ?? 0) > 0 || customAllocations.containsKey(periodKey);
+
   BudgetRuleState copyWith({
     Map<String, int>? totalPools,
     Map<String, BudgetBucket>? categoryBuckets,
@@ -440,6 +443,42 @@ class BudgetRuleNotifier extends Notifier<BudgetRuleState> {
       await prefs.setInt(_key(_kUpdated, effectiveUid), now);
       uploadToCloud(effectiveUid);
     }
+  }
+
+  /// Salin total pool dan alokasi kustom dari [sourcePeriodKey] ke [targetPeriodKey].
+  Future<bool> copyFromPeriod(
+    String sourcePeriodKey,
+    String targetPeriodKey,
+  ) async {
+    final sourceTotal = state.totalPools[sourcePeriodKey] ?? 0;
+    final sourceCustom = state.customAllocations[sourcePeriodKey];
+    if (sourceTotal <= 0 && sourceCustom == null) {
+      return false;
+    }
+
+    final updated = Map<String, int>.from(state.totalPools);
+    final updatedCustom = Map<String, Map<String, int>>.from(state.customAllocations);
+
+    updated[targetPeriodKey] = sourceTotal;
+    if (sourceCustom != null) {
+      updatedCustom[targetPeriodKey] = Map<String, int>.from(sourceCustom);
+    } else {
+      updatedCustom.remove(targetPeriodKey);
+    }
+
+    state = state.copyWith(totalPools: updated, customAllocations: updatedCustom);
+
+    final prefs = ref.read(sharedPreferencesProvider);
+    final uid = _uid();
+    final now = DateTime.now().millisecondsSinceEpoch;
+    await prefs.setString(_key(_kTotalPools, uid), jsonEncode(updated));
+    await prefs.setString(_key(_kCustomAllocations, uid), jsonEncode(updatedCustom));
+    await prefs.setInt(_key(_kUpdated, uid), now);
+
+    if (uid != null) {
+      uploadToCloud(uid);
+    }
+    return true;
   }
 
   Future<void> setTotalBudget(String periodKey, int amount) async {

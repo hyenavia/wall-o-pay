@@ -152,6 +152,19 @@ rules_version = '2';
 //   - dueDate: number | timestamp | null (optional)
 //   - date: number | timestamp (required)
 //
+// Subcollection: users/{uid}/debtPayments/{docId} (and legacy debt_payments)
+// Fields:
+//   - id: string (required, immutable, matches docId)
+//   - createdAt: number | timestamp (required)
+//   - updatedAt: number | timestamp (required)
+//   - deletedAt: number | timestamp | null (optional)
+//   - debtId: string (required, 1-128 chars)
+//   - amount: number (required, > 0)
+//   - date: number | timestamp (required)
+//   - walletId: string | null (optional, 1-128 chars)
+//   - transactionId: string | null (optional, 1-128 chars)
+//   - note: string (required, 0-2000 chars)
+//
 // Subcollection: users/{uid}/txTemplates/{docId} (and legacy tx_templates)
 // Fields:
 //   - id: string (required, immutable, matches docId)
@@ -166,12 +179,21 @@ rules_version = '2';
 //   - needWant: string | null (optional, 'need' | 'want')
 //   - note: string (required, 0-2000 chars)
 //
-// Subcollection: users/{uid}/pendingTransactions/{docId}
+// Subcollection: users/{uid}/pendingTransactions/{docId} (and legacy pending_transactions)
 // Fields:
 //   - id: string (required, immutable, matches docId)
 //   - createdAt: number | timestamp (required)
 //   - updatedAt: number | timestamp (required)
 //   - deletedAt: number | timestamp | null (optional)
+//   - recurringRuleId: string | null (optional, 1-128 chars)
+//   - title: string (required, 1-200 chars)
+//   - amount: number (required, > 0)
+//   - type: string (required, 'income' | 'expense' | 'transfer')
+//   - categoryId: string (required, 1-128 chars)
+//   - walletId: string | null (optional, 1-128 chars)
+//   - toWalletId: string | null (optional, 1-128 chars)
+//   - dueDate: number | timestamp (required)
+//   - note: string (required, 0-2000 chars)
 //
 // ===============================================================
 
@@ -484,6 +506,23 @@ service cloud.firestore {
              isTimestampOrNumber(data.date);
     }
 
+    function isValidDebtPayment(data, docId) {
+      return hasOnlyAllowedFields([
+               'id', 'createdAt', 'updatedAt', 'deletedAt',
+               'debtId', 'amount', 'date',
+               'walletId', 'transactionId', 'note'
+             ]) &&
+             hasValidSyncColumns(data, docId) &&
+             hasRequiredFields(['debtId', 'amount', 'date', 'note']) &&
+             validStringLength('debtId', 1, 128) &&
+             data.amount is number &&
+             data.amount > 0 &&
+             isTimestampOrNumber(data.date) &&
+             isOptionalOrNullString(data, 'walletId', 1, 128) &&
+             isOptionalOrNullString(data, 'transactionId', 1, 128) &&
+             validStringLength('note', 0, 2000);
+    }
+
     function isValidTxTemplate(data, docId) {
       return hasOnlyAllowedFields([
                'id', 'createdAt', 'updatedAt', 'deletedAt',
@@ -502,8 +541,24 @@ service cloud.firestore {
     }
 
     function isValidPendingTransaction(data, docId) {
-      return hasValidSyncColumns(data, docId) &&
-             data.keys().size() <= 25;
+      return hasOnlyAllowedFields([
+               'id', 'createdAt', 'updatedAt', 'deletedAt',
+               'recurringRuleId', 'title', 'amount', 'type',
+               'categoryId', 'walletId', 'toWalletId',
+               'dueDate', 'note'
+             ]) &&
+             hasValidSyncColumns(data, docId) &&
+             hasRequiredFields(['title', 'amount', 'type', 'categoryId', 'dueDate', 'note']) &&
+             isOptionalOrNullString(data, 'recurringRuleId', 1, 128) &&
+             validStringLength('title', 1, 200) &&
+             data.amount is number &&
+             data.amount > 0 &&
+             data.type in ['income', 'expense', 'transfer'] &&
+             validStringLength('categoryId', 1, 128) &&
+             isOptionalOrNullString(data, 'walletId', 1, 128) &&
+             isOptionalOrNullString(data, 'toWalletId', 1, 128) &&
+             isTimestampOrNumber(data.dueDate) &&
+             validStringLength('note', 0, 2000);
     }
 
     // ===============================================================
@@ -619,6 +674,21 @@ service cloud.firestore {
         allow delete: if isOwner(uid);
       }
 
+      // Debt Payments (camelCase and legacy snake_case)
+      match /debtPayments/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidDebtPayment(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidDebtPayment(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
+      match /debt_payments/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidDebtPayment(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidDebtPayment(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
       // Transaction Templates (camelCase and legacy snake_case)
       match /txTemplates/{docId} {
         allow read: if isOwner(uid);
@@ -634,8 +704,15 @@ service cloud.firestore {
         allow delete: if isOwner(uid);
       }
 
-      // Pending Transactions (auxiliary/legacy cleanup support)
+      // Pending Transactions (camelCase and legacy snake_case)
       match /pendingTransactions/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidPendingTransaction(request.resource.data, docId);
+        allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidPendingTransaction(request.resource.data, docId);
+        allow delete: if isOwner(uid);
+      }
+
+      match /pending_transactions/{docId} {
         allow read: if isOwner(uid);
         allow create: if isOwner(uid) && isValidPendingTransaction(request.resource.data, docId);
         allow update: if isOwner(uid) && areImmutableFieldsUnchanged(['id']) && isValidPendingTransaction(request.resource.data, docId);

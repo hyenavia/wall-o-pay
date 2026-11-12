@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/action_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_action_bar_bg"
+    android:clipToOutline="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:baselineAligned="false">
+
+        <!-- Brand & Balance Pill (hidden on compact 2x1 widths) -->
+        <LinearLayout
+            android:id="@+id/action_brand_group"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1.15"
+            android:layout_marginEnd="6dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/widget_balance_pill_bg">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@mipmap/ic_launcher"
+                android:contentDescription="@string/app_name" />
+
+            <TextView
+                android:id="@+id/action_balance_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="5dp"
+                android:text="Rp 0"
+                android:textColor="@color/widget_dew_mint"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:fontFeatureSettings="tnum"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </LinearLayout>
+
+        <!-- Income Quick Action -->
+        <LinearLayout
+            android:id="@+id/action_btn_income"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="5dp"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="@drawable/widget_pill_action_income">
+
+            <ImageView
+                android:id="@+id/action_btn_income_icon"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginEnd="4dp"
+                android:src="@drawable/ic_widget_income_on"
+                android:importantForAccessibility="no" />
+
+            <TextView
+                android:id="@+id/action_btn_income_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="In"
+                android:textColor="@color/widget_income_on_dark"
+                android:textSize="11.5sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </LinearLayout>
+
+        <!-- Expense Quick Action -->
+        <LinearLayout
+            android:id="@+id/action_btn_expense"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="5dp"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="@drawable/widget_pill_action_expense">
+
+            <ImageView
+                android:id="@+id/action_btn_expense_icon"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginEnd="4dp"
+                android:src="@drawable/ic_widget_expense_on"
+                android:importantForAccessibility="no" />
+
+            <TextView
+                android:id="@+id/action_btn_expense_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Out"
+                android:textColor="@color/widget_expense_on_dark"
+                android:textSize="11.5sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </LinearLayout>
+
+        <!-- Transfer Quick Action -->
+        <LinearLayout
+            android:id="@+id/action_btn_transfer"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="0.85"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:background="@drawable/widget_pill_action_transfer">
+
+            <ImageView
+                android:id="@+id/action_btn_transfer_icon"
+                android:layout_width="13dp"
+                android:layout_height="13dp"
+                android:src="@drawable/ic_widget_transfer_on"
+                android:contentDescription="@string/widget_transfer" />
+
+            <TextView
+                android:id="@+id/action_btn_transfer_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="Swap"
+                android:textColor="@color/widget_transfer_on_dark"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>
+

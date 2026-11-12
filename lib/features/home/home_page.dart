@@ -16,17 +16,25 @@ import '../../core/period.dart';
 import '../../core/widgets.dart';
 import '../../data/profile.dart';
 import '../../data/providers.dart';
-import '../../data/app_database.dart' show Wallet;
+import '../../data/app_database.dart' show PendingTransaction, Wallet;
+import '../../data/feature_prefs.dart';
+import '../../data/feature_providers.dart';
+import '../../data/module_prefs.dart';
+import '../../data/notifications.dart';
+import '../../data/prefs.dart';
 import '../../data/tables.dart' show TxType;
 
 import '../accounts/accounts_page.dart';
 import '../profile/profile_page.dart';
+import '../recurring/recurring_page.dart';
+import '../settings/guest_backup_nudge_banner.dart';
 import '../settings/settings_page.dart';
 import '../more/more_page.dart';
 import 'daily_financial_pulse_card.dart';
 import '../transactions/transaction_form.dart';
 import '../transactions/transaction_tile.dart';
 import '../../data/budget_rule.dart';
+import '../../data/cloud.dart';
 import '../../data/cloud_sync.dart';
 import '../../data/update_checker.dart';
 
@@ -43,7 +51,13 @@ class HomePage extends ConsumerWidget {
     final budgets = ref.watch(budgetByCategoryProvider);
     final spent = ref.watch(spentByCategoryProvider);
     final name = ref.watch(displayNameProvider);
+    final isGuest = ref.watch(currentUserProvider) == null;
     final updateInfo = ref.watch(availableUpdateProvider);
+    final modules = ref.watch(modulePrefsProvider);
+    final pendingList = modules.recurring
+        ? (ref.watch(pendingTransactionsProvider).value ??
+            const <PendingTransaction>[])
+        : const <PendingTransaction>[];
 
     void openProfile() => Navigator.push(
           context,
@@ -143,8 +157,7 @@ class HomePage extends ConsumerWidget {
                           : budgets.keys.fold<int>(0, (a, id) => a + (spent[id] ?? 0));
 
                       final daysLeft = period.daysLeft;
-                      final dailyAllowance =
-                          balance > 0 && daysLeft > 0 ? balance ~/ daysLeft : 0;
+                      final upcomingBills = ref.watch(upcomingRecurringExpenseProvider);
                       final isCurrent = period.isCurrent;
 
                       final now = DateTime.now();
@@ -156,6 +169,19 @@ class HomePage extends ConsumerWidget {
                               !t.date.isBefore(todayStart) &&
                               t.date.isBefore(todayEnd))
                           .fold<int>(0, (s, t) => s + t.amount);
+
+                      final pulse = calculateDailyPulse(
+                        income: income,
+                        expense: expense,
+                        totalWalletBalance: totalBalance,
+                        totalBudget: totalBudget,
+                        budgetSpent: budgetSpent,
+                        todayExpense: todayExpense,
+                        daysLeft: daysLeft,
+                        upcomingBills: upcomingBills,
+                        txCount: txs.length,
+                      );
+                      final dailyAllowance = pulse.dailyAllowance;
 
                       final budgetTitle = isCurrent
                           ? (isWeekly ? "This Week's Budget" : "This Month's Budget")
@@ -200,6 +226,64 @@ class HomePage extends ConsumerWidget {
                               expense: expense,
                               savedPct: savedPct,
                             ),
+                            if (pendingList.isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              _PendingConfirmationBanner(
+                                items: pendingList,
+                                onReviewAll: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => const RecurringPage(),
+                                  ),
+                                ),
+                                onConfirmFirst: () async {
+                                  final first = pendingList.first;
+                                  final db = ref.read(databaseProvider);
+                                  final created = await db.confirmPendingTransaction(first.id);
+                                  if (created != null && created.type == TxType.expense) {
+                                    final fPrefs = ref.read(featurePrefsProvider);
+                                    if (fPrefs.budgetAlerts) {
+                                      final appPrefs = ref.read(appPrefsProvider);
+                                      final cat = ref.read(categoryMapProvider)[created.categoryId];
+                                      final txPeriod = Period.containing(
+                                        appPrefs.periodType,
+                                        created.date,
+                                        firstDayOfWeek: appPrefs.firstDayOfWeek,
+                                        firstDayOfMonth: appPrefs.firstDayOfMonth,
+                                      );
+                                      checkBudgetAfterExpense(
+                                        db: db,
+                                        prefs: ref.read(sharedPreferencesProvider),
+                                        periodType: appPrefs.periodType,
+                                        categoryId: created.categoryId,
+                                        categoryName: cat?.name ?? 'Uncategorized',
+                                        date: created.date,
+                                        firstDayOfWeek: appPrefs.firstDayOfWeek,
+                                        firstDayOfMonth: appPrefs.firstDayOfMonth,
+                                        rolloverEnabled: fPrefs.rollover,
+                                        totalBudgetPool: ref.read(budgetRuleProvider).getTotalBudget(txPeriod.key),
+                                      );
+                                    }
+                                  }
+                                  if (context.mounted && created != null) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(context.tr('Transaction recorded')),
+                                      ),
+                                    );
+                                  }
+                                },
+                                onSkipFirst: () async {
+                                  final first = pendingList.first;
+                                  final db = ref.read(databaseProvider);
+                                  await db.dismissPendingTransaction(first.id);
+                                  showUndoSnackBar(
+                                    message: trG('Pending item skipped'),
+                                    onUndo: () => db.restorePendingTransaction(first.id),
+                                  );
+                                },
+                              ),
+                            ],
                             const SizedBox(height: 14),
                             DailyFinancialPulseCard(
                               dailyAllowance: dailyAllowance,
@@ -210,7 +294,18 @@ class HomePage extends ConsumerWidget {
                               budgetSpent: budgetSpent,
                               txCount: txs.length,
                               budgetTitle: budgetTitle,
-                              onSetBudget: () => ref.read(tabIndexProvider.notifier).set(2),
+                              onSetBudget: modules.budget
+                                  ? () => ref.read(tabIndexProvider.notifier).set(2)
+                                  : () {},
+                              onTapUpcomingBills: modules.recurring
+                                  ? () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute<void>(
+                                          builder: (_) => const RecurringPage(),
+                                        ),
+                                      )
+                                  : null,
+                              pulse: pulse,
                             ),
                             const SizedBox(height: 16),
                             SectionHeader(
@@ -236,8 +331,13 @@ class HomePage extends ConsumerWidget {
                                       category: cats[t.categoryId],
                                       trailingNote: shortDate(t.date),
                                       onTap: () => showTransactionForm(context, entry: t),
+                                      onLongPress: () => showDuplicateTransactionForm(context, t),
                                     ),
                                 ],
+                              ),
+                            if (isGuest)
+                              GuestBackupNudgeBanner(
+                                onBackupNow: () => triggerGuestJsonBackup(context, ref),
                               ),
                           ],
                         ),
@@ -1009,4 +1109,142 @@ class _UpdateBannerCard extends StatelessWidget {
     );
   }
 }
+
+class _PendingConfirmationBanner extends StatelessWidget {
+  const _PendingConfirmationBanner({
+    required this.items,
+    required this.onReviewAll,
+    required this.onConfirmFirst,
+    required this.onSkipFirst,
+  });
+
+  final List<PendingTransaction> items;
+  final VoidCallback onReviewAll;
+  final VoidCallback onConfirmFirst;
+  final VoidCallback onSkipFirst;
+
+  @override
+  Widget build(BuildContext context) {
+    final first = items.first;
+    final isTransfer = first.type == TxType.transfer;
+    final isIncome = first.type == TxType.income;
+    final sign = isTransfer ? '' : (isIncome ? '+' : '-');
+    final amountColor = isTransfer
+        ? AppColors.dewMint
+        : (isIncome ? AppColors.incomeOnDark : AppColors.expenseOnDark);
+
+    return AppCard(
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.pending_actions_rounded, size: 18, color: AppColors.dewMint),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  items.length == 1
+                      ? context.tr('1 recurring item ready to confirm')
+                      : context.tr('{count} recurring items ready to confirm', {
+                          'count': items.length,
+                        }),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    color: AppColors.dewMint,
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: onReviewAll,
+                child: Text(
+                  context.tr('Review'),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.freshSage,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      first.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: AppColors.softIvory,
+                      ),
+                    ),
+                    Text(
+                      context.tr('Due {date}', {'date': shortDate(first.dueDate)}),
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        color: AppColors.freshSage,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                '$sign${rupiah(first.amount)}',
+                style: context.moneyStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: amountColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onSkipFirst,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.freshSage,
+                    side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.2)),
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: Text(context.tr('Skip')),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                flex: 2,
+                child: FilledButton.icon(
+                  onPressed: onConfirmFirst,
+                  icon: const Icon(Icons.check_rounded, size: 16),
+                  label: Text(
+                    context.tr('Confirm'),
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.dewMint,
+                    foregroundColor: AppColors.deepForest,
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 

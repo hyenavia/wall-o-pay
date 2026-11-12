@@ -2,6 +2,7 @@
 /// utang-piutang, template, pencarian SQL langsung, dan perhitungan rollover anggaran.
 library;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart' show DateTimeRange;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,7 +10,7 @@ import '../core/period.dart';
 import 'app_database.dart';
 import 'feature_prefs.dart';
 import 'providers.dart';
-import 'tables.dart' show TxType;
+import 'tables.dart' show NeedWant, TxType;
 
 // ---------- Akun ----------
 
@@ -29,6 +30,15 @@ final recurringRulesProvider = StreamProvider<List<RecurringRule>>((ref) {
 
 final debtsProvider = StreamProvider<List<Debt>>((ref) {
   return ref.watch(databaseProvider).watchDebts();
+});
+
+final debtPaymentsProvider =
+    StreamProvider.family<List<DebtPayment>, String>((ref, debtId) {
+  return ref.watch(databaseProvider).watchDebtPayments(debtId);
+});
+
+final pendingTransactionsProvider = StreamProvider<List<PendingTransaction>>((ref) {
+  return ref.watch(databaseProvider).watchPendingTransactions();
 });
 
 final templatesProvider = StreamProvider<List<TxTemplate>>((ref) {
@@ -51,11 +61,19 @@ class TxSearchParams {
     required this.query,
     this.type,
     this.range,
+    this.walletId,
+    this.categoryId,
+    this.needWant,
+    this.matchedCategoryIds = const [],
   });
 
   final String query;
   final TxType? type;
   final DateTimeRange? range;
+  final String? walletId;
+  final String? categoryId;
+  final NeedWant? needWant;
+  final List<String> matchedCategoryIds;
 
   @override
   bool operator ==(Object other) =>
@@ -64,10 +82,22 @@ class TxSearchParams {
           runtimeType == other.runtimeType &&
           query == other.query &&
           type == other.type &&
-          range == other.range;
+          range == other.range &&
+          walletId == other.walletId &&
+          categoryId == other.categoryId &&
+          needWant == other.needWant &&
+          listEquals(matchedCategoryIds, other.matchedCategoryIds);
 
   @override
-  int get hashCode => Object.hash(query, type, range);
+  int get hashCode => Object.hash(
+        query,
+        type,
+        range,
+        walletId,
+        categoryId,
+        needWant,
+        Object.hashAll(matchedCategoryIds),
+      );
 }
 
 /// Pencarian transaksi berbasis query SQL langsung di database SQLite.
@@ -85,6 +115,10 @@ final searchTransactionsProvider =
         type: params.type,
         start: start,
         end: end,
+        walletId: params.walletId,
+        categoryId: params.categoryId,
+        needWant: params.needWant,
+        matchedCategoryIds: params.matchedCategoryIds,
       );
 });
 

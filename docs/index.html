@@ -59,7 +59,7 @@
       <a class="brand-link" href="#top" aria-label="Wall o' Pay Home">
         <img src="images/logo.png" alt="Wall o' Pay Logo" class="brand-logo-img">
         <span class="brand-title">Wall o' Pay</span>
-        <span class="brand-version-badge app-version-tag">v2.7.3</span>
+        <span class="brand-version-badge app-version-tag">v2.16.0</span>
       </a>
 
       <nav class="nav-menu" id="nav-links" aria-label="Main Navigation">
@@ -91,7 +91,7 @@
       <div class="hero-text-content">
         <div class="editorial-pill">
           <span class="pulse-dot"></span>
-          <span>Enchanted Glasshouse • <strong class="app-version-tag">v2.7.3</strong></span>
+          <span>Enchanted Glasshouse • <strong class="app-version-tag">v2.16.0</strong></span>
         </div>
 
         <h1>
@@ -107,7 +107,7 @@
           <a class="btn btn-primary" href="https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk"
             id="hero-download-cta">
             <span>📥</span>
-            <span id="hero-download-text">Download APK (v2.7.3)</span>
+            <span id="hero-download-text">Download APK (v2.16.0)</span>
           </a>
           <a class="btn btn-ghost" href="#features">
             <span>Explore Features</span>
@@ -133,7 +133,7 @@
 
         <div class="floating-glass-pill bottom-left">
           <div class="floating-pill-head"><span>🛡️</span> Hardware Lock</div>
-          <p>Android Keystore PBKDF2 &amp; Biometric Fingerprint.</p>
+          <p>Android Keystore HMAC-SHA256 &amp; Biometric Unlock.</p>
         </div>
 
         <!-- Smartphone Chassis -->
@@ -308,8 +308,8 @@
         <div class="bento-card bento-span-8">
           <div class="bento-card-header">
             <div class="bento-icon-badge">🌿</div>
-            <h3>Financial Overview &amp; Cashflow</h3>
-            <p>Unified real-time visibility across all your cash, bank accounts, and e-wallets. Monitor monthly net surplus at a glance.</p>
+            <h3>Net Worth, Vitality Score &amp; Harvest Recaps</h3>
+            <p>Unified real-time visibility across accounts, receivables, and debts with a 0–100 Glasshouse Vitality Score, interactive drill-downs, and Weekly/Monthly Harvest Recaps.</p>
           </div>
           <div class="bento-micro-ui">
             <div class="sparkline-preview">
@@ -395,8 +395,8 @@
         <div class="bento-card bento-span-4">
           <div class="bento-card-header">
             <div class="bento-icon-badge">🎯</div>
-            <h3>Savings Milestones</h3>
-            <p>Build your emergency canopy, vacation fund, or long-term dreams with milestone tracking and celebration progress.</p>
+            <h3>Savings Milestones &amp; Pace</h3>
+            <p>Build your emergency canopy or long-term dreams with weekly/monthly savings pace projections, status badges, and quick-fill deposits.</p>
           </div>
           <div class="bento-micro-ui">
             <div class="sparkline-preview">
@@ -418,14 +418,14 @@
               <h3>100% Offline Autonomy &amp; Biometric Keystore</h3>
               <p>
                 Powered by local Drift SQLite with zero background telemetry. Authenticate via fingerprint or face recognition,
-                shielded by Android Keystore salted PBKDF2 encryption. Your financial privacy is mathematically protected.
+                shielded by Android Keystore 2,048-iteration salted HMAC-SHA256 encryption. Your financial privacy is mathematically protected.
               </p>
             </div>
             <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end;">
               <span class="spec-chip" style="background:rgba(255,255,255,0.08); border-color:var(--fresh-sage); color:#FFF;">🔑 Android Keystore</span>
               <span class="spec-chip" style="background:rgba(255,255,255,0.08); border-color:var(--fresh-sage); color:#FFF;">⚡ 0ms Drift SQLite</span>
               <span class="spec-chip" style="background:rgba(255,255,255,0.08); border-color:var(--fresh-sage); color:#FFF;">🚫 Zero Tracking</span>
-              <span class="spec-chip" style="background:rgba(255,255,255,0.08); border-color:var(--fresh-sage); color:#FFF;">📂 Free PDF &amp; CSV Export</span>
+              <span class="spec-chip" style="background:rgba(255,255,255,0.08); border-color:var(--fresh-sage); color:#FFF;">📂 Filtered PDF &amp; CSV Export</span>
             </div>
           </div>
         </div>
@@ -507,9 +507,9 @@
               Deep-dive into monthly cashflow charts, debt settlement trackers, and progress milestones for your personal dreams.
             </p>
             <div class="showcase-feature-points">
-              <div class="showcase-point-item"><span class="chk">✓</span><span><b>Category Breakdown:</b> High-contrast donut and bar charts showing where money flows.</span></div>
-              <div class="showcase-point-item"><span class="chk">✓</span><span><b>Debt &amp; Split Bills:</b> Track who owes whom and record partial settlements smoothly.</span></div>
-              <div class="showcase-point-item"><span class="chk">✓</span><span><b>Milestone Celebrations:</b> Watch your savings seeds blossom into life goals.</span></div>
+              <div class="showcase-point-item"><span class="chk">✓</span><span><b>Net Worth &amp; Vitality Score:</b> 0–100 four-pillar health score with interactive category drill-downs and Harvest Recaps.</span></div>
+              <div class="showcase-point-item"><span class="chk">✓</span><span><b>Debt &amp; Custom Split Bills:</b> Equal or per-friend custom splits, due reminders, and partial settlement tracking.</span></div>
+              <div class="showcase-point-item"><span class="chk">✓</span><span><b>Goal Pace Projections:</b> Track on-track/behind status with weekly or monthly contribution pace quick-fill.</span></div>
             </div>
           </div>
         </div>
@@ -786,7 +786,7 @@
             </tr>
             <tr>
               <td>Security &amp; Encryption</td>
-              <td class="col-highlight">Android Keystore PBKDF2 &amp; Biometric Lock</td>
+              <td class="col-highlight">Android Keystore HMAC-SHA256 &amp; Biometric Lock</td>
               <td>Plaintext storage or no biometric gate</td>
             </tr>
             <tr>
@@ -820,7 +820,7 @@
           <h3 style="color:var(--glasshouse-green); margin-bottom:16px;">📱 Release Specifications</h3>
           <div class="specs-row">
             <span class="specs-label">App Version</span>
-            <span class="specs-value app-version-tag" id="specs-version-val">v2.7.3 (Release)</span>
+            <span class="specs-value app-version-tag" id="specs-version-val">v2.16.0 (Release)</span>
           </div>
           <div class="specs-row">
             <span class="specs-label">Package Size</span>
@@ -919,7 +919,7 @@
         <a class="btn btn-primary" href="https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk"
           id="btn-download-apk" target="_blank" rel="noopener">
           <span>📥</span>
-          <span>Download Official APK (<span class="app-version-tag">v2.7.3</span>)</span>
+          <span>Download Official APK (<span class="app-version-tag">v2.16.0</span>)</span>
         </a>
         <a class="btn btn-ghost" href="https://github.com/hyenavia/wall-o-pay/releases" target="_blank" rel="noopener">
           <span>🔗</span>

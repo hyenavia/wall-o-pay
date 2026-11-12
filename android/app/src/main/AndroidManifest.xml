@@ -83,6 +83,99 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/quick_finance_widget_info" />
         </receiver>
+        <!-- Daily Pulse & Balance Home Screen Widget -->
+        <receiver
+            android:name=".DailyPulseWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_pulse_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+                <action android:name="com.example.wall_o_pay.PULSE_TOGGLE_PRIVACY" />
+                <action android:name="com.example.wall_o_pay.PULSE_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/daily_pulse_widget_info" />
+        </receiver>
+        <!-- Quick Action Bar Home Screen Widget -->
+        <receiver
+            android:name=".QuickActionWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_action_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+                <action android:name="com.example.wall_o_pay.ACTION_BAR_UPDATE" />
+                <action android:name="com.example.wall_o_pay.ACTION_BAR_TOGGLE_PRIVACY" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/quick_action_widget_info" />
+        </receiver>
+        <!-- One-Tap Favorites Home Screen Widget -->
+        <receiver
+            android:name=".FavoriteTemplatesWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_favorites_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+                <action android:name="com.example.wall_o_pay.FAV_TAP_0" />
+                <action android:name="com.example.wall_o_pay.FAV_TAP_1" />
+                <action android:name="com.example.wall_o_pay.FAV_TAP_2" />
+                <action android:name="com.example.wall_o_pay.FAV_TAP_3" />
+                <action android:name="com.example.wall_o_pay.FAV_UNDO" />
+                <action android:name="com.example.wall_o_pay.FAV_DISMISS_FEEDBACK" />
+                <action android:name="com.example.wall_o_pay.FAV_AUTO_DISMISS_FEEDBACK" />
+                <action android:name="com.example.wall_o_pay.FAV_TOGGLE_PRIVACY" />
+                <action android:name="com.example.wall_o_pay.FAV_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/favorite_templates_widget_info" />
+        </receiver>
+        <!-- Budget Guardrail Home Screen Widget -->
+        <receiver
+            android:name=".BudgetGuardrailWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_budget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+                <action android:name="com.example.wall_o_pay.BUDGET_TOGGLE_PRIVACY" />
+                <action android:name="com.example.wall_o_pay.BUDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/budget_guardrail_widget_info" />
+        </receiver>
+        <!-- Goals & Upcoming Bills Home Screen Widget -->
+        <receiver
+            android:name=".GoalsAndBillsWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_goals_bills_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
+                <action android:name="com.example.wall_o_pay.GB_TOGGLE_PRIVACY" />
+                <action android:name="com.example.wall_o_pay.GB_CYCLE_GOAL" />
+                <action android:name="com.example.wall_o_pay.GB_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/goals_bills_widget_info" />
+        </receiver>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

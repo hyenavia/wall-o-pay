@@ -18,4 +18,44 @@
     <string name="widget_detail">Detail</string>
     <string name="widget_balance_label">Total Saldo</string>
     <string name="widget_balance_hidden">Rp ••••••••</string>
+
+    <!-- Daily Pulse Widget -->
+    <string name="widget_pulse_name">Daily Pulse &amp; Saldo</string>
+    <string name="widget_pulse_description">Pantau kuota belanja aman harian, pengeluaran hari ini, dan total saldo</string>
+    <string name="widget_pulse_title">Daily Pulse</string>
+    <string name="widget_pulse_quota_label">Kuota Aman / Hari</string>
+    <string name="widget_pulse_spent_prefix">Terpakai hari ini:</string>
+    <string name="widget_pulse_status_safe">Aman</string>
+    <string name="widget_pulse_status_caution">Waspada</string>
+    <string name="widget_pulse_status_limit">Batas</string>
+
+    <!-- Quick Action Bar Widget -->
+    <string name="widget_action_name">Bilah Aksi Cepat</string>
+    <string name="widget_action_description">Bilah ringkas untuk catat pemasukan, pengeluaran, atau transfer sekali ketuk</string>
+
+    <!-- One-Tap Favorites Widget -->
+    <string name="widget_favorites_name">Favorit Sekali Ketuk</string>
+    <string name="widget_favorites_description">Catat template transaksi favorit dalam sekali ketuk lengkap dengan tombol urungkan</string>
+    <string name="widget_favorites_title">Favorit Cepat</string>
+    <string name="widget_favorites_empty">Belum ada template</string>
+    <string name="widget_favorites_empty_hint">Ketuk untuk buat template di Wall o\' Pay</string>
+    <string name="widget_undo">Urungkan</string>
+
+    <!-- Budget Guardrail Widget -->
+    <string name="widget_budget_name">Penjaga Anggaran</string>
+    <string name="widget_budget_description">Pantau sisa anggaran periode, batas peringatan, dan kategori teratas</string>
+    <string name="widget_budget_title">Penjaga Anggaran</string>
+    <string name="widget_budget_remaining">Sisa Anggaran</string>
+    <string name="widget_budget_empty">Belum ada anggaran</string>
+    <string name="widget_budget_empty_hint">Ketuk untuk atur anggaran periode</string>
+
+    <!-- Goals & Upcoming Bills Widget -->
+    <string name="widget_goals_bills_name">Target &amp; Tagihan</string>
+    <string name="widget_goals_bills_description">Pantau progres target tabungan aktif serta jadwal tagihan rutin terdekat</string>
+    <string name="widget_goals_bills_title">Target &amp; Tagihan</string>
+    <string name="widget_goal_kicker">Target Tabungan</string>
+    <string name="widget_goal_empty">Belum ada target</string>
+    <string name="widget_goal_empty_hint">Ketuk untuk buat target baru</string>
+    <string name="widget_bills_kicker">Tagihan Terdekat</string>
+    <string name="widget_bills_empty">Tidak ada tagihan dekat</string>
 </resources>

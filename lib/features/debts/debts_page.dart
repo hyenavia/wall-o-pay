@@ -16,6 +16,58 @@ import '../../data/notifications.dart';
 import '../../data/providers.dart';
 import '../../data/tables.dart' show DebtDirection, TxType;
 
+class CustomSplitResult {
+  const CustomSplitResult({
+    required this.isValid,
+    required this.friendsTotal,
+    required this.myShare,
+    this.errorKey,
+  });
+
+  final bool isValid;
+  final int friendsTotal;
+  final int myShare;
+  final String? errorKey;
+}
+
+/// Memvalidasi dan menghitung total porsi teman serta porsi pribadi pada mode Patungan Kustom.
+CustomSplitResult computeCustomSplit({
+  required int total,
+  required List<int> friendAmounts,
+}) {
+  if (total <= 0 || friendAmounts.isEmpty) {
+    return const CustomSplitResult(
+      isValid: false,
+      friendsTotal: 0,
+      myShare: 0,
+      errorKey: 'Enter the total and at least one friend.',
+    );
+  }
+  if (friendAmounts.any((a) => a <= 0)) {
+    return CustomSplitResult(
+      isValid: false,
+      friendsTotal: friendAmounts.fold<int>(0, (s, a) => s + a),
+      myShare: total - friendAmounts.fold<int>(0, (s, a) => s + a),
+      errorKey: "Every friend's share must be greater than 0.",
+    );
+  }
+  final friendsTotal = friendAmounts.fold<int>(0, (s, a) => s + a);
+  final myShare = total - friendsTotal;
+  if (friendsTotal > total) {
+    return CustomSplitResult(
+      isValid: false,
+      friendsTotal: friendsTotal,
+      myShare: myShare,
+      errorKey: "Friends' total exceeds the bill total.",
+    );
+  }
+  return CustomSplitResult(
+    isValid: true,
+    friendsTotal: friendsTotal,
+    myShare: myShare,
+  );
+}
+
 /// Halaman utama fitur Utang & Patungan (Piutangku vs Utangku).
 class DebtsPage extends ConsumerStatefulWidget {
   const DebtsPage({super.key});
@@ -124,12 +176,18 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
               ),
               const SizedBox(height: 12),
               if (list.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 40),
-                  child: EmptyState(
-                    icon: Icons.handshake_outlined,
-                    message: context.tr('Nothing here yet.'),
+                EmptyStateCard(
+                  icon: Icons.handshake_outlined,
+                  title: context.tr(
+                    _tab == DebtDirection.lent
+                        ? 'No receivables recorded yet'
+                        : 'No debts recorded yet',
                   ),
+                  subtitle: context.tr(
+                    'Track money owed and bill splits separately from your main accounts.',
+                  ),
+                  actionLabel: context.tr('Add debt'),
+                  onAction: () => showDebtForm(context, initial: _tab),
                 )
               else
                 for (final d in list)
@@ -302,22 +360,24 @@ class _DebtDetail extends ConsumerWidget {
 
   final Debt debt;
 
-  Future<void> _record(WidgetRef ref, int amount, bool alsoTransaction, String? walletId) async {
+  Future<void> _record(
+    WidgetRef ref,
+    Debt liveDebt,
+    int amount,
+    bool alsoTransaction,
+    String? walletId,
+  ) async {
     final db = ref.read(databaseProvider);
-    await db.addDebtPayment(debt.id, amount);
-    if (alsoTransaction) {
-      final lent = debt.direction == DebtDirection.lent;
-      await db.addTransaction(
-        amount: amount,
-        type: lent ? TxType.income : TxType.expense,
-        categoryId: lent ? 'cat-inc-other' : 'cat-exp-other',
-        walletId: walletId,
-        date: DateTime.now(),
-        note: lent
-            ? trG('Repayment from {person}', {'person': debt.person})
-            : trG('Payment to {person}', {'person': debt.person}),
-      );
-    }
+    final lent = liveDebt.direction == DebtDirection.lent;
+    await db.recordDebtPayment(
+      debtId: liveDebt.id,
+      amount: amount,
+      createWalletTransaction: alsoTransaction,
+      walletId: walletId,
+      transactionNote: lent
+          ? trG('Repayment from {person}', {'person': liveDebt.person})
+          : trG('Payment to {person}', {'person': liveDebt.person}),
+    );
     checkDebtDueReminders(db);
   }
 
@@ -325,90 +385,211 @@ class _DebtDetail extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurface.withValues(alpha: 0.6);
-    final left = debt.amount - debt.paidAmount;
-    final lent = debt.direction == DebtDirection.lent;
+    final liveDebt = (ref.watch(debtsProvider).value ?? const <Debt>[])
+        .firstWhere((d) => d.id == debt.id, orElse: () => debt);
+    final payments = ref.watch(debtPaymentsProvider(liveDebt.id)).value ??
+        const <DebtPayment>[];
+    final wallets = ref.watch(walletMapProvider);
+    final left = liveDebt.amount - liveDebt.paidAmount;
+    final lent = liveDebt.direction == DebtDirection.lent;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(debt.person,
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
-          const SizedBox(height: 4),
-          Text(
-            context.tr(lent ? 'They owe you' : 'You owe them'),
-            style: theme.textTheme.bodySmall?.copyWith(color: muted),
-          ),
-          const SizedBox(height: 16),
-          Text(rupiah(left > 0 ? left : 0),
-              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
-          Text(
-            context.tr('{paid} of {total}',
-                {'paid': rupiah(debt.paidAmount), 'total': rupiah(debt.amount)}),
-            style: theme.textTheme.bodySmall?.copyWith(color: muted),
-          ),
-          if (debt.note.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            Text(debt.note),
-          ],
-          const SizedBox(height: 20),
-          if (left > 0) ...[
-            FilledButton.icon(
-              icon: const Icon(Icons.payments_outlined),
-              label: Text(context.tr('Record payment')),
-              onPressed: () async {
-                final result = await showDialog<(int, bool, String?)>(
-                  context: context,
-                  builder: (_) => _PaymentDialog(remaining: left, lent: lent),
-                );
-                if (result != null && result.$1 > 0) {
-                  await _record(ref, result.$1, result.$2, result.$3);
+      padding: EdgeInsets.fromLTRB(
+        20,
+        0,
+        20,
+        20 + MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.78,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      liveDebt.person,
+                      style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: context.tr('Edit'),
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      showDebtForm(context, debt: liveDebt);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                context.tr(lent ? 'They owe you' : 'You owe them'),
+                style: theme.textTheme.bodySmall?.copyWith(color: muted),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                rupiah(left > 0 ? left : 0),
+                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+              ),
+              Text(
+                context.tr('{paid} of {total}', {
+                  'paid': rupiah(liveDebt.paidAmount),
+                  'total': rupiah(liveDebt.amount),
+                }),
+                style: theme.textTheme.bodySmall?.copyWith(color: muted),
+              ),
+              if (liveDebt.note.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Text(liveDebt.note),
+              ],
+              const SizedBox(height: 20),
+              if (left > 0) ...[
+                FilledButton.icon(
+                  icon: const Icon(Icons.payments_outlined),
+                  label: Text(context.tr('Record payment')),
+                  onPressed: () async {
+                    final result = await showDialog<(int, bool, String?)>(
+                      context: context,
+                      builder: (_) => _PaymentDialog(remaining: left, lent: lent),
+                    );
+                    if (result != null && result.$1 > 0) {
+                      await _record(ref, liveDebt, result.$1, result.$2, result.$3);
+                      if (context.mounted) Navigator.pop(context);
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+                OutlinedButton(
+                  onPressed: () async {
+                    final result = await showDialog<(int, bool, String?)>(
+                      context: context,
+                      builder: (_) => _PaymentDialog(
+                        remaining: left,
+                        lent: lent,
+                        fixedFullPayment: true,
+                      ),
+                    );
+                    if (result != null && result.$1 > 0) {
+                      await _record(ref, liveDebt, left, result.$2, result.$3);
+                      if (context.mounted) Navigator.pop(context);
+                    }
+                  },
+                  child: Text(context.tr('Mark as fully paid')),
+                ),
+              ],
+              if (payments.isNotEmpty) ...[
+                const SizedBox(height: 18),
+                Text(
+                  context.tr('Payment History'),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.dewMint,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                for (final p in payments)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceContainer.withValues(alpha: 0.72),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.dewMint.withValues(alpha: 0.14),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                shortDate(p.date),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 12.5,
+                                  color: AppColors.softIvory,
+                                ),
+                              ),
+                              if (p.walletId != null && wallets[p.walletId!] != null)
+                                Text(
+                                  context.tr(wallets[p.walletId!]!.name),
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.freshSage,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          rupiah(p.amount),
+                          style: context.moneyStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.incomeOnDark,
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: context.tr('Delete payment'),
+                          visualDensity: VisualDensity.compact,
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            size: 18,
+                            color: AppColors.freshSage,
+                          ),
+                          onPressed: () async {
+                            final db = ref.read(databaseProvider);
+                            await db.deleteDebtPayment(p.id);
+                            showUndoSnackBar(
+                              message: trG('Payment record deleted'),
+                              onUndo: () => db.restoreDebtPayment(p.id),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+              TextButton.icon(
+                icon: const Icon(Icons.delete_outline),
+                label: Text(context.tr('Delete')),
+                onPressed: () async {
+                  final id = liveDebt.id;
+                  final db = ref.read(databaseProvider);
+                  await db.deleteDebt(id);
                   if (context.mounted) Navigator.pop(context);
-                }
-              },
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: () async {
-                final result = await showDialog<(int, bool, String?)>(
-                  context: context,
-                  builder: (_) => _PaymentDialog(remaining: left, lent: lent),
-                );
-                if (result != null && result.$1 > 0) {
-                  await _record(ref, result.$1, result.$2, result.$3);
-                  if (context.mounted) Navigator.pop(context);
-                }
-              },
-              child: Text(context.tr('Mark as fully paid')),
-            ),
-          ],
-          TextButton.icon(
-            icon: const Icon(Icons.delete_outline),
-            label: Text(context.tr('Delete')),
-            onPressed: () async {
-              final id = debt.id;
-              final db = ref.read(databaseProvider);
-              await db.deleteDebt(id);
-              if (context.mounted) Navigator.pop(context);
-              showUndoSnackBar(
-                message: trG('Debt deleted'),
-                onUndo: () => db.restoreDebt(id),
-              );
-            },
+                  showUndoSnackBar(
+                    message: trG('Debt deleted'),
+                    onUndo: () => db.restoreDebt(id),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
 class _PaymentDialog extends ConsumerStatefulWidget {
-  const _PaymentDialog({required this.remaining, required this.lent});
+  const _PaymentDialog({
+    required this.remaining,
+    required this.lent,
+    this.fixedFullPayment = false,
+  });
 
   final int remaining;
   final bool lent;
+  final bool fixedFullPayment;
 
   @override
   ConsumerState<_PaymentDialog> createState() => _PaymentDialogState();
@@ -434,19 +615,32 @@ class _PaymentDialogState extends ConsumerState<_PaymentDialog> {
     }
 
     return AlertDialog(
-      title: Text(context.tr('Record payment')),
+      title: Text(
+        context.tr(widget.fixedFullPayment ? 'Mark as fully paid' : 'Record payment'),
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
-              controller: _amount,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              inputFormatters: amountFormatters(),
-              decoration: appInput(context, prefixText: 'Rp '),
-            ),
+            if (widget.fixedFullPayment) ...[
+              Text(
+                context.tr('Confirm full settlement of {amount}?', {
+                  'amount': rupiah(widget.remaining),
+                }),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ] else ...[
+              TextField(
+                controller: _amount,
+                autofocus: true,
+                keyboardType: TextInputType.number,
+                inputFormatters: amountFormatters(),
+                decoration: appInput(context, prefixText: 'Rp '),
+              ),
+            ],
             const SizedBox(height: 8),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
@@ -478,10 +672,14 @@ class _PaymentDialogState extends ConsumerState<_PaymentDialog> {
         ),
         FilledButton(
           onPressed: () {
-            final v = parseAmount(_amount.text).clamp(0, widget.remaining).toInt();
+            final v = widget.fixedFullPayment
+                ? widget.remaining
+                : parseAmount(_amount.text).clamp(0, widget.remaining).toInt();
             Navigator.pop(context, (v, _record, _walletId));
           },
-          child: Text(context.tr('Save')),
+          child: Text(
+            context.tr(widget.fixedFullPayment ? 'Mark as paid' : 'Save'),
+          ),
         ),
       ],
     );
@@ -492,19 +690,24 @@ class _PaymentDialogState extends ConsumerState<_PaymentDialog> {
 // Form utang
 // ---------------------------------------------------------------------------
 
-Future<void> showDebtForm(BuildContext context, {DebtDirection initial = DebtDirection.lent}) {
+Future<void> showDebtForm(
+  BuildContext context, {
+  DebtDirection initial = DebtDirection.lent,
+  Debt? debt,
+}) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    builder: (_) => _DebtForm(initial: initial),
+    builder: (_) => _DebtForm(initial: initial, debt: debt),
   );
 }
 
 class _DebtForm extends ConsumerStatefulWidget {
-  const _DebtForm({required this.initial});
+  const _DebtForm({required this.initial, this.debt});
 
   final DebtDirection initial;
+  final Debt? debt;
 
   @override
   ConsumerState<_DebtForm> createState() => _DebtFormState();
@@ -514,9 +717,22 @@ class _DebtFormState extends ConsumerState<_DebtForm> {
   final _person = TextEditingController();
   final _amount = TextEditingController();
   final _note = TextEditingController();
-  late DebtDirection _direction = widget.initial;
+  late DebtDirection _direction;
   DateTime? _due;
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    final d = widget.debt;
+    _direction = d?.direction ?? widget.initial;
+    if (d != null) {
+      _person.text = d.person;
+      _amount.text = formatThousands(d.amount);
+      _note.text = d.note;
+      _due = d.dueDate;
+    }
+  }
 
   @override
   void dispose() {
@@ -545,13 +761,26 @@ class _DebtFormState extends ConsumerState<_DebtForm> {
       return;
     }
     final db = ref.read(databaseProvider);
-    await db.addDebt(
-          person: person,
-          direction: _direction,
-          amount: amount,
-          dueDate: _due,
-          note: _note.text.trim(),
-        );
+    final existing = widget.debt;
+    if (existing == null) {
+      await db.addDebt(
+        person: person,
+        direction: _direction,
+        amount: amount,
+        dueDate: _due,
+        note: _note.text.trim(),
+      );
+    } else {
+      await db.updateDebt(
+        existing.id,
+        person: person,
+        direction: _direction,
+        amount: amount,
+        dueDate: _due,
+        clearDueDate: _due == null,
+        note: _note.text.trim(),
+      );
+    }
     checkDebtDueReminders(db);
     if (mounted) Navigator.pop(context);
   }
@@ -560,6 +789,7 @@ class _DebtFormState extends ConsumerState<_DebtForm> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final isEdit = widget.debt != null;
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + bottomInset),
       child: SingleChildScrollView(
@@ -567,7 +797,7 @@ class _DebtFormState extends ConsumerState<_DebtForm> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(context.tr('Add debt'),
+            Text(context.tr(isEdit ? 'Edit debt' : 'Add debt'),
                 style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 16),
             SegmentedButton<DebtDirection>(
@@ -648,6 +878,8 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
   final _total = TextEditingController();
   final _friends = TextEditingController();
   final _note = TextEditingController();
+  final List<TextEditingController> _customControllers = [];
+  bool _isCustomSplit = false;
   bool _recordMyShare = false;
   bool _deductFullBill = false;
   String? _categoryId;
@@ -659,6 +891,9 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
     _total.dispose();
     _friends.dispose();
     _note.dispose();
+    for (final c in _customControllers) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -668,6 +903,28 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
       .where((e) => e.isNotEmpty)
       .toList();
 
+  void _syncCustomControllers({bool forcePrefill = false}) {
+    final names = _names;
+    final total = parseAmount(_total.text);
+    final equalShare =
+        (total > 0 && names.isNotEmpty) ? total ~/ (names.length + 1) : 0;
+
+    while (_customControllers.length < names.length) {
+      final ctrl = TextEditingController(
+        text: equalShare > 0 ? formatThousands(equalShare) : '',
+      );
+      _customControllers.add(ctrl);
+    }
+    while (_customControllers.length > names.length) {
+      _customControllers.removeLast().dispose();
+    }
+    if (forcePrefill) {
+      for (final ctrl in _customControllers) {
+        ctrl.text = equalShare > 0 ? formatThousands(equalShare) : '';
+      }
+    }
+  }
+
   Future<void> _save() async {
     final total = parseAmount(_total.text);
     final names = _names;
@@ -675,35 +932,61 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
       setState(() => _error = context.tr('Enter the total and at least one friend.'));
       return;
     }
+
+    final List<int> amountsPerFriend;
+    final int myShare;
+
+    if (_isCustomSplit) {
+      _syncCustomControllers();
+      amountsPerFriend = [
+        for (var i = 0; i < names.length; i++)
+          parseAmount(_customControllers[i].text),
+      ];
+      final result = computeCustomSplit(
+        total: total,
+        friendAmounts: amountsPerFriend,
+      );
+      if (!result.isValid) {
+        setState(() => _error = context.tr(result.errorKey!));
+        return;
+      }
+      myShare = result.myShare;
+    } else {
+      final people = names.length + 1;
+      final share = total ~/ people;
+      amountsPerFriend = List<int>.filled(names.length, share);
+      myShare = total - share * names.length; // sisa pembulatan jadi bagianku
+    }
+
     if (_recordMyShare && _categoryId == null) {
       setState(() => _error = context.tr('Please choose a category.'));
       return;
     }
-    final people = names.length + 1;
-    final share = total ~/ people;
-    final myShare = total - share * names.length; // sisa pembulatan jadi bagianku
     final note = _note.text.trim().isEmpty ? trG('Split bill') : _note.text.trim();
 
     final db = ref.read(databaseProvider);
-    for (final n in names) {
+    for (var i = 0; i < names.length; i++) {
       await db.addDebt(
-        person: n,
+        person: names[i],
         direction: DebtDirection.lent,
-        amount: share,
+        amount: amountsPerFriend[i],
         note: note,
       );
     }
     if (_recordMyShare) {
       final wallets = ref.read(walletsProvider).value ?? const <Wallet>[];
       final targetWalletId = _walletId ?? (wallets.isNotEmpty ? wallets.first.id : null);
-      await db.addTransaction(
-        amount: _deductFullBill ? total : myShare,
-        type: TxType.expense,
-        categoryId: _categoryId!,
-        walletId: targetWalletId,
-        date: DateTime.now(),
-        note: note,
-      );
+      final expenseAmount = _deductFullBill ? total : myShare;
+      if (expenseAmount > 0) {
+        await db.addTransaction(
+          amount: expenseAmount,
+          type: TxType.expense,
+          categoryId: _categoryId!,
+          walletId: targetWalletId,
+          date: DateTime.now(),
+          note: note,
+        );
+      }
     }
     if (mounted) Navigator.pop(context);
   }
@@ -721,7 +1004,18 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final total = parseAmount(_total.text);
     final names = _names;
+    if (_isCustomSplit) {
+      _syncCustomControllers();
+    }
     final share = names.isEmpty ? 0 : total ~/ (names.length + 1);
+    final customAmounts = _isCustomSplit
+        ? [
+            for (var i = 0; i < names.length; i++)
+              parseAmount(_customControllers[i].text),
+          ]
+        : const <int>[];
+    final customFriendsTotal = customAmounts.fold<int>(0, (s, a) => s + a);
+    final customMyShare = total - customFriendsTotal;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 20 + bottomInset),
@@ -734,7 +1028,11 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
                 style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
             const SizedBox(height: 4),
             Text(
-              context.tr('You paid the whole bill. Each friend owes an equal share.'),
+              context.tr(
+                _isCustomSplit
+                    ? 'You paid the whole bill. Set each friend\'s custom share below.'
+                    : 'You paid the whole bill. Each friend owes an equal share.',
+              ),
               style: theme.textTheme.bodySmall?.copyWith(color: muted),
             ),
             const SizedBox(height: 16),
@@ -742,14 +1040,19 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
               controller: _total,
               keyboardType: TextInputType.number,
               inputFormatters: amountFormatters(),
-              onChanged: (_) => setState(() {}),
+              onChanged: (_) => setState(() {
+                _error = null;
+              }),
               decoration: appInput(context, label: context.tr('Total bill'), prefixText: 'Rp '),
             ),
             const SizedBox(height: 14),
             TextField(
               controller: _friends,
               textCapitalization: TextCapitalization.words,
-              onChanged: (_) => setState(() {}),
+              onChanged: (_) => setState(() {
+                if (_isCustomSplit) _syncCustomControllers();
+                _error = null;
+              }),
               decoration: appInput(
                 context,
                 label: context.tr("Friends' names"),
@@ -762,7 +1065,31 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
               textCapitalization: TextCapitalization.sentences,
               decoration: appInput(context, label: context.tr('Note (optional)')),
             ),
-            if (names.isNotEmpty && total > 0) ...[
+            const SizedBox(height: 14),
+            SegmentedButton<bool>(
+              showSelectedIcon: false,
+              segments: [
+                ButtonSegment(
+                  value: false,
+                  label: Text(context.tr('Equal Split')),
+                ),
+                ButtonSegment(
+                  value: true,
+                  label: Text(context.tr('Custom Split')),
+                ),
+              ],
+              selected: {_isCustomSplit},
+              onSelectionChanged: (s) {
+                setState(() {
+                  _isCustomSplit = s.first;
+                  _error = null;
+                  if (_isCustomSplit) {
+                    _syncCustomControllers(forcePrefill: true);
+                  }
+                });
+              },
+            ),
+            if (!_isCustomSplit && names.isNotEmpty && total > 0) ...[
               const SizedBox(height: 12),
               Text(
                 context.tr('{n} people, {amount} each', {
@@ -771,6 +1098,36 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
                 }),
                 style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
+            ],
+            if (_isCustomSplit && names.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              for (var i = 0; i < names.length; i++) ...[
+                TextField(
+                  controller: _customControllers[i],
+                  keyboardType: TextInputType.number,
+                  inputFormatters: amountFormatters(),
+                  onChanged: (_) => setState(() => _error = null),
+                  decoration: appInput(
+                    context,
+                    label: names[i],
+                    prefixText: 'Rp ',
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
+              if (total > 0)
+                Text(
+                  context.tr("Friends: {friends} • Your share: {mine}", {
+                    'friends': rupiah(customFriendsTotal),
+                    'mine': rupiah(customMyShare),
+                  }),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: customMyShare < 0
+                        ? context.themeColors.expense
+                        : AppColors.dewMint,
+                  ),
+                ),
             ],
             SwitchListTile(
               contentPadding: EdgeInsets.zero,

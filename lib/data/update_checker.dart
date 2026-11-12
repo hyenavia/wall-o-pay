@@ -50,7 +50,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi fallback jika native method channel gagal membaca PackageManager.
-  static const fallbackVersion = '2.7.3';
+  static const fallbackVersion = '2.16.0';
   static String _resolvedVersion = fallbackVersion;
 
   /// Versi aplikasi saat ini. Dinamis dibaca dari native PackageManager Android atau fallback.

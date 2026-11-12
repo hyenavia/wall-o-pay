@@ -45,10 +45,280 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.7.3',
+      version: '2.16.0',
       dateEn: 'November 12, 2026',
       dateId: '12 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Widget Glass Opacity & Live Hub Previews — Switch between Deep, Frosted, and Clear glass styles for all 6 Home Screen widgets, preview cards with your live numbers in Settings, and re-enable required modules in one tap.',
+          textId:
+              'Gaya Kaca Widget & Pratinjau Langsung — Pilih tingkat transparansi Deep, Frosted, atau Clear untuk keenam widget layar utama, lihat pratinjau langsung dengan data asli di Pengaturan, dan aktifkan modul terkait dalam sekali ketuk.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Widget Polish & Quick Privacy Toggle — Added Material ripple feedback and larger touch targets across Home Screen widgets, 15s auto-dismiss for One-Tap Favorites Undo banners, Android 8–11 static previews, and direct privacy toggle on Quick Action Bar balance pill.',
+          textId:
+              'Penyempurnaan Widget & Sensor Cepat — Menambahkan efek riak Material dan area sentuh lebih lega, banner Urungkan otomatis tertutup setelah 15 detik di Favorit Sekali Ketuk, pratinjau statis Android 8–11, serta ketuk pil saldo di Bilah Aksi Cepat untuk menyembunyikan nominal.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.15.0',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Goals & Upcoming Bills Home Screen Widget — Track active savings goal progress with an inline goal switcher and watch upcoming or overdue scheduled bills right from your Android Home Screen (2×2 & 4×2).',
+          textId:
+              'Widget Target & Tagihan Mendatang — Pantau progres target tabungan aktif dengan tombol ganti target langsung serta jadwal tagihan mendatang dan terlambat dari layar beranda Android (2×2 & 4×2).',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'In-App Android Home Widgets Hub — Explore all 6 Enchanted Glasshouse widgets in Settings, see active Home Screen counts, sync snapshots immediately, and pin widgets directly on Android 8.0+.',
+          textId:
+              'Hub Widget Layar Utama di Pengaturan — Jelajahi seluruh 6 widget Enchanted Glasshouse, lihat jumlah yang terpasang, sinkronkan data seketika, dan sematkan widget langsung pada Android 8.0+.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.14.0',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'One-Tap Favorites Home Screen Widget — Record your saved transaction templates right from your Android Home Screen (4×1 & 4×2) in a single tap with instant Undo support.',
+          textId:
+              'Widget Favorit Sekali Ketuk — Catat template transaksi tersimpan langsung dari layar beranda Android (4×1 & 4×2) dalam sekali ketuk lengkap dengan tombol Urungkan instan.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Budget Guardrail Home Screen Widget — Monitor remaining period budget, warning thresholds (Safe / 85%+ Near / 100%+ Over), and top 3 spending categories (2×2 & 4×2) with rollover and privacy masking.',
+          textId:
+              'Widget Penjaga Anggaran — Pantau sisa anggaran periode aktif, peringatan batas aman (Aman / Hampir 85%+ / Lewat 100%+), dan 3 kategori pengeluaran teratas (2×2 & 4×2) lengkap dengan rollover serta sensor privasi.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Lock-Aware Widget Deep Link Routing — Tapping Home Screen widgets jumps straight to the relevant tab or transaction form while still honoring PIN and biometric LockGate.',
+          textId:
+              'Navigasi Deep Link Widget Aman PIN — Mengetuk widget beranda mengarahkan langsung ke tab terkait atau form transaksi setelah melewati verifikasi PIN & biometrik LockGate.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.13.0',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Daily Pulse & Balance Home Screen Widget — Monitor your safe daily spending quota, today\'s expense progress, financial health tier (Safe / Caution / Limit), total balance, and toggle balance privacy right from your Android Home Screen (2×2 & 4×2).',
+          textId:
+              'Widget Beranda Daily Pulse & Saldo — Pantau kuota belanja aman harian, progres pengeluaran hari ini, status kesehatan finansial (Aman / Waspada / Batas), total saldo, serta tombol sensor privasi langsung dari Home Screen Android (2×2 & 4×2).',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Quick Action Bar Home Screen Widget — A sleek 2×1 / 4×1 Enchanted Glasshouse action strip with live balance pill and one-tap Income, Expense, and Transfer shortcuts.',
+          textId:
+              'Widget Bilah Aksi Cepat — Bilah ringkas 2×1 / 4×1 bergaya Enchanted Glasshouse lengkap dengan pil saldo dan pintasan satu ketuk untuk Pemasukan, Pengeluaran, dan Transfer.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Shared Snapshot Sync & Midnight Rollover — Seamless Flutter-to-native snapshot sync with WorkManager midnight refresh so daily spending quotas stay accurate even before opening the app.',
+          textId:
+              'Sinkronisasi Snapshot & Pembaruan Tengah Malam — Sinkronisasi snapshot terpadu antara Flutter dan widget native dengan pembaruan otomatis tengah malam via WorkManager.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.12.0',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Faster Daily Recording & Duplication — Wallet chips now show compact live balances (privacy-aware), incoming shares auto-suggest type/category/merchant note, "Save as template" is directly accessible, and any transaction can be recorded again via long-press or the edit header.',
+          textId:
+              'Pencatatan & Duplikasi Lebih Cepat — Chip dompet kini menampilkan saldo ringkas (mengikuti mode privasi), teks bagikan otomatis mendeteksi tipe/kategori/catatan merchant, tombol "Simpan sebagai template" langsung terlihat, dan transaksi lama bisa dicatat ulang lewat tekan lama atau ikon salin.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'One-Tap Budget Continuity & Smarter Alerts — Copy your previous period total pool and category limits with one tap when starting an empty period, with budget alerts now factoring in category rollover carryover and total budget pools.',
+          textId:
+              'Kontinuitas Anggaran Satu Ketuk & Notifikasi Lebih Cerdas — Salin total anggaran dan batas kategori periode lalu dengan satu ketuk saat memulai periode kosong, plus peringatan anggaran kini memperhitungkan sisa rollover dan total anggaran periode.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Interactive Insight Drill-Down & Export Shortcuts — Tap Smart Insight cards to inspect matching transactions, tap scheduled bill reserves in Daily Financial Pulse to open Recurring Bills, and export PDF/CSV directly from Transactions.',
+          textId:
+              'Drill-Down Insight Interaktif & Pintasan Ekspor — Ketuk kartu Insight Pintar untuk memeriksa daftar transaksi terkait, ketuk cadangan tagihan di Daily Financial Pulse untuk membuka Jadwal Berulang, serta ekspor PDF/CSV langsung dari halaman Transaksi.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Consistent Budget Input Formatting — Total budget and category limit inputs now use live thousands separators.',
+          textId:
+              'Format Input Anggaran Konsisten — Kolom total anggaran dan batas kategori kini memakai pemisah ribuan otomatis saat diketik.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Default Transfer Wallets & PDF Transfer Sign — Default source/destination transfer chips now save immediately without re-tapping, and PDF tables display transfers cleanly with `<->` instead of `-`.',
+          textId:
+              'Dompet Bawaan Transfer & Tanda Transfer PDF — Chip dompet asal/tujuan bawaan pada mode transfer langsung tersimpan tanpa diketuk ulang, dan laporan PDF menampilkan transfer dengan `<->` alih-alih `-`.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.11.1',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Final Release UI & Bilingual Verification — Verified Net Worth & Vitality Score, Goal Savings Pace quick-fill, and Harvest Recap settings rendering cleanly across English and Indonesian.',
+          textId: 'Verifikasi UI & Dwibahasa Final — Memastikan tampilan Kekayaan Bersih & Skor Vitalitas, isi cepat Ritme Target, serta pengaturan Rekap Panen berjalan mulus di Bahasa Inggris dan Indonesia.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Documentation & Landing Page Polish — Synchronized technical specs, architecture notes, and release readiness across README, ARCHITECTURE guide, and landing page.',
+          textId: 'Penyelarasan Dokumentasi & Halaman Web — Menyelaraskan spesifikasi teknis, panduan arsitektur, dan kesiapan rilis di README, ARCHITECTURE, dan halaman landing.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.11.0',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Net Worth & Glasshouse Vitality Score — Track unified net worth (liquid wallets + receivables - liabilities) and a 0-100 four-pillar financial health score inside Insights.',
+          textId: 'Kekayaan Bersih & Skor Vitalitas Glasshouse — Pantau kekayaan bersih menyeluruh (saldo dompet + piutang - utang) beserta skor kesehatan keuangan 0-100 empat pilar di halaman Insight.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Goal Savings Pace & Quick-Fill — View weekly/monthly target pace, on-track/behind status badges, and a one-tap recommended pace fill button when funding Savings Goals.',
+          textId: 'Ritme Tabungan Target & Isi Cepat — Lihat target setoran mingguan/bulanan, lencana status progres, dan tombol isi cepat nominal rekomendasi saat menabung ke Target.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Contextual Harvest Recap Notifications — Enable optional digest alerts in Settings to get notified once when a new weekly or monthly recap is ready to review.',
+          textId: 'Notifikasi Rekap Panen Kontekstual — Aktifkan pengingat opsional di Pengaturan untuk menerima pemberitahuan sekali saat rekap mingguan atau bulanan terbaru siap ditinjau.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'CI Release Quality Gate — Added automated static analysis and test verification checks ahead of release APK builds.',
+          textId: 'Gerbang Kualitas Rilis CI — Menambahkan verifikasi analisis statis dan uji otomatis sebelum kompilasi APK rilis.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.10.0',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Weekly & Monthly Financial Recap — Review completed weekly or monthly cashflow, savings rate, top categories, Needs/Wants balance, and goals progress via Glasshouse Harvest Review inside Insights.',
+          textId: 'Rekap Keuangan Mingguan & Bulanan — Tinjau arus kas, rasio tabungan, kategori terbesar, rasio Kebutuhan/Keinginan, dan progres target tabungan melalui Tinjauan Panen Glasshouse di halaman Insight.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Interactive Category Drill-Down — Tap any top category row or Expense Composition slice/legend to inspect matching period transactions directly.',
+          textId: 'Drill-Down Kategori Interaktif — Ketuk baris kategori teratas maupun irisan/legenda diagram lingkaran untuk langsung melihat rincian transaksi terkait.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Custom Split Bills & Filtered Exports — Split group bills with non-equal custom shares per friend, filter PDF & CSV exports by account and date range, and get local backup reminders in Guest Mode.',
+          textId: 'Patungan Nominal Kustom & Ekspor Terfilter — Bagi tagihan dengan nominal berbeda per teman, filter ekspor PDF & CSV berdasarkan rekening dan rentang tanggal, serta pengingat cadangan JSON untuk Mode Tamu.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Active Modules & Incremental Cloud Sync — Customize active modules cleanly in Settings (including a Minimalist preset) alongside faster incremental Firestore sync cursors.',
+          textId: 'Modul Aktif & Sinkronisasi Cloud Inkremental — Atur modul yang ingin ditampilkan lewat Pengaturan (termasuk preset Minimalis) beserta sinkronisasi Firestore inkremental yang lebih ringan kuota.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.9.1',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Streamlined Home Dashboard — Removed the 4-button Quick Actions strip on the Home screen to keep your main overview simple, calm, and focused while keeping Transfers, Recurring, Debts, and Goals accessible in their dedicated hubs.',
+          textId: 'Beranda Lebih Ringkas — Menghapus bilah 4 Aksi Cepat dari Beranda agar tampilan utama tetap sederhana, tenang, dan fokus sementara Transfer, Jadwal Rutin, Utang, dan Target tetap mudah diakses lewat menunya masing-masing.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.9.0',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Multi-Filter Transaction Search & Net Flow Strip — Search across wallets, categories, localized category names, and Needs/Wants tags with up to 250 SQL results, one-tap clear search, and net flow summary.',
+          textId: 'Pencarian Transaksi Multi-Filter & Ringkasan Arus Bersih — Cari berdasarkan dompet, kategori, nama kategori terjemahan, serta filter Kebutuhan/Keinginan hingga 250 hasil SQL lengkap dengan tombol hapus cepat dan ringkasan arus kas.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Recurring Confirmation Queue & Transfer Schedules — Due recurring rules queue safely for Confirm, Edit, or Skip (with Undo) right from Home or Recurring, plus schedule editing, Transfer support, Record now, and Skip next due.',
+          textId: 'Antrean Konfirmasi Tagihan Rutin & Jadwal Transfer — Jadwal rutin yang jatuh tempo masuk antrean untuk Konfirmasi, Edit, atau Lewati (dengan Urungkan) dari Beranda maupun halaman Berulang, dilengkapi edit jadwal, dukungan Transfer, Catat sekarang, dan Lewati jatuh tempo.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Home Quick Actions & Itemized Debt Payment History — Added a 4-shortcut Quick Actions bar on Home (with live pending badge), unified empty state CTAs in Debts and Goals, and itemized Payment History with atomic delete/Undo on Debt details.',
+          textId: 'Aksi Cepat Beranda & Riwayat Cicilan Utang — Menambahkan bilah 4 Aksi Cepat di Beranda (dengan lencana antrean), tombol ajakan seragam di Utang dan Target, serta Riwayat Pembayaran terperinci lengkap dengan hapus & Urungkan pada detail Utang.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.8.0',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Smart Daily Quota Breakdown — Recalibrated Daily Financial Pulse to deduct upcoming recurring bills, avoid false "Limit" warnings when spending from existing account balances, and show an interactive formula breakdown inside the guide sheet.',
+          textId: 'Rincian Kuota Harian Cerdas — Menyempurnakan Daily Financial Pulse agar menyisihkan tagihan berulang mendatang, mencegah status "Batas" keliru saat memakai saldo rekening yang tersedia, serta menampilkan rincian rumus perhitungan di lembar panduan.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn: 'Debt Editing, Template Removal & Dedicated Categories — Added editing for debt records, a dedicated full-settlement confirmation prompt, one-tap deletion for saved transaction templates, and dedicated system categories for Admin Fees and Savings Deposits/Withdrawals.',
+          textId: 'Edit Utang, Hapus Template & Kategori Khusus — Menambahkan edit catatan utang, konfirmasi pelunasan penuh tersendiri, hapus cepat template transaksi tersimpan, serta kategori bawaan khusus untuk Biaya Admin dan Setoran/Penarikan Tabungan.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Core Financial Accuracy & Custom Payday Fixes — Fixed Need/Want tag persistence on transaction save/edit, repaired monthly Insights chart bucketing across custom payday cycles (firstDayOfMonth), unified Account transfers onto TransactionForm, and cleaned up Enchanted Glasshouse color tokens.',
+          textId: 'Perbaikan Akurasi Keuangan & Siklus Gajian Kustom — Memperbaiki penyimpanan label Need/Want pada transaksi, memperbaiki pengelompokan grafik Analisis untuk tanggal gajian kustom, menyatukan alur transfer antar akun, dan merapikan token warna Enchanted Glasshouse.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.7.3',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,
@@ -598,8 +868,10 @@ class AppChangelog {
         ),
         ChangeItem(
           type: ChangeType.changed,
-          textEn: 'Polished exit application confirmation dialog theme contrast.',
-          textId: 'Menyempurnakan kontras tema dialog konfirmasi keluar aplikasi.',
+          textEn:
+              'Polished exit application confirmation dialog theme contrast.',
+          textId:
+              'Menyempurnakan kontras tema dialog konfirmasi keluar aplikasi.',
         ),
       ],
     ),
@@ -634,10 +906,8 @@ class AppChangelog {
       changes: [
         ChangeItem(
           type: ChangeType.added,
-          textEn:
-              'Balance Card Accounts Shortcut & Quick Preview Bar: Tappable Total Balance header with chevron indicator and an interactive compact bar showing active account avatars and summary beneath the cashflow card.',
-          textId:
-              'Shortcut & Bar Ringkas Akun di Kartu Saldo: Judul Total Saldo interaktif dengan ikon panah serta bar ringkas berisi avatar akun aktif dan ringkasan yang langsung membuka halaman Akun & Rekening.',
+          textEn: 'Balance Card Accounts Shortcut & Quick Preview Bar: Tappable Total Balance header with chevron indicator and an interactive compact bar showing active account avatars and summary beneath the cashflow card.',
+          textId: 'Shortcut & Bar Ringkas Akun di Kartu Saldo: Judul Total Saldo interaktif dengan ikon panah serta bar ringkas berisi avatar akun aktif dan ringkasan yang langsung membuka halaman Akun & Rekening.',
         ),
       ],
     ),
@@ -648,10 +918,8 @@ class AppChangelog {
       changes: [
         ChangeItem(
           type: ChangeType.changed,
-          textEn:
-              'Landing Page Modernization & Feature Parity: Overhauled docs landing page with an 8-card feature matrix, dynamic showcase previews for all tabs, 3-block Rupiah mobile mockup, and rate-limit guard.',
-          textId:
-              'Modernisasi Landing Page & Sinkronisasi Fitur: Memperbarui landing page docs dengan matriks 8 kartu fitur riil, preview showcase dinamis per tab, mockup HP Rupiah 3-blok, dan proteksi versi.',
+          textEn: 'Landing Page Modernization & Feature Parity: Overhauled docs landing page with an 8-card feature matrix, dynamic showcase previews for all tabs, 3-block Rupiah mobile mockup, and rate-limit guard.',
+          textId: 'Modernisasi Landing Page & Sinkronisasi Fitur: Memperbarui landing page docs dengan matriks 8 kartu fitur riil, preview showcase dinamis per tab, mockup HP Rupiah 3-blok, dan proteksi versi.',
         ),
       ],
     ),
@@ -662,17 +930,13 @@ class AppChangelog {
       changes: [
         ChangeItem(
           type: ChangeType.added,
-          textEn:
-              'Undo Delete via Floating SnackBar: Promptly undo accidental deletion of transactions, transfer entries, debt records, or savings goals right from an interactive SnackBar without losing data.',
-          textId:
-              'Urungkan Hapus via SnackBar: Kembalikan transaksi, transfer, catatan utang, atau target tabungan yang terhapus secara instan lewat tombol "Urungkan" tanpa kehilangan data.',
+          textEn: 'Undo Delete via Floating SnackBar: Promptly undo accidental deletion of transactions, transfer entries, debt records, or savings goals right from an interactive SnackBar without losing data.',
+          textId: 'Urungkan Hapus via SnackBar: Kembalikan transaksi, transfer, catatan utang, atau target tabungan yang terhapus secara instan lewat tombol "Urungkan" tanpa kehilangan data.',
         ),
         ChangeItem(
           type: ChangeType.added,
-          textEn:
-              'Settings & Payday in JSON Backup: JSON export files now back up app preferences (payday cycle, rollover, reminders) and 50/30/20 budget pools, keeping Guest mode migrations completely intact.',
-          textId:
-              'Pengaturan & Gajian di Backup JSON: Ekspor file JSON kini menyertakan preferensi (tanggal gajian, rollover, pengingat) dan aturan anggaran 50/30/20, aman untuk migrasi pengguna Mode Tamu.',
+          textEn: 'Settings & Payday in JSON Backup: JSON export files now back up app preferences (payday cycle, rollover, reminders) and 50/30/20 budget pools, keeping Guest mode migrations completely intact.',
+          textId: 'Pengaturan & Gajian di Backup JSON: Ekspor file JSON kini menyertakan preferensi (tanggal gajian, rollover, pengingat) dan aturan anggaran 50/30/20, aman untuk migrasi pengguna Mode Tamu.',
         ),
       ],
     ),
@@ -683,10 +947,8 @@ class AppChangelog {
       changes: [
         ChangeItem(
           type: ChangeType.changed,
-          textEn:
-              'Side-by-Side Debug & Release Builds: Debug builds now use a separate package ID (.debug) and "Wall o\' Pay (Debug)" label so both Debug and Release apps can coexist on the same phone.',
-          textId:
-              'Instalasi Berdampingan Debug & Release: Build debug kini memakai ID paket terpisah (.debug) dan label "Wall o\' Pay (Debug)" sehingga aplikasi Debug dan Release bisa terpasang bersamaan di satu HP.',
+          textEn: 'Side-by-Side Debug & Release Builds: Debug builds now use a separate package ID (.debug) and "Wall o\' Pay (Debug)" label so both Debug and Release apps can coexist on the same phone.',
+          textId: 'Instalasi Berdampingan Debug & Release: Build debug kini memakai ID paket terpisah (.debug) dan label "Wall o\' Pay (Debug)" sehingga aplikasi Debug dan Release bisa terpasang bersamaan di satu HP.',
         ),
       ],
     ),
@@ -697,17 +959,13 @@ class AppChangelog {
       changes: [
         ChangeItem(
           type: ChangeType.added,
-          textEn:
-              'Offline Guest Mode: Continue without an account to track finances 100% offline on your device, complete with local profile & PIN lock support.',
-          textId:
-              'Mode Tamu Offline: Lanjut tanpa akun untuk mencatat keuangan 100% offline di perangkatmu, lengkap dengan profil lokal & kunci PIN.',
+          textEn: 'Offline Guest Mode: Continue without an account to track finances 100% offline on your device, complete with local profile & PIN lock support.',
+          textId: 'Mode Tamu Offline: Lanjut tanpa akun untuk mencatat keuangan 100% offline di perangkatmu, lengkap dengan profil lokal & kunci PIN.',
         ),
         ChangeItem(
           type: ChangeType.added,
-          textEn:
-              'Seamless Account Linking: Upgrade from Guest Mode to a cloud account anytime with automatic local data migration or cloud-only restore choice.',
-          textId:
-              'Penautan Akun Mulus: Beralih dari Mode Tamu ke akun cloud kapan saja dengan migrasi data lokal otomatis atau opsi pemulihan cloud saja.',
+          textEn: 'Seamless Account Linking: Upgrade from Guest Mode to a cloud account anytime with automatic local data migration or cloud-only restore choice.',
+          textId: 'Penautan Akun Mulus: Beralih dari Mode Tamu ke akun cloud kapan saja dengan migrasi data lokal otomatis atau opsi pemulihan cloud saja.',
         ),
       ],
     ),
@@ -1060,8 +1318,10 @@ class AppChangelog {
       changes: [
         ChangeItem(
           type: ChangeType.changed,
-          textEn: 'Cleaned up obsolete repository setup files and orphaned assets.',
-          textId: 'Membersihkan file panduan lama dan aset usang dari repositori.',
+          textEn:
+              'Cleaned up obsolete repository setup files and orphaned assets.',
+          textId:
+              'Membersihkan file panduan lama dan aset usang dari repositori.',
         ),
       ],
     ),
@@ -1533,11 +1793,12 @@ class AppChangelogSheet extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            context.tr(
-                              "What's new in Wall o' Pay v{version}",
-                              {'version': UpdateCheckerService.currentVersion},
+                            context.tr("What's new in Wall o' Pay v{version}", {
+                              'version': UpdateCheckerService.currentVersion,
+                            }),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: muted,
                             ),
-                            style: theme.textTheme.bodySmall?.copyWith(color: muted),
                           ),
                         ],
                       ),
@@ -1575,10 +1836,7 @@ class AppChangelogSheet extends StatelessWidget {
 }
 
 class _ReleaseCard extends StatelessWidget {
-  const _ReleaseCard({
-    required this.release,
-    required this.isIndonesian,
-  });
+  const _ReleaseCard({required this.release, required this.isIndonesian});
 
   final ReleaseEntry release;
   final bool isIndonesian;
@@ -1616,7 +1874,10 @@ class _ReleaseCard extends StatelessWidget {
               const SizedBox(width: 8),
               if (release.isCurrent)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: primaryCol,
                     borderRadius: BorderRadius.circular(6),
@@ -1639,7 +1900,9 @@ class _ReleaseCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          ...release.changes.map((item) => _ChangeItemRow(item: item, isIndonesian: isIndonesian)),
+          ...release.changes.map(
+            (item) => _ChangeItemRow(item: item, isIndonesian: isIndonesian),
+          ),
         ],
       ),
     );
@@ -1647,10 +1910,7 @@ class _ReleaseCard extends StatelessWidget {
 }
 
 class _ChangeItemRow extends StatelessWidget {
-  const _ChangeItemRow({
-    required this.item,
-    required this.isIndonesian,
-  });
+  const _ChangeItemRow({required this.item, required this.isIndonesian});
 
   final ChangeItem item;
   final bool isIndonesian;
@@ -1718,4 +1978,3 @@ class _ChangeItemRow extends StatelessWidget {
     );
   }
 }
-

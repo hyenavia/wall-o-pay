@@ -69,6 +69,12 @@ class QuickFinanceWidgetProvider : AppWidgetProvider() {
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
         updateAllWidgets(context)
+        WidgetMidnightWorker.scheduleIfNeeded(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        WidgetMidnightWorker.cancelIfNoWidgets(context)
     }
 
     override fun onRestored(context: Context, oldWidgetIds: IntArray, newWidgetIds: IntArray) {
@@ -140,7 +146,7 @@ class QuickFinanceWidgetProvider : AppWidgetProvider() {
             }
             ACTION_RECORD -> {
                 handleDirectSave(context, isId)
-                updateAllWidgets(context)
+                WidgetSnapshotStore.refreshAllWidgets(context)
             }
         }
     }
@@ -393,6 +399,7 @@ class QuickFinanceWidgetProvider : AppWidgetProvider() {
         val iconVis = if (isUltraNarrow) View.GONE else View.VISIBLE
 
         // Localization & width-responsive labels (icons carry +, -, swap semantics)
+        views.setInt(R.id.widget_root, "setBackgroundResource", WidgetSnapshotStore.resolveBackgroundRes(context))
         views.setTextViewText(R.id.widget_title, "Quick Finance")
         views.setViewVisibility(R.id.tab_income_icon, iconVis)
         views.setViewVisibility(R.id.tab_expense_icon, iconVis)

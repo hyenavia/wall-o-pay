@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/format.dart';
 import '../../core/icons.dart';
 import '../../core/l10n.dart';
 import '../../core/theme.dart';
@@ -24,7 +25,9 @@ Future<void> showCategoryBudgetSheet(
 ) async {
   var selectedBucket = currentBucket;
   final budgetController = TextEditingController(
-    text: (currentBudget != null && currentBudget > 0) ? currentBudget.toString() : '',
+    text: (currentBudget != null && currentBudget > 0)
+        ? formatThousands(currentBudget)
+        : '',
   );
 
   await showModalBottomSheet<void>(
@@ -182,6 +185,7 @@ Future<void> showCategoryBudgetSheet(
                 TextField(
                   controller: budgetController,
                   keyboardType: TextInputType.number,
+                  inputFormatters: amountFormatters(),
                   style: const TextStyle(
                     color: AppColors.softIvory,
                     fontWeight: FontWeight.w600,
@@ -242,9 +246,7 @@ Future<void> showCategoryBudgetSheet(
 
                       // 2. Simpan batas anggaran spesifik (jika ada)
                       final db = ref.read(databaseProvider);
-                      final limitVal = int.tryParse(
-                              budgetController.text.replaceAll(RegExp(r'[^0-9]'), '')) ??
-                          0;
+                      final limitVal = parseAmount(budgetController.text);
                       await db.setBudget(category.id, periodKey, limitVal);
 
                       if (context.mounted) {

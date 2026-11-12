@@ -11,6 +11,7 @@
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:initialLayout="@layout/widget_quick_finance"
+    android:previewImage="@drawable/preview_widget_quick_finance"
     android:previewLayout="@layout/widget_quick_finance"
     android:description="@string/widget_description"
     android:updatePeriodMillis="0" />

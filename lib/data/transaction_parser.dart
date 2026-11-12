@@ -179,4 +179,34 @@ class TransactionParser {
 
     return 'Transaksi $sourceApp';
   }
+
+  /// Paket ekstraksi lengkap dari teks Share Intent untuk pra-isi form transaksi.
+  static ({
+    int? amount,
+    TxType type,
+    String? categoryId,
+    String sourceApp,
+    String note,
+  }) parseSharedText(String text) {
+    final amount = extractAmount(text);
+    final sourceApp = detectSourceApp(text);
+    final type = detectType(text);
+    final categoryId = suggestCategory(text, type)?.$1;
+    final merchant = extractMerchantNote(text, sourceApp);
+    final isGenericFallback = merchant == 'Transaksi $sourceApp';
+    final note = isGenericFallback
+        ? merchant
+        : (sourceApp != 'Bank / E-Wallet' &&
+                !merchant.toLowerCase().contains(sourceApp.toLowerCase())
+            ? '[$sourceApp] $merchant'
+            : merchant);
+
+    return (
+      amount: amount,
+      type: type,
+      categoryId: categoryId,
+      sourceApp: sourceApp,
+      note: note,
+    );
+  }
 }

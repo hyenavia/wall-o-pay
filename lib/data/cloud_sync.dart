@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app_database.dart';
 import '../core/l10n.dart';
@@ -64,6 +65,40 @@ class AutoSyncService {
   DateTime _lastPushedAt = DateTime.fromMillisecondsSinceEpoch(0);
 
   static const _timeout = Duration(seconds: 20);
+  static const _cursorOverlapMs = 30000;
+
+  /// Kunci SharedPreferences untuk menyimpan cursor incremental pull Firestore per akun.
+  static String pullCursorKey(String uid) => 'sync_pull_cursor_$uid';
+
+  /// Menghitung batas waktu `updatedAt` (ms) untuk query incremental pull Firestore
+  /// dengan overlap buffer 30 detik guna mengantisipasi clock skew antar perangkat.
+  /// Mengembalikan `null` jika belum ada cursor (menandakan pull penuh pertama kali).
+  static int? computeIncrementalPullSinceMs(
+    int? lastCursorMs, {
+    int overlapMs = _cursorOverlapMs,
+  }) {
+    if (lastCursorMs == null || lastCursorMs <= 0) return null;
+    final shifted = lastCursorMs - overlapMs;
+    return shifted < 0 ? 0 : shifted;
+  }
+
+  /// Menghitung nilai cursor berikutnya berdasarkan cursor sebelumnya, max `updatedAt`
+  /// dokumen yang ditarik, dan timestamp dimulainya sinkronisasi.
+  static int computeNextPullCursorMs({
+    required int previousCursorMs,
+    required Iterable<int> pulledUpdatedAtMs,
+    required int syncStartedMs,
+  }) {
+    var maxCursor = previousCursorMs > syncStartedMs ? previousCursorMs : syncStartedMs;
+    for (final ms in pulledUpdatedAtMs) {
+      if (ms > maxCursor) maxCursor = ms;
+    }
+    return maxCursor;
+  }
+
+  /// Menghapus cursor incremental pull agar sinkronisasi berikutnya menarik penuh.
+  static Future<void> clearPullCursor(SharedPreferences prefs, String uid) =>
+      prefs.remove(pullCursorKey(uid));
 
   /// Memulai sinkronisasi otomatis untuk user yang sedang aktif.
   void startSync(String uid) async {
@@ -86,6 +121,7 @@ class AutoSyncService {
       if (lastUid != uid) {
         debugPrint('[AutoSync] Account switch or new session ($lastUid -> $uid). Preparing local data...');
         if (lastUid != null) {
+          await clearPullCursor(prefs, lastUid);
           await _db.resetAllData();
         } else if (discardGuestDataOnNextLogin) {
           discardGuestDataOnNextLogin = false;
@@ -127,6 +163,10 @@ class AutoSyncService {
         'recurring_rules',
         'recurringRules',
         'debts',
+        'debt_payments',
+        'debtPayments',
+        'pending_transactions',
+        'pendingTransactions',
         'tx_templates',
         'txTemplates',
       };
@@ -270,9 +310,17 @@ class AutoSyncService {
 
     try {
       final root = FirebaseFirestore.instance.collection('users').doc(uid);
+      final prefs = _ref.read(sharedPreferencesProvider);
+      final syncStartedMs = DateTime.now().millisecondsSinceEpoch;
+      final prevCursorMs = prefs.getInt(pullCursorKey(uid)) ?? 0;
+      final candidateSinceMs = computeIncrementalPullSinceMs(prevCursorMs);
+      final isIncrementalPull =
+          candidateSinceMs != null && _lastPushedAt.millisecondsSinceEpoch > 0;
+      final pulledUpdatedAtMs = <int>[];
+      var allPullSucceeded = true;
       final remoteUpdatedMaps = <String, Map<String, int>>{};
 
-      // Langkah 1: PULL (Tarik data cloud ke lokal dan rekam timestamp remote)
+      // Langkah 1: PULL (Tarik delta/penuh data cloud ke lokal dan rekam timestamp remote)
       try {
         await _ref.read(profileProvider.notifier).restoreFromCloud(uid);
       } catch (e) {
@@ -293,13 +341,21 @@ class AutoSyncService {
 
       for (final t in _db.syncTables) {
         try {
-          final snap = await root.collection(t.name).get().timeout(_timeout);
+          final col = root.collection(t.name);
+          final QuerySnapshot<Map<String, dynamic>> snap = isIncrementalPull
+              ? await col
+                  .where('updatedAt', isGreaterThan: candidateSinceMs)
+                  .get()
+                  .timeout(_timeout)
+              : await col.get().timeout(_timeout);
           final remoteMap = <String, int>{};
           _isApplyingRemote = true;
           try {
             for (final doc in snap.docs) {
               final data = doc.data();
-              remoteMap[doc.id] = (data['updatedAt'] as num?)?.toInt() ?? 0;
+              final updatedMs = (data['updatedAt'] as num?)?.toInt() ?? 0;
+              remoteMap[doc.id] = updatedMs;
+              pulledUpdatedAtMs.add(updatedMs);
               await t.applyRemote(data);
             }
           } finally {
@@ -307,8 +363,18 @@ class AutoSyncService {
           }
           remoteUpdatedMaps[t.name] = remoteMap;
         } catch (e) {
+          allPullSucceeded = false;
           debugPrint('[AutoSync] Warning pulling table ${t.name}: $e');
         }
+      }
+
+      if (allPullSucceeded) {
+        final nextCursor = computeNextPullCursorMs(
+          previousCursorMs: prevCursorMs,
+          pulledUpdatedAtMs: pulledUpdatedAtMs,
+          syncStartedMs: syncStartedMs,
+        );
+        await prefs.setInt(pullCursorKey(uid), nextCursor);
       }
 
       // Langkah 2: PUSH (Unggah data lokal yang belum ada / lebih baru di cloud)
@@ -330,13 +396,17 @@ class AutoSyncService {
         debugPrint('[AutoSync] Warning uploading preferences: $e');
       }
 
+      final localPushSince = isIncrementalPull
+          ? _lastPushedAt.subtract(const Duration(seconds: 5))
+          : DateTime.fromMillisecondsSinceEpoch(0);
+
       for (final t in _db.syncTables) {
         try {
           final col = root.collection(t.name);
-          // Pakai cache remote map dari Langkah 1, hemat puluhan/ratusan read get() Firestore
+          // Pakai cache remote map dari Langkah 1 agar efisien biaya read Firestore
           final remote = remoteUpdatedMaps[t.name] ?? const {};
 
-          final rows = await t.changed(DateTime.fromMillisecondsSinceEpoch(0));
+          final rows = await t.changed(localPushSince);
           final toUpload = rows.where((r) {
             final remoteMs = remote[r['id'] as String];
             return remoteMs == null || (r['updatedAt'] as num).toInt() > remoteMs;
@@ -464,6 +534,10 @@ class AutoSyncService {
 
     try {
       final root = FirebaseFirestore.instance.collection('users').doc(uid);
+      final prefs = _ref.read(sharedPreferencesProvider);
+      final syncStartedMs = DateTime.now().millisecondsSinceEpoch;
+      await clearPullCursor(prefs, uid);
+      final pulledUpdatedAtMs = <int>[];
       var totalRestored = 0;
 
       await _ref.read(profileProvider.notifier).restoreFromCloud(uid);
@@ -475,13 +549,24 @@ class AutoSyncService {
         _isApplyingRemote = true;
         try {
           for (final doc in snap.docs) {
-            final applied = await t.applyRemote(doc.data());
+            final data = doc.data();
+            pulledUpdatedAtMs.add((data['updatedAt'] as num?)?.toInt() ?? 0);
+            final applied = await t.applyRemote(data);
             if (applied) totalRestored++;
           }
         } finally {
           _isApplyingRemote = false;
         }
       }
+
+      await prefs.setInt(
+        pullCursorKey(uid),
+        computeNextPullCursorMs(
+          previousCursorMs: 0,
+          pulledUpdatedAtMs: pulledUpdatedAtMs,
+          syncStartedMs: syncStartedMs,
+        ),
+      );
 
       await RecurringService.checkAndGenerateDue(_db);
 
@@ -520,9 +605,12 @@ class AutoSyncService {
         'recurringRules',
         'recurring_rules',
         'debts',
+        'debtPayments',
+        'debt_payments',
         'txTemplates',
         'tx_templates',
         'pendingTransactions',
+        'pending_transactions',
       ];
 
       for (final colName in collections) {

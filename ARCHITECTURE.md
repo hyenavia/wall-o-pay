@@ -82,7 +82,7 @@ Folder ini berisi kode fondasi yang dipakai di seluruh fitur dan tidak bergantun
 
 | File | Peran & Tanggung Jawab |
 | :--- | :--- |
-| `theme.dart` | Definisi palet warna *Botanical Forest* (`AppColors`) dan konfigurasi tema Material 3 (`buildTheme`) dengan tipografi *Plus Jakarta Sans* berfitur *tabular figures* (agar angka sejajar). |
+| `theme.dart` | Definisi palet warna *Enchanted Glasshouse* (`AppColors`) dan konfigurasi tema Material 3 (`buildTheme`) dengan tipografi *Outfit* (heading) & *DM Sans* berfitur *tabular figures* (`appMoneyStyle`). |
 | `botanical_decorations.dart` | `CustomPainter` untuk menggambar ornamen dedaunan dan efek cahaya (*glow*) khas Wall o' Pay pada AppBar (`BotanicalCanopyPainter`), kartu utama (`BotanicalHeroCardPainter`), dan latar belakang (`BotanicalBackgroundPainter`). |
 | `brand.dart` | Widget logo aplikasi (`BrandMark`) dan tampilan layar pembuka (`SplashPage`). |
 | `format.dart` | Fungsi pemformatan nominal Rupiah (`rupiah`), pemisah ribuan (`formatThousands`, `ThousandsInputFormatter`), format tanggal (`dateLabel`, `shortDate`, `dayHeader`), dan sapaan waktu (`greeting`). |
@@ -97,25 +97,25 @@ Folder ini adalah "otak" penyimpanan dan pengolahan data aplikasi.
 
 | File | Peran & Tanggung Jawab |
 | :--- | :--- |
-| `tables.dart` | Definisi skema 8 tabel SQLite Drift (`Categories`, `Wallets`, `Transactions`, `Budgets`, `SavingsGoals`, `RecurringRules`, `Debts`, `TxTemplates`) beserta `mixin SyncColumns` (`id`, `createdAt`, `updatedAt`, `deletedAt`). |
-| `app_database.dart` | Kelas utama `AppDatabase` (Drift SQLite). Mengelola migrasi skema (`schemaVersion`), data awal (*seed* kategori & dompet), operasi CRUD, *soft-delete* (`deletedAt`), pencarian SQL, ekspor/impor JSON, dan jembatan sinkronisasi `syncTables`. |
+| `tables.dart` | Definisi skema 8 tabel SQLite Drift (`Categories`, `Wallets`, `Transactions`, `Budgets`, `SavingsGoals`, `RecurringRules`, `Debts`, `TxTemplates`) beserta `mixin SyncColumns` dan 4 index `Transactions`. |
+| `app_database.dart` | Kelas utama `AppDatabase` (Drift SQLite `schemaVersion = 9`). Mengelola migrasi skema aman, data awal (*seed* kategori & dompet), operasi CRUD, *soft-delete* (`deletedAt`), pencarian SQL, ekspor/impor JSON, dan jembatan sinkronisasi `syncTables`. |
 | `app_database.g.dart` | Kode hasil *generate* otomatis oleh `build_runner` untuk Drift. *(Jangan diubah manual)*. |
 | `providers.dart` | Provider Riverpod inti: instance database, periode terpilih (`selectedPeriodProvider`), sensor saldo (`hideBalanceProvider`), daftar transaksi, kategori, anggaran, serta perhitungan saldo tiap dompet secara *real-time* (`walletBalancesProvider`). |
 | `feature_providers.dart` | Provider tambahan: pencarian transaksi SQL (`searchTransactionsProvider`), filter rentang tanggal, dan perhitungan *rollover* sisa anggaran periode sebelumnya (`carryOverProvider`, `effectiveBudgetProvider`). |
 | `budget_rule.dart` | Logika dan state penganggaran **50/30/20** (`BudgetBucket`: *Needs*, *Wants*, *Savings*) maupun alokasi nominal kustom per periode (`BudgetRuleNotifier`, `budget503020BreakdownProvider`). |
 | `prefs.dart` | Pengaturan personalisasi pengguna (`AppPrefs`: tema, bahasa, tipe periode bulanan/mingguan, hari awal minggu, tanggal gajian) beserta sinkronisasinya ke Firestore (`users/{uid}/meta/preferences`). |
-| `feature_prefs.dart` | Pengaturan fitur opsional (`FeaturePrefs`: *rollover* anggaran, peringatan anggaran 80%/100%, dan jam pengingat harian). |
-| `module_prefs.dart` | Pengaturan modul fitur yang bisa diaktifkan/dinonaktifkan pengguna (`ModulePrefs`). |
+| `feature_prefs.dart` | Pengaturan fitur opsional (`FeaturePrefs`: *rollover* anggaran, peringatan anggaran 80%/100%, pengingat harian, dan notifikasi Harvest Recap `recapAlerts`). |
+| `module_prefs.dart` | Pengaturan modul aktif (`ModulePrefs`: `goals`, `debts`, `recurring`, `budget`, `transfer`) dengan preset **All Features** & **Minimalist** yang mengontrol visibilitas navigasi dan form. |
 | `profile.dart` | Pengelolaan nama panggilan (*nickname*) dan foto profil (`ProfileController`, disimpan sebagai Base64 di lokal & Firestore), serta `displayNameProvider` untuk sapaan di beranda. |
 | `auth_service.dart` | Layanan autentikasi Firebase (`AuthService`): login dengan email **atau** username (melalui koleksi Firestore `usernames`), pendaftaran akun, reset password, dan penghapusan akun permanen beserta seluruh data cloud. |
 | `cloud.dart` | Provider status kesiapan Firebase (`firebaseReadyProvider`), stream status login (`authStateProvider`), dan status Mode Tamu (`skipAuthProvider`). |
-| `cloud_sync.dart` | Layanan sinkronisasi dua arah otomatis & *real-time* (`AutoSyncService`). Memantau perubahan tabel lokal Drift dan *snapshot* Firestore, menangani *debounce push*, deteksi koneksi internet kembali aktif, serta pergantian akun. |
+| `cloud_sync.dart` | Layanan sinkronisasi dua arah otomatis & inkremental (`AutoSyncService`). Menyimpan cursor penarikan per-user (`sync_pull_cursor_<uid>`) dengan buffer *clock-skew* 30 detik serta *fallback* full sync untuk penarikan awal/manual. |
 | `cloud_backup.dart` | Layanan pencadangan & pemulihan manual ke Cloud Firestore (`CloudBackupService` & `CloudBackupController`). |
-| `lock.dart` | Layanan keamanan PIN 6 digit dengan *hash* SHA-256 + *salt* acak (`Lock`), sinkronisasi PIN antar perangkat, dan fitur *Privacy Shield* (`FLAG_SECURE` agar layar aplikasi disamarkan di *Recent Apps*). |
-| `notifications.dart` | Layanan notifikasi lokal Android (`NotificationService`), pengecekan batas anggaran 80% & 100% (`checkBudgetAfterExpense`), serta pengingat jatuh tempo utang (`checkDebtDueReminders`). |
-| `recurring_service.dart` | Kalkulasi tanggal jatuh tempo berikutnya (`calculateNextDueDate`) dan pencatatan otomatis transaksi berulang yang sudah jatuh tempo (`checkAndGenerateDue`). |
-| `export_service.dart` | Ekspor riwayat transaksi ke file `.csv` (kompatibel dengan Excel via BOM UTF-8) serta ekspor/impor cadangan penuh `.json`. |
-| `report_service.dart` | Pembuatan laporan keuangan formal berformat `.pdf` (`ReportService`) lengkap dengan tabel ringkasan, perincian kategori, *Needs vs Wants*, dan daftar transaksi. |
+| `lock.dart` | Layanan keamanan PIN 6 digit dengan *2,048-iteration salted HMAC-SHA256 (v2)* yang tersimpan di Android Keystore / iOS Keychain (`flutter_secure_storage`), kunci biometrik, dan *Privacy Shield* (`FLAG_SECURE`). |
+| `notifications.dart` | Layanan notifikasi lokal Android (`NotificationService`), peringatan anggaran 80%/100% (`checkBudgetAfterExpense`), pengingat jatuh tempo utang (`checkDebtDueReminders`), serta notifikasi Harvest Recap periodik (`checkHarvestRecapNotification`). |
+| `recurring_service.dart` | Kalkulasi tanggal jatuh tempo berikutnya (`calculateNextDueDate`) dan pencatatan/konfirmasi antrean transaksi berulang (`checkAndGenerateDue`, `confirmPendingItem`, `skipPendingItem`). |
+| `export_service.dart` | Ekspor riwayat transaksi ke `.csv` (8 kolom dengan filter dompet & rentang tanggal, BOM UTF-8), ekspor/impor cadangan penuh `.json`, serta pengecekan pengingat backup Mode Tamu (`shouldShowGuestBackupNudge`). |
+| `report_service.dart` | Pembuatan laporan keuangan formal `.pdf` (`ReportService`) dengan dukungan filter akun (`walletId`), tabel ringkasan, perincian kategori, *Needs vs Wants*, dan daftar transaksi. |
 | `share_service.dart` | Menangani *Share Intent* dari aplikasi lain (misal bukti transfer dari m-banking/e-wallet yang dibagikan ke Wall o' Pay) dan membuka form transaksi secara otomatis. |
 | `transaction_parser.dart` | Parser pintar berbasis *RegExp* & kata kunci (`TransactionParser`) untuk mengekstrak nominal Rupiah, mendeteksi aplikasi sumber (BCA, Mandiri, GoPay, dll.), serta menebak kategori dari teks bukti transaksi. |
 | `update_checker.dart` | Memeriksa rilis terbaru di GitHub Releases API (`UpdateCheckerService`), membandingkan versi SemVer dengan aplikasi terpasang, dan menampilkan dialog unduh APK baru. |
@@ -131,14 +131,14 @@ Setiap subfolder mewakili satu modul fitur di antarmuka pengguna:
   - `total_budget_dialog.dart`: Dialog pengaturan total anggaran periode (mode standar 50/30/20 atau alokasi nominal kustom).
   - `category_budget_sheet.dart`: *Bottom sheet* untuk memindahkan kategori ke pilar lain atau mengatur batas anggaran spesifik per kategori.
 - **`categories/` (`categories_page.dart`)**: Halaman pengelolaan kategori pengeluaran dan pemasukan (tambah, ubah nama/ikon/warna, atau hapus *soft-delete*).
-- **`debts/` (`debts_page.dart`)**: Halaman pencatatan utang (*I owe*) & piutang (*Owed to me*), pencatatan cicilan/pelunasan, serta kalkulator *Split Bill* (patungan bersama teman).
-- **`goals/` (`goals_page.dart`)**: Halaman target tabungan (*Savings Goals*), penambahan saldo tabungan, dan daftar target yang sudah tercapai.
+- **`debts/` (`debts_page.dart`)**: Halaman pencatatan utang (*I owe*) & piutang (*Owed to me*), cicilan/pelunasan, serta kalkulator *Split Bill* mode **Bagi Rata** & **Nominal Kustom** (`computeCustomSplit`).
+- **`goals/` (`goals_page.dart`)**: Halaman target tabungan (*Savings Goals*), kalkulasi ritme tabungan mingguan/bulanan (`computeGoalPace`), tombol isi cepat *Use pace*, dan riwayat target selesai.
 - **`home/`**:
-  - `home_page.dart`: Halaman beranda utama (sapaan profil, kartu saldo & arus kas periode, pintasan cepat, progres anggaran, dan transaksi terbaru).
+  - `home_page.dart`: Halaman beranda ringkas (sapaan profil, kartu total saldo & arus kas periode, antrean konfirmasi rutin, progres anggaran, dan transaksi terbaru).
   - `daily_financial_pulse_card.dart`: Kartu indikator kesehatan finansial harian (*Safe* / *Caution* / *Limit*) berdasarkan kuota belanja harian yang aman.
 - **`insights/`**:
-  - `insights_page.dart`: Halaman analitik keuangan dengan 3 tab (*Summary*, *Categories*, *Trend*).
-  - `insight_engine.dart`: Mesin kalkulasi analitik deterministik (`InsightEngine`) yang menghitung rasio tabungan, lonjakan kategori dibanding periode lalu, puncak hari belanja, dan rekomendasi pintar (`SmartInsightItem`).
+  - `insights_page.dart`: Halaman analitik 3 tab (*Overview*, *Categories*, *Trend*), kartu **Net Worth & Vitality Score**, modal **Glasshouse Harvest Review**, dan *drill-down* transaksi kategori.
+  - `insight_engine.dart`: Mesin analitik deterministik (`InsightEngine`) untuk metrik periode, *Harvest Recap* mingguan/bulanan (`computeRecap`), *Net Worth* anti *double-counting* (`computeNetWorth`), dan **Vitality Score** 0–100 (`computeVitalityScore`).
   - `charts.dart`: Widget grafik visual menggunakan `fl_chart` (`ExpensePieChart`, `TrendBarChart`, dan grafik tren pengeluaran).
 - **`more/` (`more_page.dart`)**: Halaman pusat navigasi menuju seluruh fitur lengkap aplikasi.
 - **`onboarding/` (`onboarding_gate.dart` & `onboarding_page.dart`)**: Alur pengenalan awal 4 langkah untuk mengatur periode, uang tunai awal, uang saku rutin, dan anggaran dasar.
@@ -179,6 +179,12 @@ Lalu menentukan status kesehatan (`DailyHealthTier`):
 1. **Limit (Merah):** Jika total pengeluaran sudah mencapai/melebihi anggaran periode (`budgetSpent >= totalBudget`) atau saldo periode defisit (`balance <= 0`).
 2. **Caution / Waspada (Kuning):** Jika pemakaian anggaran $\ge 85\%$ atau pengeluaran hari ini melebihi kuota harian aman (`todayExpense > dailyAllowance`).
 3. **Safe / Aman (Hijau Sage):** Jika pengeluaran masih di bawah batas aman.
+
+### D. Perhitungan *Net Worth* & *Glasshouse Vitality Score* (`insight_engine.dart`)
+- **Net Worth (`computeNetWorth`):**
+  $$\text{Net Worth} = \text{Liquid Assets} + \text{Receivables} - \text{Liabilities}$$
+  Dana *Savings Goals* (`allocatedGoalReserve`) dicatat terpisah dan tidak dijumlahkan ke *Liquid Assets* agar setoran tabungan yang sudah memotong saldo dompet maupun alokasi virtual tidak terhitung ganda.
+- **Vitality Score (`computeVitalityScore`, 0–100):** Dinormalisasi dari pilar aktif (*Savings Rate* 30, *Budget Discipline* 25, *Needs vs Wants* 25, *Debt Cushion* 20) agar pengguna baru yang belum mengatur anggaran atau tag *Needs/Wants* tetap mendapat skor proporsional yang jujur.
 
 ---
 

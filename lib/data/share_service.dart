@@ -166,12 +166,16 @@ class ShareService {
     if (imagePath == null && (text == null || text.trim().isEmpty)) return;
 
     int? parsedAmount;
+    TxType? parsedType;
+    String? parsedCategoryId;
     String note = '';
 
     if (text != null && text.trim().isNotEmpty) {
-      parsedAmount = TransactionParser.extractAmount(text);
-      final detectedSource = TransactionParser.detectSourceApp(text);
-      note = detectedSource.isNotEmpty ? '[$detectedSource] $text' : text;
+      final parsed = TransactionParser.parseSharedText(text);
+      parsedAmount = parsed.amount;
+      parsedType = parsed.type;
+      parsedCategoryId = parsed.categoryId;
+      note = parsed.note;
     }
 
     if (imagePath != null && note.isEmpty) {
@@ -188,7 +192,9 @@ class ShareService {
       if (ctx.mounted) {
         showTransactionForm(
           ctx,
+          initialType: parsedType,
           initialAmount: parsedAmount,
+          initialCategoryId: parsedCategoryId,
           initialNote: note.trim(),
           initialReceiptPath: validImagePath,
         );

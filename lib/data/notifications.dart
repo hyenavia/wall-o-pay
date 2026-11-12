@@ -12,7 +12,7 @@ import '../core/format.dart';
 import '../core/l10n.dart';
 import '../core/period.dart';
 import 'app_database.dart';
-import 'tables.dart' show DebtDirection;
+import 'tables.dart' show DebtDirection, TxType;
 
 /// Notifikasi lokal: peringatan anggaran dan pengingat harian.
 /// Semua pemanggilan aman: jika terjadi kesalahan, hanya dicatat ke log.
@@ -114,6 +114,33 @@ class NotificationService {
     }
   }
 
+  Future<void> showRecapDigest({
+    required int notificationId,
+    required String title,
+    required String body,
+  }) async {
+    if (!_supported) return;
+    await init();
+    if (!_ready) return;
+    try {
+      await _plugin.show(
+        notificationId,
+        title,
+        body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            'harvest_recap',
+            trG('Harvest recap notifications'),
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Recap digest failed: $e');
+    }
+  }
+
   /// Menjadwalkan pengingat harian pada jam lokal [time]. Jadwal dihitung
   /// ulang setiap aplikasi dibuka, jadi tetap akurat jika zona waktu berubah.
   Future<void> scheduleDailyReminder(TimeOfDay time) async {
@@ -174,25 +201,76 @@ Future<void> checkBudgetAfterExpense({
   required String categoryId,
   required String categoryName,
   required DateTime date,
+  int firstDayOfWeek = DateTime.monday,
+  int firstDayOfMonth = 1,
+  bool rolloverEnabled = false,
+  int totalBudgetPool = 0,
 }) async {
-  final period = Period.containing(periodType, date);
-  final budget = await db.budgetAmount(categoryId, period.key);
-  if (budget <= 0) return;
-  final spent = await db.expenseTotal(categoryId, period.start, period.end);
-
-  final level = spent >= budget ? 100 : (spent * 100 >= budget * 80 ? 80 : 0);
-  final key = 'alert_${period.key}_$categoryId';
-  final last = prefs.getInt(key) ?? 0;
-  if (level <= last) {
-    if (level < last) await prefs.setInt(key, level);
-    return;
-  }
-  await prefs.setInt(key, level);
-  await NotificationService.instance.showBudgetAlert(
-    categoryName: categoryName,
-    percent: level,
-    notificationId: categoryId.hashCode & 0x7fffffff,
+  final period = Period.containing(
+    periodType,
+    date,
+    firstDayOfWeek: firstDayOfWeek,
+    firstDayOfMonth: firstDayOfMonth,
   );
+  var budget = await db.budgetAmount(categoryId, period.key);
+  if (rolloverEnabled) {
+    final prevPeriod = period.shift(-1);
+    final prevBudget = await db.budgetAmount(categoryId, prevPeriod.key);
+    if (prevBudget > 0) {
+      final prevSpent = await db.expenseTotal(
+        categoryId,
+        prevPeriod.start,
+        prevPeriod.end,
+      );
+      final carryOver = prevBudget - prevSpent;
+      if (carryOver > 0) {
+        budget += carryOver;
+      }
+    }
+  }
+
+  if (budget > 0) {
+    final spent = await db.expenseTotal(categoryId, period.start, period.end);
+
+    final level = spent >= budget ? 100 : (spent * 100 >= budget * 80 ? 80 : 0);
+    final key = 'alert_${period.key}_$categoryId';
+    final last = prefs.getInt(key) ?? 0;
+    if (level > last) {
+      await prefs.setInt(key, level);
+      await NotificationService.instance.showBudgetAlert(
+        categoryName: categoryName,
+        percent: level,
+        notificationId: categoryId.hashCode & 0x7fffffff,
+      );
+    } else if (level < last) {
+      await prefs.setInt(key, level);
+    }
+  }
+
+  if (totalBudgetPool > 0) {
+    final txs = await db.transactionsBetween(period.start, period.end);
+    var totalSpent = 0;
+    for (final t in txs) {
+      if (t.type == TxType.expense) {
+        totalSpent += t.amount;
+      }
+    }
+    final poolLevel = totalSpent >= totalBudgetPool
+        ? 100
+        : (totalSpent * 100 >= totalBudgetPool * 80 ? 80 : 0);
+    final poolKey = 'alert_pool_${period.key}';
+    final lastPool = prefs.getInt(poolKey) ?? 0;
+    if (poolLevel > lastPool) {
+      await prefs.setInt(poolKey, poolLevel);
+      await NotificationService.instance.showBudgetAlert(
+        categoryName: 'Total Budget',
+        percent: poolLevel,
+        notificationId: ('pool_${period.key}').hashCode & 0x7fffffff,
+      );
+    } else if (poolLevel < lastPool) {
+      await prefs.setInt(poolKey, poolLevel);
+    }
+  }
 }
 
 /// Periksa utang-piutang yang mendekati atau melewati jatuh tempo.
@@ -255,5 +333,86 @@ Future<void> checkDebtDueReminders(AppDatabase db) async {
     }
   } catch (e) {
     debugPrint('Debt due reminder check failed: $e');
+  }
+}
+
+/// Menentukan apakah notifikasi Harvest Recap perlu dikirim untuk periode yang baru selesai.
+bool shouldSendRecapNotification({
+  required bool enabled,
+  required String completedPeriodKey,
+  required int completedTxCount,
+  required String? lastSeenKey,
+  required bool alreadyNotified,
+}) {
+  if (!enabled || completedTxCount <= 0) return false;
+  if (lastSeenKey == completedPeriodKey) return false;
+  if (alreadyNotified) return false;
+  return true;
+}
+
+/// Memeriksa sekali per periode selesai apakah notifikasi Harvest Recap perlu ditampilkan.
+Future<void> checkHarvestRecapNotification({
+  required AppDatabase db,
+  required SharedPreferences prefs,
+  required bool enabled,
+  required PeriodType periodType,
+  int firstDayOfWeek = DateTime.monday,
+  int firstDayOfMonth = 1,
+  DateTime? now,
+}) async {
+  try {
+    if (!enabled) return;
+    final completed = Period.containing(
+      periodType,
+      now ?? DateTime.now(),
+      firstDayOfWeek: firstDayOfWeek,
+      firstDayOfMonth: firstDayOfMonth,
+    ).shift(-1);
+
+    final seenKey = periodType == PeriodType.weekly
+        ? 'last_recap_seen_weekly'
+        : 'last_recap_seen_monthly';
+    final notifiedKey = 'notified_recap_${completed.key}';
+
+    final lastSeen = prefs.getString(seenKey);
+    final alreadyNotified = prefs.getBool(notifiedKey) == true;
+    if (lastSeen == completed.key || alreadyNotified) return;
+
+    final txs = await db.watchTransactionsBetween(completed.start, completed.end).first;
+    if (!shouldSendRecapNotification(
+      enabled: enabled,
+      completedPeriodKey: completed.key,
+      completedTxCount: txs.length,
+      lastSeenKey: lastSeen,
+      alreadyNotified: alreadyNotified,
+    )) {
+      return;
+    }
+
+    String periodLabel;
+    try {
+      periodLabel = completed.label();
+    } catch (_) {
+      periodLabel = completed.key;
+    }
+
+    final title = trG(
+      periodType == PeriodType.weekly
+          ? 'Weekly Harvest Review'
+          : 'Monthly Harvest Review',
+    );
+    final body = trG(
+      'Your recap for {period} is ready inside Insights.',
+      {'period': periodLabel},
+    );
+
+    await NotificationService.instance.showRecapDigest(
+      notificationId: ('recap_${completed.key}').hashCode & 0x7fffffff,
+      title: title,
+      body: body,
+    );
+    await prefs.setBool(notifiedKey, true);
+  } catch (e) {
+    debugPrint('Harvest recap notification check failed: $e');
   }
 }
