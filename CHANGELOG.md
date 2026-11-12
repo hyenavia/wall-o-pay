@@ -4,6 +4,12 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.3] - 2026-11-12
+
+### Fixed
+- **Android Gradle Plugin (AGP) Compatibility for Latest Flutter Stable:**
+  - Upgraded `com.android.application` plugin in `android/settings.gradle.kts` from `9.1.0` to `9.1.1` to meet the latest Flutter `stable` SDK minimum AGP requirement and fix GitHub Actions release APK builds.
+
 ## [2.7.2] - 2026-11-12
 
 ### Changed

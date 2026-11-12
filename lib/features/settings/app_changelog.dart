@@ -45,10 +45,23 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.7.2',
+      version: '2.7.3',
       dateEn: 'November 12, 2026',
       dateId: '12 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Build Pipeline & AGP Compatibility — Upgraded the Android Gradle Plugin to 9.1.1 so release builds remain compatible with the latest Flutter stable SDK.',
+          textId: 'Kompatibilitas Pipeline Build & AGP — Memperbarui versi Android Gradle Plugin ke 9.1.1 agar build rilis tetap kompatibel dengan Flutter stable SDK terbaru.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.7.2',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,
