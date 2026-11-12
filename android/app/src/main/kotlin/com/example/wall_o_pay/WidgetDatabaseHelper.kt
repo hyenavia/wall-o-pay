@@ -27,6 +27,13 @@ sealed class TxInsertResult {
     data class Error(val message: String, val isDbMissing: Boolean = false) : TxInsertResult()
 }
 
+data class WidgetSnapshot(
+    val dbReady: Boolean,
+    val totalBalance: Long?,
+    val wallets: List<WidgetWallet>,
+    val categories: List<WidgetCategory>,
+)
+
 object WidgetDatabaseHelper {
     const val PREFS_NAME = "quick_finance_widget"
     const val KEY_SELECTED_TAB = "selected_tab"
@@ -110,6 +117,60 @@ object WidgetDatabaseHelper {
         return found == required.size
     }
 
+    fun loadWidgetSnapshot(
+        context: Context,
+        txType: String,
+        includeBalance: Boolean,
+    ): WidgetSnapshot {
+        val dbFile = getDatabaseFile(context)
+        if (!dbFile.exists() || dbFile.length() == 0L) {
+            return WidgetSnapshot(
+                dbReady = false,
+                totalBalance = null,
+                wallets = emptyList(),
+                categories = emptyList(),
+            )
+        }
+        return synchronized(dbLock) {
+            try {
+                SQLiteDatabase.openDatabase(
+                    dbFile.absolutePath,
+                    null,
+                    SQLiteDatabase.OPEN_READONLY
+                ).use { db ->
+                    if (!hasRequiredTables(db)) {
+                        return@synchronized WidgetSnapshot(
+                            dbReady = false,
+                            totalBalance = null,
+                            wallets = emptyList(),
+                            categories = emptyList(),
+                        )
+                    }
+                    val totalBalance = if (includeBalance) queryTotalBalance(db) else null
+                    val wallets = queryActiveWallets(db)
+                    val categories = if (txType == "income" || txType == "expense") {
+                        queryActiveCategories(db, txType)
+                    } else {
+                        emptyList()
+                    }
+                    WidgetSnapshot(
+                        dbReady = true,
+                        totalBalance = totalBalance,
+                        wallets = wallets,
+                        categories = categories,
+                    )
+                }
+            } catch (_: Exception) {
+                WidgetSnapshot(
+                    dbReady = false,
+                    totalBalance = null,
+                    wallets = emptyList(),
+                    categories = emptyList(),
+                )
+            }
+        }
+    }
+
     fun getActiveWallets(context: Context): List<WidgetWallet> {
         val dbFile = getDatabaseFile(context)
         if (!dbFile.exists()) return emptyList()
@@ -121,39 +182,43 @@ object WidgetDatabaseHelper {
                     SQLiteDatabase.OPEN_READONLY
                 ).use { db ->
                     if (!hasRequiredTables(db)) return@synchronized emptyList()
-                    val result = mutableListOf<WidgetWallet>()
-                    db.rawQuery(
-                        """
-                        SELECT id, name, type FROM wallets
-                        WHERE deleted_at IS NULL
-                        ORDER BY
-                          CASE LOWER(type)
-                            WHEN 'bank' THEN 0
-                            WHEN 'digital' THEN 1
-                            WHEN 'ewallet' THEN 2
-                            WHEN 'cash' THEN 3
-                            ELSE 99
-                          END ASC,
-                          created_at ASC
-                        """.trimIndent(),
-                        null
-                    ).use { cursor ->
-                        while (cursor.moveToNext()) {
-                            result.add(
-                                WidgetWallet(
-                                    id = cursor.getString(0),
-                                    name = cursor.getString(1),
-                                    type = cursor.getString(2),
-                                )
-                            )
-                        }
-                    }
-                    result
+                    queryActiveWallets(db)
                 }
             } catch (_: Exception) {
                 emptyList()
             }
         }
+    }
+
+    private fun queryActiveWallets(db: SQLiteDatabase): List<WidgetWallet> {
+        val result = mutableListOf<WidgetWallet>()
+        db.rawQuery(
+            """
+            SELECT id, name, type FROM wallets
+            WHERE deleted_at IS NULL
+            ORDER BY
+              CASE LOWER(type)
+                WHEN 'bank' THEN 0
+                WHEN 'digital' THEN 1
+                WHEN 'ewallet' THEN 2
+                WHEN 'cash' THEN 3
+                ELSE 99
+              END ASC,
+              created_at ASC
+            """.trimIndent(),
+            null
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                result.add(
+                    WidgetWallet(
+                        id = cursor.getString(0),
+                        name = cursor.getString(1),
+                        type = cursor.getString(2),
+                    )
+                )
+            }
+        }
+        return result
     }
 
     fun getActiveCategories(context: Context, txType: String): List<WidgetCategory> {
@@ -167,38 +232,42 @@ object WidgetDatabaseHelper {
                     SQLiteDatabase.OPEN_READONLY
                 ).use { db ->
                     if (!hasRequiredTables(db)) return@synchronized emptyList()
-                    val result = mutableListOf<WidgetCategory>()
-                    db.rawQuery(
-                        """
-                        SELECT c.id, c.name, c.type, COALESCE(u.cnt, 0) AS usage_cnt
-                        FROM categories c
-                        LEFT JOIN (
-                            SELECT category_id, COUNT(*) AS cnt
-                            FROM transactions
-                            WHERE deleted_at IS NULL
-                            GROUP BY category_id
-                        ) u ON u.category_id = c.id
-                        WHERE c.deleted_at IS NULL AND c.type = ?
-                        ORDER BY usage_cnt DESC, c.name ASC
-                        """.trimIndent(),
-                        arrayOf(txType)
-                    ).use { cursor ->
-                        while (cursor.moveToNext()) {
-                            result.add(
-                                WidgetCategory(
-                                    id = cursor.getString(0),
-                                    name = cursor.getString(1),
-                                    type = cursor.getString(2),
-                                )
-                            )
-                        }
-                    }
-                    result
+                    queryActiveCategories(db, txType)
                 }
             } catch (_: Exception) {
                 emptyList()
             }
         }
+    }
+
+    private fun queryActiveCategories(db: SQLiteDatabase, txType: String): List<WidgetCategory> {
+        val result = mutableListOf<WidgetCategory>()
+        db.rawQuery(
+            """
+            SELECT c.id, c.name, c.type, COALESCE(u.cnt, 0) AS usage_cnt
+            FROM categories c
+            LEFT JOIN (
+                SELECT category_id, COUNT(*) AS cnt
+                FROM transactions
+                WHERE deleted_at IS NULL
+                GROUP BY category_id
+            ) u ON u.category_id = c.id
+            WHERE c.deleted_at IS NULL AND c.type = ?
+            ORDER BY usage_cnt DESC, c.name ASC
+            """.trimIndent(),
+            arrayOf(txType)
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                result.add(
+                    WidgetCategory(
+                        id = cursor.getString(0),
+                        name = cursor.getString(1),
+                        type = cursor.getString(2),
+                    )
+                )
+            }
+        }
+        return result
     }
 
     fun getTotalBalance(context: Context): Long? {
@@ -389,7 +458,7 @@ object WidgetDatabaseHelper {
                     } else {
                         editor.remove(KEY_BALANCE)
                     }
-                    editor.apply()
+                    editor.commit()
 
                     TxInsertResult.Success(newBalance = newBalance, amount = amount)
                 }

@@ -45,10 +45,36 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '2.7.0',
+      version: '2.7.2',
       dateEn: 'November 12, 2026',
       dateId: '12 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn: 'Quick Finance Widget Enchanted Glasshouse Redesign — Redesigned the Home Screen Widget and floating Quick Transaction dialog to seamlessly match Wall o\' Pay\'s Enchanted Glasshouse visual identity, pairing HeroCard emerald-to-moss glassmorphism, Dew Mint specular rims, subtle conservatory botanical accents, unified Emerald Leaf segmented tabs with vector icons, tabular monetary typography, AppChip-styled preset and selector pills, and dynamic TransactionForm Save CTA gradients across all widget sizes.',
+          textId: 'Desain Ulang Enchanted Glasshouse Widget Quick Finance — Memperbarui tampilan Widget Layar Beranda dan dialog Quick Transaction agar konsisten sepenuhnya dengan identitas visual Enchanted Glasshouse Wall o\' Pay: latar kaca Deep Forest menuju Moss Shadow bergaya HeroCard, bingkai refraksi Dew Mint, aksen botani konservatori yang subtil, bilah tab segmented Emerald Leaf terpadu dengan ikon vektor, angka tabular, chip nominal & pemilih bergaya AppChip, serta gradien tombol simpan dinamis mengikuti gaya TransactionForm di berbagai ukuran widget.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.7.1',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn: 'Quick Finance Widget Direct Launch & Compatibility Fix — Replaced broadcast activity trampolines with direct PendingIntent.getActivity bindings so tapping Detail or the nominal area opens the floating Quick Transaction dialog reliably across Android 12–16 and MIUI/HyperOS without redirecting to the main app, plus automatic widget rebinding on app update, boot, and locale change.',
+          textId: 'Perbaikan Peluncuran Langsung & Kompatibilitas Widget Quick Finance — Mengganti alur broadcast dengan PendingIntent.getActivity langsung agar mengetuk Detail atau area nominal selalu membuka dialog melayang Quick Transaction secara andal di Android 12–16 serta MIUI/HyperOS tanpa dialihkan ke aplikasi utama, sekaligus pembaruan widget otomatis setelah pembaruan aplikasi, boot, dan perubahan bahasa.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.7.0',
+      dateEn: 'November 12, 2026',
+      dateId: '12 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,

@@ -2,27 +2,75 @@
 <resources>
     <color name="ic_launcher_background">#00000000</color>
     <color name="splash_background">#10251F</color>
-    <!-- Quick Finance Widget Enchanted Glasshouse palette -->
-    <color name="widget_bg">#10251F</color>
-    <color name="widget_card_surface">#162A22</color>
-    <color name="widget_surface_container">#1D372D</color>
-    <color name="widget_border">#2A4D3E</color>
+
+    <!-- Enchanted Glasshouse Official Brand Palette -->
     <color name="widget_glasshouse_green">#23483B</color>
     <color name="widget_emerald_leaf">#39745A</color>
     <color name="widget_fresh_sage">#A9C5B1</color>
     <color name="widget_dew_mint">#D5E8DC</color>
     <color name="widget_soft_ivory">#F7F8F4</color>
     <color name="widget_moss_shadow">#10251F</color>
+
+    <!-- Surface & Glassmorphism Tokens (HeroCard, AppCard, AppInput) -->
+    <color name="widget_bg">#10251F</color>
+    <color name="widget_card_surface">#162A22</color>
+    <color name="widget_surface_container">#1D372D</color>
+    <color name="widget_border">#2A4D3E</color>
+
+    <color name="widget_hero_start">#26503E</color>
+    <color name="widget_hero_mid">#1B3C2F</color>
+    <color name="widget_hero_end">#132B21</color>
+
+    <color name="widget_card_glass_start">#E6162A22</color>
+    <color name="widget_card_glass_end">#D91D372D</color>
+    <color name="widget_input_glass">#B31D372D</color>
+    <color name="widget_track_glass">#8010251F</color>
+    <color name="widget_chip_glass">#B31D372D</color>
+    <color name="widget_btn_secondary_glass">#8C1D372D</color>
+    <color name="widget_circle_glass">#22FFFFFF</color>
+
+    <!-- Specular Dew Mint Refraction Borders & Glows -->
+    <color name="widget_rim_hero">#47D5E8DC</color>
+    <color name="widget_rim_dialog">#52D5E8DC</color>
+    <color name="widget_rim_active_tab">#8CD5E8DC</color>
+    <color name="widget_rim_cta">#66D5E8DC</color>
+    <color name="widget_rim_glass">#2ED5E8DC</color>
+    <color name="widget_rim_subtle">#26D5E8DC</color>
+    <color name="widget_divider_hairline">#24D5E8DC</color>
+    <color name="widget_aurora_glow">#3038B271</color>
+    <color name="widget_sheen_top">#14FFFFFF</color>
+    <color name="widget_sheen_mid">#05FFFFFF</color>
+
+    <!-- Tab Highlight Gradients (SegmentedButtonThemeData: Emerald Leaf) -->
+    <color name="widget_tab_active_start">#39745A</color>
+    <color name="widget_tab_active_end">#275440</color>
+    <color name="widget_tab_inactive_bg">#001D372D</color>
+
+    <!-- Primary CTA Gradients (TransactionForm Semantic Gradients) -->
+    <color name="widget_cta_income_start">#2E8B57</color>
+    <color name="widget_cta_income_end">#1E633E</color>
+    <color name="widget_cta_expense_start">#D64545</color>
+    <color name="widget_cta_expense_end">#9E2A2B</color>
+    <color name="widget_cta_transfer_start">#00A896</color>
+    <color name="widget_cta_transfer_end">#026A5F</color>
+
+    <!-- High-Contrast Semantic Tokens -->
     <color name="widget_income">#38B271</color>
     <color name="widget_income_on_dark">#6EE7B7</color>
     <color name="widget_expense">#D64545</color>
     <color name="widget_expense_on_dark">#FCA5A5</color>
     <color name="widget_transfer_teal">#00897B</color>
+    <color name="widget_transfer_on_dark">#5EEAD4</color>
+
+    <!-- Typography & Feedback Surfaces -->
     <color name="widget_text_primary">#F7F8F4</color>
     <color name="widget_text_secondary">#A9C5B1</color>
     <color name="widget_hint_text">#7A9B87</color>
-    <color name="widget_tab_inactive_bg">#1D372D</color>
-    <color name="widget_tab_active_income">#1A3D2A</color>
-    <color name="widget_tab_active_expense">#3D1A1A</color>
-    <color name="widget_tab_active_transfer">#1A3333</color>
+    <color name="widget_feedback_success_bg">#CC173D2B</color>
+    <color name="widget_feedback_success_rim">#806EE7B7</color>
+    <color name="widget_feedback_error_bg">#CC431B20</color>
+    <color name="widget_feedback_error_rim">#80FCA5A5</color>
+    <color name="widget_tab_active_income">#39745A</color>
+    <color name="widget_tab_active_expense">#39745A</color>
+    <color name="widget_tab_active_transfer">#39745A</color>
 </resources>

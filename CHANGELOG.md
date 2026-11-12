@@ -4,6 +4,24 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.2] - 2026-11-12
+
+### Changed
+- **Quick Finance Widget Enchanted Glasshouse Redesign:**
+  - Redesigned the Android Home Screen Widget (`widget_quick_finance.xml`) and matching floating `QuickTransactionActivity` dialog (`dialog_quick_transaction.xml`) to fully match the main application's **Enchanted Glasshouse** design system.
+  - Applied layered Deep Forest Botanical glassmorphism surfaces (`HeroCard` `#26503E` -> `#132B21` diagonal emerald-to-moss backdrop, emerald aurora glow top-right, specular glass sheen, `24dp` Dew Mint refraction rim, and translucent `18dp` inner `AppCard` surface) plus subtle vaulted conservatory arch and botanical leaf accents (`widget_botanical_canopy`, `widget_botanical_corner`).
+  - Unified the Income, Expense, and Transfer type selector into an authentic `SegmentedButton`-style pill track (`#8010251F`, `16dp` radius) featuring **Emerald Leaf** (`#39745A`) active fills with `Dew Mint` (`#D5E8DC`) specular borders and crisp vector flow/swap icons instead of plain ASCII characters.
+  - Styled header controls with a frosted circular `Open App` glass button (`_HomeHeader` parity), frosted glass balance pill, tabular figures (`tnum`) across monetary values and `+10k`/`+20k`/`+50k`/`+100k` `AppChip`/`_QuickAmountChip` pills, `AppCard`-style category and wallet selector pills with vector icons, and dynamic **TransactionForm** semantic Save CTA gradients (Expense rose-crimson, Income emerald, Transfer ocean teal) framed by `1.2dp` Dew Mint glass rims.
+
+## [2.7.1] - 2026-11-12
+
+### Fixed
+- **Quick Finance Widget Direct Launch & MIUI / Android BAL Compatibility:**
+  - Replaced `PendingIntent.getBroadcast` trampoline dispatches (`WIDGET_OPEN_DETAIL`, `WIDGET_OPEN_APP`) with direct `PendingIntent.getActivity` bindings to `QuickTransactionActivity` and `MainActivity`, resolving background activity launch blocks (`Abort background activity starts` / MIUI `MIUIOP`) when opening the floating dialog or app from the Home Screen widget.
+  - Bound the entire nominal row (`widget_nominal_row`), nominal display (`widget_queued_amount`), and `Detail` button directly to `QuickTransactionActivity` while keeping preset chips, category/account cyclers, clear button, and `Save Transaction` in-widget.
+  - Added `MY_PACKAGE_REPLACED`, `BOOT_COMPLETED`, and `LOCALE_CHANGED` broadcast handling plus `onEnabled`/`onRestored` hooks so active widget instances rebind automatically after app updates, device restarts, or launcher restoration without getting stuck on the static placeholder view.
+  - Consolidated `updateWidget()` queries into a single read-only SQLite snapshot (`WidgetDatabaseHelper.loadWidgetSnapshot`) and synchronous `.commit()` persistence, and synced `QuickTransactionActivity` directly with live `SharedPreferences` state and proper `adjustResize` keyboard handling.
+
 ## [2.7.0] - 2026-11-12
 
 ### Added

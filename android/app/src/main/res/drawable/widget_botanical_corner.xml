@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="130dp"
+    android:height="84dp"
+    android:viewportWidth="130"
+    android:viewportHeight="84">
+    <!-- Growth Contour Rings (mirrors BotanicalHeroCardPainter) -->
+    <path
+        android:strokeColor="#0FD5E8DC"
+        android:strokeWidth="1.0"
+        android:pathData="M0,30 A58,58 0 0,1 58,84" />
+    <path
+        android:strokeColor="#0CD5E8DC"
+        android:strokeWidth="1.0"
+        android:pathData="M0,12 A76,76 0 0,1 76,84" />
+    <!-- Subtle Understory Leaves Bottom-Left -->
+    <path
+        android:fillColor="#1239745A"
+        android:pathData="M0,84 Q24,54 54,58 Q30,78 0,84 Z" />
+    <path
+        android:fillColor="#10A9C5B1"
+        android:pathData="M8,84 Q22,64 42,68 Q26,80 8,84 Z" />
+</vector>
+

@@ -13,6 +13,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
@@ -24,6 +25,7 @@ import java.util.Locale
 class QuickTransactionActivity : Activity() {
 
     companion object {
+        const val EXTRA_FROM_WIDGET = "extra_from_widget"
         const val EXTRA_TYPE = "extra_type"
         const val EXTRA_AMOUNT = "extra_amount"
         const val EXTRA_CATEGORY_ID = "extra_category_id"
@@ -41,11 +43,14 @@ class QuickTransactionActivity : Activity() {
     private var expenseCategories: List<WidgetCategory> = emptyList()
     private var displayedCategories: List<WidgetCategory> = emptyList()
 
-    private lateinit var tabIncome: FrameLayout
+    private lateinit var tabIncome: LinearLayout
+    private lateinit var tabIncomeIcon: ImageView
     private lateinit var tabIncomeText: TextView
-    private lateinit var tabExpense: FrameLayout
+    private lateinit var tabExpense: LinearLayout
+    private lateinit var tabExpenseIcon: ImageView
     private lateinit var tabExpenseText: TextView
-    private lateinit var tabTransfer: FrameLayout
+    private lateinit var tabTransfer: LinearLayout
+    private lateinit var tabTransferIcon: ImageView
     private lateinit var tabTransferText: TextView
 
     private lateinit var inputAmount: EditText
@@ -60,7 +65,7 @@ class QuickTransactionActivity : Activity() {
     private lateinit var labelNote: TextView
     private lateinit var inputNote: EditText
     private lateinit var errorText: TextView
-    private lateinit var btnSave: FrameLayout
+    private lateinit var btnSave: LinearLayout
     private lateinit var btnSaveText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,17 +96,50 @@ class QuickTransactionActivity : Activity() {
         btnSaveText.text = if (locale == "id") "Simpan Transaksi" else "Save Transaction"
 
         val prefs = getSharedPreferences(WidgetDatabaseHelper.PREFS_NAME, Context.MODE_PRIVATE)
-        currentType = sourceIntent.getStringExtra(EXTRA_TYPE)
-            ?: prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TAB, "expense")
-            ?: "expense"
+        val fromWidget = sourceIntent.getBooleanExtra(EXTRA_FROM_WIDGET, false)
+        currentType = if (fromWidget) {
+            prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TAB, null)
+                ?: sourceIntent.getStringExtra(EXTRA_TYPE)
+                ?: "expense"
+        } else {
+            sourceIntent.getStringExtra(EXTRA_TYPE)
+                ?: prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TAB, "expense")
+                ?: "expense"
+        }
         if (currentType != "income" && currentType != "expense" && currentType != "transfer") {
             currentType = "expense"
         }
 
-        val initialAmount = sourceIntent.getLongExtra(EXTRA_AMOUNT, 0L)
-        val initialCategoryId = sourceIntent.getStringExtra(EXTRA_CATEGORY_ID)
-        val initialWalletId = sourceIntent.getStringExtra(EXTRA_WALLET_ID)
-        val initialToWalletId = sourceIntent.getStringExtra(EXTRA_TO_WALLET_ID)
+        val initialAmount = if (fromWidget && prefs.contains(WidgetDatabaseHelper.KEY_QUEUED_AMOUNT)) {
+            prefs.getLong(WidgetDatabaseHelper.KEY_QUEUED_AMOUNT, 0L)
+        } else {
+            sourceIntent.getLongExtra(EXTRA_AMOUNT, 0L)
+        }.coerceAtLeast(0L)
+
+        val catPrefKey = if (currentType == "income") {
+            WidgetDatabaseHelper.KEY_SELECTED_INCOME_CAT_ID
+        } else {
+            WidgetDatabaseHelper.KEY_SELECTED_EXPENSE_CAT_ID
+        }
+        val initialCategoryId = if (fromWidget) {
+            prefs.getString(catPrefKey, null) ?: sourceIntent.getStringExtra(EXTRA_CATEGORY_ID)
+        } else {
+            sourceIntent.getStringExtra(EXTRA_CATEGORY_ID) ?: prefs.getString(catPrefKey, null)
+        }
+        val initialWalletId = if (fromWidget) {
+            prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_WALLET_ID, null)
+                ?: sourceIntent.getStringExtra(EXTRA_WALLET_ID)
+        } else {
+            sourceIntent.getStringExtra(EXTRA_WALLET_ID)
+                ?: prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_WALLET_ID, null)
+        }
+        val initialToWalletId = if (fromWidget) {
+            prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TO_WALLET_ID, null)
+                ?: sourceIntent.getStringExtra(EXTRA_TO_WALLET_ID)
+        } else {
+            sourceIntent.getStringExtra(EXTRA_TO_WALLET_ID)
+                ?: prefs.getString(WidgetDatabaseHelper.KEY_SELECTED_TO_WALLET_ID, null)
+        }
 
         loadDatabaseOptions()
 
@@ -112,28 +150,43 @@ class QuickTransactionActivity : Activity() {
         } else {
             inputAmount.setText("")
         }
+        inputNote.setText("")
 
         selectTab(currentType, initialCategoryId)
         selectInitialWallets(initialWalletId, initialToWalletId)
 
         if (initialAmount <= 0L) {
             inputAmount.requestFocus()
-            window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+            @Suppress("DEPRECATION")
+            window.setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or
+                    WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
+            )
+        } else {
+            inputNote.requestFocus()
+            @Suppress("DEPRECATION")
+            window.setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or
+                    WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN
+            )
         }
     }
 
     private fun bindViews() {
         val backdrop = findViewById<FrameLayout>(R.id.dialog_backdrop)
-        val btnClose = findViewById<TextView>(R.id.dialog_btn_close)
+        val btnClose = findViewById<View>(R.id.dialog_btn_close)
 
         backdrop.setOnClickListener { finish() }
         btnClose.setOnClickListener { finish() }
 
         tabIncome = findViewById(R.id.dialog_tab_income)
+        tabIncomeIcon = findViewById(R.id.dialog_tab_income_icon)
         tabIncomeText = findViewById(R.id.dialog_tab_income_text)
         tabExpense = findViewById(R.id.dialog_tab_expense)
+        tabExpenseIcon = findViewById(R.id.dialog_tab_expense_icon)
         tabExpenseText = findViewById(R.id.dialog_tab_expense_text)
         tabTransfer = findViewById(R.id.dialog_tab_transfer)
+        tabTransferIcon = findViewById(R.id.dialog_tab_transfer_icon)
         tabTransferText = findViewById(R.id.dialog_tab_transfer_text)
 
         inputAmount = findViewById(R.id.dialog_input_amount)
@@ -154,9 +207,9 @@ class QuickTransactionActivity : Activity() {
 
     private fun applyStaticLocalization(isId: Boolean) {
         findViewById<TextView>(R.id.dialog_title).text = "Quick Finance"
-        tabIncomeText.text = if (isId) "+ Pemasukan" else "+ Income"
-        tabExpenseText.text = if (isId) "- Pengeluaran" else "- Expense"
-        tabTransferText.text = "⇄ Transfer"
+        tabIncomeText.text = if (isId) "Pemasukan" else "Income"
+        tabExpenseText.text = if (isId) "Pengeluaran" else "Expense"
+        tabTransferText.text = "Transfer"
         findViewById<TextView>(R.id.dialog_label_amount).text =
             if (isId) "Nominal Transaksi" else "Transaction Amount"
         labelWalletTo.text = if (isId) "Akun Tujuan" else "Destination Account"
@@ -208,17 +261,22 @@ class QuickTransactionActivity : Activity() {
 
         // Reset tab styles
         tabIncome.setBackgroundResource(R.drawable.widget_tab_bg_inactive)
-        tabIncomeText.setTextColor(resolveColor(R.color.widget_text_secondary))
+        tabIncomeIcon.setImageResource(R.drawable.ic_widget_income_off)
+        tabIncomeText.setTextColor(resolveColor(R.color.widget_fresh_sage))
         tabExpense.setBackgroundResource(R.drawable.widget_tab_bg_inactive)
-        tabExpenseText.setTextColor(resolveColor(R.color.widget_text_secondary))
+        tabExpenseIcon.setImageResource(R.drawable.ic_widget_expense_off)
+        tabExpenseText.setTextColor(resolveColor(R.color.widget_fresh_sage))
         tabTransfer.setBackgroundResource(R.drawable.widget_tab_bg_inactive)
-        tabTransferText.setTextColor(resolveColor(R.color.widget_text_secondary))
+        tabTransferIcon.setImageResource(R.drawable.ic_widget_transfer_off)
+        tabTransferText.setTextColor(resolveColor(R.color.widget_fresh_sage))
 
         when (type) {
             "income" -> {
                 tabIncome.setBackgroundResource(R.drawable.widget_tab_bg_income)
-                tabIncomeText.setTextColor(resolveColor(R.color.widget_income_on_dark))
+                tabIncomeIcon.setImageResource(R.drawable.ic_widget_income_on)
+                tabIncomeText.setTextColor(resolveColor(R.color.widget_soft_ivory))
                 inputAmount.setTextColor(resolveColor(R.color.widget_income_on_dark))
+                btnSave.setBackgroundResource(R.drawable.widget_btn_record_income)
                 categoryContainer.visibility = View.VISIBLE
                 walletToContainer.visibility = View.GONE
                 labelCategory.text = if (isId) "Kategori Pemasukan" else "Income Category"
@@ -228,8 +286,10 @@ class QuickTransactionActivity : Activity() {
             }
             "expense" -> {
                 tabExpense.setBackgroundResource(R.drawable.widget_tab_bg_expense)
-                tabExpenseText.setTextColor(resolveColor(R.color.widget_expense_on_dark))
+                tabExpenseIcon.setImageResource(R.drawable.ic_widget_expense_on)
+                tabExpenseText.setTextColor(resolveColor(R.color.widget_soft_ivory))
                 inputAmount.setTextColor(resolveColor(R.color.widget_expense_on_dark))
+                btnSave.setBackgroundResource(R.drawable.widget_btn_record_expense)
                 categoryContainer.visibility = View.VISIBLE
                 walletToContainer.visibility = View.GONE
                 labelCategory.text = if (isId) "Kategori Pengeluaran" else "Expense Category"
@@ -239,12 +299,18 @@ class QuickTransactionActivity : Activity() {
             }
             "transfer" -> {
                 tabTransfer.setBackgroundResource(R.drawable.widget_tab_bg_transfer)
-                tabTransferText.setTextColor(resolveColor(R.color.widget_dew_mint))
-                inputAmount.setTextColor(resolveColor(R.color.widget_dew_mint))
+                tabTransferIcon.setImageResource(R.drawable.ic_widget_transfer_on)
+                tabTransferText.setTextColor(resolveColor(R.color.widget_soft_ivory))
+                inputAmount.setTextColor(resolveColor(R.color.widget_transfer_on_dark))
+                btnSave.setBackgroundResource(R.drawable.widget_btn_record_transfer)
                 categoryContainer.visibility = View.GONE
                 walletToContainer.visibility = View.VISIBLE
                 labelWalletFrom.text = if (isId) "Akun Sumber" else "Source Account"
                 inputNote.hint = if (isId) "contoh: Transfer ke tabungan" else "e.g. Transfer to savings"
+                if (wallets.size > 1 && spinnerWalletFrom.selectedItemPosition == spinnerWalletTo.selectedItemPosition) {
+                    val nextToIdx = (spinnerWalletFrom.selectedItemPosition + 1) % wallets.size
+                    spinnerWalletTo.setSelection(nextToIdx)
+                }
             }
         }
     }
@@ -413,7 +479,7 @@ class QuickTransactionActivity : Activity() {
                     }
                     .putString(WidgetDatabaseHelper.KEY_FEEDBACK_TEXT, successMsg)
                     .putBoolean(WidgetDatabaseHelper.KEY_FEEDBACK_IS_ERROR, false)
-                    .apply()
+                    .commit()
 
                 QuickFinanceWidgetProvider.updateAllWidgets(this)
                 hideKeyboard()

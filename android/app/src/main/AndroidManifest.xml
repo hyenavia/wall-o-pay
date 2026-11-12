@@ -61,6 +61,9 @@
             android:label="@string/widget_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCALE_CHANGED" />
                 <action android:name="com.example.wall_o_pay.WIDGET_TAB_INCOME" />
                 <action android:name="com.example.wall_o_pay.WIDGET_TAB_EXPENSE" />
                 <action android:name="com.example.wall_o_pay.WIDGET_TAB_TRANSFER" />
@@ -73,9 +76,7 @@
                 <action android:name="com.example.wall_o_pay.WIDGET_CYCLE_WALLET_FROM" />
                 <action android:name="com.example.wall_o_pay.WIDGET_CYCLE_WALLET_TO" />
                 <action android:name="com.example.wall_o_pay.WIDGET_DISMISS_FEEDBACK" />
-                <action android:name="com.example.wall_o_pay.WIDGET_OPEN_DETAIL" />
                 <action android:name="com.example.wall_o_pay.WIDGET_RECORD" />
-                <action android:name="com.example.wall_o_pay.WIDGET_OPEN_APP" />
                 <action android:name="com.example.wall_o_pay.WIDGET_UPDATE_DATA" />
             </intent-filter>
             <meta-data
