@@ -2,7 +2,10 @@
 /// sekaligus pemicu tugas latar belakang (transaksi berulang & jadwal pengingat harian).
 library;
 
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,7 +14,6 @@ import '../../data/feature_prefs.dart';
 import '../../data/notifications.dart';
 import '../../data/prefs.dart';
 import '../../data/providers.dart';
-import '../../data/recurring_service.dart';
 import 'onboarding_page.dart';
 
 /// Menampilkan onboarding sekali untuk pengguna baru, dan menjalankan tugas
@@ -53,46 +55,71 @@ class _OnboardingGateState extends ConsumerState<OnboardingGate>
     if (state == AppLifecycleState.resumed) _background();
   }
 
+  static const _checkTimeout = Duration(seconds: 6);
+
   Future<void> _check() async {
     try {
-      final prefs = ref.read(sharedPreferencesProvider);
-      if (prefs.getBool(_doneKey) ?? false) {
-        if (mounted) setState(() { _loading = false; _needsOnboarding = false; });
-        return;
+      final needs = await _resolveNeedsOnboarding().timeout(
+        _checkTimeout,
+        onTimeout: () {
+          debugPrint('[OnboardingGate] Check timed out after ${_checkTimeout.inSeconds}s; proceeding safely.');
+          return false;
+        },
+      );
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _needsOnboarding = needs;
+        });
       }
-      final user = ref.read(currentUserProvider);
-      if (user != null) {
-        try {
-          final doc = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .collection('meta')
-              .doc('preferences')
-              .get()
-              .timeout(const Duration(seconds: 3));
-          if (doc.exists && doc.data()?['onboardingDone'] == true) {
-            await prefs.setBool(_doneKey, true);
-            if (mounted) setState(() { _loading = false; _needsOnboarding = false; });
-            return;
-          }
-        } catch (_) {}
-      }
-      final hasData = await ref.read(databaseProvider).hasAnyTransaction();
-      if (hasData) {
-        await prefs.setBool(_doneKey, true);
-        if (mounted) setState(() { _loading = false; _needsOnboarding = false; });
-        return;
-      }
-      if (mounted) setState(() { _loading = false; _needsOnboarding = true; });
     } catch (e) {
       debugPrint('Error checking onboarding: $e');
-      if (mounted) setState(() { _loading = false; _needsOnboarding = false; });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _needsOnboarding = false;
+        });
+      }
     }
+  }
+
+  Future<bool> _resolveNeedsOnboarding() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    if (prefs.getBool(_doneKey) ?? false) {
+      return false;
+    }
+
+    final user = ref.read(currentUserProvider);
+    if (user != null && Firebase.apps.isNotEmpty) {
+      try {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('meta')
+            .doc('preferences')
+            .get()
+            .timeout(const Duration(seconds: 3));
+        if (doc.exists && doc.data()?['onboardingDone'] == true) {
+          await prefs.setBool(_doneKey, true);
+          return false;
+        }
+      } catch (_) {}
+    }
+
+    final hasData = await ref
+        .read(databaseProvider)
+        .hasAnyTransaction()
+        .timeout(const Duration(seconds: 4));
+    if (hasData) {
+      await prefs.setBool(_doneKey, true);
+      return false;
+    }
+
+    return true;
   }
 
   Future<void> _background() async {
     try {
-      await RecurringService.checkAndGenerateDue(ref.read(databaseProvider));
       final f = ref.read(featurePrefsProvider);
       await NotificationService.instance
           .syncReminder(enabled: f.dailyReminder, time: f.reminderTime);
@@ -108,7 +135,7 @@ class _OnboardingGateState extends ConsumerState<OnboardingGate>
     }
     final user = ref.read(currentUserProvider);
     if (user != null) {
-      ref.read(appPrefsProvider.notifier).uploadToCloud(user.uid);
+      unawaited(ref.read(appPrefsProvider.notifier).uploadToCloud(user.uid));
     }
     _background();
   }

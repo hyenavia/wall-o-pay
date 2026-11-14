@@ -24,7 +24,6 @@ import '../../data/feature_prefs.dart';
 import '../../data/feature_providers.dart';
 import '../../data/module_prefs.dart';
 import '../../data/notifications.dart';
-import '../../data/quick_widget_service.dart';
 import '../../data/tables.dart' show NeedWant, TxType;
 
 enum _TxFormAction { duplicate }
@@ -317,7 +316,6 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
           needWant: _type == TxType.expense ? _needWant : null,
           note: _note.text.trim(),
         );
-    syncWidgetSnapshot(ref);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.tr('Template saved.'))),
@@ -350,7 +348,6 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     );
     if (ok == true) {
       await ref.read(databaseProvider).deleteTemplate(t.id);
-      syncWidgetSnapshot(ref);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.tr('Template deleted.'))),
@@ -518,8 +515,6 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
       );
     }
 
-    syncWidgetData(ref);
-    syncWidgetSnapshot(ref);
     if (mounted) Navigator.pop(context);
   }
 
@@ -544,15 +539,11 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
     final id = widget.entry!.id;
     final db = ref.read(databaseProvider);
     await db.deleteTransaction(id);
-    syncWidgetData(ref);
-    syncWidgetSnapshot(ref);
     if (mounted) Navigator.pop(context);
     showUndoSnackBar(
       message: trG('Transaction deleted'),
       onUndo: () async {
         await db.restoreTransaction(id);
-        syncWidgetData(ref);
-        syncWidgetSnapshot(ref);
       },
     );
   }

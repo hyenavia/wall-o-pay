@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -56,13 +57,46 @@ class AutoSyncService {
   final Ref _ref;
   AppDatabase get _db => _ref.read(databaseProvider);
 
-  bool _isApplyingRemote = false;
+  int _applyingRemoteCount = 0;
+  bool get _isApplyingRemote => _applyingRemoteCount > 0;
+  Future<void> _remoteApplyQueue = Future<void>.value();
+
   bool _isSyncing = false;
+  int _syncRunSeq = 0;
+  int _activeSyncSeq = 0;
+
   bool discardGuestDataOnNextLogin = false;
   Timer? _debounceTimer;
   final List<StreamSubscription> _subscriptions = [];
   String? _currentUid;
+  String? _startingUid;
+  Future<void>? _startInFlight;
+  Future<void>? _twoWayInFlight;
+  String? _twoWayUid;
+  int _sessionEpoch = 0;
   DateTime _lastPushedAt = DateTime.fromMillisecondsSinceEpoch(0);
+
+  Future<T> _runRemoteWrite<T>(Future<T> Function() fn) async {
+    _applyingRemoteCount++;
+    try {
+      return await fn();
+    } finally {
+      if (_applyingRemoteCount > 0) _applyingRemoteCount--;
+    }
+  }
+
+  Future<void> _enqueueRemoteSnapshotApply(
+    int epoch,
+    String uid,
+    Future<void> Function() fn,
+  ) {
+    final next = _remoteApplyQueue.then((_) async {
+      if (epoch != _sessionEpoch || _currentUid != uid) return;
+      await _runRemoteWrite(fn);
+    });
+    _remoteApplyQueue = next.catchError((_) {});
+    return next;
+  }
 
   static const _timeout = Duration(seconds: 20);
   static const _cursorOverlapMs = 30000;
@@ -100,19 +134,68 @@ class AutoSyncService {
   static Future<void> clearPullCursor(SharedPreferences prefs, String uid) =>
       prefs.remove(pullCursorKey(uid));
 
-  /// Memulai sinkronisasi otomatis untuk user yang sedang aktif.
-  void startSync(String uid) async {
-    if (_currentUid == uid && _subscriptions.isNotEmpty) return;
-    stopSync();
+  void _clearSessionResources() {
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+    for (final sub in _subscriptions) {
+      sub.cancel();
+    }
+    _subscriptions.clear();
+  }
 
+  /// Memulai sinkronisasi otomatis untuk user yang sedang aktif.
+  /// Mengembalikan [Future<void>] agar pemanggil dapat menunggu sesi siap dan
+  /// mencegah eksekusi paralel untuk UID yang sama maupun konflik pergantian akun.
+  Future<void> startSync(String uid) async {
+    while (true) {
+      if (_currentUid == uid &&
+          _subscriptions.isNotEmpty &&
+          _startInFlight == null) {
+        return;
+      }
+
+      final existing = _startInFlight;
+      if (existing != null) {
+        if (_startingUid == uid) {
+          return existing;
+        }
+        // Pergantian UID saat startSync lain masih berjalan: batalkan sesi lama lalu tunggu selesai.
+        stopSync();
+        try {
+          await existing;
+        } catch (_) {}
+        continue;
+      }
+      break;
+    }
+
+    final epoch = ++_sessionEpoch;
+    _startingUid = uid;
+    late final Future<void> run;
+    run = _startSyncImpl(uid, epoch).whenComplete(() {
+      if (identical(_startInFlight, run)) {
+        _startInFlight = null;
+        _startingUid = null;
+      }
+    });
+    _startInFlight = run;
+    return run;
+  }
+
+  Future<void> _startSyncImpl(String uid, int epoch) async {
+    _clearSessionResources();
     _currentUid = uid;
     debugPrint('[AutoSync] Starting sync session for user: $uid');
 
     // Muat riwayat push terakhir untuk membatasi query push lokal
     try {
       final lastBackup = await CloudBackupService.lastBackup(uid);
+      if (epoch != _sessionEpoch) return;
       _lastPushedAt = lastBackup ?? DateTime.fromMillisecondsSinceEpoch(0);
-    } catch (_) {}
+    } catch (_) {
+      if (epoch != _sessionEpoch) return;
+      _lastPushedAt = DateTime.fromMillisecondsSinceEpoch(0);
+    }
 
     // Cek apakah terjadi pergantian akun atau sesi baru pada perangkat ini
     try {
@@ -121,10 +204,12 @@ class AutoSyncService {
       if (lastUid != uid) {
         debugPrint('[AutoSync] Account switch or new session ($lastUid -> $uid). Preparing local data...');
         if (lastUid != null) {
+          await prefs.remove('current_sync_user_id');
           await clearPullCursor(prefs, lastUid);
           await _db.resetAllData();
         } else if (discardGuestDataOnNextLogin) {
           discardGuestDataOnNextLogin = false;
+          await prefs.remove('current_sync_user_id');
           await _db.resetAllData();
           await _ref.read(profileProvider.notifier).clearLocal(ProfileController.guestId);
           await _ref.read(budgetRuleProvider.notifier).clearLocal();
@@ -139,20 +224,32 @@ class AutoSyncService {
             await prefs.remove('onboarding_done_local');
           }
         }
+        if (epoch != _sessionEpoch) return;
         _ref.read(appPrefsProvider.notifier).loadForUser(uid);
         _ref.read(budgetRuleProvider.notifier).loadForUser(uid);
         await Lock.instance.syncWithCloud(uid);
       }
+      if (epoch != _sessionEpoch) return;
       discardGuestDataOnNextLogin = false;
       await _ref.read(skipAuthProvider.notifier).reset();
+      if (epoch != _sessionEpoch) return;
       await prefs.setString('current_sync_user_id', uid);
     } catch (e) {
       debugPrint('[AutoSync] Error during account switch check: $e');
     }
 
+    if (epoch != _sessionEpoch || _currentUid != uid) return;
+
+    if (Firebase.apps.isEmpty) {
+      debugPrint('[AutoSync] Firebase is not initialized; skipping remote sync listeners.');
+      return;
+    }
+
     // 1. Dengarkan perubahan tabel lokal Drift untuk auto-push ke cloud
     final localSub = _db.tableUpdates().listen((updates) {
-      if (_isApplyingRemote) return;
+      if (epoch != _sessionEpoch || _currentUid != uid || _isApplyingRemote) {
+        return;
+      }
       final syncTableNames = {
         'categories',
         'wallets',
@@ -180,21 +277,21 @@ class AutoSyncService {
     // 2. Dengarkan snapshot Firestore secara real-time untuk setiap tabel
     final root = FirebaseFirestore.instance.collection('users').doc(uid);
     for (final t in _db.syncTables) {
-      final snapSub = root.collection(t.name).snapshots().listen((snap) async {
+      final snapSub = root.collection(t.name).snapshots().listen((snap) {
+        if (epoch != _sessionEpoch || _currentUid != uid) return;
         for (final change in snap.docChanges) {
           // Abaikan perubahan lokal yang belum selesai ditulis ke server
           if (change.doc.metadata.hasPendingWrites) continue;
           if (change.type != DocumentChangeType.removed) {
             final data = change.doc.data();
             if (data != null) {
-              _isApplyingRemote = true;
-              try {
-                await t.applyRemote(data);
-              } catch (e) {
-                debugPrint('[AutoSync] Error applying remote change for ${t.name}: $e');
-              } finally {
-                _isApplyingRemote = false;
-              }
+              unawaited(_enqueueRemoteSnapshotApply(epoch, uid, () async {
+                try {
+                  await t.applyRemote(data);
+                } catch (e) {
+                  debugPrint('[AutoSync] Error applying remote change for ${t.name}: $e');
+                }
+              }));
             }
           }
         }
@@ -210,6 +307,7 @@ class AutoSyncService {
         .doc('profile')
         .snapshots()
         .listen((snap) async {
+      if (epoch != _sessionEpoch || _currentUid != uid) return;
       if (snap.metadata.hasPendingWrites) return;
       if (snap.exists) {
         try {
@@ -229,6 +327,7 @@ class AutoSyncService {
         .doc('budgetConfig')
         .snapshots()
         .listen((snap) async {
+      if (epoch != _sessionEpoch || _currentUid != uid) return;
       if (snap.metadata.hasPendingWrites) return;
       if (snap.exists && snap.data() != null) {
         try {
@@ -248,6 +347,7 @@ class AutoSyncService {
         .doc('preferences')
         .snapshots()
         .listen((snap) async {
+      if (epoch != _sessionEpoch || _currentUid != uid) return;
       if (snap.metadata.hasPendingWrites) return;
       if (snap.exists && snap.data() != null) {
         try {
@@ -263,26 +363,33 @@ class AutoSyncService {
 
     // 4. Dengarkan perubahan konektivitas jaringan (deteksi internet kembali aktif)
     final connSub = Connectivity().onConnectivityChanged.listen((results) {
+      if (epoch != _sessionEpoch || _currentUid != uid) return;
       final hasConnection = results.any((r) => r != ConnectivityResult.none);
       if (hasConnection) {
         debugPrint('[AutoSync] Network reconnected! Triggering instant auto-sync...');
-        triggerTwoWaySync();
+        unawaited(triggerTwoWaySync());
       }
     });
     _subscriptions.add(connSub);
 
+    if (epoch != _sessionEpoch || _currentUid != uid) {
+      _clearSessionResources();
+      return;
+    }
+
     // 5. Jalankan sinkronisasi awal dua arah (pull remote + push local)
-    triggerTwoWaySync();
+    unawaited(triggerTwoWaySync());
   }
 
-  /// Menghentikan seluruh listener saat user logout.
+  /// Menghentikan seluruh listener saat user logout atau pergantian akun.
   void stopSync() {
-    _debounceTimer?.cancel();
-    _debounceTimer = null;
-    for (final sub in _subscriptions) {
-      sub.cancel();
-    }
-    _subscriptions.clear();
+    _sessionEpoch++;
+    _activeSyncSeq++;
+    _isSyncing = false;
+    _twoWayInFlight = null;
+    _twoWayUid = null;
+    _lastPushedAt = DateTime.fromMillisecondsSinceEpoch(0);
+    _clearSessionResources();
     _currentUid = null;
     debugPrint('[AutoSync] Stopped sync session');
   }
@@ -290,19 +397,44 @@ class AutoSyncService {
   /// Menjadwalkan push data lokal ke cloud dengan jeda debounce (1.5 detik).
   void schedulePush() {
     final uid = _currentUid;
+    final epoch = _sessionEpoch;
     if (uid == null) return;
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 1500), () {
-      _pushLocalOnly(uid);
+      _pushLocalOnly(uid, epoch);
     });
   }
 
   /// Melakukan sinkronisasi dua arah penuh (Pull Remote lalu Push Local).
+  /// Menggabungkan panggilan bersamaan untuk UID aktif agar tidak terjadi sync ganda.
   Future<void> triggerTwoWaySync() async {
     final uid = _currentUid ?? _ref.read(currentUserProvider)?.uid;
-    if (uid == null || _isSyncing) return;
-    _currentUid ??= uid;
+    if (uid == null) return;
+    if (Firebase.apps.isEmpty) return;
 
+    final inFlight = _twoWayInFlight;
+    if (inFlight != null && _twoWayUid == uid) {
+      return inFlight;
+    }
+    if (_isSyncing) return;
+
+    _currentUid ??= uid;
+    final epoch = _sessionEpoch;
+    _twoWayUid = uid;
+    late final Future<void> run;
+    run = _runTwoWaySync(uid, epoch).whenComplete(() {
+      if (identical(_twoWayInFlight, run)) {
+        _twoWayInFlight = null;
+        _twoWayUid = null;
+      }
+    });
+    _twoWayInFlight = run;
+    return run;
+  }
+
+  Future<void> _runTwoWaySync(String uid, int epoch) async {
+    final runSeq = ++_syncRunSeq;
+    _activeSyncSeq = runSeq;
     _isSyncing = true;
     _ref.read(syncStateProvider.notifier).update(
           _ref.read(syncStateProvider).copyWith(status: SyncStatus.syncing),
@@ -326,20 +458,24 @@ class AutoSyncService {
       } catch (e) {
         debugPrint('[AutoSync] Warning restoring profile: $e');
       }
+      if (epoch != _sessionEpoch) return;
 
       try {
         await _ref.read(budgetRuleProvider.notifier).restoreFromCloud(uid);
       } catch (e) {
         debugPrint('[AutoSync] Warning restoring budgetConfig: $e');
       }
+      if (epoch != _sessionEpoch) return;
 
       try {
         await _ref.read(appPrefsProvider.notifier).restoreFromCloud(uid);
       } catch (e) {
         debugPrint('[AutoSync] Warning restoring preferences: $e');
       }
+      if (epoch != _sessionEpoch) return;
 
       for (final t in _db.syncTables) {
+        if (epoch != _sessionEpoch) return;
         try {
           final col = root.collection(t.name);
           final QuerySnapshot<Map<String, dynamic>> snap = isIncrementalPull
@@ -348,25 +484,26 @@ class AutoSyncService {
                   .get()
                   .timeout(_timeout)
               : await col.get().timeout(_timeout);
+          if (epoch != _sessionEpoch) return;
           final remoteMap = <String, int>{};
-          _isApplyingRemote = true;
-          try {
+          await _runRemoteWrite(() async {
             for (final doc in snap.docs) {
+              if (epoch != _sessionEpoch) return;
               final data = doc.data();
               final updatedMs = (data['updatedAt'] as num?)?.toInt() ?? 0;
               remoteMap[doc.id] = updatedMs;
               pulledUpdatedAtMs.add(updatedMs);
               await t.applyRemote(data);
             }
-          } finally {
-            _isApplyingRemote = false;
-          }
+          });
           remoteUpdatedMaps[t.name] = remoteMap;
         } catch (e) {
           allPullSucceeded = false;
           debugPrint('[AutoSync] Warning pulling table ${t.name}: $e');
         }
       }
+
+      if (epoch != _sessionEpoch) return;
 
       if (allPullSucceeded) {
         final nextCursor = computeNextPullCursorMs(
@@ -376,6 +513,7 @@ class AutoSyncService {
         );
         await prefs.setInt(pullCursorKey(uid), nextCursor);
       }
+      if (epoch != _sessionEpoch) return;
 
       // Langkah 2: PUSH (Unggah data lokal yang belum ada / lebih baru di cloud)
       try {
@@ -383,24 +521,28 @@ class AutoSyncService {
       } catch (e) {
         debugPrint('[AutoSync] Warning uploading profile: $e');
       }
+      if (epoch != _sessionEpoch) return;
 
       try {
         await _ref.read(budgetRuleProvider.notifier).uploadToCloud(uid);
       } catch (e) {
         debugPrint('[AutoSync] Warning uploading budgetConfig: $e');
       }
+      if (epoch != _sessionEpoch) return;
 
       try {
         await _ref.read(appPrefsProvider.notifier).uploadToCloud(uid);
       } catch (e) {
         debugPrint('[AutoSync] Warning uploading preferences: $e');
       }
+      if (epoch != _sessionEpoch) return;
 
       final localPushSince = isIncrementalPull
           ? _lastPushedAt.subtract(const Duration(seconds: 5))
           : DateTime.fromMillisecondsSinceEpoch(0);
 
       for (final t in _db.syncTables) {
+        if (epoch != _sessionEpoch) return;
         try {
           final col = root.collection(t.name);
           // Pakai cache remote map dari Langkah 1 agar efisien biaya read Firestore
@@ -414,6 +556,7 @@ class AutoSyncService {
 
           if (toUpload.isNotEmpty) {
             for (var i = 0; i < toUpload.length; i += 400) {
+              if (epoch != _sessionEpoch) return;
               final batch = FirebaseFirestore.instance.batch();
               for (final r in toUpload.skip(i).take(400)) {
                 batch.set(col.doc(r['id'] as String), r);
@@ -426,26 +569,36 @@ class AutoSyncService {
         }
       }
 
+      if (epoch != _sessionEpoch) return;
+
       // Periksa transaksi berulang yang jatuh tempo
       await RecurringService.checkAndGenerateDue(_db);
+
+      if (epoch != _sessionEpoch) return;
 
       final now = DateTime.now();
       _lastPushedAt = now;
       await CloudBackupService.saveLastBackup(uid, now);
-      _ref.read(syncStateProvider.notifier).update(SyncState(
-            status: SyncStatus.synced,
-            lastSynced: now,
-          ));
+      if (epoch == _sessionEpoch) {
+        _ref.read(syncStateProvider.notifier).update(SyncState(
+              status: SyncStatus.synced,
+              lastSynced: now,
+            ));
+      }
     } catch (e) {
       debugPrint('[AutoSync] Sync error: $e');
-      _ref.read(syncStateProvider.notifier).update(
-            _ref.read(syncStateProvider).copyWith(
-                  status: SyncStatus.error,
-                  errorMessage: e.toString(),
-                ),
-          );
+      if (epoch == _sessionEpoch) {
+        _ref.read(syncStateProvider.notifier).update(
+              _ref.read(syncStateProvider).copyWith(
+                    status: SyncStatus.error,
+                    errorMessage: e.toString(),
+                  ),
+            );
+      }
     } finally {
-      _isSyncing = false;
+      if (_activeSyncSeq == runSeq) {
+        _isSyncing = false;
+      }
     }
   }
 
@@ -461,7 +614,10 @@ class AutoSyncService {
       throw Exception(trG('Another operation is still running.'));
     }
 
+    final runSeq = ++_syncRunSeq;
+    _activeSyncSeq = runSeq;
     _isSyncing = true;
+    final epoch = _sessionEpoch;
     _ref.read(syncStateProvider.notifier).update(
           _ref.read(syncStateProvider).copyWith(status: SyncStatus.syncing),
         );
@@ -478,10 +634,12 @@ class AutoSyncService {
 
       // 2. Seluruh tabel Drift SQLite
       for (final t in _db.syncTables) {
+        if (epoch != _sessionEpoch) return totalUploaded;
         final col = root.collection(t.name);
         final rows = await t.changed(DateTime.fromMillisecondsSinceEpoch(0));
         if (rows.isNotEmpty) {
           for (var i = 0; i < rows.length; i += 400) {
+            if (epoch != _sessionEpoch) return totalUploaded;
             final batch = FirebaseFirestore.instance.batch();
             for (final r in rows.skip(i).take(400)) {
               batch.set(col.doc(r['id'] as String), r);
@@ -492,26 +650,35 @@ class AutoSyncService {
         }
       }
 
+      if (epoch != _sessionEpoch) return totalUploaded;
       await RecurringService.checkAndGenerateDue(_db);
+      if (epoch != _sessionEpoch) return totalUploaded;
 
       final now = DateTime.now();
+      _lastPushedAt = now;
       await CloudBackupService.saveLastBackup(uid, now);
-      _ref.read(syncStateProvider.notifier).update(SyncState(
-            status: SyncStatus.synced,
-            lastSynced: now,
-          ));
+      if (epoch == _sessionEpoch) {
+        _ref.read(syncStateProvider.notifier).update(SyncState(
+              status: SyncStatus.synced,
+              lastSynced: now,
+            ));
+      }
       return totalUploaded;
     } catch (e) {
       debugPrint('[AutoSync] Error during pushAllLocalToCloud: $e');
-      _ref.read(syncStateProvider.notifier).update(
-            _ref.read(syncStateProvider).copyWith(
-                  status: SyncStatus.error,
-                  errorMessage: e.toString(),
-                ),
-          );
+      if (epoch == _sessionEpoch) {
+        _ref.read(syncStateProvider.notifier).update(
+              _ref.read(syncStateProvider).copyWith(
+                    status: SyncStatus.error,
+                    errorMessage: e.toString(),
+                  ),
+            );
+      }
       rethrow;
     } finally {
-      _isSyncing = false;
+      if (_activeSyncSeq == runSeq) {
+        _isSyncing = false;
+      }
     }
   }
 
@@ -527,7 +694,10 @@ class AutoSyncService {
       throw Exception(trG('Another operation is still running.'));
     }
 
+    final runSeq = ++_syncRunSeq;
+    _activeSyncSeq = runSeq;
     _isSyncing = true;
+    final epoch = _sessionEpoch;
     _ref.read(syncStateProvider.notifier).update(
           _ref.read(syncStateProvider).copyWith(status: SyncStatus.syncing),
         );
@@ -545,19 +715,20 @@ class AutoSyncService {
       await _ref.read(appPrefsProvider.notifier).restoreFromCloud(uid);
 
       for (final t in _db.syncTables) {
+        if (epoch != _sessionEpoch) return totalRestored;
         final snap = await root.collection(t.name).get().timeout(_timeout);
-        _isApplyingRemote = true;
-        try {
+        await _runRemoteWrite(() async {
           for (final doc in snap.docs) {
+            if (epoch != _sessionEpoch) return;
             final data = doc.data();
             pulledUpdatedAtMs.add((data['updatedAt'] as num?)?.toInt() ?? 0);
             final applied = await t.applyRemote(data);
             if (applied) totalRestored++;
           }
-        } finally {
-          _isApplyingRemote = false;
-        }
+        });
       }
+
+      if (epoch != _sessionEpoch) return totalRestored;
 
       await prefs.setInt(
         pullCursorKey(uid),
@@ -569,25 +740,32 @@ class AutoSyncService {
       );
 
       await RecurringService.checkAndGenerateDue(_db);
+      if (epoch != _sessionEpoch) return totalRestored;
 
       final now = DateTime.now();
       await CloudBackupService.saveLastBackup(uid, now);
-      _ref.read(syncStateProvider.notifier).update(SyncState(
-            status: SyncStatus.synced,
-            lastSynced: now,
-          ));
+      if (epoch == _sessionEpoch) {
+        _ref.read(syncStateProvider.notifier).update(SyncState(
+              status: SyncStatus.synced,
+              lastSynced: now,
+            ));
+      }
       return totalRestored;
     } catch (e) {
       debugPrint('[AutoSync] Error during pullAllRemoteToLocal: $e');
-      _ref.read(syncStateProvider.notifier).update(
-            _ref.read(syncStateProvider).copyWith(
-                  status: SyncStatus.error,
-                  errorMessage: e.toString(),
-                ),
-          );
+      if (epoch == _sessionEpoch) {
+        _ref.read(syncStateProvider.notifier).update(
+              _ref.read(syncStateProvider).copyWith(
+                    status: SyncStatus.error,
+                    errorMessage: e.toString(),
+                  ),
+            );
+      }
       rethrow;
     } finally {
-      _isSyncing = false;
+      if (_activeSyncSeq == runSeq) {
+        _isSyncing = false;
+      }
     }
   }
 
@@ -667,8 +845,14 @@ class AutoSyncService {
     }
   }
 
-  Future<void> _pushLocalOnly(String uid) async {
-    if (_isSyncing || _isApplyingRemote) return;
+  Future<void> _pushLocalOnly(String uid, int epoch) async {
+    if (epoch != _sessionEpoch ||
+        _currentUid != uid ||
+        _isSyncing ||
+        _isApplyingRemote ||
+        Firebase.apps.isEmpty) {
+      return;
+    }
     try {
       final root = FirebaseFirestore.instance.collection('users').doc(uid);
       // Query hanya data lokal yang diperbarui sejak push terakhir (beri buffer 5 detik untuk clock skew)
@@ -676,11 +860,13 @@ class AutoSyncService {
       var hasChanges = false;
 
       for (final t in _db.syncTables) {
+        if (epoch != _sessionEpoch || _currentUid != uid) return;
         final rows = await t.changed(since);
         if (rows.isNotEmpty) {
           hasChanges = true;
           final col = root.collection(t.name);
           for (var i = 0; i < rows.length; i += 400) {
+            if (epoch != _sessionEpoch || _currentUid != uid) return;
             final batch = FirebaseFirestore.instance.batch();
             for (final r in rows.skip(i).take(400)) {
               batch.set(col.doc(r['id'] as String), r);
@@ -690,17 +876,18 @@ class AutoSyncService {
         }
       }
 
-      // Periksa transaksi berulang yang jatuh tempo
-      await RecurringService.checkAndGenerateDue(_db);
+      if (epoch != _sessionEpoch || _currentUid != uid) return;
 
       final now = DateTime.now();
       _lastPushedAt = now;
       if (hasChanges) {
         await CloudBackupService.saveLastBackup(uid, now);
-        _ref.read(syncStateProvider.notifier).update(SyncState(
-              status: SyncStatus.synced,
-              lastSynced: now,
-            ));
+        if (epoch == _sessionEpoch) {
+          _ref.read(syncStateProvider.notifier).update(SyncState(
+                status: SyncStatus.synced,
+                lastSynced: now,
+              ));
+        }
       }
     } catch (e) {
       debugPrint('[AutoSync] Background push error: $e');

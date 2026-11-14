@@ -3,6 +3,7 @@
 /// sinkronisasi PIN antar perangkat, dan Privacy Shield (`FLAG_SECURE`).
 library;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -27,8 +28,10 @@ class AppLockState {
   });
 
   final bool enabled;
-  final int delayMin; // auto-lock timeout in minutes (0 = immediately / 3s grace)
-  final bool privacyShield; // true = FLAG_SECURE active (hide app switcher preview)
+  final int
+  delayMin; // auto-lock timeout in minutes (0 = immediately / 3s grace)
+  final bool
+  privacyShield; // true = FLAG_SECURE active (hide app switcher preview)
   final bool biometricEnabled; // true = biometric unlock active alongside PIN
   final bool biometricAvailable; // true = device has enrolled biometrics
   final List<BiometricType> biometricTypes;
@@ -56,10 +59,30 @@ class Lock {
   static const _channel = MethodChannel('com.example.wall_o_pay/notifications');
   SharedPreferences? _p;
   String? _activeUid;
+  bool _hasLoaded = false;
+  bool _pendingAutoLockOnEnable = false;
+  StreamSubscription<User?>? _authSub;
+  Future<void> _loadUserQueue = Future<void>.value();
+  final Map<String, Future<void>> _inFlightCloudSync = {};
+  final Map<String, Future<void>> _inFlightLocalLoad = {};
   bool _biometricAvailable = false;
   List<BiometricType> _biometricTypes = const [];
   bool _isAuthenticatingBiometric = false;
   DateTime? _lastBiometricAuthEndedAt;
+
+  /// Menandakan `Lock.instance.load()` telah selesai berjalan minimal sekali.
+  bool get isInitialized => _hasLoaded;
+
+  /// Memeriksa apakah kunci untuk [uid] (`null` = tamu) sudah dimuat ke memori.
+  bool isLoadedFor(String? uid) => _hasLoaded && _activeUid == uid;
+
+  /// Mengambil dan mengosongkan penanda bahwa perubahan status PIN ke aktif
+  /// berasal dari pemuatan akun/sinkronisasi (bukan setup PIN interaktif).
+  bool consumeAutoLockOnEnable() {
+    final v = _pendingAutoLockOnEnable;
+    _pendingAutoLockOnEnable = false;
+    return v;
+  }
 
   /// Menandakan apakah dialog biometrik sistem sedang aktif (atau baru saja ditutup)
   /// agar transisi lifecycle pause/resume dari dialog OS tidak memicu penguncian ulang.
@@ -156,25 +179,36 @@ class Lock {
 
   Future<void> load() async {
     _p = await SharedPreferences.getInstance();
+    bypassForQuickAction.value = false;
     try {
       _activeUid = FirebaseAuth.instance.currentUser?.uid;
     } catch (_) {
       _activeUid = null;
     }
-    _migrateLegacyIfNeeded(_activeUid);
     await _loadSecretsForUid(_activeUid);
+    await _migrateLegacyIfNeeded(_activeUid);
+    _hasLoaded = true;
     await refreshBiometricSupport();
     final shield = _p?.getBool('security.privacy_shield') ?? false;
     if (shield) {
       await setSecureScreen(true);
     }
     try {
-      if (_activeUid != null) {
-        syncWithCloud(_activeUid!);
+      final uid = _activeUid;
+      if (uid != null) {
+        unawaited(syncWithCloud(uid));
       }
-      FirebaseAuth.instance.authStateChanges().listen((u) {
-        loadForUser(u?.uid);
-      });
+      await _authSub?.cancel();
+      _authSub = FirebaseAuth.instance.authStateChanges().listen(
+        (u) {
+          final nextUid = u?.uid;
+          if (_hasLoaded && nextUid == _activeUid) return;
+          unawaited(loadForUser(nextUid));
+        },
+        onError: (Object e) {
+          debugPrint('Auth state listener error in Lock: $e');
+        },
+      );
     } catch (e) {
       debugPrint('Firebase not available for lock sync: $e');
     }
@@ -280,42 +314,67 @@ class Lock {
     return true;
   }
 
-  Future<void> loadForUser(String? uid) async {
-    _activeUid = uid;
-    _migrateLegacyIfNeeded(uid);
-    await _loadSecretsForUid(uid);
-    _emit();
-    if (uid != null) {
-      await syncWithCloud(uid);
-    }
+  /// Memuat hanya state PIN lokal untuk [uid] (cepat, tanpa menunggu jaringan Firestore)
+  /// agar [LockGate] tidak me-mount UI utama sebelum status kunci lokal diketahui.
+  Future<void> ensureLocalLoaded(String? uid) {
+    final key = uid ?? 'guest';
+    final existing = _inFlightLocalLoad[key];
+    if (existing != null) return existing;
+
+    final future = () async {
+      _p = await SharedPreferences.getInstance();
+      _activeUid = uid;
+      bypassForQuickAction.value = false;
+      await _loadSecretsForUid(uid);
+      await _migrateLegacyIfNeeded(uid);
+      _hasLoaded = true;
+      _emit();
+    }().whenComplete(() {
+      _inFlightLocalLoad.remove(key);
+    });
+
+    _inFlightLocalLoad[key] = future;
+    return future;
   }
 
-  void _migrateLegacyIfNeeded(String? uid) {
+  Future<void> loadForUser(String? uid) {
+    _loadUserQueue = _loadUserQueue.catchError((_) {}).then((_) async {
+      await ensureLocalLoaded(uid);
+      if (uid != null) {
+        await syncWithCloud(uid);
+      }
+    });
+    return _loadUserQueue;
+  }
+
+  Future<void> _migrateLegacyIfNeeded(String? uid) async {
     final p = _p;
     if (p == null || uid == null) return;
     final scopedHash = _getSecret(_k('hash', uid));
     final legacyHash = p.getString('lock.hash');
     if (scopedHash == null && legacyHash != null) {
-      p.setString(_k('hash', uid), legacyHash);
+      await _writeSecret(_k('hash', uid), legacyHash);
       final legacySalt = p.getString('lock.salt');
-      if (legacySalt != null) p.setString(_k('salt', uid), legacySalt);
+      if (legacySalt != null) await _writeSecret(_k('salt', uid), legacySalt);
       final legacyDelay = p.getInt('lock.delay');
-      if (legacyDelay != null) p.setInt(_k('delay', uid), legacyDelay);
+      if (legacyDelay != null) await p.setInt(_k('delay', uid), legacyDelay);
       final legacyAt = p.getInt('lock.updatedAt');
-      if (legacyAt != null) p.setInt(_k('updatedAt', uid), legacyAt);
-      p.remove('lock.hash');
-      p.remove('lock.salt');
-      p.remove('lock.delay');
-      p.remove('lock.updatedAt');
+      if (legacyAt != null) await p.setInt(_k('updatedAt', uid), legacyAt);
+      await p.remove('lock.hash');
+      await p.remove('lock.salt');
+      await p.remove('lock.delay');
+      await p.remove('lock.updatedAt');
     }
   }
 
-  void _emit() {
+  void _emit({bool suppressAutoLock = false}) {
     final p = _p;
     if (p == null) return;
+    final wasEnabled = state.value.enabled;
     final enabled = _getSecret(_k('hash')) != null;
     final biometricPref = p.getBool(_k('biometric')) ?? false;
     final privacyShield = p.getBool('security.privacy_shield') ?? false;
+    _pendingAutoLockOnEnable = !suppressAutoLock && !wasEnabled && enabled;
     state.value = AppLockState(
       enabled: enabled,
       delayMin: p.getInt(_k('delay')) ?? 1,
@@ -324,6 +383,7 @@ class Lock {
       biometricAvailable: _biometricAvailable,
       biometricTypes: _biometricTypes,
     );
+    _pendingAutoLockOnEnable = false;
     if (!enabled) {
       isLocked.value = false;
     }
@@ -384,7 +444,7 @@ class Lock {
     await _writeSecret(_k('hash', uid), hash);
     await _p!.setInt(_k('updatedAt', uid), now);
     await _clearLockoutState(uid);
-    _emit();
+    _emit(suppressAutoLock: true);
 
     try {
       final userUid = FirebaseAuth.instance.currentUser?.uid;
@@ -408,11 +468,11 @@ class Lock {
     final h = _getSecret(_k('hash'));
     final ok = salt != null && h != null && _verifyHash(pin, salt, h);
     if (ok) {
-      _clearLockoutState();
+      unawaited(_clearLockoutState());
       // Upgrade transparan jika PIN masih menggunakan format hash v1 lama
       if (!h.startsWith('v2:')) {
         final upgraded = _hash(pin, salt);
-        _writeSecret(_k('hash'), upgraded);
+        unawaited(_writeSecret(_k('hash'), upgraded));
       }
       return true;
     }
@@ -428,7 +488,9 @@ class Lock {
       _p?.setInt(_k('lockoutTier'), tier);
       _p?.setInt(
         _k('lockoutUntil'),
-        DateTime.now().add(Duration(seconds: penaltySec)).millisecondsSinceEpoch,
+        DateTime.now()
+            .add(Duration(seconds: penaltySec))
+            .millisecondsSinceEpoch,
       );
     } else {
       _p?.setInt(_k('fails'), fails);
@@ -445,6 +507,7 @@ class Lock {
     await _p?.remove(_k('biometric', uid));
     await _clearLockoutState(uid);
     await _p?.setInt(_k('updatedAt', uid), now);
+    bypassForQuickAction.value = false;
     _emit();
 
     try {
@@ -486,7 +549,18 @@ class Lock {
   }
 
   /// Sinkronkan status PIN dengan Cloud Firestore (dipanggil saat login atau buka app).
-  Future<void> syncWithCloud(String uid) async {
+  Future<void> syncWithCloud(String uid) {
+    final existing = _inFlightCloudSync[uid];
+    if (existing != null) return existing;
+
+    final future = _syncWithCloudImpl(uid).whenComplete(() {
+      _inFlightCloudSync.remove(uid);
+    });
+    _inFlightCloudSync[uid] = future;
+    return future;
+  }
+
+  Future<void> _syncWithCloudImpl(String uid) async {
     try {
       final doc = _doc(uid);
       if (doc == null) return;
@@ -497,7 +571,8 @@ class Lock {
         final localHash = _getSecret(_k('hash', uid));
         final localSalt = _getSecret(_k('salt', uid));
         if (localHash != null && localSalt != null) {
-          final now = _p?.getInt(_k('updatedAt', uid)) ??
+          final now =
+              _p?.getInt(_k('updatedAt', uid)) ??
               DateTime.now().millisecondsSinceEpoch;
           await doc.set({
             'hash': localHash,
@@ -567,12 +642,14 @@ class Lock {
     }
     await clearLocal('guest');
     _activeUid = uid;
-    _emit();
+    _hasLoaded = true;
+    _emit(suppressAutoLock: true);
   }
 
   /// Bersihkan data PIN lokal pengguna tertentu saat wipe data.
   Future<void> clearLocal([String? uid]) async {
     final targetUid = uid ?? _currentUid;
+    bypassForQuickAction.value = false;
     await _deleteSecret(_k('salt', targetUid));
     await _deleteSecret(_k('hash', targetUid));
     await _p?.remove(_k('delay', targetUid));

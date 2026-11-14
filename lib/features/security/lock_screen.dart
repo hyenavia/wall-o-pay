@@ -18,9 +18,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Membungkus aplikasi: terkunci saat dibuka (jika PIN aktif),
 /// dan terkunci kembali setelah ditinggalkan di latar belakang sesuai batas waktu.
+/// Saat terkunci, [child] tidak di-mount agar UI utama & side effect tidak berjalan di balik [LockScreen].
 class LockGate extends StatefulWidget {
-  const LockGate({super.key, required this.child});
+  const LockGate({super.key, this.uid, required this.child});
 
+  final String? uid;
   final Widget child;
 
   @override
@@ -28,28 +30,78 @@ class LockGate extends StatefulWidget {
 }
 
 class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
+  static _LockGateState? _activeGate;
+
   late bool locked = Lock.instance.state.value.enabled;
+  bool _resolvingUser = false;
   DateTime? leftAt;
 
   @override
   void initState() {
     super.initState();
-    Lock.instance.isLocked.value = locked;
+    _activeGate = this;
     WidgetsBinding.instance.addObserver(this);
     Lock.instance.state.addListener(_onLockStateChanged);
+    _resolveLockForCurrentUser(fromInit: true);
+  }
+
+  @override
+  void didUpdateWidget(covariant LockGate oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.uid != oldWidget.uid) {
+      _resolveLockForCurrentUser(fromInit: false);
+    }
+  }
+
+  void _resolveLockForCurrentUser({required bool fromInit}) {
+    final targetUid = widget.uid;
+    if (Lock.instance.isInitialized && !Lock.instance.isLoadedFor(targetUid)) {
+      _resolvingUser = true;
+      locked = true;
+      Lock.instance.isLocked.value = true;
+      if (!fromInit && mounted) setState(() {});
+      Lock.instance.ensureLocalLoaded(targetUid).whenComplete(() {
+        if (!mounted) return;
+        setState(() {
+          _resolvingUser = false;
+          locked = Lock.instance.state.value.enabled;
+          Lock.instance.isLocked.value = locked;
+        });
+      });
+    } else {
+      _resolvingUser = false;
+      locked = Lock.instance.state.value.enabled;
+      Lock.instance.isLocked.value = locked;
+      if (!fromInit && mounted) setState(() {});
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     Lock.instance.state.removeListener(_onLockStateChanged);
+    if (identical(_activeGate, this)) {
+      _activeGate = null;
+      Lock.instance.isLocked.value = false;
+    }
     super.dispose();
   }
 
   void _onLockStateChanged() {
-    if (!Lock.instance.state.value.enabled && locked) {
+    if (_resolvingUser) return;
+    final st = Lock.instance.state.value;
+    if (!st.enabled && locked) {
+      Lock.instance.consumeAutoLockOnEnable();
       Lock.instance.isLocked.value = false;
       setState(() => locked = false);
+      return;
+    }
+    if (st.enabled && !locked && Lock.instance.consumeAutoLockOnEnable()) {
+      try {
+        Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+      } catch (_) {}
+      Lock.instance.isLocked.value = true;
+      setState(() => locked = true);
     }
   }
 
@@ -63,7 +115,11 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       final previousLeftAt = leftAt;
       leftAt = null;
-      if (st.enabled && previousLeftAt != null && !locked) {
+      if (locked) {
+        Lock.instance.refreshBiometricSupport();
+        return;
+      }
+      if (st.enabled && previousLeftAt != null && !_resolvingUser) {
         final timeout = st.delayMin == 0
             ? const Duration(seconds: 3)
             : Duration(minutes: st.delayMin);
@@ -82,20 +138,20 @@ class _LockGateState extends State<LockGate> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        widget.child,
-        if (locked)
-          Positioned.fill(
-            child: LockScreen(
-              onUnlock: () {
-                Lock.instance.isLocked.value = false;
-                setState(() => locked = false);
-              },
-            ),
-          ),
-      ],
-    );
+    if (_resolvingUser) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (locked) {
+      return LockScreen(
+        onUnlock: () {
+          Lock.instance.isLocked.value = false;
+          setState(() => locked = false);
+        },
+      );
+    }
+    return widget.child;
   }
 }
 

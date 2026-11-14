@@ -12,7 +12,7 @@
 [![Security](https://img.shields.io/badge/Security-Keystore%20%7C%20Biometrics-38B271?logo=android&logoColor=white)](https://github.com/hyenavia/wall-o-pay)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.16.0-234B3B.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-2.16.2-234B3B.svg)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://hyenavia.github.io/wall-o-pay/) • [📥 Download Latest APK](https://github.com/hyenavia/wall-o-pay/releases/latest) • [📐 Architecture Guide](ARCHITECTURE.md) • [📋 Changelog](CHANGELOG.md)
 
@@ -28,9 +28,9 @@ When you're ready to back up or sync across devices, Wall o' Pay offers optional
 
 ---
 
-## 🚀 Highlights in Latest Release (v2.14)
+## 🚀 Highlights in Latest Release (v2.16.2)
 
-Wall o' Pay v2.14 expands the **Enchanted Glasshouse Android Home Screen Widget** ecosystem with **One-Tap Favorites** (instant template logging + Undo) and **Budget Guardrail** (period budget tracking, near/over threshold alerts, and top categories) alongside secure lock-aware deep-link routing, complementing **Daily Pulse & Balance**, **Quick Action Bar**, and **Quick Finance**:
+Wall o' Pay v2.16.2 strengthens startup stability, PIN lock enforcement, recurring transaction idempotency, cloud sync session safety, and App Shortcut reliability:
 
 - 🏛️ **Enchanted Glasshouse Visual Identity:** Modern botanical conservatory aesthetic featuring translucent emerald glassmorphic surfaces, specular glass highlights, 24 bespoke 3D botanical glass icons, and vaulted architectural accents.
 - 🌿 **Atmospheric Lock Screen & Profile Wreath:** Serene sunlit glasshouse background with ambient lighting on `LockScreen` and an intricate botanical glass wreath frame for user profile photos.
@@ -64,19 +64,23 @@ Wall o' Pay v2.14 expands the **Enchanted Glasshouse Android Home Screen Widget*
 - **Daily Financial Pulse:** Real-time visual allowance meters with alert indicators when spending crosses 80% and 100% thresholds.
 
 ### 🎯 Dedicated Savings Goals
-- **Target Tracking & Pace Projection:** Set goals for emergency funds, gadgets, travel, or investments with recommended weekly/monthly contribution pace, status badges (*On Track*, *Behind Schedule*, *Due Today*, *Overdue*), and one-tap pace quick-fill.
+
+- **Target Tracking & Pace Projection:** Set goals for emergency funds, gadgets, travel, or investments with recommended weekly/monthly contribution pace, status badges (_On Track_, _Behind Schedule_, _Due Today_, _Overdue_), and one-tap pace quick-fill.
 - **Linked Account Deposits:** Fund savings goals directly from designated wallets (or track virtual allocations) with progress percentages and milestone markers.
 
 ### 🤝 Debts & Custom Split Bills
+
 - **Lend & Borrow Tracking:** Keep track of who owes whom with due dates, overdue alerts, and settlement history.
 - **Equal & Custom Split Bills:** Split bills evenly or customize exact per-friend amounts (`CustomSplitResult`) with live user-share validation.
 
 ### 📈 Visual Insights, Vitality Score & Filtered Reports
-- **Net Worth & Vitality Score:** Track unified net worth (`Liquid Assets + Receivables - Liabilities`) alongside a 0–100 four-pillar *Glasshouse Vitality Score* without double-counting goal allocations.
+
+- **Net Worth & Vitality Score:** Track unified net worth (`Liquid Assets + Receivables - Liabilities`) alongside a 0–100 four-pillar _Glasshouse Vitality Score_ without double-counting goal allocations.
 - **Weekly & Monthly Harvest Recaps & Drill-Down:** Review completed period recaps, tap category rows or pie chart slices to inspect matching transactions, and explore 6-period trend charts powered by `fl_chart`.
 - **Filtered PDF, CSV & Guest Backup:** Export wallet-filtered PDF statements, date- and wallet-filtered 8-column CSVs, and complete JSON backups with unobtrusive Guest Mode backup reminders.
 
 ### ⏰ Automation, Modules & Reminders
+
 - **Recurring Transactions:** Automate subscriptions, bills, and salaries with due confirmation queues inside Home and Recurring Schedules.
 - **Active Modules Manager:** Enable or disable optional feature pillars (`Goals`, `Debts & Splits`, `Recurring`, `Budget`, `Transfers`) dynamically via presets (**All Features** / **Minimalist**).
 - **Smart Local Notifications:** Customizable daily reminders, 80%/100% budget warnings, debt due reminders, and contextual Harvest Recap alerts scheduled cleanly on-device.
@@ -89,18 +93,18 @@ Wall o' Pay v2.14 expands the **Enchanted Glasshouse Android Home Screen Widget*
 
 ## 🛠️ Technology Stack
 
-| Layer                   | Technology                                 | Details                                                    |
-| :---------------------- | :----------------------------------------- | :--------------------------------------------------------- |
-| **Framework**           | Flutter 3.47+ (Stable Channel)             | High-performance cross-platform UI                         |
-| **Language**            | Dart 3.13+                                 | Null-safe, modern reactive language                        |
-| **State Management**    | Flutter Riverpod (`flutter_riverpod` 3.x)  | Predictable, reactive dependency injection                 |
-| **Local Database**      | Drift SQLite (`drift`, `drift_flutter`)    | Type-safe SQL engine with reactive streams                 |
-| **Hardware Security**   | `flutter_secure_storage` & `local_auth`    | Android Keystore / iOS Keychain & Biometrics               |
-| **Cloud & Auth**        | Firebase Core, Firebase Auth, Firestore    | Optional real-time cloud backup & cross-device sync        |
-| **Charts & Analytics**  | `fl_chart`                                 | Interactive, animated vector charts                        |
-| **Reporting & Export**  | `pdf` & `printing`                         | Custom PDF generation & print-ready statements             |
-| **Local Notifications** | `flutter_local_notifications` & `timezone` | Offline scheduled notifications & threshold alerts         |
-| **Typography & Icons**  | Outfit & DM Sans (`google_fonts`)          | Material 3 & tabular figures for number alignment          |
+| Layer                   | Technology                                 | Details                                                       |
+| :---------------------- | :----------------------------------------- | :------------------------------------------------------------ |
+| **Framework**           | Flutter 3.47+ (Stable Channel)             | High-performance cross-platform UI                            |
+| **Language**            | Dart 3.13+                                 | Null-safe, modern reactive language                           |
+| **State Management**    | Flutter Riverpod (`flutter_riverpod` 3.x)  | Predictable, reactive dependency injection                    |
+| **Local Database**      | Drift SQLite (`drift`, `drift_flutter`)    | Type-safe SQL engine with reactive streams                    |
+| **Hardware Security**   | `flutter_secure_storage` & `local_auth`    | Android Keystore / iOS Keychain & Biometrics                  |
+| **Cloud & Auth**        | Firebase Core, Firebase Auth, Firestore    | Optional real-time cloud backup & cross-device sync           |
+| **Charts & Analytics**  | `fl_chart`                                 | Interactive, animated vector charts                           |
+| **Reporting & Export**  | `pdf` & `printing`                         | Custom PDF generation & print-ready statements                |
+| **Local Notifications** | `flutter_local_notifications` & `timezone` | Offline scheduled notifications & threshold alerts            |
+| **Typography & Icons**  | Outfit & DM Sans (`google_fonts`)          | Material 3 & tabular figures for number alignment             |
 | **CI / CD Pipeline**    | GitHub Actions                             | Automated `flutter analyze` & `flutter test` gate + APK build |
 
 ---

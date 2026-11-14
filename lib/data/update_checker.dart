@@ -50,7 +50,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi fallback jika native method channel gagal membaca PackageManager.
-  static const fallbackVersion = '2.16.0';
+  static const fallbackVersion = '2.16.2';
   static String _resolvedVersion = fallbackVersion;
 
   /// Versi aplikasi saat ini. Dinamis dibaca dari native PackageManager Android atau fallback.
@@ -91,6 +91,17 @@ class UpdateCheckerService {
 
   static String? _promptedVersion;
   static bool _isShowingDialog = false;
+  static VoidCallback? _pendingUnlockListener;
+
+  /// Membatalkan listener pop-up pembaruan yang menunggu kunci dibuka
+  /// agar tidak terjadi kebocoran listener atau menahan [BuildContext] yang sudah di-dispose.
+  static void cancelPendingPrompt() {
+    final existing = _pendingUnlockListener;
+    if (existing != null) {
+      Lock.instance.isLocked.removeListener(existing);
+      _pendingUnlockListener = null;
+    }
+  }
 
   /// Memeriksa pembaruan dan otomatis memunculkan pop-up dialog ke pengguna jika ada rilis baru.
   static Future<AppUpdateInfo?> checkAndNotify(
@@ -102,24 +113,29 @@ class UpdateCheckerService {
       ref.read(availableUpdateProvider.notifier).setUpdate(info);
 
       if (context != null &&
+          context.mounted &&
           _promptedVersion != info.latestVersion &&
           !_isShowingDialog) {
         // Jika aplikasi sedang terkunci dengan PIN, tunggu sampai pengguna selesai membuka kunci
         if (Lock.instance.isLocked.value) {
+          cancelPendingPrompt();
           void listener() {
+            if (!context.mounted) {
+              cancelPendingPrompt();
+              return;
+            }
             if (!Lock.instance.isLocked.value) {
-              Lock.instance.isLocked.removeListener(listener);
-              if (context.mounted &&
-                  _promptedVersion != info.latestVersion &&
-                  !_isShowingDialog) {
+              cancelPendingPrompt();
+              if (_promptedVersion != info.latestVersion && !_isShowingDialog) {
                 _promptedVersion = info.latestVersion;
                 showUpdateDialog(context, info);
               }
             }
           }
 
+          _pendingUnlockListener = listener;
           Lock.instance.isLocked.addListener(listener);
-        } else if (context.mounted) {
+        } else {
           _promptedVersion = info.latestVersion;
           showUpdateDialog(context, info);
         }
@@ -130,22 +146,19 @@ class UpdateCheckerService {
 
   /// Memeriksa apakah ada pembaruan rilis terbaru di GitHub.
   static Future<AppUpdateInfo?> checkForUpdate() async {
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
     try {
       final installedVersion = await getInstalledVersion();
-      final client = HttpClient();
-      client.connectionTimeout = const Duration(seconds: 8);
       final request = await client.getUrl(Uri.parse(_latestReleaseApi));
       request.headers.set('User-Agent', 'Wall-o-Pay-Android/$installedVersion');
       request.headers.set('Accept', 'application/vnd.github.v3+json');
 
       final response = await request.close();
       if (response.statusCode != 200) {
-        client.close();
         return null;
       }
 
       final body = await response.transform(utf8.decoder).join();
-      client.close();
 
       final data = jsonDecode(body) as Map<String, dynamic>;
       final rawTag = (data['tag_name'] as String? ?? '').trim();
@@ -182,6 +195,8 @@ class UpdateCheckerService {
     } catch (e) {
       debugPrint('Error checking for updates: $e');
       return null;
+    } finally {
+      client.close();
     }
   }
 

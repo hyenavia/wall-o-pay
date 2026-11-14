@@ -4,6 +4,28 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.16.2] - 2026-11-15
+
+### Fixed
+- **Startup, Security Lock & Lifecycle Stability:**
+  - Replaced overlay stacking in `LockGate` with exclusive lock gating so `HomeShell` and background side effects do not mount or run behind `LockScreen` before PIN/biometric verification.
+  - Resolved race conditions across multi-account lock loading (`Lock.ensureLocalLoaded`, serialized `loadForUser`), coalesced cloud PIN syncs, awaited legacy lock migration before reading secrets, and removed Quick Action lock bypasses.
+- **Recurring Transactions & Two-Way Cloud Synchronization:**
+  - Added single-flight concurrency protection (`_inFlightChecks`) and intra-transaction pending-item idempotency in `RecurringService.checkAndGenerateDue` to prevent duplicate recurring entries, while pruning redundant callers in `OnboardingGate` and `_pushLocalOnly`.
+  - Upgraded `AutoSyncService.startSync` to `Future<void>` with session epochs, account-switch guards, coalesced `triggerTwoWaySync`, reference-counted serialized remote writes, `Firebase.apps` safety checks, and complete `stopSync()` cleanup.
+- **Profile, Initialization & App Shortcut Reliability:**
+  - Added safe Base64 profile decoding and corrupt avatar fallback rendering in `ProfileController` and `UserAvatar` without deleting stored user data.
+  - Eliminated double `SplashPage` rendering in `AuthGate`, resolved per-user startup locale formatting and normalized remote locale codes, prevented `UpdateCheckerService` lock listener leaks, and added bounded timeouts to `OnboardingGate`.
+  - Hardened Android App Shortcuts (`SHORTCUT_EXPENSE`, `SHORTCUT_INCOME`, `SHORTCUT_TRANSFER`) and `ShareService` across cold and warm starts with atomic `consumeSharedData`, launcher/history intent filtering, early listener registration, sequential draining, and frame scheduling via `ensureVisualUpdate()`.
+
+## [2.16.1] - 2026-11-14
+
+### Removed
+- **Android Home Screen Widgets Integration:**
+  - Removed all 6 Android `AppWidgetProvider` implementations (`QuickFinanceWidgetProvider`, `DailyPulseWidgetProvider`, `QuickActionWidgetProvider`, `FavoriteTemplatesWidgetProvider`, `BudgetGuardrailWidgetProvider`, `GoalsAndBillsWidgetProvider`), `QuickTransactionActivity`, `WidgetDatabaseHelper`, `WidgetSnapshotStore`, `WidgetMidnightWorker`, and all widget XML/layout/drawable/string/color resources.
+  - Removed `androidx.work:work-runtime-ktx` dependency from Android Gradle configuration and cleaned widget receivers and activities from `AndroidManifest.xml`.
+  - Removed `com.example.wall_o_pay/widget` platform channel, `QuickWidgetService`, `WidgetHubSheet`, widget sync hooks across `HomeShell` and `TransactionForm`, and widget-exclusive localization keys while preserving app launcher shortcuts, Share Intent handling, and core financial features.
+
 ## [2.16.0] - 2026-11-12
 
 ### Added

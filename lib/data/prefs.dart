@@ -166,7 +166,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
         'dark' => ThemeMode.dark,
         _ => ThemeMode.system,
       };
-      final locale = data['localeCode'] as String? ?? 'en';
+      final locale = (data['localeCode'] as String?) == 'id' ? 'id' : 'en';
       final periodStr = data['periodType'] as String?;
       final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
       final firstDay = (data['firstDayOfWeek'] as num?)?.toInt() ?? DateTime.monday;

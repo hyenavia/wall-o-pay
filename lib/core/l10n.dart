@@ -80,10 +80,6 @@ const Map<String, String> _en = {
   'Kesehatan': 'Health',
   'Lainnya': 'Other',
   'Transfer': 'Transfer',
-  'Quick Finance': 'Quick Finance',
-  'Quick Finance Widget': 'Quick Finance Widget',
-  'Record Transaction': 'Record Transaction',
-  'Save Transaction': 'Save Transaction',
   '1 Akun': '1 Account',
   '{count} Akun': '{count} Accounts',
   'Tambah akun & rekening': 'Add accounts & wallets',
@@ -97,10 +93,6 @@ const Map<String, String> _en = {
 
 const Map<String, String> _id = {
   'Main Account': 'Rekening Utama',
-  'Quick Finance': 'Keuangan Cepat',
-  'Quick Finance Widget': 'Widget Keuangan Cepat',
-  'Record Transaction': 'Catat Transaksi',
-  'Save Transaction': 'Simpan Transaksi',
   'Commercial Bank': 'Bank Konvensional',
   'Digital Bank': 'Bank Digital',
   'Cash': 'Tunai',
@@ -1050,59 +1042,5 @@ const Map<String, String> _id = {
   'Export': 'Ekspor',
   'Export PDF report': 'Ekspor laporan PDF',
   'No matching transactions': 'Tidak ada transaksi yang cocok',
-  // Phase 3 — Android Home Screen Widgets Hub
-  'Android Home Widgets': 'Widget Layar Utama Android',
-  '6 Enchanted Glasshouse widgets for your Home Screen':
-      '6 widget Enchanted Glasshouse untuk Layar Utama Anda',
-  'Keep Enchanted Glasshouse insights and quick actions right on your Android Home Screen.':
-      'Sematkan ringkasan dan aksi cepat Enchanted Glasshouse langsung di Layar Utama Android Anda.',
-  'Sync now': 'Sinkronkan',
-  'Home widgets synced.': 'Widget Layar Utama telah disinkronkan.',
-  'Checking Home Screen widgets...': 'Memeriksa widget di Layar Utama...',
-  '{count} active on Home Screen': '{count} terpasang di Layar Utama',
-  'Active ×{count}': 'Aktif ×{count}',
-  'Pin to Home': 'Sematkan',
-  'Long-press your Android Home Screen → Widgets → Wall o\' Pay to add any widget.':
-      'Tekan lama Layar Utama Android → Widget → Wall o\' Pay untuk menambahkan widget.',
-  'Long-press your Android Home Screen → Widgets → Wall o\' Pay to add this widget.':
-      'Tekan lama Layar Utama Android → Widget → Wall o\' Pay untuk menambahkan widget ini.',
-  'Daily Pulse & Balance': 'Denyut Harian & Saldo',
-  'See your total balance, safe daily spending quota, and pace status at a glance.':
-      'Pantau total saldo, kuota belanja harian aman, dan status laju pengeluaran sekilas.',
-  'Record income, expenses, or transfers directly from your Home Screen in seconds.':
-      'Catat pemasukan, pengeluaran, atau transfer langsung dari Layar Utama dalam hitungan detik.',
-  'Quick Action Bar': 'Bilah Aksi Cepat',
-  'Compact glassmorphic shortcuts to jump straight into recording transactions.':
-      'Pintasan ringkas untuk langsung membuka pencatatan transaksi cepat.',
-  'One-Tap Favorites': 'Favorit Sekali Ketuk',
-  'Log your saved templates in one tap directly from the Home Screen with instant Undo.':
-      'Catat template tersimpan sekali ketuk langsung dari Layar Utama lengkap dengan Urungkan.',
-  'Budget Guardrail': 'Penjaga Anggaran',
-  'Monitor remaining period budget, 85%/100% alert pills, and top category limits.':
-      'Awasi sisa anggaran periode, peringatan 85%/100%, dan batas kategori teratas.',
-  'Goals & Upcoming Bills': 'Target & Tagihan Mendatang',
-  'Track active savings goal progress and upcoming scheduled bills with live countdowns.':
-      'Lacak progres target tabungan aktif serta jadwal tagihan mendatang dengan hitung mundur.',
-  'Glass Style': 'Gaya Kaca',
-  'Deep': 'Pekat',
-  'Frosted': 'Buram',
-  'Clear': 'Bening',
-  'Glass style updated': 'Gaya kaca diperbarui',
-  'Budget module is turned off': 'Modul Anggaran sedang nonaktif',
-  'Goals module is turned off': 'Modul Target sedang nonaktif',
-  'Recurring module is turned off': 'Modul Tagihan Berulang sedang nonaktif',
-  'Goals & Recurring modules are turned off': 'Modul Target & Berulang sedang nonaktif',
-  'Enable': 'Aktifkan',
-  'Module enabled': 'Modul diaktifkan',
-  'Daily quota': 'Kuota harian',
-  'Hidden': 'Disembunyikan',
-  'Save templates to unlock 1-tap logging': 'Simpan template untuk catat 1 ketuk',
-  'No budget set yet': 'Anggaran belum diatur',
-  'No active goals or bills yet': 'Belum ada target atau tagihan',
-  '{count} due soon': '{count} jatuh tempo',
-  'Over limit': 'Melebihi batas',
-  'Remaining': 'Sisa',
-  'Upcoming': 'Mendatang',
-  'Bills': 'Tagihan',
 };
 

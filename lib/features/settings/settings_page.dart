@@ -33,7 +33,6 @@ import '../profile/profile_page.dart';
 import '../../data/lock.dart';
 import '../security/security_page.dart';
 import 'settings_actions.dart';
-import 'widget_hub_sheet.dart';
 
 /// Widget halaman Pengaturan aplikasi.
 class SettingsPage extends ConsumerWidget {
@@ -219,21 +218,6 @@ class SettingsPage extends ConsumerWidget {
                   ),
                   trailing: const Icon(Icons.chevron_right, size: 20),
                   onTap: () => _showModulePrefsSheet(context),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: iconBadge(Icons.widgets_outlined, AppColors.sage),
-                  title: Text(
-                    context.tr('Android Home Widgets'),
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                  ),
-                  subtitle: Text(
-                    context.tr('6 Enchanted Glasshouse widgets for your Home Screen'),
-                    style: TextStyle(fontSize: 12, color: muted),
-                  ),
-                  trailing: const Icon(Icons.chevron_right, size: 20),
-                  onTap: () => showWidgetHubSheet(context, ref),
                 ),
               ],
             ),

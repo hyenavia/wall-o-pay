@@ -3,9 +3,9 @@
 library;
 
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show MemoryImage;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,6 +32,20 @@ class ProfileController extends Notifier<ProfileState> {
   String _photoKey(String uid) => 'photo_$uid';
   String _updatedKey(String uid) => 'profile_updated_$uid';
 
+  /// Mendekode Base64 foto secara aman tanpa membuang data tersimpan bila korup.
+  static Uint8List? _safeDecodePhoto(String? raw) {
+    if (raw == null) return null;
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
+    try {
+      final bytes = base64Decode(trimmed);
+      return bytes.isEmpty ? null : bytes;
+    } catch (e) {
+      debugPrint('[Profile] Invalid base64 photo ignored: $e');
+      return null;
+    }
+  }
+
   @override
   ProfileState build() {
     final user = ref.watch(currentUserProvider);
@@ -40,7 +54,7 @@ class ProfileController extends Notifier<ProfileState> {
     final b64 = p.getString(_photoKey(uid));
     return ProfileState(
       nickname: p.getString(_nickKey(uid)),
-      photo: b64 == null ? null : base64Decode(b64),
+      photo: _safeDecodePhoto(b64),
     );
   }
 
@@ -104,14 +118,14 @@ class ProfileController extends Notifier<ProfileState> {
     final remoteAt = (data['updatedAt'] as num?)?.toInt() ?? 0;
     if (remoteAt <= (p.getInt(_updatedKey(uid)) ?? 0)) return;
 
-    final nick = data['nickname'] as String?;
-    final photo = data['photo'] as String?;
+    final nick = data['nickname'] is String ? data['nickname'] as String : null;
+    final photo = data['photo'] is String ? data['photo'] as String : null;
     nick == null ? await p.remove(_nickKey(uid)) : await p.setString(_nickKey(uid), nick);
     photo == null ? await p.remove(_photoKey(uid)) : await p.setString(_photoKey(uid), photo);
     await p.setInt(_updatedKey(uid), remoteAt);
     state = ProfileState(
       nickname: nick,
-      photo: photo == null ? null : base64Decode(photo),
+      photo: _safeDecodePhoto(photo),
     );
   }
 
@@ -139,7 +153,7 @@ class ProfileController extends Notifier<ProfileState> {
     final b64 = p.getString(_photoKey(uid));
     state = ProfileState(
       nickname: p.getString(_nickKey(uid)),
-      photo: b64 == null ? null : base64Decode(b64),
+      photo: _safeDecodePhoto(b64),
     );
   }
 

@@ -1,7 +1,7 @@
 /// Layanan perhitungan tanggal jatuh tempo dan pencatatan otomatis untuk jadwal transaksi berulang.
 library;
 
-import 'package:drift/drift.dart' show Value;
+import 'package:drift/drift.dart' show BooleanExpressionOperators, Value;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -59,10 +59,29 @@ class RecurringService {
     }
   }
 
+  static final Map<AppDatabase, Future<int>> _inFlightChecks = {};
+
   /// Memeriksa seluruh aturan transaksi berulang yang telah jatuh tempo,
   /// lalu menambahkannya ke antrean transaksi tertunda (`PendingTransactions`)
   /// agar pengguna dapat meninjau dan mengonfirmasi sebelum dicatat ke buku kas resmi.
-  static Future<int> checkAndGenerateDue(AppDatabase db, {DateTime? now}) async {
+  ///
+  /// Menggunakan single-flight guard per instance [AppDatabase] agar pemanggilan
+  /// paralel (mis. dari HomeShell dan AutoSyncService) tidak menggandakan eksekusi.
+  static Future<int> checkAndGenerateDue(AppDatabase db, {DateTime? now}) {
+    final existing = _inFlightChecks[db];
+    if (existing != null) return existing;
+
+    final future = _checkAndGenerateDueImpl(db, now: now).whenComplete(() {
+      _inFlightChecks.remove(db);
+    });
+    _inFlightChecks[db] = future;
+    return future;
+  }
+
+  static Future<int> _checkAndGenerateDueImpl(
+    AppDatabase db, {
+    DateTime? now,
+  }) async {
     try {
       final refNow = now ?? DateTime.now();
       final dueRules = await db.getDueRecurringRules(refNow);
@@ -70,39 +89,72 @@ class RecurringService {
 
       for (final rule in dueRules) {
         if (rule.amount <= 0) continue;
-        final nextDue = calculateNextDueDate(
-          rule.frequency,
-          rule.nextDueDate,
-          dayOfWeek: rule.dayOfWeek,
-          dayOfMonth: rule.dayOfMonth,
-          referenceNow: refNow,
-        );
 
-        await db.transaction(() async {
-          await db.into(db.pendingTransactions).insert(
-                PendingTransactionsCompanion.insert(
-                  recurringRuleId: Value(rule.id),
-                  title: rule.title,
-                  amount: rule.amount,
-                  type: rule.type,
-                  categoryId: rule.type == TxType.transfer
-                      ? 'cat-tra-transfer'
-                      : rule.categoryId,
-                  walletId: Value(rule.walletId ?? 'wallet-main'),
-                  toWalletId: Value(
-                    rule.type == TxType.transfer ? rule.toWalletId : null,
+        final inserted = await db.transaction<bool>(() async {
+          final freshRule = await (db.select(db.recurringRules)
+                ..where(
+                  (r) =>
+                      r.id.equals(rule.id) &
+                      r.deletedAt.isNull() &
+                      r.isActive.equals(true),
+                ))
+              .getSingleOrNull();
+
+          if (freshRule == null ||
+              freshRule.amount <= 0 ||
+              freshRule.nextDueDate.isAfter(refNow)) {
+            return false;
+          }
+
+          final dueDay = DateTime(
+            freshRule.nextDueDate.year,
+            freshRule.nextDueDate.month,
+            freshRule.nextDueDate.day,
+          );
+          final nextDue = calculateNextDueDate(
+            freshRule.frequency,
+            freshRule.nextDueDate,
+            dayOfWeek: freshRule.dayOfWeek,
+            dayOfMonth: freshRule.dayOfMonth,
+            referenceNow: refNow,
+          );
+
+          final existingPending = await (db.select(db.pendingTransactions)
+                ..where(
+                  (p) =>
+                      p.recurringRuleId.equals(freshRule.id) &
+                      p.dueDate.equals(dueDay) &
+                      p.deletedAt.isNull(),
+                )
+                ..limit(1))
+              .getSingleOrNull();
+
+          var created = false;
+          if (existingPending == null) {
+            await db.into(db.pendingTransactions).insert(
+                  PendingTransactionsCompanion.insert(
+                    recurringRuleId: Value(freshRule.id),
+                    title: freshRule.title,
+                    amount: freshRule.amount,
+                    type: freshRule.type,
+                    categoryId: freshRule.type == TxType.transfer
+                        ? 'cat-tra-transfer'
+                        : freshRule.categoryId,
+                    walletId: Value(freshRule.walletId ?? 'wallet-main'),
+                    toWalletId: Value(
+                      freshRule.type == TxType.transfer
+                          ? freshRule.toWalletId
+                          : null,
+                    ),
+                    dueDate: dueDay,
+                    note: Value(freshRule.note),
                   ),
-                  dueDate: DateTime(
-                    rule.nextDueDate.year,
-                    rule.nextDueDate.month,
-                    rule.nextDueDate.day,
-                  ),
-                  note: Value(rule.note),
-                ),
-              );
+                );
+            created = true;
+          }
 
           await (db.update(db.recurringRules)
-                ..where((r) => r.id.equals(rule.id)))
+                ..where((r) => r.id.equals(freshRule.id)))
               .write(
             RecurringRulesCompanion(
               nextDueDate: Value(nextDue),
@@ -110,8 +162,13 @@ class RecurringService {
               updatedAt: Value(refNow),
             ),
           );
+
+          return created;
         });
-        generatedCount++;
+
+        if (inserted) {
+          generatedCount++;
+        }
       }
 
       if (generatedCount > 0) {

@@ -17,146 +17,172 @@ import '../features/transactions/transaction_form.dart';
 /// Kelas penghubung penerima data Share Intent & App Shortcuts Android dengan form transaksi.
 class ShareService {
   static const _channel = MethodChannel('com.example.wall_o_pay/share');
-  static Map<String, dynamic>? _pendingShareData;
-  static Map<String, dynamic>? _preloadedShortcutData;
+  static final List<Map<String, dynamic>> _pendingQueue = [];
   static BuildContext? _activeContext;
   static bool _listenerRegistered = false;
-  static bool _isOpeningShortcut = false;
+  static bool _isDrainingQueue = false;
 
-  /// Bernilai true jika aplikasi dibuka melalui pintasan cepat (App Shortcut) Android.
+  /// Bernilai true jika masih ada aksi pintasan cepat (App Shortcut) Android di antrean.
   static bool get hasPendingShortcut =>
-      _preloadedShortcutData != null && _preloadedShortcutData!['shortcutType'] != null;
+      _pendingQueue.any((d) => d['shortcutType'] != null);
+
+  /// Jumlah item aksi yang sedang menunggu diproses (untuk diagnostik & testing).
+  @visibleForTesting
+  static int get pendingQueueLength => _pendingQueue.length;
+
+  /// Mengosongkan antrean internal pada lingkungan pengujian unit.
+  @visibleForTesting
+  static void resetForTesting() {
+    _pendingQueue.clear();
+    _activeContext = null;
+    _isDrainingQueue = false;
+  }
+
+  static void _ensureListenerRegistered() {
+    if (_listenerRegistered) return;
+    _listenerRegistered = true;
+
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == 'onShareReceived') {
+        final data = call.arguments;
+        if (data is Map) {
+          final map = Map<String, dynamic>.from(data);
+          _enqueue(map);
+          _drainQueue();
+          return true;
+        }
+      }
+      return false;
+    });
+
+    // Jika aplikasi terkunci saat menerima Share Intent atau App Shortcut, proses setelah kunci dibuka.
+    Lock.instance.isLocked.addListener(() {
+      if (!Lock.instance.isLocked.value) {
+        _drainQueue();
+      }
+    });
+  }
+
+  static Future<Map<String, dynamic>?> _consumeNativeSharedData() async {
+    try {
+      final res = await _channel.invokeMethod<Map>('consumeSharedData');
+      if (res != null && res.isNotEmpty) {
+        return Map<String, dynamic>.from(res);
+      }
+      return null;
+    } on MissingPluginException {
+      // Kompatibilitas mundur dengan mock channel lama pada test yang hanya mengimplementasikan getSharedData/clearSharedData.
+      try {
+        final res = await _channel.invokeMethod<Map>('getSharedData');
+        if (res != null && res.isNotEmpty) {
+          final map = Map<String, dynamic>.from(res);
+          await _channel.invokeMethod('clearSharedData');
+          return map;
+        }
+      } catch (_) {}
+      return null;
+    } catch (e) {
+      debugPrint('[ShareService] Error checking shared data: $e');
+      return null;
+    }
+  }
+
+  static void _enqueue(Map<String, dynamic> map) {
+    final incomingShortcut = map['shortcutType'];
+    if (incomingShortcut != null &&
+        _pendingQueue.isNotEmpty &&
+        _pendingQueue.last['shortcutType'] == incomingShortcut) {
+      return;
+    }
+    _pendingQueue.add(map);
+  }
 
   /// Memeriksa data intent awal sebelum frame pertama di-render agar pintasan cepat
-  /// dapat melewati splash screen dan tidak memicu popup biometrik otomatis.
+  /// dapat melewati layar splash tanpa melewati kunci PIN/biometrik.
   static Future<void> preloadInitialData() async {
     try {
-      final res = await _channel.invokeMethod<Map>('getSharedData');
-      if (res != null && res.isNotEmpty) {
-        final data = Map<String, dynamic>.from(res);
-        if (data['shortcutType'] != null) {
-          await _channel.invokeMethod('clearSharedData');
-          _preloadedShortcutData = data;
-          Lock.instance.bypassForQuickAction.value = true;
-        }
+      _ensureListenerRegistered();
+      final data = await _consumeNativeSharedData();
+      if (data != null && data.isNotEmpty) {
+        _enqueue(data);
       }
     } catch (_) {}
   }
 
   static void initialize(BuildContext context, WidgetRef ref) {
     _activeContext = context;
+    _ensureListenerRegistered();
 
-    if (!_listenerRegistered) {
-      _listenerRegistered = true;
-
-      _channel.setMethodCallHandler((call) async {
-        if (call.method == 'onShareReceived') {
-          final data = call.arguments;
-          if (data is Map) {
-            final map = Map<String, dynamic>.from(data);
-            if (map['shortcutType'] != null) {
-              Lock.instance.bypassForQuickAction.value = true;
-            }
-            await _channel.invokeMethod('clearSharedData');
-            final ctx = _activeContext;
-            if (ctx != null && ctx.mounted) {
-              _queueOrProcess(ctx, map);
-            } else {
-              _preloadedShortcutData = map;
-            }
-          }
-        }
-      });
-
-      // Jika aplikasi terkunci saat menerima Share Intent biasa, proses setelah kunci dibuka.
-      Lock.instance.isLocked.addListener(() {
-        if (!Lock.instance.isLocked.value && _pendingShareData != null) {
-          final data = _pendingShareData!;
-          _pendingShareData = null;
-          final ctx = _activeContext;
-          if (ctx != null && ctx.mounted) {
-            _openTransactionWithData(ctx, data);
-          }
-        }
-      });
-    }
-
-    // Periksa data shortcut yang sudah di-preload atau share intent saat startup
+    // Periksa data shortcut/share yang sudah di-preload atau intent baru saat HomeShell siap.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final ctx = _activeContext;
-      if (ctx == null || !ctx.mounted) return;
-      if (_preloadedShortcutData != null) {
-        final data = _preloadedShortcutData!;
-        _preloadedShortcutData = null;
-        _openTransactionWithData(ctx, data);
+      if (_activeContext != context || !context.mounted) return;
+      if (_pendingQueue.isNotEmpty) {
+        _drainQueue();
       } else {
-        checkSharedData(ctx);
+        checkSharedData(context);
       }
     });
   }
 
+  /// Melepas referensi [BuildContext] saat [HomeShell] di-dispose agar tidak menahan context lama.
+  static void detachContext(BuildContext context) {
+    if (identical(_activeContext, context)) {
+      _activeContext = null;
+    }
+  }
+
   static Future<void> checkSharedData(BuildContext context) async {
     _activeContext = context;
-    if (_preloadedShortcutData != null) {
-      final data = _preloadedShortcutData!;
-      _preloadedShortcutData = null;
-      if (context.mounted) {
-        _openTransactionWithData(context, data);
-      }
-      return;
+    _ensureListenerRegistered();
+    final data = await _consumeNativeSharedData();
+    if (data != null && data.isNotEmpty) {
+      _enqueue(data);
     }
-    try {
-      final res = await _channel.invokeMethod<Map>('getSharedData');
-      if (res != null && res.isNotEmpty) {
-        final map = Map<String, dynamic>.from(res);
-        if (map['shortcutType'] != null) {
-          Lock.instance.bypassForQuickAction.value = true;
-        }
-        await _channel.invokeMethod('clearSharedData');
-        if (context.mounted) {
-          _queueOrProcess(context, map);
-        }
-      }
-    } catch (e) {
-      debugPrint('[ShareService] Error checking shared data: $e');
-    }
+    _drainQueue();
   }
 
-  static void _queueOrProcess(BuildContext context, Map<String, dynamic> data) {
-    // Pintasan cepat (App Shortcuts) langsung membuka form tanpa perlu buka kunci PIN/biometrik.
-    if (data['shortcutType'] != null) {
-      _openTransactionWithData(context, data);
-      return;
-    }
-    if (Lock.instance.isLocked.value) {
-      _pendingShareData = data;
-    } else {
-      _openTransactionWithData(context, data);
-    }
+  static void _drainQueue() {
+    if (_isDrainingQueue) return;
+    if (Lock.instance.isLocked.value) return;
+    final ctx = _activeContext;
+    if (ctx == null || !ctx.mounted) return;
+    if (_pendingQueue.isEmpty) return;
+
+    _isDrainingQueue = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        while (_pendingQueue.isNotEmpty) {
+          if (Lock.instance.isLocked.value) break;
+          final currentCtx = _activeContext;
+          if (currentCtx == null || !currentCtx.mounted) break;
+
+          final next = _pendingQueue.removeAt(0);
+          await _processPayload(currentCtx, next);
+        }
+      } finally {
+        _isDrainingQueue = false;
+        Lock.instance.bypassForQuickAction.value = false;
+      }
+    });
+    WidgetsBinding.instance.ensureVisualUpdate();
   }
 
-  static void _openTransactionWithData(BuildContext context, Map<String, dynamic> data) {
+  static Future<void> _processPayload(
+    BuildContext context,
+    Map<String, dynamic> data,
+  ) async {
     final shortcutType = data['shortcutType'] as String?;
     if (shortcutType != null) {
-      if (_isOpeningShortcut) return;
-      _isOpeningShortcut = true;
-      Lock.instance.bypassForQuickAction.value = true;
       final initialType = switch (shortcutType) {
         'income' => TxType.income,
         'transfer' => TxType.transfer,
         _ => TxType.expense,
       };
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        try {
-          final ctx = _activeContext ?? context;
-          if (ctx.mounted) {
-            await showTransactionForm(ctx, initialType: initialType);
-          }
-        } finally {
-          _isOpeningShortcut = false;
-          Lock.instance.bypassForQuickAction.value = false;
-        }
-      });
+      if (!Lock.instance.isLocked.value && context.mounted) {
+        await showTransactionForm(context, initialType: initialType);
+      } else {
+        _pendingQueue.insert(0, data);
+      }
       return;
     }
 
@@ -187,18 +213,17 @@ class ShareService {
       validImagePath = imagePath;
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final ctx = _activeContext ?? context;
-      if (ctx.mounted) {
-        showTransactionForm(
-          ctx,
-          initialType: parsedType,
-          initialAmount: parsedAmount,
-          initialCategoryId: parsedCategoryId,
-          initialNote: note.trim(),
-          initialReceiptPath: validImagePath,
-        );
-      }
-    });
+    if (!Lock.instance.isLocked.value && context.mounted) {
+      await showTransactionForm(
+        context,
+        initialType: parsedType,
+        initialAmount: parsedAmount,
+        initialCategoryId: parsedCategoryId,
+        initialNote: note.trim(),
+        initialReceiptPath: validImagePath,
+      );
+    } else {
+      _pendingQueue.insert(0, data);
+    }
   }
 }

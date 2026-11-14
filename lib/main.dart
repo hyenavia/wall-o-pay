@@ -4,6 +4,7 @@
 /// sebelum menjalankan widget utama di dalam [ProviderScope].
 library;
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -57,7 +58,15 @@ Future<void> main() async {
     }(),
   ]);
 
-  AppLocale.code = prefs.getString('pref_locale') == 'id' ? 'id' : 'en';
+  String? activeUid;
+  if (firebaseReady) {
+    try {
+      activeUid = FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {}
+  }
+  final storedLocale = (activeUid != null ? prefs.getString('pref_locale_$activeUid') : null) ??
+      prefs.getString('pref_locale');
+  AppLocale.code = storedLocale == 'id' ? 'id' : 'en';
 
   // Muat status kunci PIN aplikasi setelah SharedPreferences & Firebase siap.
   try {

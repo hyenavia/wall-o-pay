@@ -45,10 +45,52 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '2.16.2',
+      dateEn: 'November 15, 2026',
+      dateId: '15 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Startup, PIN Lock & Lifecycle Stability — Prevented HomeShell from mounting behind LockScreen, synchronized multi-account lock loading, and enforced lock checks on quick actions.',
+          textId:
+              'Stabilitas Startup, Kunci PIN & Siklus Hidup — Mencegah HomeShell ter-mount di balik LockScreen, menyinkronkan pemuatan kunci multi-akun, serta menjaga keamanan kunci pada aksi cepat.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Recurring & Cloud Sync Integrity — Added single-flight & idempotency guards for recurring due checks and epoch-guarded two-way cloud synchronization without race conditions.',
+          textId:
+              'Integritas Transaksi Berulang & Sinkronisasi Cloud — Menambahkan pengaman single-flight dan idempotensi transaksi berulang serta sinkronisasi cloud dua arah bebas race condition.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Profile, Init & Shortcut Reliability — Added safe Base64 profile decoding fallback, removed duplicate splash rendering, fixed update listener cleanup, added OnboardingGate timeout, and hardened App Shortcut cold/warm start queues.',
+          textId:
+              'Keandalan Profil, Inisialisasi & Pintasan Cepat — Menambahkan fallback aman decoding foto profil Base64, menghapus splash ganda, membersihkan listener pembaruan, menambahkan batas waktu OnboardingGate, serta menyempurnakan antrean App Shortcut.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.16.1',
+      dateEn: 'November 14, 2026',
+      dateId: '14 November 2026',
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Removed Android Home Screen Widgets — Removed all Home Screen AppWidget providers, native snapshot sync, and widget configuration UI to keep app startup lightweight and avoid concurrent background/database contention.',
+          textId:
+              'Penghapusan Widget Layar Utama Android — Menghapus seluruh widget Layar Utama Android, sinkronisasi snapshot native, dan menu pengaturan widget agar proses buka aplikasi lebih ringan dan stabil.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '2.16.0',
       dateEn: 'November 12, 2026',
       dateId: '12 November 2026',
-      isCurrent: true,
       changes: [
         ChangeItem(
           type: ChangeType.added,

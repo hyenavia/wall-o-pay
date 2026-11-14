@@ -720,20 +720,29 @@ class UserAvatar extends ConsumerWidget {
     final photoImage = ref.watch(profileProvider.select((s) => s.photoImage));
     final name = ref.watch(displayNameProvider) ?? '?';
 
+    final initialText = Text(
+      (name.isEmpty ? '?' : String.fromCharCode(name.runes.first)).toUpperCase(),
+      style: TextStyle(
+        fontSize: size * 0.4,
+        fontWeight: FontWeight.w800,
+        color: scheme.onPrimaryContainer,
+      ),
+    );
+
     final avatarCore = CircleAvatar(
       radius: size / 2,
       backgroundColor: scheme.primaryContainer,
-      backgroundImage: photoImage,
       child: photoImage == null
-          ? Text(
-              (name.isEmpty ? '?' : String.fromCharCode(name.runes.first)).toUpperCase(),
-              style: TextStyle(
-                fontSize: size * 0.4,
-                fontWeight: FontWeight.w800,
-                color: scheme.onPrimaryContainer,
+          ? initialText
+          : ClipOval(
+              child: Image(
+                image: photoImage,
+                width: size,
+                height: size,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => Center(child: initialText),
               ),
-            )
-          : null,
+            ),
     );
 
     final avatarDisplay = !withGlassFrame
