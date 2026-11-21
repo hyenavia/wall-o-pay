@@ -147,7 +147,7 @@ class Lock {
 
   Future<void> _loadSecretsForUid(String? uid) async {
     final targetUid = uid ?? 'guest';
-    for (final field in const ['hash', 'salt']) {
+    for (final field in const ['hash', 'salt', 'fails', 'lockoutUntil', 'lockoutTier']) {
       final key = _k(field, targetUid);
       String? val;
       var secureOk = false;
@@ -157,10 +157,11 @@ class Lock {
           secureOk = true;
         } catch (_) {}
       }
-      final legacyVal = _p?.getString(key);
+      final legacyObj = _p?.get(key);
+      final legacyVal = legacyObj?.toString();
       if (val != null) {
         _secretCache[key] = val;
-        if (legacyVal != null) {
+        if (legacyObj != null) {
           await _p?.remove(key);
         }
       } else if (legacyVal != null) {
@@ -241,13 +242,31 @@ class Lock {
     _emit();
   }
 
+  int? _getSecretInt(String key) {
+    final raw = _secretCache[key];
+    if (raw != null) {
+      final parsed = int.tryParse(raw);
+      if (parsed != null) return parsed;
+    }
+    return _p?.getInt(key);
+  }
+
   /// Waktu berakhirnya penalti lockout akibat salah mengetik PIN berulang kali (disimpan persisten).
+  /// Dilengkapi penjaga manipulasi jam sistem mundur (clock-rollback guard).
   DateTime? get lockoutUntil {
-    final ms = _p?.getInt(_k('lockoutUntil'));
+    final ms = _getSecretInt(_k('lockoutUntil'));
     if (ms == null) return null;
+    final now = DateTime.now();
     final until = DateTime.fromMillisecondsSinceEpoch(ms);
-    if (DateTime.now().isBefore(until)) return until;
-    return null;
+    final diffMs = until.difference(now).inMilliseconds;
+    if (diffMs <= 0) return null;
+    // Maksimum penalti adalah 300 detik. Jika selisih > 305 detik, berarti jam perangkat dimundurkan.
+    if (diffMs > 305000) {
+      final clamped = now.add(const Duration(seconds: 300));
+      unawaited(_writeSecret(_k('lockoutUntil'), clamped.millisecondsSinceEpoch.toString()));
+      return clamped;
+    }
+    return until;
   }
 
   /// Apakah saat ini sedang dalam masa penalti lockout brute-force PIN.
@@ -259,14 +278,14 @@ class Lock {
     if (until == null) return 0;
     return (until.difference(DateTime.now()).inMilliseconds / 1000)
         .ceil()
-        .clamp(1, 86400);
+        .clamp(1, 300);
   }
 
   Future<void> _clearLockoutState([String? uid]) async {
     final targetUid = uid ?? _currentUid;
-    await _p?.remove(_k('fails', targetUid));
-    await _p?.remove(_k('lockoutUntil', targetUid));
-    await _p?.remove(_k('lockoutTier', targetUid));
+    await _deleteSecret(_k('fails', targetUid));
+    await _deleteSecret(_k('lockoutUntil', targetUid));
+    await _deleteSecret(_k('lockoutTier', targetUid));
   }
 
   /// Jalankan autentikasi biometrik bawaan sistem (Fingerprint / Face Unlock).
@@ -432,7 +451,18 @@ class Lock {
     }
   }
 
-  /// Atur PIN baru (6 digit).
+  /// Menentukan nilai timestamp `updatedAt` remote yang aman dari manipulasi timestamp masa depan.
+  static int clampRemoteUpdatedAtMs(int remoteAtMs, {int? nowMs}) {
+    final refNow = nowMs ?? DateTime.now().millisecondsSinceEpoch;
+    final maxAllowed = refNow + 300000; // toleransi clock skew 5 menit
+    if (remoteAtMs > maxAllowed) {
+      return refNow;
+    }
+    return remoteAtMs;
+  }
+
+  /// Atur PIN baru (6 digit) di Android Keystore / iOS Keychain dan sinkronkan ke Cloud Firestore
+  /// (`users/{uid}/meta/security`) agar otomatis berlaku di perangkat lain milik pengguna.
   Future<void> setPin(String pin) async {
     final salt = base64Url.encode(
       List<int>.generate(16, (_) => Random.secure().nextInt(256)),
@@ -476,29 +506,28 @@ class Lock {
       }
       return true;
     }
-    final fails = (_p?.getInt(_k('fails')) ?? 0) + 1;
+    final fails = (_getSecretInt(_k('fails')) ?? 0) + 1;
     if (fails >= 5) {
-      final tier = (_p?.getInt(_k('lockoutTier')) ?? 0) + 1;
+      final tier = (_getSecretInt(_k('lockoutTier')) ?? 0) + 1;
       final penaltySec = switch (tier) {
         1 => 30,
         2 => 120,
         _ => 300,
       };
-      _p?.setInt(_k('fails'), 0);
-      _p?.setInt(_k('lockoutTier'), tier);
-      _p?.setInt(
-        _k('lockoutUntil'),
-        DateTime.now()
-            .add(Duration(seconds: penaltySec))
-            .millisecondsSinceEpoch,
-      );
+      final untilMs = DateTime.now()
+          .add(Duration(seconds: penaltySec))
+          .millisecondsSinceEpoch;
+      unawaited(_writeSecret(_k('fails'), '0'));
+      unawaited(_writeSecret(_k('lockoutTier'), tier.toString()));
+      unawaited(_writeSecret(_k('lockoutUntil'), untilMs.toString()));
     } else {
-      _p?.setInt(_k('fails'), fails);
+      unawaited(_writeSecret(_k('fails'), fails.toString()));
     }
     return false;
   }
 
-  /// Nonaktifkan penguncian PIN.
+  /// Nonaktifkan penguncian PIN (setelah pengguna memverifikasi PIN di SecurityPage)
+  /// dan sinkronkan status nonaktif ke Cloud Firestore.
   Future<void> disable() async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final uid = _currentUid;
@@ -525,7 +554,7 @@ class Lock {
     }
   }
 
-  /// Ubah jeda waktu penguncian otomatis (menit).
+  /// Ubah jeda waktu penguncian otomatis (menit) dan sinkronkan ke Cloud Firestore.
   Future<void> setDelay(int minutes) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     final uid = _currentUid;
@@ -548,7 +577,8 @@ class Lock {
     }
   }
 
-  /// Sinkronkan status PIN dengan Cloud Firestore (dipanggil saat login atau buka app).
+  /// Sinkronkan status PIN dengan Cloud Firestore (dipanggil saat login atau buka app)
+  /// sehingga pengguna tidak perlu membuat PIN ulang saat login di perangkat berbeda.
   Future<void> syncWithCloud(String uid) {
     final existing = _inFlightCloudSync[uid];
     if (existing != null) return existing;
@@ -584,15 +614,19 @@ class Lock {
         return;
       }
 
-      final remoteAt = (data['updatedAt'] as num?)?.toInt() ?? 0;
+      final rawRemoteAt = (data['updatedAt'] as num?)?.toInt() ?? 0;
+      final remoteAt = clampRemoteUpdatedAtMs(rawRemoteAt);
       final localAt = _p?.getInt(_k('updatedAt', uid)) ?? 0;
 
       if (remoteAt >= localAt) {
         final remoteHash = data['hash'] as String?;
         final remoteSalt = data['salt'] as String?;
-        final remoteDelay = (data['delay'] as num?)?.toInt() ?? 1;
+        final remoteDelay = ((data['delay'] as num?)?.toInt() ?? 1).clamp(0, 60);
 
-        if (remoteHash != null && remoteSalt != null) {
+        if (remoteHash != null &&
+            remoteSalt != null &&
+            remoteHash.isNotEmpty &&
+            remoteSalt.isNotEmpty) {
           await _writeSecret(_k('hash', uid), remoteHash);
           await _writeSecret(_k('salt', uid), remoteSalt);
           await _p?.setInt(_k('delay', uid), remoteDelay);

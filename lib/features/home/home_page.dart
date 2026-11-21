@@ -9,6 +9,7 @@ import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
+import '../../core/icons.dart';
 import '../../core/theme.dart';
 import '../../core/botanical_decorations.dart';
 import '../../core/l10n.dart';
@@ -78,17 +79,17 @@ class HomePage extends ConsumerWidget {
         value: SystemUiOverlayStyle.light,
         child: Stack(
           children: [
-            // Atmospheric Sunlit Conservatory Backdrop Header
+            // Atmospheric Vice City Sunset Vertical Canopy Backdrop
             Positioned(
               top: 0,
               left: 0,
               right: 0,
-              height: 220,
+              height: 240,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   Image.asset(
-                    'assets/images/glasshouse_bg.jpg',
+                    'assets/images/vice_city_vertical_bg.jpg',
                     fit: BoxFit.cover,
                     alignment: Alignment.topCenter,
                   ),
@@ -98,8 +99,8 @@ class HomePage extends ConsumerWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          AppColors.headerCanopyTop.withValues(alpha: 0.78),
-                          AppColors.headerCanopyBottom.withValues(alpha: 0.96),
+                          AppColors.headerCanopyTop.withValues(alpha: 0.15),
+                          AppColors.headerCanopyBottom.withValues(alpha: 0.55),
                         ],
                       ),
                     ),
@@ -444,8 +445,11 @@ class _HomeHeader extends ConsumerWidget {
             child: IconButton(
               tooltip: context.tr('More Features'),
               padding: EdgeInsets.zero,
-              color: Colors.white,
-              icon: const Icon(Icons.grid_view_rounded, size: 20),
+              icon: Image.asset(
+                'assets/icons/vice_city/diamond.png',
+                width: 20,
+                height: 20,
+              ),
               onPressed: onMore,
             ),
           ),
@@ -464,8 +468,11 @@ class _HomeHeader extends ConsumerWidget {
             child: IconButton(
               tooltip: context.tr('Settings'),
               padding: EdgeInsets.zero,
-              color: Colors.white,
-              icon: const Icon(Icons.settings_outlined, size: 20),
+              icon: Image.asset(
+                'assets/icons/vice_city/settings.png',
+                width: 20,
+                height: 20,
+              ),
               onPressed: onSettings,
             ),
           ),
@@ -489,7 +496,7 @@ class _Sheet extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border(
           top: BorderSide(
-            color: AppColors.dewMint.withValues(alpha: 0.28),
+            color: AppColors.borderOutline.withValues(alpha: 0.85),
             width: 1.2,
           ),
         ),
@@ -497,9 +504,9 @@ class _Sheet extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF163228), // Deep emerald mist at the top
-            Color(0xFF11251E), // Subtle moss tint
-            Color(0xFF0C1914), // Deep grounding moss shadow
+            Color(0xFF0E1738), // Deep Navy canopy at the top
+            Color(0xFF090F2C), // Subtle Midnight Navy
+            Color(0xFF070D2B), // Deep Midnight Navy Canvas
           ],
           stops: [0.0, 0.40, 1.0],
         ),
@@ -507,14 +514,27 @@ class _Sheet extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Suasana Rumah Kaca Alami dari Aset Fotorealistik
+          // Suasana Sunset Vertikal Vice City
           Positioned.fill(
-            child: Opacity(
-              opacity: 0.10,
-              child: Image.asset(
-                'assets/images/glasshouse_bg.jpg',
-                fit: BoxFit.cover,
-                alignment: Alignment.center,
+            child: Image.asset(
+              'assets/images/vice_city_vertical_bg.jpg',
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF0E1738).withValues(alpha: 0.78),
+                    const Color(0xFF070D2B).withValues(alpha: 0.85),
+                    const Color(0xFF070D2B).withValues(alpha: 0.92),
+                  ],
+                  stops: const [0.0, 0.40, 1.0],
+                ),
               ),
             ),
           ),
@@ -541,8 +561,8 @@ class _Sheet extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      const Color(0xFF163228).withValues(alpha: 0.85),
-                      const Color(0xFF163228).withValues(alpha: 0.0),
+                      AppColors.cardSurface.withValues(alpha: 0.85),
+                      AppColors.cardSurface.withValues(alpha: 0.0),
                     ],
                   ),
                 ),
@@ -645,8 +665,13 @@ class _BalanceCard extends ConsumerWidget {
               IconButton(
                 tooltip: context.tr(hidden ? 'Show amounts' : 'Hide amounts'),
                 visualDensity: VisualDensity.compact,
-                color: Colors.white70,
-                icon: Icon(hidden ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+                icon: Image.asset(
+                  hidden
+                      ? 'assets/icon-compress/33_eye_off-kompres.png'
+                      : 'assets/icon-compress/32_eye-kompres.png',
+                  width: 20,
+                  height: 20,
+                ),
                 onPressed: () => ref.read(hideBalanceProvider.notifier).toggle(),
               ),
             ],
@@ -843,10 +868,18 @@ class _AccountsQuickBar extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: context.themeColors.heroBackground, width: 1.5),
                 ),
-                child: Icon(
-                  accountIcon(displayed[i].type),
-                  size: 11,
-                  color: Colors.white,
+                child: Center(
+                  child: viceCityAssetForIcon(accountIcon(displayed[i].type)) != null
+                      ? Image.asset(
+                          viceCityAssetForIcon(accountIcon(displayed[i].type))!,
+                          width: 12,
+                          height: 12,
+                        )
+                      : Icon(
+                          accountIcon(displayed[i].type),
+                          size: 11,
+                          color: Colors.white,
+                        ),
                 ),
               ),
             ),
@@ -910,7 +943,6 @@ class _FlowTile extends StatelessWidget {
       ),
     );
     final isIncome = icon == Icons.arrow_downward;
-    final accentColor = isIncome ? AppColors.incomeOnDark : AppColors.expenseOnDark;
     final bgTint = isIncome
         ? AppColors.income.withValues(alpha: 0.20)
         : AppColors.expense.withValues(alpha: 0.20);
@@ -928,7 +960,15 @@ class _FlowTile extends StatelessWidget {
             color: bgTint,
             border: Border.all(color: borderTint, width: 1.0),
           ),
-          child: Icon(icon, size: 16, color: accentColor),
+          child: Center(
+            child: Image.asset(
+              isIncome
+                  ? 'assets/icons/vice_city/growth.png'
+                  : 'assets/icons/vice_city/minus.png',
+              width: 18,
+              height: 18,
+            ),
+          ),
         ),
         const SizedBox(width: 10),
         Expanded(
@@ -976,17 +1016,26 @@ class _UpdateBannerCard extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             colors.heroBackground,
-            const Color(0xFF2C5A47),
+            const Color(0xFF1B2B63),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: AppColors.borderOutline.withValues(alpha: 0.85),
+          width: 1.0,
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.deepForest.withValues(alpha: 0.28),
+            color: Colors.black.withValues(alpha: 0.30),
             blurRadius: 16,
             offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: AppColors.sunsetMagenta.withValues(alpha: 0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -1140,7 +1189,11 @@ class _PendingConfirmationBanner extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.pending_actions_rounded, size: 18, color: AppColors.dewMint),
+              Image.asset(
+                'assets/icon-compress/098_alarm_clock-kompres.png',
+                width: 18,
+                height: 18,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

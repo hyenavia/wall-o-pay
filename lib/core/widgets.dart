@@ -37,15 +37,13 @@ PreferredSizeWidget pageAppBar(
     systemOverlayStyle: SystemUiOverlayStyle.light,
     iconTheme: const IconThemeData(color: Colors.white),
     actionsIconTheme: const IconThemeData(color: Colors.white),
-    titleTextStyle: Theme.of(context)
-        .textTheme
-        .titleLarge
+    titleTextStyle: Theme.of(context).textTheme.titleLarge
         ?.copyWith(fontWeight: FontWeight.w800, color: Colors.white),
     flexibleSpace: Stack(
       fit: StackFit.expand,
       children: [
         Image.asset(
-          'assets/images/glasshouse_bg.jpg',
+          'assets/images/vice_city_vertical_bg.jpg',
           fit: BoxFit.cover,
           alignment: Alignment.topCenter,
         ),
@@ -55,8 +53,8 @@ PreferredSizeWidget pageAppBar(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                AppColors.headerCanopyTop.withValues(alpha: 0.78),
-                AppColors.headerCanopyBottom.withValues(alpha: 0.96),
+                AppColors.headerCanopyTop.withValues(alpha: 0.15),
+                AppColors.headerCanopyBottom.withValues(alpha: 0.55),
               ],
             ),
           ),
@@ -76,7 +74,7 @@ PreferredSizeWidget pageAppBar(
   );
 }
 
-/// Lengkungan atas lembar background di bawah header hijau.
+/// Lengkungan atas lembar background di bawah header.
 class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
   const _SheetEdge({this.child, this.childHeight = 0});
 
@@ -97,11 +95,11 @@ class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
         Container(
           height: edge,
           decoration: BoxDecoration(
-            color: const Color(0xFF163228),
+            color: AppColors.cardSurface,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             border: Border(
               top: BorderSide(
-                color: AppColors.dewMint.withValues(alpha: 0.28),
+                color: AppColors.borderOutline.withValues(alpha: 0.85),
                 width: 1.2,
               ),
             ),
@@ -113,7 +111,7 @@ class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
 }
 
 /// AppBar bersih dan elegan untuk halaman sekunder/detail di luar tab utama.
-/// Menggunakan warna dasar mossShadow tanpa latar foto atau lengkungan lembar agar fokus penuh pada konten.
+/// Menggunakan warna dasar midnightNavy tanpa latar foto atau lengkungan lembar agar fokus penuh pada konten.
 PreferredSizeWidget secondaryAppBar(
   BuildContext context, {
   required Widget title,
@@ -125,18 +123,16 @@ PreferredSizeWidget secondaryAppBar(
     actions: actions,
     bottom: bottom,
     centerTitle: false,
-    backgroundColor: AppColors.mossShadow,
-    foregroundColor: AppColors.softIvory,
+    backgroundColor: AppColors.midnightNavy,
+    foregroundColor: AppColors.softWhite,
     surfaceTintColor: Colors.transparent,
     elevation: 0,
     scrolledUnderElevation: 0,
     systemOverlayStyle: SystemUiOverlayStyle.light,
-    iconTheme: const IconThemeData(color: AppColors.softIvory),
-    actionsIconTheme: const IconThemeData(color: AppColors.softIvory),
-    titleTextStyle: Theme.of(context)
-        .textTheme
-        .titleLarge
-        ?.copyWith(fontWeight: FontWeight.w700, color: AppColors.softIvory),
+    iconTheme: const IconThemeData(color: AppColors.softWhite),
+    actionsIconTheme: const IconThemeData(color: AppColors.softWhite),
+    titleTextStyle: Theme.of(context).textTheme.titleLarge
+        ?.copyWith(fontWeight: FontWeight.w700, color: AppColors.softWhite),
   );
 }
 
@@ -152,9 +148,9 @@ InputDecoration appInput(
 }) {
   final scheme = Theme.of(context).colorScheme;
   OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide(color: c, width: w),
-      );
+    borderRadius: BorderRadius.circular(16),
+    borderSide: BorderSide(color: c, width: w),
+  );
   return InputDecoration(
     labelText: label,
     labelStyle: TextStyle(
@@ -162,9 +158,7 @@ InputDecoration appInput(
       fontWeight: FontWeight.w600,
     ),
     hintText: hint,
-    hintStyle: TextStyle(
-      color: scheme.onSurface.withValues(alpha: 0.45),
-    ),
+    hintStyle: TextStyle(color: scheme.onSurface.withValues(alpha: 0.45)),
     prefixIcon: prefixIcon,
     prefixText: prefixText,
     prefixStyle: const TextStyle(
@@ -172,9 +166,7 @@ InputDecoration appInput(
       fontWeight: FontWeight.w700,
     ),
     helperText: helper,
-    helperStyle: TextStyle(
-      color: scheme.onSurface.withValues(alpha: 0.6),
-    ),
+    helperStyle: TextStyle(color: scheme.onSurface.withValues(alpha: 0.6)),
     suffixIcon: suffixIcon,
     filled: true,
     fillColor: AppColors.surfaceContainer.withValues(alpha: 0.70),
@@ -215,7 +207,7 @@ class AppCard extends StatelessWidget {
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(20),
       side: BorderSide(
-        color: AppColors.dewMint.withValues(alpha: 0.16),
+        color: AppColors.borderOutline.withValues(alpha: 0.8),
         width: 1.0,
       ),
     );
@@ -224,7 +216,7 @@ class AppCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.dewMint.withValues(alpha: 0.15),
+          color: AppColors.borderOutline.withValues(alpha: 0.8),
           width: 1.0,
         ),
         gradient: LinearGradient(
@@ -237,8 +229,8 @@ class AppCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.20),
-            blurRadius: 12,
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 14,
             offset: const Offset(0, 4),
           ),
         ],
@@ -256,7 +248,7 @@ class AppCard extends StatelessWidget {
   }
 }
 
-/// Kartu sorotan (HeroCard) untuk saldo, total anggaran, dan sorotan utama bergaya Enchanted Glasshouse.
+/// Kartu sorotan (HeroCard) untuk saldo, total anggaran, dan sorotan utama bergaya Vice City Sunset.
 class HeroCard extends StatelessWidget {
   const HeroCard({
     super.key,
@@ -282,18 +274,18 @@ class HeroCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF26503E), // Luminous Glasshouse Emerald
-            Color(0xFF132B21), // Deep Moss Shadow Glass
+            Color(0xFF1E293B), // Slate 800
+            Color(0xFF0F172A), // Slate 900
           ],
         ),
         shadows: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
+            color: Colors.black.withValues(alpha: 0.40),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
           BoxShadow(
-            color: AppColors.emeraldLeaf.withValues(alpha: 0.22),
+            color: AppColors.sunsetMagenta.withValues(alpha: 0.16),
             blurRadius: 16,
             spreadRadius: -2,
             offset: const Offset(0, 2),
@@ -302,12 +294,12 @@ class HeroCard extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Background konservatori samar di dalam kartu
+          // Background neon arcs samar di dalam kartu
           Positioned.fill(
             child: Opacity(
-              opacity: 0.14,
+              opacity: 0.18,
               child: Image.asset(
-                'assets/images/glasshouse_bg.jpg',
+                'assets/images/vice_city_bg.jpg',
                 fit: BoxFit.cover,
               ),
             ),
@@ -319,7 +311,7 @@ class HeroCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: AppColors.dewMint.withValues(alpha: 0.28),
+                    color: AppColors.borderOutline.withValues(alpha: 0.9),
                     width: 1.2,
                   ),
                 ),
@@ -349,7 +341,7 @@ class HeroCard extends StatelessWidget {
   }
 }
 
-/// Lencana ikon kategori persegi membulat bergaya Enchanted Glasshouse.
+/// Lencana ikon kategori persegi membulat bergaya Vice City Sunset.
 class CategoryBadge extends StatelessWidget {
   const CategoryBadge({
     super.key,
@@ -366,11 +358,12 @@ class CategoryBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final assetPath = glasshouseAssetFor(categoryKey) ?? glasshouseAssetForIcon(icon);
+    final assetPath =
+        glasshouseAssetFor(categoryKey) ?? glasshouseAssetForIcon(icon);
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(size * 0.32),
       side: BorderSide(
-        color: AppColors.dewMint.withValues(alpha: 0.22),
+        color: AppColors.borderOutline.withValues(alpha: 0.8),
         width: 1.0,
       ),
     );
@@ -388,7 +381,7 @@ class CategoryBadge extends StatelessWidget {
             offset: const Offset(0, 2),
           ),
           BoxShadow(
-            color: color.withValues(alpha: 0.18),
+            color: color.withValues(alpha: 0.20),
             blurRadius: 6,
             spreadRadius: -1,
           ),
@@ -462,7 +455,8 @@ class AppChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedAsset = assetPath ??
+    final resolvedAsset =
+        assetPath ??
         glasshouseAssetFor(categoryKey) ??
         (icon != null ? glasshouseAssetForIcon(icon!) : null);
     final fg = selected ? Colors.white : AppColors.softIvory;
@@ -515,9 +509,7 @@ class AppChip extends StatelessWidget {
             : AppColors.dewMint.withValues(alpha: 0.16),
         width: selected ? 1.2 : 1.0,
       ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       labelStyle: TextStyle(
         color: fg,
         fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
@@ -548,9 +540,7 @@ class SectionHeader extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
+              style: Theme.of(context).textTheme.titleMedium
                   ?.copyWith(fontWeight: FontWeight.w800),
             ),
           ),
@@ -559,7 +549,10 @@ class SectionHeader extends StatelessWidget {
               onPressed: onAction,
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.freshSage,
-                textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -659,7 +652,9 @@ class PeriodTypeToggle extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                isMonthly ? Icons.calendar_month_outlined : Icons.view_week_outlined,
+                isMonthly
+                    ? Icons.calendar_month_outlined
+                    : Icons.view_week_outlined,
                 size: 15,
                 color: AppColors.freshSage,
               ),
@@ -721,7 +716,8 @@ class UserAvatar extends ConsumerWidget {
     final name = ref.watch(displayNameProvider) ?? '?';
 
     final initialText = Text(
-      (name.isEmpty ? '?' : String.fromCharCode(name.runes.first)).toUpperCase(),
+      (name.isEmpty ? '?' : String.fromCharCode(name.runes.first))
+          .toUpperCase(),
       style: TextStyle(
         fontSize: size * 0.4,
         fontWeight: FontWeight.w800,
@@ -758,9 +754,9 @@ class UserAvatar extends ConsumerWidget {
                 Positioned.fill(
                   child: IgnorePointer(
                     child: Transform.scale(
-                      scale: 1.42,
+                      scale: 1.38,
                       child: Image.asset(
-                        'assets/images/frame_glasshouse.png',
+                        'assets/images/frame_vice_city.png',
                         fit: BoxFit.contain,
                         filterQuality: FilterQuality.medium,
                       ),
@@ -771,33 +767,123 @@ class UserAvatar extends ConsumerWidget {
             ),
           );
 
-    final core = heroTag != null ? Hero(tag: heroTag!, child: avatarDisplay) : avatarDisplay;
+    final core = heroTag != null
+        ? Hero(tag: heroTag!, child: avatarDisplay)
+        : avatarDisplay;
 
     return onTap == null
         ? core
-        : InkWell(customBorder: const CircleBorder(), onTap: onTap, child: core);
+        : InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onTap,
+            child: core,
+          );
   }
 }
 
-/// Tampilan informasi sederhana (ikon + pesan teks) saat daftar masih kosong.
+/// Helper untuk menentukan path ilustrasi kosong Tropical Neon Finance berdasarkan [IconData].
+String resolveEmptyIllustration(IconData icon) {
+  if (icon == Icons.receipt ||
+      icon == Icons.receipt_long ||
+      icon == Icons.receipt_long_outlined ||
+      icon == Icons.account_balance_wallet ||
+      icon == Icons.account_balance_wallet_outlined ||
+      icon == Icons.wallet ||
+      icon == Icons.payments ||
+      icon == Icons.payment ||
+      icon == Icons.swap_horiz) {
+    return 'assets/illustrations/empty_transactions.png';
+  }
+  if (icon == Icons.pie_chart ||
+      icon == Icons.pie_chart_outline ||
+      icon == Icons.pie_chart_rounded ||
+      icon == Icons.donut_large) {
+    return 'assets/illustrations/empty_budget.png';
+  }
+  if (icon == Icons.savings ||
+      icon == Icons.savings_outlined ||
+      icon == Icons.flag ||
+      icon == Icons.flag_outlined ||
+      icon == Icons.track_changes ||
+      icon == Icons.eco_outlined ||
+      icon == Icons.eco) {
+    return 'assets/illustrations/empty_savings.png';
+  }
+  if (icon == Icons.insights ||
+      icon == Icons.insights_outlined ||
+      icon == Icons.bar_chart ||
+      icon == Icons.show_chart ||
+      icon == Icons.trending_up) {
+    return 'assets/illustrations/empty_analytics.png';
+  }
+  if (icon == Icons.search ||
+      icon == Icons.search_rounded ||
+      icon == Icons.search_off ||
+      icon == Icons.search_off_rounded ||
+      icon == Icons.filter_list) {
+    return 'assets/illustrations/empty_search.png';
+  }
+  if (icon == Icons.notifications ||
+      icon == Icons.notifications_outlined ||
+      icon == Icons.notifications_off_outlined ||
+      icon == Icons.repeat ||
+      icon == Icons.repeat_rounded ||
+      icon == Icons.event_repeat ||
+      icon == Icons.alarm) {
+    return 'assets/illustrations/empty_notifications.png';
+  }
+  return 'assets/illustrations/empty_transactions.png';
+}
+
+/// Tampilan informasi saat daftar masih kosong dengan ilustrasi Tropical Neon Finance.
 class EmptyState extends StatelessWidget {
-  const EmptyState({super.key, required this.icon, required this.message});
+  const EmptyState({
+    super.key,
+    required this.icon,
+    required this.message,
+    this.illustrationAsset,
+    this.actionLabel,
+    this.onAction,
+  });
 
   final IconData icon;
   final String message;
+  final String? illustrationAsset;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.outline;
+    final colors = context.themeColors;
+    final illustration = illustrationAsset ?? resolveEmptyIllustration(icon);
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(28),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 56, color: color),
-            const SizedBox(height: 12),
-            Text(message, textAlign: TextAlign.center, style: TextStyle(color: color)),
+            Image.asset(
+              illustration,
+              width: 140,
+              height: 140,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.medium,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: colors.textMuted,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (actionLabel != null && onAction != null) ...[
+              const SizedBox(height: 16),
+              FilledButton(onPressed: onAction, child: Text(actionLabel!)),
+            ],
           ],
         ),
       ),
@@ -814,7 +900,8 @@ Future<int?> showAmountDialog(
 }) {
   return showDialog<int>(
     context: context,
-    builder: (_) => _AmountDialog(title: title, initial: initial, helper: helper),
+    builder: (_) =>
+        _AmountDialog(title: title, initial: initial, helper: helper),
   );
 }
 
@@ -830,8 +917,9 @@ class _AmountDialog extends StatefulWidget {
 }
 
 class _AmountDialogState extends State<_AmountDialog> {
-  late final TextEditingController _controller =
-      TextEditingController(text: formatThousands(widget.initial ?? 0));
+  late final TextEditingController _controller = TextEditingController(
+    text: formatThousands(widget.initial ?? 0),
+  );
 
   @override
   void dispose() {
@@ -865,7 +953,7 @@ class _AmountDialogState extends State<_AmountDialog> {
   }
 }
 
-/// Kartu hijau tua untuk keadaan kosong, dengan ajakan positif.
+/// Kartu keadaan kosong bergaya Vice City Sunset dengan ilustrasi dan ajakan positif.
 class EmptyStateCard extends StatelessWidget {
   const EmptyStateCard({
     super.key,
@@ -873,7 +961,8 @@ class EmptyStateCard extends StatelessWidget {
     required this.subtitle,
     this.actionLabel,
     this.onAction,
-    this.icon = Icons.eco_outlined,
+    this.icon = Icons.receipt_long_outlined,
+    this.illustrationAsset,
   });
 
   final String title;
@@ -881,24 +970,24 @@ class EmptyStateCard extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? onAction;
   final IconData icon;
+  final String? illustrationAsset;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = context.themeColors;
+    final illustration = illustrationAsset ?? resolveEmptyIllustration(icon);
 
     return HeroCard(
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
       child: Column(
         children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: ShapeDecoration(
-              color: colors.primary.withValues(alpha: 0.22),
-              shape: const CircleBorder(),
-            ),
-            child: Icon(icon, size: 38, color: colors.primary),
+          Image.asset(
+            illustration,
+            width: 124,
+            height: 124,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.medium,
           ),
           const SizedBox(height: 16),
           Text(
@@ -906,14 +995,14 @@ class EmptyStateCard extends StatelessWidget {
             textAlign: TextAlign.center,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: colors.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+            style: theme.textTheme.bodySmall?.copyWith(color: colors.textMuted),
           ),
           if (actionLabel != null) ...[
             const SizedBox(height: 18),
@@ -933,7 +1022,6 @@ class EmptyStateCard extends StatelessWidget {
   }
 }
 
-
 /// GlobalKey untuk root ScaffoldMessenger agar SnackBar dapat dipanggil secara konsisten
 /// dari mana saja, termasuk setelah modal/bottom sheet ditutup.
 final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
@@ -946,8 +1034,11 @@ void showUndoSnackBar({
   required Future<void> Function() onUndo,
   Duration duration = const Duration(seconds: 4),
 }) {
-  final messenger = rootScaffoldMessengerKey.currentState ??
-      (context != null && context.mounted ? ScaffoldMessenger.maybeOf(context) : null);
+  final messenger =
+      rootScaffoldMessengerKey.currentState ??
+      (context != null && context.mounted
+          ? ScaffoldMessenger.maybeOf(context)
+          : null);
   if (messenger == null) return;
   messenger.hideCurrentSnackBar();
   messenger.showSnackBar(
@@ -956,7 +1047,9 @@ void showUndoSnackBar({
       duration: duration,
       action: SnackBarAction(
         label: trG('Undo'),
-        textColor: context != null ? Theme.of(context).colorScheme.primary : AppColors.sage,
+        textColor: context != null
+            ? Theme.of(context).colorScheme.primary
+            : AppColors.sage,
         onPressed: () async {
           await onUndo();
           messenger.hideCurrentSnackBar();
@@ -972,8 +1065,10 @@ void showUndoSnackBar({
   );
 }
 
-/// Container dengan latar belakang ambient daun botani lembut dan suasana rumah kaca fotorealistik
-/// yang identik dengan lembar halaman Beranda (Enchanted Glasshouse).
+typedef ViceCityBackgroundSheet = BotanicalBackgroundSheet;
+
+/// Container dengan latar belakang ambient neon waves dan suasana retro-modern
+/// yang identik dengan lembar halaman Beranda (Vice City Sunset).
 class BotanicalBackgroundSheet extends StatelessWidget {
   const BotanicalBackgroundSheet({super.key, required this.child});
 
@@ -987,9 +1082,9 @@ class BotanicalBackgroundSheet extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF163228), // Deep emerald mist at the top
-            Color(0xFF11251E), // Subtle moss tint
-            Color(0xFF0C1914), // Deep grounding moss shadow
+            Color(0xFF0E1738), // Deep Navy canopy at top
+            Color(0xFF090F2C), // Subtle Midnight Navy
+            Color(0xFF070D2B), // Deep Midnight Navy Canvas
           ],
           stops: [0.0, 0.40, 1.0],
         ),
@@ -997,14 +1092,27 @@ class BotanicalBackgroundSheet extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Suasana Rumah Kaca Alami dari Aset Fotorealistik
+          // Suasana Sunset Vertikal Vice City
           Positioned.fill(
-            child: Opacity(
-              opacity: 0.10,
-              child: Image.asset(
-                'assets/images/glasshouse_bg.jpg',
-                fit: BoxFit.cover,
-                alignment: Alignment.center,
+            child: Image.asset(
+              'assets/images/vice_city_vertical_bg.jpg',
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF0E1738).withValues(alpha: 0.78),
+                    const Color(0xFF070D2B).withValues(alpha: 0.85),
+                    const Color(0xFF070D2B).withValues(alpha: 0.92),
+                  ],
+                  stops: const [0.0, 0.40, 1.0],
+                ),
               ),
             ),
           ),
@@ -1031,8 +1139,8 @@ class BotanicalBackgroundSheet extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      const Color(0xFF163228).withValues(alpha: 0.85),
-                      const Color(0xFF163228).withValues(alpha: 0.0),
+                      AppColors.cardSurface.withValues(alpha: 0.85),
+                      AppColors.cardSurface.withValues(alpha: 0.0),
                     ],
                   ),
                 ),
@@ -1090,4 +1198,3 @@ class AnimatedMoneyCounter extends StatelessWidget {
     );
   }
 }
-

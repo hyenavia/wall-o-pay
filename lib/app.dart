@@ -264,15 +264,15 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
 
     Widget item(int i, IconData icon, IconData activeIcon, String label, {String? glassIcon}) {
       final selected = index == i;
-      const activeColor = AppColors.dewMint;
-      final inactiveColor = AppColors.freshSage.withValues(alpha: 0.55);
+      const activeColor = AppColors.goldenYellow;
+      final inactiveColor = AppColors.mutedBlueGray.withValues(alpha: 0.60);
 
       final Widget iconWidget;
       if (glassIcon != null) {
         iconWidget = AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
-          opacity: selected ? 1.0 : 0.38,
+          opacity: selected ? 1.0 : 0.45,
           child: Image.asset(
             glassIcon,
             width: 26,
@@ -325,10 +325,10 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
               color: colors.primary.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.exit_to_app_rounded,
-              color: colors.primary,
-              size: 32,
+            child: Image.asset(
+              'assets/icons/vice_city/logout.png',
+              width: 32,
+              height: 32,
             ),
           ),
           title: Text(
@@ -402,18 +402,18 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(0xFF38B271),
-                  Color(0xFF1E4F39),
+                  AppColors.sunsetMagenta,
+                  AppColors.sunsetOrange,
                 ],
               ),
               border: Border.all(
-                color: AppColors.dewMint.withValues(alpha: 0.55),
+                color: AppColors.goldenYellow.withValues(alpha: 0.65),
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.income.withValues(alpha: 0.40),
-                  blurRadius: 14,
+                  color: AppColors.sunsetMagenta.withValues(alpha: 0.45),
+                  blurRadius: 16,
                   spreadRadius: 1,
                   offset: const Offset(0, 3),
                 ),
@@ -421,7 +421,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
             ),
             child: Center(
               child: Image.asset(
-                'assets/icons/glasshouse/add.png',
+                'assets/icons/vice_city/add.png',
                 width: 32,
                 height: 32,
               ),
@@ -434,13 +434,13 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
           notchMargin: 8,
           height: 66,
           padding: EdgeInsets.zero,
-          color: AppColors.mossShadow,
+          color: AppColors.deepNavy,
           surfaceTintColor: Colors.transparent,
           child: DecoratedBox(
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
-                  color: AppColors.dewMint.withValues(alpha: 0.16),
+                  color: AppColors.borderOutline.withValues(alpha: 0.75),
                   width: 1.0,
                 ),
               ),
@@ -452,14 +452,14 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
                   Icons.home_outlined,
                   Icons.home,
                   context.tr('Home'),
-                  glassIcon: 'assets/icons/glasshouse/home.png',
+                  glassIcon: 'assets/icons/vice_city/home.png',
                 ),
                 item(
                   1,
                   Icons.receipt_long_outlined,
                   Icons.receipt_long,
                   context.tr('Transactions'),
-                  glassIcon: 'assets/icons/glasshouse/receipt.png',
+                  glassIcon: 'assets/icons/vice_city/card.png',
                 ),
                 const SizedBox(width: 64),
                 if (budgetEnabled)
@@ -468,14 +468,14 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
                     Icons.pie_chart_outline,
                     Icons.pie_chart,
                     context.tr('Budget'),
-                    glassIcon: 'assets/icons/glasshouse/savings.png',
+                    glassIcon: 'assets/icons/vice_city/pie_chart.png',
                   ),
                 item(
                   3,
                   Icons.insights_outlined,
                   Icons.insights,
                   context.tr('Insight'),
-                  glassIcon: 'assets/icons/glasshouse/investment.png',
+                  glassIcon: 'assets/icons/vice_city/growth.png',
                 ),
               ],
             ),

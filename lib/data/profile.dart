@@ -32,11 +32,14 @@ class ProfileController extends Notifier<ProfileState> {
   String _photoKey(String uid) => 'photo_$uid';
   String _updatedKey(String uid) => 'profile_updated_$uid';
 
+  /// Batas maksimum panjang string Base64 foto profil (~600 KB binary) agar aman bagi memori & batas dokumen Firestore 1 MiB.
+  static const maxPhotoBase64Length = 800000;
+
   /// Mendekode Base64 foto secara aman tanpa membuang data tersimpan bila korup.
   static Uint8List? _safeDecodePhoto(String? raw) {
     if (raw == null) return null;
     final trimmed = raw.trim();
-    if (trimmed.isEmpty) return null;
+    if (trimmed.isEmpty || trimmed.length > maxPhotoBase64Length) return null;
     try {
       final bytes = base64Decode(trimmed);
       return bytes.isEmpty ? null : bytes;
@@ -119,7 +122,10 @@ class ProfileController extends Notifier<ProfileState> {
     if (remoteAt <= (p.getInt(_updatedKey(uid)) ?? 0)) return;
 
     final nick = data['nickname'] is String ? data['nickname'] as String : null;
-    final photo = data['photo'] is String ? data['photo'] as String : null;
+    final rawPhoto = data['photo'] is String ? data['photo'] as String : null;
+    final photo = (rawPhoto != null && rawPhoto.length <= maxPhotoBase64Length)
+        ? rawPhoto
+        : null;
     nick == null ? await p.remove(_nickKey(uid)) : await p.setString(_nickKey(uid), nick);
     photo == null ? await p.remove(_photoKey(uid)) : await p.setString(_photoKey(uid), photo);
     await p.setInt(_updatedKey(uid), remoteAt);

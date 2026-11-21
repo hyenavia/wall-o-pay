@@ -172,6 +172,8 @@ class _AccountCategoryHeader extends StatelessWidget {
       child: Row(
         children: [
           Container(
+            width: 32,
+            height: 32,
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: AppColors.dewMint.withValues(alpha: 0.16),
@@ -181,7 +183,9 @@ class _AccountCategoryHeader extends StatelessWidget {
                 width: 1,
               ),
             ),
-            child: Icon(icon, size: 16, color: AppColors.dewMint),
+            child: viceCityAssetForIcon(icon) != null
+                ? Image.asset(viceCityAssetForIcon(icon)!, fit: BoxFit.contain)
+                : Icon(icon, size: 16, color: AppColors.dewMint),
           ),
           const SizedBox(width: 10),
           Text(

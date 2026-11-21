@@ -50,7 +50,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi fallback jika native method channel gagal membaca PackageManager.
-  static const fallbackVersion = '2.16.2';
+  static const fallbackVersion = '3.0.0';
   static String _resolvedVersion = fallbackVersion;
 
   /// Versi aplikasi saat ini. Dinamis dibaca dari native PackageManager Android atau fallback.
@@ -80,8 +80,26 @@ class UpdateCheckerService {
   static const String _directDownloadUrl =
       'https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk';
 
+  /// Memeriksa apakah URL unduhan pembaruan berasal dari repositori GitHub resmi melalui HTTPS.
+  static bool isTrustedReleaseUrl(String url) {
+    final uri = Uri.tryParse(url.trim());
+    if (uri == null || uri.scheme != 'https') return false;
+    final host = uri.host.toLowerCase();
+    if (host == 'github.com') {
+      return uri.path.startsWith('/hyenavia/wall-o-pay/releases/');
+    }
+    if (host == 'objects.githubusercontent.com') {
+      return true;
+    }
+    return false;
+  }
+
   /// Membuka URL di browser atau installer eksternal via native intent.
   static Future<void> openUrl(String url) async {
+    if (!isTrustedReleaseUrl(url)) {
+      debugPrint('Blocked untrusted update URL: $url');
+      return;
+    }
     try {
       await _channel.invokeMethod('openUrl', {'url': url});
     } catch (e) {
@@ -175,7 +193,10 @@ class UpdateCheckerService {
         for (final a in assets) {
           final assetName = a['name'] as String? ?? '';
           if (assetName == 'Wall_o_Pay.apk') {
-            downloadUrl = a['browser_download_url'] as String? ?? downloadUrl;
+            final candidate = a['browser_download_url'] as String?;
+            if (candidate != null && isTrustedReleaseUrl(candidate)) {
+              downloadUrl = candidate;
+            }
             break;
           }
         }

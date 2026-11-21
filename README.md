@@ -1,4 +1,4 @@
-# Wall o' Pay 🌿
+# Wall o' Pay 🌆
 
 <div align="center">
 
@@ -8,11 +8,11 @@
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.47+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.13+-0175C2?logo=dart&logoColor=white)](https://dart.dev)
-[![Database](https://img.shields.io/badge/Database-Drift%20SQLite-1E4238?logo=sqlite&logoColor=white)](https://drift.simonbinder.eu/)
+[![Database](https://img.shields.io/badge/Database-Drift%20SQLite-101A3A?logo=sqlite&logoColor=white)](https://drift.simonbinder.eu/)
 [![Security](https://img.shields.io/badge/Security-Keystore%20%7C%20Biometrics-38B271?logo=android&logoColor=white)](https://github.com/hyenavia/wall-o-pay)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-2.16.2-234B3B.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-3.0.0-FB7185.svg)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://hyenavia.github.io/wall-o-pay/) • [📥 Download Latest APK](https://github.com/hyenavia/wall-o-pay/releases/latest) • [📐 Architecture Guide](ARCHITECTURE.md) • [📋 Changelog](CHANGELOG.md)
 
@@ -28,13 +28,23 @@ When you're ready to back up or sync across devices, Wall o' Pay offers optional
 
 ---
 
-## 🚀 Highlights in Latest Release (v2.16.2)
+## 🚀 Highlights in Latest Release (v3.0.0)
 
-Wall o' Pay v2.16.2 strengthens startup stability, PIN lock enforcement, recurring transaction idempotency, cloud sync session safety, and App Shortcut reliability:
+Wall o' Pay v3.0.0 introduces the complete **Vice City Sunset** visual rebranding, hardware-backed Keystore security hardening, comprehensive 3D custom iconography, and hardened Cloud Firestore Security Rules:
 
-- 🏛️ **Enchanted Glasshouse Visual Identity:** Modern botanical conservatory aesthetic featuring translucent emerald glassmorphic surfaces, specular glass highlights, 24 bespoke 3D botanical glass icons, and vaulted architectural accents.
-- 🌿 **Atmospheric Lock Screen & Profile Wreath:** Serene sunlit glasshouse background with ambient lighting on `LockScreen` and an intricate botanical glass wreath frame for user profile photos.
-- 🔤 **Outfit & DM Sans Tabular Typography:** Premium editorial headings powered by Google Fonts `Outfit` paired with `DM Sans` tabular figures for financial numbers.
+- 🌆 **Full Vice City Sunset Branding:** Updated About Wall o' Pay lore, financial recap notifications, and documentation to reflect the **Vice City Sunset** identity (`Midnight Navy`, `Deep Navy`, `Sunset Magenta`, `Neon Cyan`, and `Golden Yellow`).
+- 🎨 **25+ Bespoke Miami Sunset Icons:** Integrated compressed high-resolution custom icons across header actions, search bar, transaction filter chips, cashflow cards, and budget pillars.
+- 🌅 **Prominent Coastal Sunset Background:** Activated the portrait tropical sunset and skyline across Home, Transactions, Budget, and Insights with balanced atmospheric scrim.
+
+- 🌅 **Vice City Sunset Visual Identity:** A retro-modern, coastal sunset aesthetic featuring deep midnight navy (`#070D2B`), deep navy card surfaces (`#101A3A`), sunset magenta (`#FF2E93`), sunset orange (`#FF8A36`), neon cyan (`#20D9E8`), and golden yellow (`#FFD166`).
+- 🌆 **Unified 4-Page Header Canopy (Concept A):** Home, Transactions, Budget, and Insights now share a vertical sunset skyline header canopy with dark navy gradient overlay, preserving the original sheet-based layout.
+- 🪪 **Settings Coastal Sunset VIP Card:** The profile card in Settings features the panoramic coastal sunset landscape with Neon Edge Highlight border and transparent circular Vice City avatar frame.
+- 🔤 **Retro-Modern Typography System:** Space Grotesk for bold headings and tabular financial numbers, Inter for smooth body copy, and IBM Plex Mono for technical details.
+- 🚀 **Zero-Flash Midnight Navy Splash Screen:** Fully unified native launch background and Flutter startup in Midnight Navy (`#070D2B`) with centered emblem.
+- 🪪 **Refreshed Logo & App Launcher Icon:** Replaced application icon with the iconic **Neon Sunset Wallet W Emblem** across Android adaptive icons, iOS, Web, and desktop launchers.
+- 🎨 **30 Bespoke Miami Sunset Finance Icons:** High-precision, transparent 128x128 icons tailored for navigation, transactions, wallets, analytics, savings, and reminders.
+- 🏝️ **Tropical Neon Empty State Illustrations:** 6 high-resolution 512x512 empty state illustrations for transactions, budgets, savings, analytics, search, and notifications.
+- 🌆 **Atmospheric Backgrounds:** Coastal skyline sunset for authentication, onboarding, and PIN lock screens; midnight neon arc waves for headers and sheets.
 - 🛡️ **Universal Biometric Unlock:** Instant fingerprint and face recognition (`local_auth`) coupled with a 6-digit PIN pad. Authenticate in a fraction of a second when opening the app.
 - 🔐 **Hardware-Backed Secret Storage:** Cryptographic migration of PIN hashes, salts, and anti-tamper lockout counters into the **Android Keystore** (`EncryptedSharedPreferences`) and **iOS Keychain** via `FlutterSecureStorage`.
 - 🔑 **Key-Stretched Security (v2 Salted HMAC-SHA256):** Upgraded PIN verification to a 2,048-iteration salted HMAC-SHA256 scheme with persistent exponential backoff lockout protection (30s → 120s → 300s).
@@ -75,15 +85,15 @@ Wall o' Pay v2.16.2 strengthens startup stability, PIN lock enforcement, recurri
 
 ### 📈 Visual Insights, Vitality Score & Filtered Reports
 
-- **Net Worth & Vitality Score:** Track unified net worth (`Liquid Assets + Receivables - Liabilities`) alongside a 0–100 four-pillar _Glasshouse Vitality Score_ without double-counting goal allocations.
-- **Weekly & Monthly Harvest Recaps & Drill-Down:** Review completed period recaps, tap category rows or pie chart slices to inspect matching transactions, and explore 6-period trend charts powered by `fl_chart`.
+- **Net Worth & Financial Health Score:** Track unified net worth (`Liquid Assets + Receivables - Liabilities`) alongside a 0–100 four-pillar _Financial Health Score_ without double-counting goal allocations.
+- **Weekly & Monthly Financial Recaps & Drill-Down:** Review completed period recaps, tap category rows or pie chart slices to inspect matching transactions, and explore 6-period trend charts powered by `fl_chart`.
 - **Filtered PDF, CSV & Guest Backup:** Export wallet-filtered PDF statements, date- and wallet-filtered 8-column CSVs, and complete JSON backups with unobtrusive Guest Mode backup reminders.
 
 ### ⏰ Automation, Modules & Reminders
 
 - **Recurring Transactions:** Automate subscriptions, bills, and salaries with due confirmation queues inside Home and Recurring Schedules.
 - **Active Modules Manager:** Enable or disable optional feature pillars (`Goals`, `Debts & Splits`, `Recurring`, `Budget`, `Transfers`) dynamically via presets (**All Features** / **Minimalist**).
-- **Smart Local Notifications:** Customizable daily reminders, 80%/100% budget warnings, debt due reminders, and contextual Harvest Recap alerts scheduled cleanly on-device.
+- **Smart Local Notifications:** Customizable daily reminders, 80%/100% budget warnings, debt due reminders, and contextual Financial Recap alerts scheduled cleanly on-device.
 
 ### 🌐 Bilingual Localization
 
@@ -104,7 +114,7 @@ Wall o' Pay v2.16.2 strengthens startup stability, PIN lock enforcement, recurri
 | **Charts & Analytics**  | `fl_chart`                                 | Interactive, animated vector charts                           |
 | **Reporting & Export**  | `pdf` & `printing`                         | Custom PDF generation & print-ready statements                |
 | **Local Notifications** | `flutter_local_notifications` & `timezone` | Offline scheduled notifications & threshold alerts            |
-| **Typography & Icons**  | Outfit & DM Sans (`google_fonts`)          | Material 3 & tabular figures for number alignment             |
+| **Typography & Icons**  | Space Grotesk, Inter & IBM Plex Mono (`google_fonts`) | Material 3 & tabular figures for number alignment             |
 | **CI / CD Pipeline**    | GitHub Actions                             | Automated `flutter analyze` & `flutter test` gate + APK build |
 
 ---

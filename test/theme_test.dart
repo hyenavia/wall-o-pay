@@ -47,13 +47,13 @@ void main() {
       expect(budgetColor(1.2, scheme, botanicalColors), botanicalColors.expense);
     });
 
-    test('appMoneyStyle applies DM Sans with tabular figures', () {
+    test('appMoneyStyle applies Space Grotesk with tabular figures', () {
       final botanicalStyle = appMoneyStyle(
         null,
         fontSize: 16,
         fontWeight: FontWeight.w700,
       );
-      expect(botanicalStyle.fontFamily, contains('DMSans'));
+      expect(botanicalStyle.fontFamily, contains('SpaceGrotesk'));
       expect(botanicalStyle.fontFeatures, contains(const FontFeature.tabularFigures()));
     });
 

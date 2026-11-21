@@ -154,13 +154,19 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                               width: 0.8,
                             ),
                           ),
-                          child: Icon(
-                            st.isFaceOnly ? Icons.face_rounded : Icons.fingerprint_rounded,
-                            color: st.biometricEnabled
-                                ? AppColors.dewMint
-                                : AppColors.freshSage,
-                            size: 22,
-                          ),
+                          child: st.isFaceOnly
+                              ? Icon(
+                                  Icons.face_rounded,
+                                  color: st.biometricEnabled
+                                      ? AppColors.dewMint
+                                      : AppColors.freshSage,
+                                  size: 22,
+                                )
+                              : Image.asset(
+                                  'assets/icon-compress/107_fingerprint-kompres.png',
+                                  width: 22,
+                                  height: 22,
+                                ),
                         ),
                         title: Text(
                           bioTitle,
@@ -235,7 +241,11 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                             }
                           }
                         },
-                        icon: const Icon(Icons.password_rounded, size: 20),
+                        icon: Image.asset(
+                          'assets/icon-compress/109_password-kompres.png',
+                          width: 20,
+                          height: 20,
+                        ),
                         label: Text(context.tr('Change PIN')),
                       ),
                     ],

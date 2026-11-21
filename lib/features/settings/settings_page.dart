@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/format.dart';
+import '../../core/icons.dart';
 import '../../core/l10n.dart';
 import '../../core/period.dart';
 import '../../core/theme.dart';
@@ -63,10 +64,12 @@ class SettingsPage extends ConsumerWidget {
         ? context.tr('No cloud backup yet.')
         : context.tr('Last backup {date}', {'date': dateTimeLabel(lastSyncTime)});
 
-    Widget iconBadge(IconData icon, Color color) {
+    Widget iconBadge(IconData icon, Color color, {String? customAsset}) {
+      final asset = customAsset ?? viceCityAssetForIcon(icon);
       return Container(
         width: 40,
         height: 40,
+        padding: asset != null ? const EdgeInsets.all(8) : null,
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.16),
           borderRadius: BorderRadius.circular(12),
@@ -75,7 +78,9 @@ class SettingsPage extends ConsumerWidget {
             width: 0.8,
           ),
         ),
-        child: Icon(icon, color: color, size: 20),
+        child: asset != null
+            ? Image.asset(asset, fit: BoxFit.contain)
+            : Icon(icon, color: color, size: 20),
       );
     }
 
@@ -327,7 +332,7 @@ class SettingsPage extends ConsumerWidget {
                 SwitchListTile(
                   secondary: iconBadge(Icons.auto_stories_outlined, AppColors.dewMint),
                   title: Text(
-                    context.tr('Harvest recap notifications'),
+                    context.tr('Financial recap notifications'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                   ),
                   subtitle: Text(
@@ -404,7 +409,11 @@ class SettingsPage extends ConsumerWidget {
                 if (!ready)
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.cloud_off_outlined),
+                    leading: Image.asset(
+                      'assets/icon-compress/155_cloud_sync-kompres.png',
+                      width: 24,
+                      height: 24,
+                    ),
                     title: Text(context.tr('Firebase is not connected')),
                     subtitle: Text(context.tr(
                       'Run "flutterfire configure" in the project, then restart the app to enable login and cloud backup.',
@@ -419,10 +428,10 @@ class SettingsPage extends ConsumerWidget {
                           color: AppColors.sage.withValues(alpha: 0.16),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.cloud_off_outlined,
-                          color: AppColors.sage,
-                          size: 24,
+                        child: Image.asset(
+                          'assets/icon-compress/155_cloud_sync-kompres.png',
+                          width: 24,
+                          height: 24,
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -458,7 +467,11 @@ class SettingsPage extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      icon: const Icon(Icons.login_rounded, size: 18),
+                      icon: Image.asset(
+                        'assets/icon-compress/104_user_add-kompres.png',
+                        width: 18,
+                        height: 18,
+                      ),
                       label: Text(context.tr('Sign In / Create Account')),
                       onPressed: () => Navigator.push(
                         context,
@@ -557,7 +570,11 @@ class SettingsPage extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          icon: const Icon(Icons.cloud_upload_outlined, size: 16),
+                          icon: Image.asset(
+                            'assets/icon-compress/41_cloud_upload-kompres.png',
+                            width: 16,
+                            height: 16,
+                          ),
                           label: Text(context.tr('Send to Cloud')),
                           onPressed: canUseCloud ? () => SettingsActions.handleManualUpload(context, ref) : null,
                         ),
@@ -572,7 +589,11 @@ class SettingsPage extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          icon: const Icon(Icons.cloud_download_outlined, size: 16),
+                          icon: Image.asset(
+                            'assets/icon-compress/42_cloud_download-kompres.png',
+                            width: 16,
+                            height: 16,
+                          ),
                           label: Text(context.tr('Fetch from Cloud')),
                           onPressed: canUseCloud ? () => SettingsActions.handleManualRestore(context, ref) : null,
                         ),
@@ -590,7 +611,11 @@ class SettingsPage extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      icon: const Icon(Icons.sync_rounded, size: 16),
+                      icon: Image.asset(
+                        'assets/icon-compress/155_cloud_sync-kompres.png',
+                        width: 16,
+                        height: 16,
+                      ),
                       label: Text(context.tr('Sync Now (Two-Way)')),
                       onPressed: canUseCloud ? () => SettingsActions.handleTwoWaySync(context, ref) : null,
                     ),
@@ -984,21 +1009,21 @@ class _GlasshouseProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.mossShadow,
+        color: AppColors.deepNavy,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: AppColors.dewMint.withValues(alpha: 0.28),
+          color: AppColors.sunsetMagenta.withValues(alpha: 0.38),
           width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
+            color: Colors.black.withValues(alpha: 0.40),
             blurRadius: 18,
             offset: const Offset(0, 6),
           ),
           BoxShadow(
-            color: AppColors.dewMint.withValues(alpha: 0.05),
-            blurRadius: 12,
+            color: AppColors.sunsetMagenta.withValues(alpha: 0.12),
+            blurRadius: 14,
           ),
         ],
       ),
@@ -1008,45 +1033,30 @@ class _GlasshouseProfileCard extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            splashColor: AppColors.dewMint.withValues(alpha: 0.10),
-            highlightColor: AppColors.dewMint.withValues(alpha: 0.05),
+            splashColor: AppColors.sunsetMagenta.withValues(alpha: 0.10),
+            highlightColor: AppColors.neonCyan.withValues(alpha: 0.05),
             child: Stack(
               children: [
-                // Glasshouse gradient background
+                // Coastal Sunset landscape background
+                Positioned.fill(
+                  child: Image.asset(
+                    'assets/images/coastal_sunset_bg.jpg',
+                    fit: BoxFit.cover,
+                    alignment: const Alignment(0, -0.25),
+                  ),
+                ),
+                // Dark cinematic gradient overlay for high contrast
                 Positioned.fill(
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
                         colors: [
-                          const Color(0xFF1B3D30).withValues(alpha: 0.90),
-                          AppColors.mossShadow,
+                          AppColors.midnightNavy.withValues(alpha: 0.88),
+                          AppColors.midnightNavy.withValues(alpha: 0.70),
+                          AppColors.midnightNavy.withValues(alpha: 0.82),
                         ],
-                      ),
-                    ),
-                  ),
-                ),
-                // Specular glass glare & greenhouse arch overlay
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: CustomPaint(
-                      painter: _ProfileCardGlassPainter(),
-                    ),
-                  ),
-                ),
-                // Subtle botanical corner ornament
-                Positioned(
-                  right: -10,
-                  bottom: -10,
-                  child: IgnorePointer(
-                    child: Opacity(
-                      opacity: 0.09,
-                      child: Image.asset(
-                        'assets/icons/glasshouse/savings.png',
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
@@ -1056,7 +1066,7 @@ class _GlasshouseProfileCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
                   child: Row(
                     children: [
-                      // Circular Profile Avatar with Botanical Glass Frame
+                      // Circular Profile Avatar with Vice City Sunset Frame
                       const UserAvatar(size: 60, withGlassFrame: true),
                       const SizedBox(width: 14),
                       // Information Hierarchy
@@ -1069,10 +1079,10 @@ class _GlasshouseProfileCard extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF23483B).withValues(alpha: 0.65),
+                                color: AppColors.surfaceContainer.withValues(alpha: 0.85),
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
-                                  color: AppColors.dewMint.withValues(alpha: 0.35),
+                                  color: AppColors.goldenYellow.withValues(alpha: 0.40),
                                   width: 0.8,
                                 ),
                               ),
@@ -1084,7 +1094,7 @@ class _GlasshouseProfileCard extends StatelessWidget {
                                     height: 5,
                                     decoration: const BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: AppColors.dewMint,
+                                      color: AppColors.goldenYellow,
                                     ),
                                   ),
                                   const SizedBox(width: 5),
@@ -1092,18 +1102,18 @@ class _GlasshouseProfileCard extends StatelessWidget {
                                     isGuest
                                         ? context.tr('Guest Mode')
                                         : context.tr('Personal Account'),
-                                    style: GoogleFonts.dmSans(
+                                    style: GoogleFonts.inter(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,
                                       letterSpacing: 0.3,
-                                      color: AppColors.dewMint,
+                                      color: AppColors.goldenYellow,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
                             const SizedBox(height: 5),
-                            // User Name in Outfit SemiBold
+                            // User Name in Space Grotesk Bold
                             Text(
                               name ??
                                   (isGuest
@@ -1111,15 +1121,15 @@ class _GlasshouseProfileCard extends StatelessWidget {
                                       : context.tr('Profile')),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.outfit(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 17.5,
-                                color: AppColors.softIvory,
+                              style: GoogleFonts.spaceGrotesk(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 18,
+                                color: AppColors.softWhite,
                                 letterSpacing: -0.2,
                               ),
                             ),
                             const SizedBox(height: 2),
-                            // Email or username in DM Sans
+                            // Email or username in Inter
                             Text(
                               email ??
                                   (username != null
@@ -1129,10 +1139,10 @@ class _GlasshouseProfileCard extends StatelessWidget {
                                           : 'user@wallopay.local')),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.dmSans(
+                              style: GoogleFonts.inter(
                                 fontSize: 12.5,
                                 fontWeight: FontWeight.w400,
-                                color: AppColors.freshSage,
+                                color: AppColors.mutedBlueGray,
                               ),
                             ),
                           ],
@@ -1144,22 +1154,22 @@ class _GlasshouseProfileCard extends StatelessWidget {
                         width: 38,
                         height: 38,
                         decoration: BoxDecoration(
-                          color: AppColors.mossShadow.withValues(alpha: 0.70),
+                          color: AppColors.surfaceContainer.withValues(alpha: 0.85),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: AppColors.dewMint.withValues(alpha: 0.40),
+                            color: AppColors.neonCyan.withValues(alpha: 0.45),
                             width: 1.0,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.dewMint.withValues(alpha: 0.12),
+                              color: AppColors.neonCyan.withValues(alpha: 0.15),
                               blurRadius: 8,
                             ),
                           ],
                         ),
                         child: const Icon(
                           Icons.edit_outlined,
-                          color: AppColors.dewMint,
+                          color: AppColors.neonCyan,
                           size: 18,
                         ),
                       ),
@@ -1173,60 +1183,6 @@ class _GlasshouseProfileCard extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Painter efek specular sheen dan garis arsitektur conservatory untuk kartu profil.
-class _ProfileCardGlassPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    // 1. Specular glass diagonal sheen
-    final sheenPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Colors.white.withValues(alpha: 0.08),
-          Colors.white.withValues(alpha: 0.02),
-          Colors.transparent,
-        ],
-        stops: const [0.0, 0.35, 0.7],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), sheenPaint);
-
-    // 2. Subtle greenhouse mullion lines in top-right
-    final archPaint = Paint()
-      ..color = AppColors.dewMint.withValues(alpha: 0.07)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
-
-    final path = Path()
-      ..moveTo(size.width * 0.65, 0)
-      ..cubicTo(
-        size.width * 0.75,
-        size.height * 0.3,
-        size.width * 0.9,
-        size.height * 0.4,
-        size.width,
-        size.height * 0.5,
-      );
-    canvas.drawPath(path, archPaint);
-
-    final path2 = Path()
-      ..moveTo(size.width * 0.8, 0)
-      ..cubicTo(
-        size.width * 0.88,
-        size.height * 0.25,
-        size.width * 0.95,
-        size.height * 0.35,
-        size.width,
-        size.height * 0.45,
-      );
-    canvas.drawPath(path2, archPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _ModulePrefsSheet extends ConsumerWidget {
@@ -1296,7 +1252,16 @@ class _ModulePrefsSheet extends ConsumerWidget {
               const SizedBox(height: 12),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                secondary: const Icon(Icons.flag_outlined, color: AppColors.sage),
+                secondary: Container(
+                  width: 32,
+                  height: 32,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.sage.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Image.asset('assets/icons/vice_city/goals.png', fit: BoxFit.contain),
+                ),
                 title: Text(context.tr('Savings Goals')),
                 subtitle: Text(
                   context.tr('Set targets for emergency funds, gadgets, or vacations.'),
@@ -1308,7 +1273,16 @@ class _ModulePrefsSheet extends ConsumerWidget {
               const Divider(height: 1),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                secondary: const Icon(Icons.handshake_outlined, color: AppColors.warning),
+                secondary: Container(
+                  width: 32,
+                  height: 32,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Image.asset('assets/icons/vice_city/debts.png', fit: BoxFit.contain),
+                ),
                 title: Text(context.tr('Debts & Split Bills')),
                 subtitle: Text(
                   context.tr('Track who owes whom and split group dining bills.'),
@@ -1320,7 +1294,16 @@ class _ModulePrefsSheet extends ConsumerWidget {
               const Divider(height: 1),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                secondary: const Icon(Icons.event_repeat_rounded, color: Color(0xFF60A5FA)),
+                secondary: Container(
+                  width: 32,
+                  height: 32,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF60A5FA).withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Image.asset('assets/icons/vice_city/recurring.png', fit: BoxFit.contain),
+                ),
                 title: Text(context.tr('Recurring Schedules')),
                 subtitle: Text(
                   context.tr('Automate allowance, subscriptions, and rent reminders.'),
@@ -1332,7 +1315,16 @@ class _ModulePrefsSheet extends ConsumerWidget {
               const Divider(height: 1),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                secondary: const Icon(Icons.swap_horiz_rounded, color: AppColors.incomeOnDark),
+                secondary: Container(
+                  width: 32,
+                  height: 32,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.incomeOnDark.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Image.asset('assets/icons/vice_city/transfer.png', fit: BoxFit.contain),
+                ),
                 title: Text(context.tr('Account Transfers')),
                 subtitle: Text(
                   context.tr('Move funds between cash, bank, and digital wallets.'),
@@ -1344,7 +1336,16 @@ class _ModulePrefsSheet extends ConsumerWidget {
               const Divider(height: 1),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                secondary: const Icon(Icons.pie_chart_outline_rounded, color: AppColors.dewMint),
+                secondary: Container(
+                  width: 32,
+                  height: 32,
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.dewMint.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Image.asset('assets/icons/vice_city/pie_chart.png', fit: BoxFit.contain),
+                ),
                 title: Text(context.tr('Category Budgets')),
                 subtitle: Text(
                   context.tr('Set monthly or weekly spending limits per category.'),

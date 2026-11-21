@@ -1,9 +1,10 @@
 /// Modal bottom sheet "Tentang Wall o' Pay" ([AboutWallOPaySheet]) yang menampilkan
-/// informasi versi, filosofi desain Botanical Forest, fitur utama, dan tautan repositori.
+/// informasi versi, filosofi desain Vice City Sunset, fitur utama, dan tautan repositori.
 library;
 
 import 'package:flutter/material.dart';
 
+import '../../core/icons.dart';
 import '../../core/l10n.dart';
 import '../../core/theme.dart';
 import '../../data/update_checker.dart';
@@ -25,7 +26,7 @@ class AboutWallOPaySheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isIndonesian = AppLocale.code == 'id';
-    const mutedColor = AppColors.freshSage;
+    const mutedColor = AppColors.mutedBlueGray;
     const borderColor = AppColors.borderOutline;
 
     return DraggableScrollableSheet(
@@ -35,11 +36,11 @@ class AboutWallOPaySheet extends StatelessWidget {
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: AppColors.mossShadow,
+            color: AppColors.midnightNavy,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             border: Border(
               top: BorderSide(
-                color: AppColors.dewMint.withValues(alpha: 0.35),
+                color: AppColors.borderOutline.withValues(alpha: 0.85),
                 width: 1.2,
               ),
             ),
@@ -59,7 +60,7 @@ class AboutWallOPaySheet extends StatelessWidget {
                 width: 44,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.dewMint.withValues(alpha: 0.35),
+                  color: AppColors.mutedBlueGray.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -76,19 +77,19 @@ class AboutWallOPaySheet extends StatelessWidget {
                         style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 17,
-                          color: AppColors.softIvory,
+                          color: AppColors.softWhite,
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, color: AppColors.softIvory),
+                      icon: const Icon(Icons.close_rounded, color: AppColors.softWhite),
                       onPressed: () => Navigator.of(context).pop(),
                       tooltip: context.tr('Close'),
                     ),
                   ],
                 ),
               ),
-              Divider(height: 1, color: AppColors.dewMint.withValues(alpha: 0.12)),
+              Divider(height: 1, color: AppColors.borderOutline.withValues(alpha: 0.5)),
 
               // Scrollable Body
               Expanded(
@@ -106,12 +107,12 @@ class AboutWallOPaySheet extends StatelessWidget {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(22),
                               border: Border.all(
-                                color: AppColors.dewMint.withValues(alpha: 0.35),
+                                color: AppColors.borderOutline.withValues(alpha: 0.85),
                                 width: 1.2,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppColors.deepForest.withValues(alpha: 0.40),
+                                  color: AppColors.sunsetMagenta.withValues(alpha: 0.20),
                                   blurRadius: 18,
                                   offset: const Offset(0, 6),
                                 ),
@@ -130,17 +131,17 @@ class AboutWallOPaySheet extends StatelessWidget {
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.3,
-                              color: AppColors.softIvory,
+                              color: AppColors.softWhite,
                             ),
                           ),
                           const SizedBox(height: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                             decoration: BoxDecoration(
-                              color: AppColors.emeraldLeaf.withValues(alpha: 0.35),
+                              color: AppColors.sunsetMagenta.withValues(alpha: 0.25),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: AppColors.dewMint.withValues(alpha: 0.35),
+                                color: AppColors.goldenYellow.withValues(alpha: 0.45),
                               ),
                             ),
                             child: Text(
@@ -148,7 +149,7 @@ class AboutWallOPaySheet extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.dewMint,
+                                color: AppColors.goldenYellow,
                               ),
                             ),
                           ),
@@ -170,10 +171,10 @@ class AboutWallOPaySheet extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.glasshouseGreen.withValues(alpha: 0.35),
+                        color: AppColors.deepNavy.withValues(alpha: 0.35),
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: AppColors.dewMint.withValues(alpha: 0.35),
+                          color: AppColors.goldenYellow.withValues(alpha: 0.35),
                         ),
                       ),
                       child: Row(
@@ -181,21 +182,21 @@ class AboutWallOPaySheet extends StatelessWidget {
                         children: [
                           const Icon(
                             Icons.format_quote_rounded,
-                            color: AppColors.dewMint,
+                            color: AppColors.goldenYellow,
                             size: 28,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               context.tr(
-                                'Small steps, nurtured consistently, create meaningful growth.',
+                                'Bold clarity, steady rhythm, and full control over every move.',
                               ),
                               style: const TextStyle(
                                 fontSize: 13,
                                 height: 1.45,
                                 fontStyle: FontStyle.italic,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.softIvory,
+                                color: AppColors.softWhite,
                               ),
                             ),
                           ),
@@ -210,13 +211,13 @@ class AboutWallOPaySheet extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.dewMint,
+                        color: AppColors.goldenYellow,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       context.tr(
-                        'Wall o\' Pay was built with a singular vision: managing personal finances should feel mindful, empowering, and calm—never stressful or intimidating. Here is the meaning behind our identity:',
+                        'Wall o\' Pay was built with a singular vision: managing personal finances should feel bold, effortless, and crystal clear—never cluttered or intimidating. Here is the meaning behind our identity:',
                       ),
                       style: const TextStyle(
                         fontSize: 12.5,
@@ -237,28 +238,28 @@ class AboutWallOPaySheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     _LoreCard(
-                      icon: Icons.eco_outlined,
-                      title: context.tr('The Growing Sprout'),
+                      icon: Icons.savings_outlined,
+                      title: context.tr('Pay Yourself First'),
                       description: context.tr(
-                        'Reframing "Pay" into "Pay yourself first"—every dollar budgeted and saved is a seed nurtured to flourish over time.',
+                        'Reframing "Pay" into "Pay yourself first"—every rupiah budgeted and saved fuels your momentum toward bigger goals.',
                       ),
                       borderColor: borderColor,
                     ),
                     const SizedBox(height: 10),
                     _LoreCard(
                       icon: Icons.auto_awesome_outlined,
-                      title: context.tr('The Guiding Star'),
+                      title: context.tr('The Neon Horizon'),
                       description: context.tr(
-                        'The spark of reaching your savings targets, debt freedom, and achieving lasting financial serenity.',
+                        'The glow of hitting your savings targets, clearing debts, and cruising toward lasting financial freedom.',
                       ),
                       borderColor: borderColor,
                     ),
                     const SizedBox(height: 10),
                     _LoreCard(
-                      icon: Icons.forest_outlined,
-                      title: context.tr('The Botanical Sanctuary'),
+                      icon: Icons.nights_stay_outlined,
+                      title: context.tr('Vice City Sunset'),
                       description: context.tr(
-                        'An organic, tranquil environment inspired by the deep forest, replacing aggressive corporate fintech with mindful peace.',
+                        'A retro-modern coastal sunset atmosphere with crisp neon contrast, replacing sterile corporate fintech with effortless style.',
                       ),
                       borderColor: borderColor,
                     ),
@@ -270,7 +271,7 @@ class AboutWallOPaySheet extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.dewMint,
+                        color: AppColors.goldenYellow,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -424,7 +425,9 @@ class _LoreCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            width: 36,
+            height: 36,
+            padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
               color: AppColors.dewMint.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(10),
@@ -433,7 +436,9 @@ class _LoreCard extends StatelessWidget {
                 width: 0.8,
               ),
             ),
-            child: Icon(icon, color: AppColors.dewMint, size: 20),
+            child: viceCityAssetForIcon(icon) != null
+                ? Image.asset(viceCityAssetForIcon(icon)!, fit: BoxFit.contain)
+                : Icon(icon, color: AppColors.dewMint, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -483,6 +488,8 @@ class _PrincipleRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
+          width: 32,
+          height: 32,
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: AppColors.dewMint.withValues(alpha: 0.12),
@@ -492,7 +499,9 @@ class _PrincipleRow extends StatelessWidget {
               width: 0.8,
             ),
           ),
-          child: Icon(icon, color: AppColors.dewMint, size: 18),
+          child: viceCityAssetForIcon(icon) != null
+              ? Image.asset(viceCityAssetForIcon(icon)!, fit: BoxFit.contain)
+              : Icon(icon, color: AppColors.dewMint, size: 18),
         ),
         const SizedBox(width: 12),
         Expanded(

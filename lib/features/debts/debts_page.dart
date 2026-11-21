@@ -90,7 +90,11 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
         actions: [
           IconButton(
             tooltip: context.tr('Split a bill'),
-            icon: const Icon(Icons.groups_outlined),
+            icon: Image.asset(
+              'assets/icon-compress/106_users_group-kompres.png',
+              width: 24,
+              height: 24,
+            ),
             onPressed: () => showSplitSheet(context),
           ),
         ],

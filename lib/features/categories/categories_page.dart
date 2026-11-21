@@ -246,7 +246,13 @@ class _CategoryFormState extends ConsumerState<CategoryForm> {
                 for (final e in categoryIcons.entries)
                   ChoiceChip(
                     showCheckmark: false,
-                    label: Icon(e.value, size: 20),
+                    label: viceCityAssetFor(e.key) != null
+                        ? Image.asset(
+                            viceCityAssetFor(e.key)!,
+                            width: 22,
+                            height: 22,
+                          )
+                        : Icon(e.value, size: 20),
                     selected: _icon == e.key,
                     onSelected: (_) => setState(() => _icon = e.key),
                   ),

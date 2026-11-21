@@ -11,7 +11,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = false;
 
-  group('About Sheet Botanical Identity Tests', () {
+  group('About Sheet Vice City Sunset Identity Tests', () {
     Widget createTestApp({Locale locale = const Locale('en')}) {
       return MaterialApp(
         theme: buildTheme(),
@@ -29,7 +29,7 @@ void main() {
       );
     }
 
-    testWidgets('Renders Botanical identity, current version, and omits theme switcher', (tester) async {
+    testWidgets('Renders Vice City Sunset identity, current version, and omits theme switcher', (tester) async {
       await tester.pumpWidget(createTestApp());
       await tester.pumpAndSettle();
 
@@ -41,19 +41,19 @@ void main() {
       expect(find.text('Your money, under your control.'), findsOneWidget);
 
       await tester.scrollUntilVisible(
-        find.text('The Botanical Sanctuary'),
+        find.text('Vice City Sunset'),
         150,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
-      expect(find.text('The Botanical Sanctuary'), findsOneWidget);
+      expect(find.text('Vice City Sunset'), findsOneWidget);
 
       expect(find.text('Cyberpunk'), findsNothing);
       expect(find.text('Switch to Cyberpunk Grid?'), findsNothing);
       expect(find.byIcon(Icons.swap_horiz_rounded), findsNothing);
     });
 
-    testWidgets('In Indonesian locale, renders localized Botanical lore and actions', (tester) async {
+    testWidgets('In Indonesian locale, renders localized Vice City Sunset lore and actions', (tester) async {
       await tester.pumpWidget(createTestApp(locale: const Locale('id')));
       await tester.pumpAndSettle();
 
@@ -61,12 +61,12 @@ void main() {
       expect(find.text('Uangmu, di bawah kendalimu.'), findsOneWidget);
 
       await tester.scrollUntilVisible(
-        find.text('Suaka Botani Finansial'),
+        find.text('Cakrawala Neon'),
         150,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
-      expect(find.text('Suaka Botani Finansial'), findsOneWidget);
+      expect(find.text('Cakrawala Neon'), findsOneWidget);
       expect(find.byIcon(Icons.swap_horiz_rounded), findsNothing);
     });
   });

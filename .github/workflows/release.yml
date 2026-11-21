@@ -124,7 +124,7 @@ jobs:
         if: steps.check_release.outputs.exists == 'false'
         run: flutter test --no-pub
 
-      - name: Configure Release Signing (from GitHub Secrets if available)
+      - name: Configure Release Signing (from GitHub Secrets)
         if: steps.check_release.outputs.exists == 'false'
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -142,7 +142,8 @@ jobs:
           EOF
             echo "Release signing configured from GitHub Secrets."
           else
-            echo "GitHub signing secrets not set; using fallback signing config."
+            echo "::error::Missing KEYSTORE_BASE64 or KEY_STORE_PASSWORD in GitHub Secrets. Refusing to publish a debug-signed release APK."
+            exit 1
           fi
 
       - name: Build Release APK
@@ -150,7 +151,7 @@ jobs:
         run: |
           for i in 1 2 3; do
             echo "Attempt $i to build release APK..."
-            flutter build apk --release && break || {
+            flutter build apk --release --obfuscate --split-debug-info=build/symbols && break || {
               if [ $i -lt 3 ]; then
                 echo "Build attempt $i failed. Retrying in 15 seconds..."
                 sleep 15

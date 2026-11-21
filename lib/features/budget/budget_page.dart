@@ -31,7 +31,9 @@ class BudgetPage extends ConsumerWidget {
     final catsAsync = ref.watch(categoriesProvider);
     final baseBudgets = ref.watch(budgetByCategoryProvider);
     final budgets = ref.watch(effectiveBudgetProvider);
-    final prevBudgets = ref.watch(prevBudgetsProvider).maybeWhen(
+    final prevBudgets = ref
+        .watch(prevBudgetsProvider)
+        .maybeWhen(
           data: (l) => l.where((b) => b.amount > 0).toList(),
           orElse: () => const <Budget>[],
         );
@@ -44,7 +46,8 @@ class BudgetPage extends ConsumerWidget {
     final breakdown = ref.watch(budget503020BreakdownProvider);
     final budgetRule = ref.watch(budgetRuleProvider);
     final prevPool = budgetRule.getTotalBudget(prevPeriod.key);
-    final canCopyPrev = breakdown.totalBudget <= 0 &&
+    final canCopyPrev =
+        breakdown.totalBudget <= 0 &&
         !baseBudgets.values.any((v) => v > 0) &&
         (budgetRule.hasPeriodConfig(prevPeriod.key) || prevBudgets.isNotEmpty);
 
@@ -102,7 +105,11 @@ class BudgetPage extends ConsumerWidget {
                             ),
                           ),
                           FilledButton.tonalIcon(
-                            icon: const Icon(Icons.edit_outlined, size: 15),
+                            icon: Image.asset(
+                              'assets/icons/vice_city/settings.png',
+                              width: 15,
+                              height: 15,
+                            ),
                             label: Text(
                               breakdown.totalBudget > 0
                                   ? context.tr('Edit')
@@ -118,7 +125,9 @@ class BudgetPage extends ConsumerWidget {
                               ),
                               foregroundColor: AppColors.dewMint,
                               side: BorderSide(
-                                color: AppColors.dewMint.withValues(alpha: 0.35),
+                                color: AppColors.dewMint.withValues(
+                                  alpha: 0.35,
+                                ),
                                 width: 1,
                               ),
                               padding: const EdgeInsets.symmetric(
@@ -159,7 +168,9 @@ class BudgetPage extends ConsumerWidget {
                                 }),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: Colors.white70,
-                                  fontFeatures: const [FontFeature.tabularFigures()],
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures(),
+                                  ],
                                 ),
                               ),
                             ),
@@ -172,7 +183,9 @@ class BudgetPage extends ConsumerWidget {
                                     ? AppColors.expenseOnDark
                                     : AppColors.dewMint,
                                 fontWeight: FontWeight.w800,
-                                fontFeatures: const [FontFeature.tabularFigures()],
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
                               ),
                             ),
                           ],
@@ -183,7 +196,8 @@ class BudgetPage extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0F221B).withValues(alpha: 0.70),
+                            color: const Color(0xFF0F221B)
+                                .withValues(alpha: 0.70),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: AppColors.dewMint.withValues(alpha: 0.18),
@@ -195,7 +209,11 @@ class BudgetPage extends ConsumerWidget {
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.pie_chart_outline_rounded, size: 14, color: AppColors.dewMint),
+                                  const Icon(
+                                    Icons.pie_chart_outline_rounded,
+                                    size: 14,
+                                    color: AppColors.dewMint,
+                                  ),
                                   const SizedBox(width: 6),
                                   Text(
                                     context.tr('50/30/20 Budgeting Rule'),
@@ -287,7 +305,11 @@ class BudgetPage extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         FilledButton.icon(
-                          icon: const Icon(Icons.add, size: 18),
+                          icon: Image.asset(
+                            'assets/icons/vice_city/add.png',
+                            width: 18,
+                            height: 18,
+                          ),
                           label: Text(context.tr('Set Total Budget')),
                           style: FilledButton.styleFrom(
                             backgroundColor: AppColors.dewMint,
@@ -329,7 +351,9 @@ class BudgetPage extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(7),
                               decoration: BoxDecoration(
-                                color: AppColors.dewMint.withValues(alpha: 0.16),
+                                color: AppColors.dewMint.withValues(
+                                  alpha: 0.16,
+                                ),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -390,11 +414,14 @@ class BudgetPage extends ConsumerWidget {
                               ),
                             ),
                             style: FilledButton.styleFrom(
-                              backgroundColor:
-                                  AppColors.dewMint.withValues(alpha: 0.18),
+                              backgroundColor: AppColors.dewMint.withValues(
+                                alpha: 0.18,
+                              ),
                               foregroundColor: AppColors.dewMint,
                               side: BorderSide(
-                                color: AppColors.dewMint.withValues(alpha: 0.35),
+                                color: AppColors.dewMint.withValues(
+                                  alpha: 0.35,
+                                ),
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -567,19 +594,24 @@ class BudgetPage extends ConsumerWidget {
                         vertical: 4,
                       ),
                       leading: Container(
-                        padding: const EdgeInsets.all(8),
+                        width: 36,
+                        height: 36,
+                        padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF5EEAD4).withValues(alpha: 0.16),
+                          color: const Color(0xFF5EEAD4)
+                              .withValues(alpha: 0.16),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFF5EEAD4).withValues(alpha: 0.35),
+                            color: const Color(0xFF5EEAD4)
+                                .withValues(alpha: 0.35),
                             width: 1,
                           ),
                         ),
-                        child: const Icon(
-                          Icons.track_changes_rounded,
-                          color: Color(0xFF5EEAD4),
-                          size: 20,
+                        child: Image.asset(
+                          'assets/icons/vice_city/goals.png',
+                          width: 20,
+                          height: 20,
+                          fit: BoxFit.contain,
                         ),
                       ),
                       title: Text(

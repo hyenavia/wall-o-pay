@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="botanical">
+<html lang="en" data-theme="vice-city-sunset">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Wall o' Pay – Grow Better Financial Habits | Enchanted Glasshouse</title>
+  <title>Wall o' Pay – Grow Better Financial Habits | Vice City Sunset</title>
   <meta name="description"
     content="Take control of your money, build better habits, and let your financial future grow one step at a time with Wall o' Pay. A modern, offline-first personal finance application with Drift SQLite and biometric encryption.">
   <meta name="keywords"
-    content="Wall o' Pay, personal finance, budget tracker, expense tracker, flutter, offline first, drift sqlite, cashflow manager, enchanted glasshouse">
+    content="Wall o' Pay, personal finance, budget tracker, expense tracker, flutter, offline first, drift sqlite, cashflow manager, vice city sunset">
   <meta name="author" content="Wall o' Pay">
 
   <!-- Open Graph / Social Meta -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="Wall o' Pay – Grow Better Financial Habits">
   <meta property="og:description"
-    content="Take control of your money, build better habits, and let your financial future grow one step at a time. Offline-first, biometric keystore encryption, zero ads.">
+    content="Take control of your money, build better habits, and let your financial future grow one step at a time. Offline-first, Android Keystore PIN &amp; biometric lock, zero ads.">
   <meta property="og:image" content="images/banner.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Wall o' Pay – Grow Better Financial Habits">
@@ -29,11 +29,11 @@
   <link rel="icon" type="image/png" sizes="192x192" href="images/icon.png">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 
-  <!-- Google Fonts: Outfit (Display & Headings), DM Sans (Body & Finances), Lora (Editorial Accent) -->
+  <!-- Google Fonts: Space Grotesk (Display & Numbers), Inter (Body & UI), IBM Plex Mono (Technical Metadata) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Outfit:wght@500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
     rel="stylesheet">
 
   <!-- Stylesheet -->
@@ -41,12 +41,14 @@
 </head>
 
 <body>
-  <!-- Leaf Symbol Definition for Botanical Decorations -->
+  <!-- Sunset Horizon Emblem for CTA Section -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
-      <symbol id="lf" viewBox="0 0 100 160">
-        <path d="M50 0C88 32 94 88 50 160 6 88 12 32 50 0Z" />
-        <path d="M50 14V150" stroke="currentColor" stroke-opacity=".3" stroke-width="2" fill="none" />
+      <symbol id="sunset-mark" viewBox="0 0 64 64">
+        <circle cx="32" cy="30" r="16" fill="currentColor" fill-opacity="0.9" />
+        <rect x="8" y="38" width="48" height="3" rx="1.5" fill="currentColor" fill-opacity="0.7" />
+        <rect x="14" y="45" width="36" height="3" rx="1.5" fill="currentColor" fill-opacity="0.45" />
+        <rect x="22" y="52" width="20" height="3" rx="1.5" fill="currentColor" fill-opacity="0.25" />
       </symbol>
     </defs>
   </svg>
@@ -59,7 +61,7 @@
       <a class="brand-link" href="#top" aria-label="Wall o' Pay Home">
         <img src="images/logo.png" alt="Wall o' Pay Logo" class="brand-logo-img">
         <span class="brand-title">Wall o' Pay</span>
-        <span class="brand-version-badge app-version-tag">v2.16.2</span>
+        <span class="brand-version-badge app-version-tag">v3.0.0</span>
       </a>
 
       <nav class="nav-menu" id="nav-links" aria-label="Main Navigation">
@@ -79,19 +81,17 @@
   </header>
 
   <!-- ========================================================================
-       B. HERO SECTION (Enchanted Glasshouse Atmosphere)
+       B. HERO SECTION (Vice City Sunset Atmosphere)
        ======================================================================== -->
   <section class="hero-section" id="top">
     <div class="hero-ambient-beam" aria-hidden="true"></div>
-    <svg class="botanical-silhouette" style="width:280px;left:-60px;bottom:40px;transform:rotate(45deg)" aria-hidden="true"><use href="#lf" /></svg>
-    <svg class="botanical-silhouette" style="width:220px;right:4%;top:80px;transform:rotate(20deg)" aria-hidden="true"><use href="#lf" /></svg>
 
     <div class="wrap hero-grid">
       <!-- Left Column: Editorial Content -->
       <div class="hero-text-content">
         <div class="editorial-pill">
           <span class="pulse-dot"></span>
-          <span>Enchanted Glasshouse • <strong class="app-version-tag">v2.16.2</strong></span>
+          <span>Vice City Sunset • <strong class="app-version-tag">v3.0.0</strong></span>
         </div>
 
         <h1>
@@ -107,7 +107,7 @@
           <a class="btn btn-primary" href="https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk"
             id="hero-download-cta">
             <span>📥</span>
-            <span id="hero-download-text">Download APK (v2.16.2)</span>
+            <span id="hero-download-text">Download APK (v3.0.0)</span>
           </a>
           <a class="btn btn-ghost" href="#features">
             <span>Explore Features</span>
@@ -118,7 +118,7 @@
         <div class="hero-spec-chips">
           <div class="spec-chip"><span class="ico">⚡</span> 100% Offline SQLite (0ms)</div>
           <div class="spec-chip"><span class="ico">🛡️</span> Biometric Unlock</div>
-          <div class="spec-chip"><span class="ico">🌱</span> 50/30/20 Smart Pools</div>
+          <div class="spec-chip"><span class="ico">🌅</span> 50/30/20 Smart Pools</div>
           <div class="spec-chip"><span class="ico">🚫</span> Zero Ads Forever</div>
         </div>
       </div>
@@ -181,7 +181,7 @@
             <div class="mock-pulse-card">
               <div class="mock-pulse-head">
                 <div class="mock-pulse-title">
-                  <span>🌿</span>
+                  <span>🌅</span>
                   <span>Daily Budget Pulse</span>
                 </div>
                 <span class="mock-safe-badge">Safe</span>
@@ -195,7 +195,7 @@
             <!-- Recent Activity List -->
             <div class="mock-section-label">
               <span>Recent Activities</span>
-              <span style="color:var(--fresh-sage); cursor:pointer;">See All ›</span>
+              <span style="color:var(--neon-cyan); cursor:pointer;">See All ›</span>
             </div>
             <div class="mock-tx-list">
               <div class="mock-tx-tile">
@@ -249,7 +249,7 @@
           </h2>
           <p class="section-lead">
             Good financial health isn’t built on restriction, anxiety, or cumbersome spreadsheets.
-            Just like tending a sunlit conservatory, true financial peace grows through gentle, steady, and intentional daily habits.
+            Just like watching a calm coastal sunset, true financial clarity grows through steady, intentional daily habits.
           </p>
 
           <div class="intro-pillars-list">
@@ -265,7 +265,7 @@
               <div class="intro-pillar-bullet">2</div>
               <div class="intro-pillar-content">
                 <h4>Balanced 50/30/20 Freedom</h4>
-                <p>Categorize income into Needs, Wants, and Savings pools. Spend guilt-free while securing your future canopy.</p>
+                <p>Categorize income into Needs, Wants, and Savings pools. Spend guilt-free while securing your future horizon.</p>
               </div>
             </div>
 
@@ -296,7 +296,7 @@
   <section class="paper bento-section" id="features">
     <div class="wrap">
       <div class="section-head-center">
-        <div class="editorial-pill light">ORGANIC BENTO GRID</div>
+        <div class="editorial-pill light">MODULAR BENTO GRID</div>
         <h2>Designed for <em>Effortless Harmony</em></h2>
         <p class="section-lead">
           Every tool you need to master personal finance, shaped into an intuitive, tranquil experience.
@@ -307,9 +307,9 @@
         <!-- 1. Financial Overview (Wide Spotlight - Span 8) -->
         <div class="bento-card bento-span-8">
           <div class="bento-card-header">
-            <div class="bento-icon-badge">🌿</div>
-            <h3>Net Worth, Vitality Score &amp; Harvest Recaps</h3>
-            <p>Unified real-time visibility across accounts, receivables, and debts with a 0–100 Glasshouse Vitality Score, interactive drill-downs, and Weekly/Monthly Harvest Recaps.</p>
+            <div class="bento-icon-badge">🌅</div>
+            <h3>Net Worth, Vitality Score &amp; Monthly Recaps</h3>
+            <p>Unified real-time visibility across accounts, receivables, and debts with a 0–100 Financial Vitality Score, interactive drill-downs, and Weekly/Monthly Recaps.</p>
           </div>
           <div class="bento-micro-ui">
             <div class="sparkline-preview">
@@ -319,13 +319,13 @@
                   <div class="sparkline-stat-value">Rp 12.850.000</div>
                 </div>
                 <div style="text-align: right;">
-                  <span class="mock-hero-flow-pill" style="font-size:11px;">↗ +Rp 5.350.000 this month</span>
+                  <span class="mock-hero-flow-pill" style="font-size:11px; color:var(--income); background:rgba(52,211,153,0.14);">↗ +Rp 5.350.000 this month</span>
                 </div>
               </div>
               <!-- SVG Sparkline Trend Curve -->
               <svg viewBox="0 0 380 60" style="width:100%; height:45px; overflow:visible;" aria-hidden="true">
-                <path d="M0,50 Q40,45 80,30 T160,25 T240,15 T320,18 T380,5" fill="none" stroke="var(--emerald-leaf)" stroke-width="3" stroke-linecap="round" />
-                <circle cx="380" cy="5" r="4" fill="var(--income)" />
+                <path d="M0,50 Q40,45 80,30 T160,25 T240,15 T320,18 T380,5" fill="none" stroke="var(--coral-pink)" stroke-width="3" stroke-linecap="round" />
+                <circle cx="380" cy="5" r="4" fill="var(--income-paper)" />
               </svg>
             </div>
           </div>
@@ -336,7 +336,7 @@
           <div class="bento-card-header">
             <div class="bento-icon-badge">⚡</div>
             <h3>5-Second Rapid Logging</h3>
-            <p>Input cashflow instantly with built-in mini calculator arithmetic, dynamic botanical category pills, and receipt attachments.</p>
+            <p>Input cashflow instantly with built-in mini calculator arithmetic, custom 3D category icons, and receipt attachments.</p>
           </div>
           <div class="bento-micro-ui">
             <div class="sparkline-preview" style="display:flex; flex-direction:column; gap:8px;">
@@ -384,8 +384,8 @@
           </div>
           <div class="bento-micro-ui">
             <div class="sparkline-preview" style="text-align:center;">
-              <span class="mock-safe-badge" style="font-size:10px; padding:3px 10px;">🟢 Safe to Spend</span>
-              <div style="font-size:1.6rem; font-weight:700; color:var(--glasshouse-green); margin:8px 0 2px;">Rp 145.000</div>
+              <span class="mock-safe-badge" style="font-size:10px; padding:3px 10px; color:var(--income); background:rgba(52,211,153,0.16);">🟢 Safe to Spend</span>
+              <div style="font-size:1.6rem; font-weight:700; color:var(--ink); margin:8px 0 2px;">Rp 145.000</div>
               <small style="color:var(--ink-muted);">Remaining daily quota for November</small>
             </div>
           </div>
@@ -396,7 +396,7 @@
           <div class="bento-card-header">
             <div class="bento-icon-badge">🎯</div>
             <h3>Savings Milestones &amp; Pace</h3>
-            <p>Build your emergency canopy or long-term dreams with weekly/monthly savings pace projections, status badges, and quick-fill deposits.</p>
+            <p>Build your emergency reserve or long-term dreams with weekly/monthly savings pace projections, status badges, and quick-fill deposits.</p>
           </div>
           <div class="bento-micro-ui">
             <div class="sparkline-preview">
@@ -417,15 +417,15 @@
               <div class="bento-icon-badge">🛡️</div>
               <h3>100% Offline Autonomy &amp; Biometric Keystore</h3>
               <p>
-                Powered by local Drift SQLite with zero background telemetry. Authenticate via fingerprint or face recognition,
-                shielded by Android Keystore 2,048-iteration salted HMAC-SHA256 encryption. Your financial privacy is mathematically protected.
+                Powered by local Drift SQLite inside your Android app sandbox with zero background telemetry. Authenticate via fingerprint or face recognition,
+                shielded by Android Keystore 2,048-iteration salted HMAC-SHA256 PIN verification. Your financial privacy is protected on-device.
               </p>
             </div>
             <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-end;">
-              <span class="spec-chip" style="background:rgba(255,255,255,0.08); border-color:var(--fresh-sage); color:#FFF;">🔑 Android Keystore</span>
-              <span class="spec-chip" style="background:rgba(255,255,255,0.08); border-color:var(--fresh-sage); color:#FFF;">⚡ 0ms Drift SQLite</span>
-              <span class="spec-chip" style="background:rgba(255,255,255,0.08); border-color:var(--fresh-sage); color:#FFF;">🚫 Zero Tracking</span>
-              <span class="spec-chip" style="background:rgba(255,255,255,0.08); border-color:var(--fresh-sage); color:#FFF;">📂 Filtered PDF &amp; CSV Export</span>
+              <span class="spec-chip" style="background:rgba(36,48,68,0.8); border-color:var(--neon-cyan); color:#FFF;">🔑 Android Keystore</span>
+              <span class="spec-chip" style="background:rgba(36,48,68,0.8); border-color:var(--neon-cyan); color:#FFF;">⚡ 0ms Drift SQLite</span>
+              <span class="spec-chip" style="background:rgba(36,48,68,0.8); border-color:var(--neon-cyan); color:#FFF;">🚫 Zero Tracking</span>
+              <span class="spec-chip" style="background:rgba(36,48,68,0.8); border-color:var(--neon-cyan); color:#FFF;">📂 Filtered PDF &amp; CSV Export</span>
             </div>
           </div>
         </div>
@@ -442,7 +442,7 @@
         <div class="editorial-pill">AUTHENTIC INTERFACE</div>
         <h2>Designed for <em>Your Daily Flow</em></h2>
         <p class="section-lead">
-          Explore Wall o' Pay's signature Enchanted Glasshouse interface, crafted for effortless clarity day and night.
+          Explore Wall o' Pay's signature Vice City Sunset interface, crafted for effortless clarity day and night.
         </p>
       </div>
 
@@ -467,7 +467,7 @@
             <div class="showcase-feature-points">
               <div class="showcase-point-item"><span class="chk">✓</span><span><b>Hero Balance Card:</b> Real-time calculated net balance across cash, bank, and digital wallets.</span></div>
               <div class="showcase-point-item"><span class="chk">✓</span><span><b>Daily Pulse Radar:</b> Know if your spending pace is Safe, Warning, or Alert in one glance.</span></div>
-              <div class="showcase-point-item"><span class="chk">✓</span><span><b>Quick Shortcuts:</b> Tap the floating emerald '+' button to log cashflows in under 5 seconds.</span></div>
+              <div class="showcase-point-item"><span class="chk">✓</span><span><b>Quick Shortcuts:</b> Tap the floating sunset '+' button to log cashflows in under 5 seconds.</span></div>
             </div>
           </div>
 
@@ -480,7 +480,7 @@
             </p>
             <div class="showcase-feature-points">
               <div class="showcase-point-item"><span class="chk">✓</span><span><b>Built-in Arithmetic:</b> Type calculations directly in the amount field (e.g. 25000 + 15000).</span></div>
-              <div class="showcase-point-item"><span class="chk">✓</span><span><b>Botanical Categories:</b> 24 custom glasshouse icon badges for immediate visual recognition.</span></div>
+              <div class="showcase-point-item"><span class="chk">✓</span><span><b>Custom 3D Categories:</b> 25 bespoke Vice City Sunset icon badges for immediate visual recognition.</span></div>
               <div class="showcase-point-item"><span class="chk">✓</span><span><b>Receipt Photos:</b> Securely attach photos of bills or payment proofs stored only on device.</span></div>
             </div>
           </div>
@@ -507,7 +507,7 @@
               Deep-dive into monthly cashflow charts, debt settlement trackers, and progress milestones for your personal dreams.
             </p>
             <div class="showcase-feature-points">
-              <div class="showcase-point-item"><span class="chk">✓</span><span><b>Net Worth &amp; Vitality Score:</b> 0–100 four-pillar health score with interactive category drill-downs and Harvest Recaps.</span></div>
+              <div class="showcase-point-item"><span class="chk">✓</span><span><b>Net Worth &amp; Vitality Score:</b> 0–100 four-pillar health score with interactive category drill-downs and Monthly Recaps.</span></div>
               <div class="showcase-point-item"><span class="chk">✓</span><span><b>Debt &amp; Custom Split Bills:</b> Equal or per-friend custom splits, due reminders, and partial settlement tracking.</span></div>
               <div class="showcase-point-item"><span class="chk">✓</span><span><b>Goal Pace Projections:</b> Track on-track/behind status with weekly or monthly contribution pace quick-fill.</span></div>
             </div>
@@ -532,7 +532,7 @@
                     <div class="mock-avatar">W</div>
                     <div>
                       <div class="mock-user-name">Olivia</div>
-                      <div class="mock-user-sub">Enchanted Glasshouse</div>
+                      <div class="mock-user-sub">Vice City Sunset</div>
                     </div>
                   </div>
                   <span style="font-size:15px; opacity:0.8;">⚙️</span>
@@ -550,7 +550,7 @@
 
                 <div class="mock-pulse-card">
                   <div class="mock-pulse-head">
-                    <div class="mock-pulse-title"><span>🌿</span><span>Daily Pulse</span></div>
+                    <div class="mock-pulse-title"><span>🌅</span><span>Daily Pulse</span></div>
                     <span class="mock-safe-badge">Safe</span>
                   </div>
                   <div class="mock-pulse-quota">Rp 145.000 <span class="mock-quota-sub">/ day safe</span></div>
@@ -580,13 +580,13 @@
                   <span style="font-size:14px; background:rgba(255,255,255,0.08); padding:4px 8px; border-radius:6px;">🔍 Filter</span>
                 </div>
 
-                <div style="background:rgba(22,42,34,0.6); padding:8px 12px; border-radius:12px; border:1px solid var(--glass-border); margin-bottom:12px; font-size:11px; display:flex; justify-content:space-between;">
+                <div style="background:var(--deep-navy); padding:8px 12px; border-radius:12px; border:1px solid var(--border-outline); margin-bottom:12px; font-size:11px; display:flex; justify-content:space-between;">
                   <span>Monthly Total Spent:</span>
                   <strong style="color:var(--expense)">-Rp 3.125.000</strong>
                 </div>
 
                 <div class="mock-tx-list">
-                  <div style="font-size:10px; font-weight:700; color:var(--fresh-sage); margin-top:4px;">TODAY • 11 NOV</div>
+                  <div style="font-size:10px; font-weight:700; color:var(--neon-cyan); margin-top:4px;">TODAY • 11 NOV</div>
                   <div class="mock-tx-tile">
                     <div class="tx-left"><div class="tx-icon-sq out">🛒</div><div class="tx-meta"><strong>Organic Groceries</strong><small>Supermarket • Needs</small></div></div>
                     <div class="tx-val neg">-Rp 185.000</div>
@@ -595,7 +595,7 @@
                     <div class="tx-left"><div class="tx-icon-sq in">📈</div><div class="tx-meta"><strong>Dividend Yield</strong><small>Investment • Passive</small></div></div>
                     <div class="tx-val pos">+Rp 450.000</div>
                   </div>
-                  <div style="font-size:10px; font-weight:700; color:var(--fresh-sage); margin-top:8px;">YESTERDAY • 10 NOV</div>
+                  <div style="font-size:10px; font-weight:700; color:var(--neon-cyan); margin-top:8px;">YESTERDAY • 10 NOV</div>
                   <div class="mock-tx-tile">
                     <div class="tx-left"><div class="tx-icon-sq out">⚡</div><div class="tx-meta"><strong>Electricity &amp; Water</strong><small>Bills &amp; Utilities</small></div></div>
                     <div class="tx-val neg">-Rp 320.000</div>
@@ -614,16 +614,16 @@
                 </div>
 
                 <div class="mock-hero-card" style="padding:10px 12px; margin-bottom:10px;">
-                  <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--fresh-sage);">
+                  <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--neon-cyan);">
                     <span>Allocated Budget</span>
                     <span>Rp 8.500.000</span>
                   </div>
                   <div style="font-size:11px; margin-top:4px;">Rp 3.250.000 remaining (38%)</div>
                   <div class="mock-meter-track" style="margin-top:6px; height:6px;">
                     <div style="display:flex; height:100%; width:100%;">
-                      <div style="background:var(--income); width:50%;"></div>
-                      <div style="background:var(--fresh-sage); width:30%;"></div>
-                      <div style="background:var(--emerald-leaf); width:20%;"></div>
+                      <div style="background:var(--sunset-magenta); width:50%;"></div>
+                      <div style="background:var(--neon-cyan); width:30%;"></div>
+                      <div style="background:var(--income); width:20%;"></div>
                     </div>
                   </div>
                 </div>
@@ -634,21 +634,21 @@
                       <strong>🛡️ Needs (50%)</strong>
                       <span>62% spent</span>
                     </div>
-                    <div class="mock-meter-track" style="margin-top:4px;"><div class="mock-meter-fill" style="width:62%; background:var(--fresh-sage);"></div></div>
+                    <div class="mock-meter-track" style="margin-top:4px;"><div class="mock-meter-fill" style="width:62%; background:var(--sunset-magenta);"></div></div>
                   </div>
                   <div class="mock-pulse-card" style="padding:8px 10px; margin:0;">
                     <div style="display:flex; justify-content:space-between; font-size:11px;">
                       <strong>🎮 Wants (30%)</strong>
                       <span>40% spent</span>
                     </div>
-                    <div class="mock-meter-track" style="margin-top:4px;"><div class="mock-meter-fill" style="width:40%; background:var(--income);"></div></div>
+                    <div class="mock-meter-track" style="margin-top:4px;"><div class="mock-meter-fill" style="width:40%; background:var(--neon-cyan);"></div></div>
                   </div>
                   <div class="mock-pulse-card" style="padding:8px 10px; margin:0;">
                     <div style="display:flex; justify-content:space-between; font-size:11px;">
                       <strong>🎯 Savings (20%)</strong>
                       <span style="color:var(--income)">85% saved</span>
                     </div>
-                    <div class="mock-meter-track" style="margin-top:4px;"><div class="mock-meter-fill" style="width:85%; background:var(--emerald-leaf);"></div></div>
+                    <div class="mock-meter-track" style="margin-top:4px;"><div class="mock-meter-fill" style="width:85%; background:var(--income);"></div></div>
                   </div>
                 </div>
               </div>
@@ -722,10 +722,10 @@
 
         <!-- Pillar 2 -->
         <div class="lore-pillar-card">
-          <div class="lore-pillar-icon">🌱</div>
-          <h3>The Growing Sprout</h3>
+          <div class="lore-pillar-icon">🌅</div>
+          <h3>The Rising Horizon</h3>
           <p>
-            Reframing <strong>"Pay"</strong> into <em>"Pay yourself first"</em>. Every dollar saved and budgeted is a seed tended with care in your sanctuary.
+            Reframing <strong>"Pay"</strong> into <em>"Pay yourself first"</em>. Every dollar saved and budgeted builds toward a brighter financial horizon.
           </p>
         </div>
 
@@ -740,10 +740,10 @@
 
         <!-- Pillar 4 -->
         <div class="lore-pillar-card">
-          <div class="lore-pillar-icon">🌲</div>
-          <h3>The Botanical Sanctuary</h3>
+          <div class="lore-pillar-icon">🌴</div>
+          <h3>Vice City Sunset</h3>
           <p>
-            A serene night-forest environment crafted in emerald greens and soft sage—replacing fintech anxiety with mindful, peaceful planning.
+            A retro-modern coastal twilight palette crafted in Midnight Navy, Sunset Rose, and Sky Aqua—replacing fintech anxiety with calm clarity.
           </p>
         </div>
       </div>
@@ -769,7 +769,7 @@
           <thead>
             <tr>
               <th>Aspect / Feature</th>
-              <th class="col-highlight">🌿 Wall o' Pay</th>
+              <th class="col-highlight">🌅 Wall o' Pay</th>
               <th>Conventional Finance Apps</th>
             </tr>
           </thead>
@@ -791,7 +791,7 @@
             </tr>
             <tr>
               <td>Visual Aesthetics</td>
-              <td class="col-highlight">Enchanted Glasshouse (Botanical Modernism)</td>
+              <td class="col-highlight">Vice City Sunset (Retro-Modern Neon)</td>
               <td>Generic, sterile corporate templates</td>
             </tr>
             <tr>
@@ -817,10 +817,10 @@
       <div class="specs-guide-grid">
         <!-- Specs -->
         <div class="specs-box">
-          <h3 style="color:var(--glasshouse-green); margin-bottom:16px;">📱 Release Specifications</h3>
+          <h3 style="color:var(--ink); margin-bottom:16px;">📱 Release Specifications</h3>
           <div class="specs-row">
             <span class="specs-label">App Version</span>
-            <span class="specs-value app-version-tag" id="specs-version-val">v2.16.2 (Release)</span>
+            <span class="specs-value app-version-tag" id="specs-version-val">v3.0.0 (Release)</span>
           </div>
           <div class="specs-row">
             <span class="specs-label">Package Size</span>
@@ -832,7 +832,7 @@
           </div>
           <div class="specs-row">
             <span class="specs-label">Design Identity</span>
-            <span class="specs-value">Enchanted Glasshouse</span>
+            <span class="specs-value">Vice City Sunset</span>
           </div>
           <div class="specs-row">
             <span class="specs-label">License</span>
@@ -842,7 +842,7 @@
 
         <!-- Install Guide -->
         <div class="specs-box">
-          <h3 style="color:var(--glasshouse-green); margin-bottom:16px;">⚙️ How to Install on Android</h3>
+          <h3 style="color:var(--ink); margin-bottom:16px;">⚙️ How to Install on Android</h3>
           <div class="install-steps">
             <div class="step-card">
               <div class="step-number">1</div>
@@ -879,36 +879,77 @@
   </section>
 
   <!-- ========================================================================
-       H. COMMUNITY TESTIMONIALS SECTION (Paper Background)
+       H. FREQUENTLY ASKED QUESTIONS SECTION
        ======================================================================== -->
-  <section class="paper testi-section" id="testimonials">
+  <section class="paper faq-section" id="faq">
     <div class="wrap">
       <div class="section-head-center">
-        <div class="editorial-pill light">COMMUNITY VOICES</div>
-        <h2>Real People. <em>Real Financial Peace.</em></h2>
-        <p class="section-lead">Join users who have unlocked mindful cashflow habits with Wall o' Pay.</p>
+        <div class="editorial-pill light">FREQUENTLY ASKED QUESTIONS</div>
+        <h2>Clear Answers. <em>Zero Surprises.</em></h2>
+        <p class="section-lead">Everything you need to know about privacy, offline storage, and getting started with Wall o' Pay.</p>
       </div>
 
-      <div class="testimonial-card">
-        <p class="testimonial-quote" id="qt">
-          “Wall o’ Pay made me far more aware of my daily spending leaks. Managing monthly allowance is now completely effortless!”
-        </p>
-        <div class="testimonial-author" id="qn">— Sarah, University Student</div>
-        <div class="testimonial-controls">
-          <div class="testimonial-dots" id="dots" role="tablist" aria-label="Testimonial pagination"></div>
-          <button class="testimonial-next-btn" id="next" aria-label="Next testimonial">→</button>
-        </div>
+      <div class="faq-list">
+        <details class="faq-item" open>
+          <summary class="faq-question">
+            <span>Is Wall o' Pay completely free and ad-free?</span>
+            <span class="faq-chevron" aria-hidden="true">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Yes. Wall o' Pay is 100% open-source under the MIT License—there are no ads, no tracking, no monthly subscriptions, and no paywalls on PDF, CSV, or JSON exports.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Does it work without an internet connection?</span>
+            <span class="faq-chevron" aria-hidden="true">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Yes. Wall o' Pay uses an offline-first local Drift SQLite engine, so logging transactions, checking your Daily Financial Pulse, and viewing analytics work instantaneously with 0ms latency even in airplane mode.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>How do I back up or transfer my data to a new phone?</span>
+            <span class="faq-chevron" aria-hidden="true">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p>You stay in full control of your data. Enable optional Firebase Cloud Sync when you want cross-device backup, or export your ledger anytime in JSON, CSV, or PDF format.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>How are my PIN and biometric lock secured?</span>
+            <span class="faq-chevron" aria-hidden="true">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Your PIN is never stored in plaintext—it is protected with 2,048-iteration salted HMAC-SHA256 hashing backed by Android Keystore, alongside native fingerprint and face unlock.</p>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>Why is it distributed via GitHub Releases APK?</span>
+            <span class="faq-chevron" aria-hidden="true">+</span>
+          </summary>
+          <div class="faq-answer">
+            <p>Publishing directly on GitHub Releases lets anyone inspect the source code, verify builds, and install the latest updates right away without third-party store delays.</p>
+          </div>
+        </details>
       </div>
     </div>
   </section>
 
   <!-- ========================================================================
-       I. FINAL CTA SECTION (Arched Glasshouse Gateway on Moss Shadow)
+       I. FINAL CTA SECTION (Vice City Sunset Gateway)
        ======================================================================== -->
   <section class="dark-section cta-section" id="download">
     <div class="wrap cta-box">
-      <svg class="cta-icon-leaf" viewBox="0 0 100 160" fill="currentColor" aria-hidden="true">
-        <use href="#lf" />
+      <svg class="cta-icon-leaf" viewBox="0 0 64 64" fill="currentColor" aria-hidden="true">
+        <use href="#sunset-mark" />
       </svg>
       <h2>Start Growing Your<br><em>Financial Future.</em></h2>
       <p class="section-lead" style="margin-bottom:34px;">
@@ -919,7 +960,7 @@
         <a class="btn btn-primary" href="https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk"
           id="btn-download-apk" target="_blank" rel="noopener">
           <span>📥</span>
-          <span>Download Official APK (<span class="app-version-tag">v2.16.2</span>)</span>
+          <span>Download Official APK (<span class="app-version-tag">v3.0.0</span>)</span>
         </a>
         <a class="btn btn-ghost" href="https://github.com/hyenavia/wall-o-pay/releases" target="_blank" rel="noopener">
           <span>🔗</span>
@@ -930,7 +971,7 @@
   </section>
 
   <!-- ========================================================================
-       J. FOOTER (Minimalist Botanical Brand & Links)
+       J. FOOTER (Minimalist Vice City Sunset Brand & Links)
        ======================================================================== -->
   <footer class="glass-footer">
     <div class="wrap">
@@ -940,7 +981,7 @@
             <img src="images/logo.png" alt="Wall o' Pay Logo" style="width:32px; height:32px;">
             <strong style="font-family:var(--font-display); font-size:1.2rem; color:#FFF;">Wall o' Pay</strong>
           </div>
-          <p>Your money, under your control. A modern, offline-first personal finance application inspired by botanical conservatories.</p>
+          <p>Your money, under your control. A modern, offline-first personal finance application crafted with the Vice City Sunset aesthetic.</p>
         </div>
 
         <div class="footer-col">
@@ -967,7 +1008,7 @@
 
       <div class="footer-bottom-row">
         <div>Copyright &copy; 2026 <strong>Wall o' Pay</strong>. Open source under MIT License.</div>
-        <div>Engineered with Flutter, Drift SQLite &amp; Enchanted Glasshouse aesthetic.</div>
+        <div>Engineered with Flutter, Drift SQLite &amp; Vice City Sunset aesthetic.</div>
       </div>
     </div>
   </footer>

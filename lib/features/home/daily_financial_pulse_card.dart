@@ -205,7 +205,7 @@ class DailyFinancialPulseCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final muted = scheme.onSurface.withValues(alpha: 0.65);
     final colors = context.themeColors;
-    final safeColor = colors.primary;
+    final safeColor = colors.income;
     final warningColor = colors.warning;
     final limitColor = colors.expense;
 
@@ -256,9 +256,9 @@ class DailyFinancialPulseCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            statusColor.withValues(alpha: 0.16),
-            AppColors.cardSurface.withValues(alpha: 0.95),
-            AppColors.surfaceContainer.withValues(alpha: 0.88),
+            statusColor.withValues(alpha: 0.10),
+            AppColors.cardSurface.withValues(alpha: 0.96),
+            AppColors.surfaceContainer.withValues(alpha: 0.90),
           ],
         ),
         boxShadow: [
@@ -310,7 +310,15 @@ class DailyFinancialPulseCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(statusIcon, size: 14, color: statusColor),
+                          Image.asset(
+                            currentTier == DailyHealthTier.safe
+                                ? 'assets/icons/vice_city/growth.png'
+                                : (currentTier == DailyHealthTier.caution
+                                    ? 'assets/icons/vice_city/pulse.png'
+                                    : 'assets/icons/vice_city/minus.png'),
+                            width: 14,
+                            height: 14,
+                          ),
                           const SizedBox(width: 5),
                           Flexible(
                             child: Text(
@@ -690,7 +698,7 @@ class _PhaseInfoSheet extends StatelessWidget {
                     color: colors.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(Icons.spa_rounded, color: AppColors.sage, size: 24),
+                  child: Image.asset('assets/icons/vice_city/pulse.png', width: 24, height: 24),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -768,7 +776,7 @@ class _PhaseInfoSheet extends StatelessWidget {
                     value: pulse.dailyAllowance > 0
                         ? '${rupiah(pulse.dailyAllowance)} / ${context.tr('day')}'
                         : '-',
-                    valueColor: colors.primary,
+                    valueColor: colors.income,
                     bold: true,
                   ),
                 ],
@@ -776,8 +784,9 @@ class _PhaseInfoSheet extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _PhaseDetailTile(
-              color: AppColors.sage,
+              color: colors.income,
               icon: Icons.spa_rounded,
+              customAsset: 'assets/icons/vice_city/growth.png',
               phaseBadge: context.tr('Safe'),
               phaseTitle: context.tr('Phase 1: Safe Financial Health'),
               description: context.tr('Spending is well within limits. Keep up the mindful pace!'),
@@ -787,6 +796,7 @@ class _PhaseInfoSheet extends StatelessWidget {
             _PhaseDetailTile(
               color: AppColors.warning,
               icon: Icons.speed_rounded,
+              customAsset: 'assets/icons/vice_city/pulse.png',
               phaseBadge: context.tr('Caution'),
               phaseTitle: context.tr('Phase 2: Spending Velocity Warning'),
               description: context.tr('Today\'s spending has passed your daily quota. Balance it out tomorrow.'),
@@ -796,6 +806,7 @@ class _PhaseInfoSheet extends StatelessWidget {
             _PhaseDetailTile(
               color: colors.expense,
               icon: Icons.shield_outlined,
+              customAsset: 'assets/icons/vice_city/minus.png',
               phaseBadge: context.tr('Limit'),
               phaseTitle: context.tr('Phase 3: Budget Limit Reached'),
               description: context.tr('Expenses have reached the period limit. Focus on essentials only.'),
@@ -872,6 +883,7 @@ class _PhaseDetailTile extends StatelessWidget {
   const _PhaseDetailTile({
     required this.color,
     required this.icon,
+    this.customAsset,
     required this.phaseBadge,
     required this.phaseTitle,
     required this.description,
@@ -880,6 +892,7 @@ class _PhaseDetailTile extends StatelessWidget {
 
   final Color color;
   final IconData icon;
+  final String? customAsset;
   final String phaseBadge;
   final String phaseTitle;
   final String description;
@@ -915,7 +928,9 @@ class _PhaseDetailTile extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(icon, size: 12, color: color),
+                    customAsset != null
+                        ? Image.asset(customAsset!, width: 12, height: 12)
+                        : Icon(icon, size: 12, color: color),
                     const SizedBox(width: 4),
                     Text(
                       phaseBadge,

@@ -389,7 +389,11 @@ class _PendingSectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.pending_actions_rounded, size: 18, color: AppColors.dewMint),
+        Image.asset(
+          'assets/icon-compress/098_alarm_clock-kompres.png',
+          width: 18,
+          height: 18,
+        ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -580,17 +584,19 @@ class _RuleCard extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            width: 42,
+            height: 42,
+            padding: const EdgeInsets.all(9),
             decoration: BoxDecoration(
               color: catColor.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: Image.asset(
               isTransfer
-                  ? Icons.swap_horiz_rounded
-                  : iconFor(category?.icon ?? 'more'),
-              color: catColor,
-              size: 22,
+                  ? 'assets/icons/vice_city/transfer.png'
+                  : (viceCityAssetFor(category?.icon ?? 'more') ??
+                      'assets/icons/vice_city/diamond.png'),
+              fit: BoxFit.contain,
             ),
           ),
           const SizedBox(width: 12),

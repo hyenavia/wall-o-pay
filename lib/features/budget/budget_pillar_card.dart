@@ -70,7 +70,18 @@ class BudgetPillarCard extends StatelessWidget {
                           width: 1,
                         ),
                       ),
-                      child: Icon(bucket.icon, color: bucketColor, size: 22),
+                      child: Center(
+                        child: Image.asset(
+                          bucket == BudgetBucket.needs
+                              ? 'assets/icons/vice_city/home.png'
+                              : (bucket == BudgetBucket.wants
+                                  ? 'assets/icons/vice_city/gift.png'
+                                  : 'assets/icons/vice_city/savings.png'),
+                          width: 22,
+                          height: 22,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(

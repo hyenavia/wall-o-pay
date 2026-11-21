@@ -1,11 +1,11 @@
 /**
  * Wall o' Pay - Landing Page Interactive Logic
- * Signature Enchanted Glasshouse Theme
- * Includes: Showcase Screen Switcher, Testimonial Carousel, Mobile Nav Drawer,
+ * Signature Vice City Sunset Theme
+ * Includes: Showcase Screen Switcher, Mobile Nav Drawer,
  * and GitHub Releases API Version Sync.
  */
 
-const APP_VERSION = "2.16.2";
+const APP_VERSION = "3.0.0";
 
 // Helper to compare semver strings (e.g. "2.5.4" vs "v2.5.3")
 function isVersionGreater(v1, v2) {
@@ -65,77 +65,7 @@ function setupShowcaseTabs() {
   });
 }
 
-// 2. Testimonials Carousel
-const testimonials = [
-  {
-    quote: "“Wall o’ Pay made me far more aware of my daily spending leaks. Managing my monthly allowance is now completely effortless!”",
-    author: "— Sarah, University Student"
-  },
-  {
-    quote: "“The 50/30/20 budget pools and Daily Pulse tell me exactly when to stop splurging. Plus, offline SQLite means it opens instantly with zero lag.”",
-    author: "— Rafi, Software Engineer"
-  },
-  {
-    quote: "“The Enchanted Glasshouse aesthetic feels tranquil, mindful, and bespoke. With instant local SQLite storage and Biometric Unlock, managing my daily finances never feels stressful.”",
-    author: "— Dina, UI/UX Designer"
-  }
-];
-
-function setupTestimonials() {
-  const quoteText = document.getElementById("qt");
-  const quoteAuthor = document.getElementById("qn");
-  const dotsContainer = document.getElementById("dots");
-  const nextBtn = document.getElementById("next");
-
-  if (!quoteText || !quoteAuthor || !dotsContainer || !nextBtn) return;
-
-  let currentIndex = 0;
-  let timer = null;
-
-  function show(index) {
-    currentIndex = (index + testimonials.length) % testimonials.length;
-    quoteText.textContent = testimonials[currentIndex].quote;
-    quoteAuthor.textContent = testimonials[currentIndex].author;
-
-    Array.from(dotsContainer.children).forEach((dot, idx) => {
-      dot.setAttribute("aria-current", String(idx === currentIndex));
-    });
-  }
-
-  // Create dot buttons
-  dotsContainer.innerHTML = "";
-  testimonials.forEach((_, idx) => {
-    const dot = document.createElement("button");
-    dot.setAttribute("type", "button");
-    dot.setAttribute("aria-label", `Testimonial ${idx + 1}`);
-    dot.addEventListener("click", () => {
-      show(idx);
-      resetTimer();
-    });
-    dotsContainer.appendChild(dot);
-  });
-
-  nextBtn.addEventListener("click", () => {
-    show(currentIndex + 1);
-    resetTimer();
-  });
-
-  function startTimer() {
-    timer = setInterval(() => {
-      show(currentIndex + 1);
-    }, 7000);
-  }
-
-  function resetTimer() {
-    if (timer) clearInterval(timer);
-    startTimer();
-  }
-
-  show(0);
-  startTimer();
-}
-
-// 3. Mobile Navigation Drawer Toggle & Close on Anchor Click
+// 2. Mobile Navigation Drawer Toggle & Close on Anchor Click
 function setupMobileNav() {
   const toggle = document.getElementById("mobile-toggle");
   const nav = document.getElementById("nav-links");
@@ -156,7 +86,7 @@ function setupMobileNav() {
   }
 }
 
-// 4. Header Scroll Elevation & Active Spy
+// 3. Header Scroll Elevation & Active Spy
 function setupNavScroll() {
   const header = document.querySelector("header.glass-nav");
   if (!header) return;
@@ -170,7 +100,7 @@ function setupNavScroll() {
   }, { passive: true });
 }
 
-// 5. GitHub API: Fetch Latest Release Version without downgrading local version
+// 4. GitHub API: Fetch Latest Release Version without downgrading local version
 function fetchLatestReleaseVersion() {
   // Apply baseline local version
   document.querySelectorAll(".app-version-tag").forEach(el => {
@@ -217,7 +147,6 @@ function fetchLatestReleaseVersion() {
 // Initialize on DOM Ready
 document.addEventListener("DOMContentLoaded", () => {
   setupShowcaseTabs();
-  setupTestimonials();
   setupMobileNav();
   setupNavScroll();
   fetchLatestReleaseVersion();

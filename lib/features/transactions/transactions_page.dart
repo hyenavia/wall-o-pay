@@ -132,9 +132,11 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         actions: [
           IconButton(
             tooltip: context.tr('Cashflow Calendar'),
-            icon: Icon(
-              Icons.calendar_month_rounded,
-              color: (_showCalendar || _selectedDay != null) ? AppColors.dewMint : Colors.white,
+            icon: Image.asset(
+              'assets/icons/vice_city/calendar.png',
+              width: 22,
+              height: 22,
+              color: (_showCalendar || _selectedDay != null) ? AppColors.goldenYellow : null,
             ),
             onPressed: () => setState(() {
               _showCalendar = !_showCalendar;
@@ -143,15 +145,21 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
           IconButton(
             tooltip: context.tr('Filter by date range'),
-            icon: Icon(
-              Icons.date_range_rounded,
-              color: _range == null ? Colors.white : AppColors.dewMint,
+            icon: Image.asset(
+              'assets/icons/vice_city/calendar.png',
+              width: 22,
+              height: 22,
+              color: _range == null ? null : AppColors.goldenYellow,
             ),
             onPressed: _pickRange,
           ),
           PopupMenuButton<String>(
             tooltip: context.tr('Export'),
-            icon: const Icon(Icons.ios_share_rounded, color: Colors.white),
+            icon: Image.asset(
+              'assets/icons/vice_city/card.png',
+              width: 22,
+              height: 22,
+            ),
             onSelected: (choice) {
               if (choice == 'pdf') {
                 showReportDialog(context);
@@ -164,7 +172,11 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 value: 'pdf',
                 child: Row(
                   children: [
-                    const Icon(Icons.picture_as_pdf_outlined, size: 18, color: AppColors.dewMint),
+                    Image.asset(
+                      'assets/icon-compress/39_file_document-kompres.png',
+                      width: 18,
+                      height: 18,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -179,7 +191,11 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 value: 'csv',
                 child: Row(
                   children: [
-                    const Icon(Icons.table_view_outlined, size: 18, color: AppColors.dewMint),
+                    Image.asset(
+                      'assets/icon-compress/38_analytics_bars-kompres.png',
+                      width: 18,
+                      height: 18,
+                    ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
@@ -196,7 +212,11 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
         bottom: Center(
           child: _range != null
               ? InputChip(
-                  avatar: const Icon(Icons.date_range_rounded, size: 18, color: AppColors.dewMint),
+                  avatar: Image.asset(
+                    'assets/icon-compress/05_calendar-kompres.png',
+                    width: 18,
+                    height: 18,
+                  ),
                   label: Text(
                     '${shortDate(_range!.start)} - ${shortDate(_range!.end)}',
                     style: const TextStyle(color: AppColors.dewMint, fontWeight: FontWeight.w700),
@@ -295,7 +315,14 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           decoration: appInput(
                             context,
                             hint: context.tr('Search transaction...'),
-                            prefixIcon: const Icon(Icons.search_rounded, color: AppColors.freshSage),
+                            prefixIcon: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Image.asset(
+                                'assets/icons/vice_city/search.png',
+                                width: 20,
+                                height: 20,
+                              ),
+                            ),
                             suffixIcon: (_query.isNotEmpty || _searchController.text.isNotEmpty)
                                 ? IconButton(
                                     tooltip: context.tr('Clear search'),
@@ -314,17 +341,17 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                              for (final f in <(String, TxType?, IconData)>[
-                                (context.tr('All'), null, Icons.tune_rounded),
-                                (context.tr('Expense'), TxType.expense, Icons.arrow_upward_rounded),
-                                (context.tr('Income'), TxType.income, Icons.arrow_downward_rounded),
-                                (context.tr('Transfer'), TxType.transfer, Icons.swap_horiz_rounded),
+                              for (final f in <(String, TxType?, String)>[
+                                (context.tr('All'), null, 'assets/icons/vice_city/filter.png'),
+                                (context.tr('Expense'), TxType.expense, 'assets/icons/vice_city/minus.png'),
+                                (context.tr('Income'), TxType.income, 'assets/icons/vice_city/growth.png'),
+                                (context.tr('Transfer'), TxType.transfer, 'assets/icons/vice_city/transfer.png'),
                               ])
                                 Padding(
                                   padding: const EdgeInsets.only(right: 8),
                                   child: AppChip(
                                     label: f.$1,
-                                    icon: f.$3,
+                                    assetPath: f.$3,
                                     selected: _filter == f.$2,
                                     onSelected: () => setState(() => _filter = f.$2),
                                   ),
@@ -378,12 +405,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
-                                        Icons.account_balance_wallet_outlined,
-                                        size: 15,
-                                        color: _selectedWalletId != null
-                                            ? AppColors.dewMint
-                                            : AppColors.freshSage,
+                                      Image.asset(
+                                        'assets/icons/vice_city/wallet.png',
+                                        width: 15,
+                                        height: 15,
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
@@ -454,12 +479,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
-                                        Icons.category_outlined,
-                                        size: 15,
-                                        color: _selectedCategoryId != null
-                                            ? AppColors.dewMint
-                                            : AppColors.freshSage,
+                                      Image.asset(
+                                        'assets/icons/vice_city/diamond.png',
+                                        width: 15,
+                                        height: 15,
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
@@ -542,12 +565,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
-                                        Icons.balance_outlined,
-                                        size: 15,
-                                        color: _needWant != null
-                                            ? AppColors.dewMint
-                                            : AppColors.freshSage,
+                                      Image.asset(
+                                        'assets/icons/vice_city/pie_chart.png',
+                                        width: 15,
+                                        height: 15,
                                       ),
                                       const SizedBox(width: 6),
                                       Text(
@@ -664,10 +685,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                           ),
                           child: Row(
                             children: [
-                              Icon(
-                                Icons.receipt_long_outlined,
-                                size: 14,
-                                color: AppColors.freshSage,
+                              Image.asset(
+                                'assets/icon-compress/28_receipt-kompres.png',
+                                width: 15,
+                                height: 15,
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -850,7 +871,15 @@ class _SummaryTile extends StatelessWidget {
                 width: 1,
               ),
             ),
-            child: Icon(icon, color: color, size: 18),
+            child: Center(
+              child: Image.asset(
+                (icon == Icons.arrow_downward_rounded || icon == Icons.arrow_downward)
+                    ? 'assets/icons/vice_city/growth.png'
+                    : 'assets/icons/vice_city/minus.png',
+                width: 20,
+                height: 20,
+              ),
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -947,7 +976,11 @@ class _CashflowCalendarCard extends StatelessWidget {
                   color: AppColors.emeraldLeaf.withValues(alpha: 0.25),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.calendar_month_rounded, size: 16, color: AppColors.dewMint),
+                child: Image.asset(
+                  'assets/icon-compress/05_calendar-kompres.png',
+                  width: 16,
+                  height: 16,
+                ),
               ),
               const SizedBox(width: 8),
               Expanded(

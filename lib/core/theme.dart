@@ -1,45 +1,57 @@
-/// Konfigurasi sistem desain visual Wall o' Pay (Enchanted Glasshouse),
-/// perpaduan botanical forest dengan estetika rumah kaca modern, kaca transparan, dan pencahayaan lembut.
+/// Konfigurasi sistem desain visual Wall o' Pay (Vice City Sunset — Balanced),
+/// perpaduan atmosfer kota pesisir tropis saat matahari terbenam, neon signage halus,
+/// dan estetika retro-modern berlatar gelap kontras tinggi.
 /// Mencakup token warna ([AppColors]) dan konfigurasi Material 3 ([buildTheme]).
 library;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Palet dari desain Wall o' Pay (Enchanted Glasshouse).
+/// Palet dari desain Wall o' Pay (Vice City Sunset — Arah A: Sunset Elegance).
 class AppColors {
-  // Palet Utama Enchanted Glasshouse
-  static const glasshouseGreen = Color(0xFF23483B); // Identitas brand, tombol utama, dan elemen penting
-  static const emeraldLeaf = Color(0xFF39745A);     // Warna sekunder untuk aksen dan elemen botanical
-  static const freshSage = Color(0xFFA9C5B1);       // Aksen lembut untuk komponen pendukung
-  static const dewMint = Color(0xFFD5E8DC);         // Highlight lembut dan permukaan reflektif
-  static const softIvory = Color(0xFFF7F8F4);       // Latar terang dan permukaan kartu
-  static const mossShadow = Color(0xFF10251F);      // Latar gelap mendalam dan kontras tinggi
+  // Palet Utama Vice City Sunset (Arah A: Sunset Elegance)
+  static const midnightNavy = Color(0xFF0F172A); // Background utama (Slate 900 — gelap elegan, bukan pitch black)
+  static const deepNavy = Color(0xFF1E293B);     // Surface dan card (Slate 800 — kedalaman pas, nyaman di mata)
+  static const sunsetMagenta = Color(0xFFFB7185); // Primary accent (Warm Sunset Rose / Coral 400 — ramah di mata)
+  static const coralPink = Color(0xFFF43F5E);     // Secondary accent (Rose 500)
+  static const sunsetOrange = Color(0xFFF97316);  // Highlight (Warm Sunset Orange)
+  static const goldenYellow = Color(0xFFFBBF24);  // Positive highlight (Sunset Amber Gold)
+  static const neonCyan = Color(0xFF38BDF8);      // Aksen sekunder (Soft Sky Aqua — tidak menusuk mata)
+  static const softWhite = Color(0xFFF8FAFC);     // Teks utama (Slate 50 — jernih)
+  static const mutedBlueGray = Color(0xFF94A3B8); // Teks sekunder (Slate 400 — sangat terbaca)
 
-  // Alias kanonikal untuk kompatibilitas mundur
-  static const deepForest = glasshouseGreen;
-  static const sage = freshSage;
-  static const ivory = softIvory;
-  static const ink = mossShadow;
+  // Surface & Depth Tokens (Vice City Sunset — Arah A)
+  static const bg = midnightNavy; // Kanvas Slate Navy
+  static const cardSurface = deepNavy; // Permukaan Kartu Slate 800
+  static const surfaceContainer = Color(0xFF243044); // Kontainer & Dialog Elevated
+  static const borderOutline = Color(0xFF334155); // Garis Tepi Halus
 
-  // Semantik Finansial Kontras Tinggi
-  static const income = Color(0xFF38B271); // Cerah & berakar botani kontras tinggi di latar gelap
-  static const expense = Color(0xFFD64545);
-  static const warning = Color(0xFFE8A33D);
-
-  // Surface & Depth Tokens (Enchanted Glasshouse)
-  static const bg = mossShadow; // Kanvas Gelap Moss Shadow
-  static const cardSurface = Color(0xFF162A22); // Permukaan Kaca Zamrud Transparan
-  static const surfaceContainer = Color(0xFF1D372D); // Ruang Kontainer Kaca & Dialog Elevated
-  static const borderOutline = Color(0xFF2A4D3E); // Garis Refraksi & Bingkai Kaca Halus
+  // Semantik Finansial Universal & Ramah Mata (Arah A)
+  static const income = Color(0xFF10B981); // Emerald 500 (Universal Financial Green)
+  static const expense = Color(0xFFFB7185); // Warm Sunset Rose / Coral
+  static const warning = Color(0xFFF97316); // Warm Sunset Orange
+  static const positiveHighlight = Color(0xFFFBBF24); // Sunset Amber Gold
 
   // High-contrast semantic tokens on dark card surfaces
-  static const incomeOnDark = Color(0xFF6EE7B7);
-  static const expenseOnDark = Color(0xFFFCA5A5);
+  static const incomeOnDark = Color(0xFF34D399); // Emerald 400 (Sangat jernih di dark card tanpa silau)
+  static const expenseOnDark = Color(0xFFFB7185); // Rose 400
 
-  // Atmospheric Header Canopy Tokens (Enchanted Glasshouse)
-  static const headerCanopyTop = Color(0xFF0D1D17);
-  static const headerCanopyBottom = Color(0xFF142B22);
+  // Atmospheric Header Canopy Tokens
+  static const headerCanopyTop = Color(0xFF090D16);
+  static const headerCanopyBottom = Color(0xFF0F172A);
+
+  // Alias kanonikal untuk kompatibilitas mundur
+  static const glasshouseGreen = deepNavy;
+  static const emeraldLeaf = sunsetMagenta;
+  static const freshSage = neonCyan;
+  static const dewMint = goldenYellow;
+  static const softIvory = softWhite;
+  static const mossShadow = midnightNavy;
+
+  static const deepForest = deepNavy;
+  static const sage = sunsetMagenta;
+  static const ivory = softWhite;
+  static const ink = midnightNavy;
 }
 
 /// Mengaktifkan fitur `tabularFigures` pada seluruh gaya teks agar digit angka memiliki lebar seragam.
@@ -91,19 +103,20 @@ ThemeData buildTheme() {
     colorScheme: scheme,
   );
 
-  final outfitTheme = GoogleFonts.outfitTextTheme(base.textTheme);
-  final dmSansTheme = GoogleFonts.dmSansTextTheme(base.textTheme);
+  final spaceGroteskTheme = GoogleFonts.spaceGroteskTextTheme(base.textTheme);
+  final interTheme = GoogleFonts.interTextTheme(base.textTheme);
 
-  // Padukan Outfit untuk display/heading dan DM Sans untuk body/label finansial
-  final blendedTextTheme = dmSansTheme.copyWith(
-    displayLarge: outfitTheme.displayLarge,
-    displayMedium: outfitTheme.displayMedium,
-    displaySmall: outfitTheme.displaySmall,
-    headlineLarge: outfitTheme.headlineLarge,
-    headlineMedium: outfitTheme.headlineMedium,
-    headlineSmall: outfitTheme.headlineSmall,
-    titleLarge: outfitTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-    titleMedium: outfitTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+  // Padukan Space Grotesk untuk display/heading dan Inter untuk body/label deskripsi
+  final blendedTextTheme = interTheme.copyWith(
+    displayLarge: spaceGroteskTheme.displayLarge,
+    displayMedium: spaceGroteskTheme.displayMedium,
+    displaySmall: spaceGroteskTheme.displaySmall,
+    headlineLarge: spaceGroteskTheme.headlineLarge,
+    headlineMedium: spaceGroteskTheme.headlineMedium,
+    headlineSmall: spaceGroteskTheme.headlineSmall,
+    titleLarge: spaceGroteskTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+    titleMedium: spaceGroteskTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+    titleSmall: spaceGroteskTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
   );
 
   final styledTextTheme = _applyTabularFigures(
@@ -144,11 +157,11 @@ ThemeData buildTheme() {
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: colors.cardSurface,
       surfaceTintColor: Colors.transparent,
-      dragHandleColor: AppColors.dewMint.withValues(alpha: 0.35),
+      dragHandleColor: AppColors.mutedBlueGray.withValues(alpha: 0.35),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         side: BorderSide(
-          color: Color(0xFF2A4D3E),
+          color: AppColors.borderOutline,
           width: 1.0,
         ),
       ),
@@ -159,7 +172,7 @@ ThemeData buildTheme() {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: AppColors.dewMint.withValues(alpha: 0.16),
+          color: AppColors.borderOutline,
           width: 1.0,
         ),
       ),
@@ -171,7 +184,7 @@ ThemeData buildTheme() {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
         side: BorderSide(
-          color: AppColors.dewMint.withValues(alpha: 0.20),
+          color: AppColors.borderOutline,
           width: 1.0,
         ),
       ),
@@ -184,7 +197,7 @@ ThemeData buildTheme() {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
         side: BorderSide(
-          color: AppColors.dewMint.withValues(alpha: 0.35),
+          color: AppColors.goldenYellow.withValues(alpha: 0.45),
           width: 1.0,
         ),
       ),
@@ -196,7 +209,7 @@ ThemeData buildTheme() {
         ),
         backgroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return AppColors.emeraldLeaf;
+            return AppColors.sunsetMagenta;
           }
           return AppColors.surfaceContainer.withValues(alpha: 0.65);
         }),
@@ -204,25 +217,25 @@ ThemeData buildTheme() {
           if (states.contains(WidgetState.selected)) {
             return Colors.white;
           }
-          return AppColors.freshSage;
+          return AppColors.neonCyan;
         }),
         side: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return BorderSide(color: AppColors.dewMint.withValues(alpha: 0.55), width: 1.2);
+            return BorderSide(color: AppColors.goldenYellow.withValues(alpha: 0.55), width: 1.2);
           }
-          return BorderSide(color: AppColors.dewMint.withValues(alpha: 0.16), width: 1.0);
+          return BorderSide(color: AppColors.borderOutline, width: 1.0);
         }),
       ),
     ),
     chipTheme: ChipThemeData(
       backgroundColor: AppColors.surfaceContainer.withValues(alpha: 0.65),
-      selectedColor: AppColors.emeraldLeaf,
-      secondarySelectedColor: AppColors.emeraldLeaf,
-      labelStyle: const TextStyle(color: AppColors.softIvory, fontWeight: FontWeight.w600),
+      selectedColor: AppColors.sunsetMagenta,
+      secondarySelectedColor: AppColors.sunsetMagenta,
+      labelStyle: const TextStyle(color: AppColors.softWhite, fontWeight: FontWeight.w600),
       secondaryLabelStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-      side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.16), width: 1.0),
+      side: const BorderSide(color: AppColors.borderOutline, width: 1.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      iconTheme: const IconThemeData(color: AppColors.freshSage, size: 18),
+      iconTheme: const IconThemeData(color: AppColors.neonCyan, size: 18),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
@@ -294,25 +307,26 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
   final Color textPrimary;
   final Color textMuted;
 
-  static const enchantedGlasshouse = AppThemeColors(
+  static const viceCitySunset = AppThemeColors(
     bg: AppColors.bg,
     cardSurface: AppColors.cardSurface,
     surfaceContainer: AppColors.surfaceContainer,
     borderOutline: AppColors.borderOutline,
     primary: AppColors.sage,
-    onPrimary: AppColors.ink,
+    onPrimary: Colors.white,
     heroBackground: AppColors.deepForest,
     fabBackground: AppColors.sage,
-    fabForeground: AppColors.ink,
+    fabForeground: Colors.white,
     income: AppColors.incomeOnDark,
     expense: AppColors.expenseOnDark,
     warning: AppColors.warning,
-    textPrimary: Color(0xFFF0F5F2),
-    textMuted: Color(0xFF8BA597),
+    textPrimary: AppColors.softWhite,
+    textMuted: AppColors.mutedBlueGray,
   );
 
   /// Alias kanonikal untuk kompatibilitas mundur
-  static const botanical = enchantedGlasshouse;
+  static const enchantedGlasshouse = viceCitySunset;
+  static const botanical = viceCitySunset;
 
   @override
   AppThemeColors copyWith({
@@ -371,7 +385,7 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
   }
 }
 
-/// Gaya teks untuk angka finansial / nominal mata uang menggunakan [GoogleFonts.dmSans]
+/// Gaya teks untuk angka finansial / nominal mata uang menggunakan [GoogleFonts.spaceGrotesk]
 /// dengan fitur tabularFigures agar digit angka sejajar rapi.
 TextStyle appMoneyStyle(
   BuildContext? context, {
@@ -381,12 +395,28 @@ TextStyle appMoneyStyle(
   double? letterSpacing,
 }) {
   const tabular = [FontFeature.tabularFigures()];
-  return GoogleFonts.dmSans(
+  return GoogleFonts.spaceGrotesk(
     fontSize: fontSize,
     fontWeight: fontWeight ?? FontWeight.w700,
     color: color,
     letterSpacing: letterSpacing,
     fontFeatures: tabular,
+  );
+}
+
+/// Gaya teks untuk metadata teknis / kode ledger menggunakan [GoogleFonts.ibmPlexMono]
+TextStyle appMonoStyle(
+  BuildContext? context, {
+  double? fontSize,
+  FontWeight? fontWeight,
+  Color? color,
+  double? letterSpacing,
+}) {
+  return GoogleFonts.ibmPlexMono(
+    fontSize: fontSize,
+    fontWeight: fontWeight ?? FontWeight.w500,
+    color: color,
+    letterSpacing: letterSpacing,
   );
 }
 
@@ -403,6 +433,21 @@ extension ThemeContextX on BuildContext {
     double? letterSpacing,
   }) =>
       appMoneyStyle(
+        this,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        color: color,
+        letterSpacing: letterSpacing,
+      );
+
+  /// Shortcut praktis untuk mendapatkan gaya teks metadata teknis monospace.
+  TextStyle monoStyle({
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? letterSpacing,
+  }) =>
+      appMonoStyle(
         this,
         fontSize: fontSize,
         fontWeight: fontWeight,

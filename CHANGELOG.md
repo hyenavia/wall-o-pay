@@ -4,6 +4,181 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2026-11-21
+
+### Added
+- **Vice City Sunset Design System:**
+  - Complete visual transformation centered on Slate Navy (`#0F172A`), Deep Navy (`#1E293B`), Sunset Rose (`#FB7185`), Sunset Amber (`#FBBF24`), Neon Cyan (`#38BDF8`), and Warm Emerald (`#10B981`).
+  - Overhauled typography system utilizing Space Grotesk (headings and tabular figures), Inter (body readability), and IBM Plex Mono (metadata).
+  - Integrated the iconic Neon Sunset Wallet "W" Emblem across all app launchers (Android adaptive mipmaps, iOS AppIcons, Web manifest/icons, Windows desktop).
+  - 160-icon custom 3D transparent icon library across all primary and secondary navigation, categories, forms, filters, and settings.
+  - 6 custom tropical neon empty-state illustrations for transactions, budgets, savings/goals, analytics, search, and notifications.
+  - Panoramic coastal sunset skyline canopies and user profile card with authentic circular Vice City avatar frame.
+- **Cloud Firestore Security Rules (`firestore.rules`):**
+  - Added version-controlled Cloud Firestore Security Rules enforcing owner-only access (`request.auth.uid == uid`) across `/users/{uid}`, `/users/{uid}/meta/{docId}`, and all 15 synced financial subcollections with strict schema validation.
+  - Protected `/usernames/{username}` against unauthenticated bulk enumeration or hijacking.
+
+### Fixed
+- **App PIN Lock & Keystore Security Hardening:**
+  - Enforced full local SQLite data and cache wipe on Forgot PIN reset while preserving cloud-synced PIN until password re-authentication.
+  - Migrated brute-force lockout counters (`fails`, `lockoutTier`, `lockoutUntil`) to `FlutterSecureStorage` (Android Keystore / iOS Keychain) with backward clock-tampering protection.
+  - Enforced private notification visibility with redacted counterparty names and amounts for lock-screen debt due reminders.
+- **Export, Sync & Reliability Hardening:**
+  - Neutralized CSV formula injection triggers (`=`, `+`, `-`, `@`, `\t`, `\r`) with leading single quotes.
+  - Restricted `_purgeLocalSensitiveFiles` to safe receipt directories, clamped far-future `updatedAt` timestamps, and added Android Share Intent stream copy bounds (10 MB cap).
+  - Restricted in-app update URLs to official HTTPS GitHub release domains and added CI signing guards.
+
+## [2.17.14] - 2026-11-21
+
+### Changed
+- **Vice City Sunset Branding Transition:**
+  - Replaced remaining Botanical / Glasshouse branding in `AboutWallOPaySheet` (`lib/features/settings/about_sheet.dart`) and `lib/core/l10n.dart` with Vice City Sunset brand lore and philosophy.
+  - Updated user-facing financial recap notification labels (`SettingsPage` and `NotificationService`) from `Harvest recap notifications` / `Weekly Harvest Review` / `Monthly Harvest Review` to `Financial recap notifications` / `Weekly Financial Review` / `Monthly Financial Review`.
+  - Updated `README.md`, `ARCHITECTURE.md`, `AGENTS.md`, and `pubspec.yaml` description to reflect the Vice City Sunset theme and current typography/color tokens.
+
+## [2.17.13] - 2026-11-21
+
+### Added
+- **Firestore Security Rules (`firestore.rules`):**
+  - Added version-controlled Cloud Firestore Security Rules enforcing owner-only access (`request.auth.uid == uid`) across `/users/{uid}`, `/users/{uid}/meta/{docId}`, and all 15 synced financial subcollections, schema/length validation, a Base64 avatar size limit (`<= 800,000` chars), and protection against unauthenticated bulk enumeration or hijacking on `/usernames/{username}`.
+
+### Fixed
+- **App PIN Lock & Authentication Hardening:**
+  - **Forgot PIN Reset Wipe & Deferred Cloud Reset (`LockScreen._forgot`, `AutoSyncService`):** Resetting a forgotten PIN while logged in now wipes all local SQLite data, local caches, and sync cursors before signing out (preventing access to the previous user's local data via Guest Mode), preserves the PIN in Cloud Firestore until the owner re-authenticates with their account password, and automatically syncs the active PIN across the user's devices.
+  - **Hardware Keystore Lockout & Clock-Rollback Guard (`Lock`):** Migrated brute-force lockout counters (`fails`, `lockoutTier`, `lockoutUntil`) to `FlutterSecureStorage` (Android Keystore / iOS Keychain) with a backward clock-tampering guard and clamped remote `updatedAt` timestamps on PIN cloud sync.
+  - **Sign-Up Guest Data Merge Prompt (`AuthPage`):** Prompted users with the "Keep Guest Data?" dialog during both account registration and login when local Guest Mode transactions exist, and ensured `AutoSyncService` clears `current_sync_user_id` only after `resetAllData()` completes.
+- **Data Export, Sync, Share Intent, & Updater Hardening:**
+  - **CSV Formula Injection Prevention (`ExportService`):** Sanitized exported CSV cells starting with formula triggers (`=`, `+`, `-`, `@`, `\t`, `\r`) with a leading single quote (`'`).
+  - **Remote Sync & JSON Backup Validation (`AppDatabase`):** Clamped far-future `updatedAt` timestamps (`clampRemoteUpdatedAt`), validated non-negative bounded amounts, stripped unsafe `receiptPath` references, and restricted `_purgeLocalSensitiveFiles` to only delete files inside `shared_receipts/` or temporary cache directories (`isSafeReceiptDeletionPath`).
+  - **Android Share Intent Stream Guard (`MainActivity.kt`):** Added a 10 MB stream copy cap and blocked `file://` URIs targeting the app's own internal sandbox directory.
+  - **Lock-Screen Debt Notification Redaction (`NotificationService`):** Set `NotificationVisibility.private` and redacted counterparty names and Rupiah amounts from debt due notifications whenever `hideBalance`, App PIN Lock, or Privacy Shield is active.
+  - **Updater URL Validation & CI Signing Guard (`UpdateCheckerService`, `release.yml`):** Restricted in-app update URLs to official HTTPS GitHub release domains (`isTrustedReleaseUrl`), enforced mandatory release keystore presence in GitHub Actions, and enabled Dart symbol obfuscation (`--obfuscate --split-debug-info`).
+
+## [2.17.12] - 2026-11-21
+
+### Changed
+- **Landing Page Vice City Sunset Theme Alignment:**
+  - Aligned `docs/style.css`, `docs/index.html`, and `docs/script.js` with the application's Vice City Sunset palette (`#0F172A`, `#1E293B`, `#243044`, `#FB7185`, `#38BDF8`, `#FBBF24`) and typography (`Space Grotesk`, `Inter`, `IBM Plex Mono`), preserving the existing layout structure.
+  - Added the blurred coastal sunset hero background (`docs/images/hero-sunset.jpg`) and replaced remaining Enchanted Glasshouse / botanical references with Vice City Sunset copy and styling.
+
+## [2.17.11] - 2026-11-21
+
+### Fixed
+- **Daily Financial Pulse Traffic-Light Color Hierarchy:**
+  - Updated `DailyFinancialPulseCard` Safe tier and `_DailyPulseGuideSheet` Phase 1 ("Safe Financial Health") & Safe Daily Quota value from Rose (`colors.primary`) to Warm Emerald (`colors.income`), establishing clear traffic-light semantics: Green (Safe) → Orange (Caution) → Coral Rose (Limit).
+  - Softened the card's top-left radial/linear tint opacity so Slate Navy card surfaces remain calm and readable.
+
+## [2.17.10] - 2026-11-21
+
+### Changed
+- **Profile Avatar Frame Upgrade:**
+  - Replaced `frame_vice_city.png` (and `frame_glasshouse.png`) with the new `1024x1024 RGBA` Vice City Sunset circular profile border featuring tropical palm silhouette, coastal skyline, and neon sunset rim lighting.
+
+## [2.17.9] - 2026-11-21
+
+### Fixed
+- **Functional Empty State Illustration Mapping:**
+  - Changed `EmptyStateCard` default icon from `Icons.eco_outlined` to `Icons.receipt_long_outlined` so empty transaction screens on Home and Transactions render the Wallet & Falling Coins illustration (`empty_transactions.png`) instead of the Savings Jar.
+  - Added `Icons.search_off_rounded` to `resolveEmptyIllustration` so filtered/search empty states in Transactions render `empty_search.png`.
+  - Added `Icons.repeat_rounded` / `Icons.event_repeat` to `resolveEmptyIllustration` so empty recurring schedule lists render `empty_notifications.png`.
+  - Updated Insights empty states ("Record a few more transactions" and "No recap activity yet") to render `empty_analytics.png`.
+
+## [2.17.8] - 2026-11-21
+
+### Changed
+- **Transparent App Launcher Icon & Brand Emblem:**
+  - Replaced the square-backed launcher icon with the transparent-background Vice City Sunset "W" wallet & palm emblem (`1024x1024 RGBA`), matching the clean floating launcher style of the previous theme.
+  - Regenerated all Android mipmaps, iOS AppIcons, Web icons, and Windows app icon via `flutter_launcher_icons`, and aligned native splash background color to Slate Navy (`#0F172A`).
+
+## [2.17.7] - 2026-11-21
+
+### Fixed
+- **Eliminated Remaining Default Icon Leaks Across All Secondary & Core Views:**
+  - **More Features (`MorePage`)**: Replaced all 9 default Material menu icons (Accounts, Transfer balance, Debts & splits, Budget, Goals, Recurring, Categories, PDF report, Settings) with custom neon 3D icons via `viceCityAssetForIcon`.
+  - **Settings (`SettingsPage`)**: Replaced remaining default icons for Carry over unused budget, Daily reminder, Recap notifications, Guest Mode (Offline), Sign In / Create Account, and Cloud Sync/Upload/Download buttons.
+  - **About Wall o' Pay (`AboutWallOPaySheet`)**: Replaced all 6 default Material icons across Brand Lore cards and Core Principles rows with custom assets (`security_shield`, `growth_plant`, `star`, `palm_tree`, `database`, `cloud_sync`).
+  - **Insights (`InsightsPage`)**: Replaced default Material icons on Monthly Summary Income/Expense pills, Monthly Financial Review banner & modal, Trend comparison notice, Smart Insight cards, and empty-state prompt.
+  - **Categories & Recurring**: Upgraded the category icon picker (`CategoriesPage`) and recurring schedule tiles (`RecurringPage`) to display custom 3D icons instead of Material defaults.
+
+## [2.17.6] - 2026-11-21
+
+### Added
+- **Full 160-Icon Compressed Set Integration & Re-Audit:**
+  - Mapped distinct, dedicated 3D icons from `assets/icon-compress/` to every transaction category (`food_basket`, `coffee_cup`, `bus`, `car`, `plane`, `wifi`, `smartphone`, `laptop`, `cart`, `gift_box`, `ticket`, `headphones`, `fitness_activity`, `medical_cross`, `users_group`, `wallet_cash`, `coin_stack`, `bank_building`, `mobile_banking`, `contactless_pay`, `cash`, `receipt`).
+  - Replaced remaining default Material icons across Home (`visibility` eye/eye_off, pending recurring alarm clock, account quick-bar avatars), Transactions (PDF/CSV export icons, calendar range chip, net flow receipt, calendar header), Security (biometric fingerprint, change PIN password), Debts (split bill users group), Budget (`TotalBudgetDialog` calculator), and Goals (`savings_goal` replacing legacy `eco_outlined`).
+
+## [2.17.5] - 2026-11-20
+
+### Added
+- **Deep Custom Icon Integration Across Settings, Home, & Transactions:**
+  - Upgraded Settings menu tiles (Notifications, Security & PIN, Backup & Sync, Categories, Android Widgets, and About) and module switches (Goals, Debts, Recurring, Transfers, and Budgets) with custom Vice City 3D icons.
+  - Upgraded Home `BalanceCard` income and expense flow badges with custom growth and minus assets.
+  - Upgraded Daily Financial Pulse card tier badges and the comprehensive guide sheet with pulse gauge and health growth assets.
+  - Upgraded Transactions page filter bar dropdowns (Accounts wallet, Categories diamond, and Need/Want budget pie chart) and Accounts page category headers.
+
+## [2.17.4] - 2026-11-20
+
+### Changed
+- **Theme Refinement (Sunset Elegance — Arah A):**
+  - Elevated app canvas from crushed dark navy (`#070D2B`) to refined modern Slate Navy (`#0F172A`), softened card surfaces to Slate 800 (`#1E293B`), and tuned borders and containers for high-contrast, eye-friendly readability.
+  - Replaced harsh electric synthwave magenta with warm Sunset Rose / Coral (`#FB7185`) and Sunset Amber (`#FBBF24`), harmonizing directly with tropical sunset sky tones.
+  - Shifted income indicators from cyan to warm emerald (`#10B981` / `#34D399`), restoring universal financial intuition (Income = Green, Expense = Coral Rose) on dark surfaces.
+  - Modernized legacy branding strings in Insights and localization to "Financial Health Score" and "Financial Review / Recap".
+
+## [2.17.3] - 2026-11-20
+
+### Added
+- **Comprehensive Custom Icon System Integration:**
+  - Replaced standard Flutter Material icons across all primary views with custom transparent icons from `assets/icon-compress/` / `assets/icons/vice_city/`.
+  - Upgraded Home header buttons (Settings gear and More Features diamond), Transactions header (Cashflow calendar, Date range, and Export card), Transactions search field, Transaction filter chips (All, Expense, Income, Transfer), and cashflow summary cards.
+  - Upgraded Budget action buttons (Set budget gear, Add total budget, and Savings goals target), budget pillar category icons (Needs home, Wants gift, and Savings piggy bank), and Insights header/vitality badges.
+
+## [2.17.2] - 2026-11-20
+
+### Fixed
+- **Residual Botanical Foliage & Ivy Removal:**
+  - Fully eliminated legacy botanical fronds, hanging corner leaves, ivy vines, and greenhouse glass arches in `BotanicalCanopyPainter`, `BotanicalHeroCardPainter`, and `BotanicalBackgroundPainter`.
+  - Replaced decorative vector drawings with sleek Vice City Sunset radial glows and subtle neon contour accents.
+
+### Changed
+- **Prominent 4-Page Vertical Sunset Background Integration:**
+  - Activated the portrait Vice City coastal skyline sunset backdrop (`vice_city_vertical_bg.jpg`) across `_Sheet` in `HomePage` and `BotanicalBackgroundSheet` in `TransactionsPage`, `BudgetPage`, and `InsightsPage`.
+  - Refined the header canopy gradient scrim from 65%-94% down to 15%-55% opacity, making the vibrant twilight sky and skyline prominent while keeping typography legible.
+
+## [2.17.1] - 2026-11-20
+
+### Fixed
+- **Native & Flutter Splash Screen Palette Consistency:**
+  - Replaced legacy botanical green (`#10251F`) with Midnight Navy (`#070D2B`) in Android native launch theme (`colors.xml`) and Flutter `SplashPage`, eliminating startup color flashes.
+  - Removed botanical leaf silhouette custom paintings in favor of sleek neon arc waves and subtle starlight motes.
+
+### Added
+- **4 Main Pages Header Canopy (Concept A):**
+  - Integrated portrait Vice City sunset backdrop (`vice_city_vertical_bg.jpg`) into the top header canopy of Home, Transactions, Budget, and Insights screens.
+  - Maintained complete layout integrity with dark navy content sheets sliding smoothly over the canopy.
+- **Settings Profile Card & Transparent Frame:**
+  - Redesigned user profile card in `SettingsPage` with coastal sunset skyline landscape (`coastal_sunset_bg.jpg`) and Neon Edge Highlight border.
+  - Integrated authentic circular Vice City profile frame (`frame_vice_city.png`) with alpha-transparency center.
+- **Typography & Iconography Refinement:**
+  - Upgraded font styling to Space Grotesk (headings and tabular financial figures), Inter (body readability), and IBM Plex Mono (metadata).
+  - Integrated 25 compressed transparent 512x512 icons into internal icon assets.
+
+## [2.17.0] - 2026-11-20
+
+### Added
+- **Vice City Sunset Visual Rebranding (Balanced Intensity):**
+  - Implemented the complete Vice City Sunset design system centered on Midnight Navy (`#070D2B`), Deep Navy (`#101A3A`), Sunset Magenta (`#FF2E93`), Coral Pink (`#FF5B78`), Sunset Orange (`#FF8A36`), Golden Yellow (`#FFD166`), and Neon Cyan (`#20D9E8`).
+  - Integrated the iconic `Neon Sunset Wallet W Emblem` as the primary brand logo, splash combination logo, and Android/iOS/Web app icons.
+  - Sliced and mapped 30 individual icons from the `Miami Sunset Finance Icon Set` into `assets/icons/vice_city/` and integrated them across bottom navigation, category badges, transaction forms, date pickers, filters, and settings.
+  - Sliced and integrated 6 contextual illustrations from `Tropical Neon Finance Empty States` into `assets/illustrations/` for empty transactions, empty budgets, empty savings/goals, empty analytics/insights, empty search, and empty notifications.
+  - Integrated `Midnight Neon Arc Waves` and `Neon Sunset Over Coastal Skyline` background assets across splash, authentication, lock screen, and onboarding flows.
+
+### Changed
+- **Navigation & Components Overhaul:**
+  - Modernized bottom navigation bar with active Golden Yellow & Neon Cyan indicators and floating action button with vibrant Sunset Magenta-to-Orange gradient and neon halo.
+  - Refined `HeroCard`, `AppCard`, `CategoryBadge`, and `_HomeContentSheet` surfaces with deep navy backdrop, specular border outlines, and subtle glow shadows.
+  - Upgraded custom painters (`BotanicalCanopyPainter`, `BotanicalHeroCardPainter`, `BotanicalBackgroundPainter`) to render coastal palms, sunset rays, and neon arc waves.
+
 ## [2.16.2] - 2026-11-15
 
 ### Fixed

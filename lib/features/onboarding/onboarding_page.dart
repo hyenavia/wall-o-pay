@@ -227,78 +227,99 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     final last = _step == _lastStep;
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const BrandMark(size: 40),
-                  const Spacer(),
-                  TextButton(
-                    style: TextButton.styleFrom(foregroundColor: AppColors.dewMint),
-                    onPressed: _saving ? null : widget.onDone,
-                    child: Text(context.tr('Skip')),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              AppProgressBar(value: (_step + 1) / (_lastStep + 1)),
-              const SizedBox(height: 28),
-              Expanded(child: SingleChildScrollView(child: _body(context))),
-              Row(
-                children: [
-                  if (_step > 0)
-                    TextButton(
-                      style: TextButton.styleFrom(foregroundColor: AppColors.dewMint),
-                      onPressed: _saving ? null : () => setState(() => _step--),
-                      child: Text(context.tr('Back')),
-                    ),
-                  const Spacer(),
-                  FilledButton(
-                    onPressed: _saving
-                        ? null
-                        : () {
-                            if (last) {
-                              _finish();
-                            } else {
-                              setState(() => _step++);
-                            }
-                          },
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(140, 52),
-                      backgroundColor: AppColors.glasshouseGreen,
-                      foregroundColor: AppColors.softIvory,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        side: BorderSide(
-                          color: AppColors.dewMint.withValues(alpha: 0.35),
-                        ),
-                      ),
-                    ),
-                    child: _saving
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.softIvory),
-                          )
-                        : Text(
-                            context.tr(last ? 'Finish' : 'Next'),
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
-                          ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                context.tr('Step {n} of {total}', {'n': _step + 1, 'total': _lastStep + 1}),
-                style: const TextStyle(fontSize: 12, color: AppColors.freshSage),
-              ),
-            ],
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/coastal_sunset_bg.jpg',
+            fit: BoxFit.cover,
           ),
-        ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.midnightNavy.withValues(alpha: 0.90),
+                  AppColors.midnightNavy.withValues(alpha: 0.96),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const BrandMark(size: 40),
+                      const Spacer(),
+                      TextButton(
+                        style: TextButton.styleFrom(foregroundColor: AppColors.neonCyan),
+                        onPressed: _saving ? null : widget.onDone,
+                        child: Text(context.tr('Skip')),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  AppProgressBar(value: (_step + 1) / (_lastStep + 1)),
+                  const SizedBox(height: 28),
+                  Expanded(child: SingleChildScrollView(child: _body(context))),
+                  Row(
+                    children: [
+                      if (_step > 0)
+                        TextButton(
+                          style: TextButton.styleFrom(foregroundColor: AppColors.neonCyan),
+                          onPressed: _saving ? null : () => setState(() => _step--),
+                          child: Text(context.tr('Back')),
+                        ),
+                      const Spacer(),
+                      FilledButton(
+                        onPressed: _saving
+                            ? null
+                            : () {
+                                if (last) {
+                                  _finish();
+                                } else {
+                                  setState(() => _step++);
+                                }
+                              },
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(140, 52),
+                          backgroundColor: AppColors.sunsetMagenta,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                            side: BorderSide(
+                              color: AppColors.goldenYellow.withValues(alpha: 0.45),
+                            ),
+                          ),
+                        ),
+                        child: _saving
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : Text(
+                                context.tr(last ? 'Finish' : 'Next'),
+                                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                              ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    context.tr('Step {n} of {total}', {'n': _step + 1, 'total': _lastStep + 1}),
+                    style: const TextStyle(fontSize: 12, color: AppColors.mutedBlueGray),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

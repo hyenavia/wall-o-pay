@@ -10,7 +10,9 @@ import '../../core/l10n.dart';
 import '../../core/theme.dart';
 import '../../data/budget_rule.dart';
 import '../../data/cloud.dart';
+import '../../data/cloud_sync.dart';
 import '../../data/lock.dart';
+import '../../data/notifications.dart';
 import '../../data/prefs.dart';
 import '../../data/profile.dart';
 import '../../data/providers.dart';
@@ -371,17 +373,52 @@ class _LockScreenState extends ConsumerState<LockScreen> {
     );
 
     if (ok == true) {
-      if (isGuest) {
-        try {
-          await ref.read(databaseProvider).resetAllData();
-          await ref.read(profileProvider.notifier).clearLocal(ProfileController.guestId);
-          await ref.read(budgetRuleProvider.notifier).clearLocal();
-          await Lock.instance.clearLocal('guest');
-          await ref.read(sharedPreferencesProvider).remove('onboarding_done_local');
-          await ref.read(skipAuthProvider.notifier).reset();
-        } catch (_) {}
-      } else {
-        await Lock.instance.disable();
+      final userUid = ref.read(currentUserProvider)?.uid;
+      try {
+        ref.read(autoSyncServiceProvider).stopSync();
+      } catch (_) {}
+      try {
+        await ref.read(databaseProvider).resetAllData();
+      } catch (_) {}
+      try {
+        if (userUid != null) {
+          await ref.read(profileProvider.notifier).clearLocal(userUid);
+          await ref.read(budgetRuleProvider.notifier).clearLocal(userUid);
+        }
+        await ref.read(profileProvider.notifier).clearLocal(ProfileController.guestId);
+        await ref.read(budgetRuleProvider.notifier).clearLocal();
+      } catch (_) {}
+      try {
+        await Lock.instance.clearLocal(userUid ?? 'guest');
+        await Lock.instance.clearLocal('guest');
+      } catch (_) {}
+      try {
+        await NotificationService.instance.cancelDailyReminder();
+      } catch (_) {}
+      try {
+        final prefs = ref.read(sharedPreferencesProvider);
+        final prevSyncUid = prefs.getString('current_sync_user_id');
+        if (prevSyncUid != null) {
+          await AutoSyncService.clearPullCursor(prefs, prevSyncUid);
+        }
+        if (userUid != null) {
+          await AutoSyncService.clearPullCursor(prefs, userUid);
+        }
+        await prefs.remove('current_sync_user_id');
+        await prefs.remove('onboarding_done_local');
+        await ref.read(skipAuthProvider.notifier).reset();
+      } catch (_) {}
+
+      if (!isGuest) {
+        // Jika pengguna memilih keluar akun karena lupa PIN, jadwalkan penghapusan PIN
+        // hanya setelah pengguna berhasil membuktikan kepemilikan akun (login ulang dengan password).
+        if (userUid != null) {
+          try {
+            await ref
+                .read(sharedPreferencesProvider)
+                .setBool('pending_pin_reset_after_auth_$userUid', true);
+          } catch (_) {}
+        }
         try {
           await FirebaseAuth.instance.signOut();
         } catch (_) {}
@@ -417,18 +454,18 @@ class _LockScreenState extends ConsumerState<LockScreen> {
           body: Stack(
             fit: StackFit.expand,
             children: [
-              // Atmospheric Conservatory Background
+              // Atmospheric Coastal Sunset Background
               Image.asset(
-                'assets/images/glasshouse_bg.jpg',
+                'assets/images/coastal_sunset_bg.jpg',
                 fit: BoxFit.cover,
               ),
-              // Emerald Conservatory Tint & Deep Shadow Gradient Overlay
+              // Midnight Navy & Deep Shadow Gradient Overlay
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.mossShadow.withValues(alpha: 0.88),
-                      AppColors.mossShadow.withValues(alpha: 0.96),
+                      AppColors.midnightNavy.withValues(alpha: 0.88),
+                      AppColors.midnightNavy.withValues(alpha: 0.96),
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,

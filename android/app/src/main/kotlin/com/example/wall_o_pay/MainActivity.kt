@@ -126,7 +126,7 @@ class MainActivity : FlutterFragmentActivity() {
         val type = intent.type ?: return false
         val map = mutableMapOf<String, Any?>()
 
-        // Handle image stream
+        // Handle image stream (with scheme guard & 10 MB size cap to prevent storage DoS / self-read)
         if (type.startsWith("image/")) {
             val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
@@ -135,16 +135,30 @@ class MainActivity : FlutterFragmentActivity() {
                 intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
             }
 
-            if (uri != null) {
+            if (uri != null && isSafeExternalImageUri(uri)) {
                 try {
                     val receiptsDir = File(filesDir, "shared_receipts").apply { mkdirs() }
                     val file = File(receiptsDir, "receipt_${System.currentTimeMillis()}.jpg")
+                    val maxBytes = 10L * 1024L * 1024L // 10 MB limit
+                    var totalCopied = 0L
+                    var exceeded = false
                     contentResolver.openInputStream(uri)?.use { input ->
                         file.outputStream().use { output ->
-                            input.copyTo(output)
+                            val buffer = ByteArray(8192)
+                            var read: Int
+                            while (input.read(buffer).also { read = it } != -1) {
+                                totalCopied += read
+                                if (totalCopied > maxBytes) {
+                                    exceeded = true
+                                    break
+                                }
+                                output.write(buffer, 0, read)
+                            }
                         }
                     }
-                    if (file.exists() && file.length() > 0) {
+                    if (exceeded) {
+                        file.delete()
+                    } else if (file.exists() && file.length() > 0) {
                         map["imagePath"] = file.absolutePath
                     }
                 } catch (e: Exception) {
@@ -163,6 +177,22 @@ class MainActivity : FlutterFragmentActivity() {
             latestSharedData = map
             intent.action = null
             return true
+        }
+        return false
+    }
+
+    private fun isSafeExternalImageUri(uri: Uri): Boolean {
+        val scheme = uri.scheme?.lowercase() ?: return false
+        if (scheme == "content") return true
+        if (scheme == "file") {
+            val path = uri.path ?: return false
+            return try {
+                val canonicalTarget = File(path).canonicalPath
+                val appDataDir = File(applicationInfo.dataDir).canonicalPath
+                !canonicalTarget.startsWith(appDataDir)
+            } catch (_: Exception) {
+                false
+            }
         }
         return false
     }

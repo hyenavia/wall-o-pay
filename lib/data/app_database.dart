@@ -988,24 +988,85 @@ class AppDatabase extends _$AppDatabase {
     await _purgeLocalSensitiveFiles(receiptPaths);
   }
 
+  /// Memeriksa apakah [path] berada di dalam direktori lampiran struk atau cache aplikasi
+  /// (mencegah penghapusan atau referensi file internal arbitrer seperti database SQLite / SharedPreferences).
+  static bool isSafeReceiptDeletionPath(
+    String path, {
+    required Iterable<String> allowedParentDirs,
+  }) {
+    final trimmed = path.trim();
+    if (trimmed.isEmpty) return false;
+    final normalized = File(trimmed).absolute.uri.normalizePath().toFilePath();
+    final lowerPath = normalized.toLowerCase();
+    // Jangan pernah menghapus file database SQLite atau konfigurasi XML preferensi
+    if (lowerPath.endsWith('.sqlite') ||
+        lowerPath.endsWith('.sqlite-wal') ||
+        lowerPath.endsWith('.sqlite-shm') ||
+        lowerPath.endsWith('.db') ||
+        lowerPath.endsWith('.xml')) {
+      return false;
+    }
+    for (final dir in allowedParentDirs) {
+      if (dir.trim().isEmpty) continue;
+      var normDir = Directory(dir).absolute.uri.normalizePath().toFilePath();
+      if (!normDir.endsWith(Platform.pathSeparator)) {
+        normDir = '$normDir${Platform.pathSeparator}';
+      }
+      if (normalized.startsWith(normDir)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Menentukan nilai timestamp `updatedAt` yang aman (mencegah *Last-Write-Wins poisoning*
+  /// dari dokumen/file backup dengan timestamp masa depan seperti tahun 2099).
+  static DateTime clampRemoteUpdatedAt(DateTime remoteUpdatedAt, {DateTime? now}) {
+    final refNow = now ?? DateTime.now();
+    final maxAllowed = refNow.add(const Duration(minutes: 5));
+    if (remoteUpdatedAt.isAfter(maxAllowed)) {
+      return refNow;
+    }
+    return remoteUpdatedAt;
+  }
+
   Future<void> _purgeLocalSensitiveFiles(Set<String> receiptPaths) async {
     if (kIsWeb) return;
+    final allowedDirs = <String>[];
+    Directory? supportDir;
+    Directory? tempDir;
+    try {
+      supportDir = await getApplicationSupportDirectory();
+      allowedDirs.add('${supportDir.path}/shared_receipts');
+    } catch (_) {}
+    try {
+      tempDir = await getTemporaryDirectory();
+      allowedDirs.add(tempDir.path);
+    } catch (_) {}
+    try {
+      final docDir = await getApplicationDocumentsDirectory();
+      allowedDirs.add('${docDir.path}/shared_receipts');
+    } catch (_) {}
+
     for (final path in receiptPaths) {
       try {
+        if (!isSafeReceiptDeletionPath(path, allowedParentDirs: allowedDirs)) {
+          continue;
+        }
         final f = File(path);
         if (await f.exists()) await f.delete();
       } catch (_) {}
     }
     try {
-      final supportDir = await getApplicationSupportDirectory();
-      final sharedReceiptsDir = Directory('${supportDir.path}/shared_receipts');
-      if (await sharedReceiptsDir.exists()) {
-        await sharedReceiptsDir.delete(recursive: true);
+      if (supportDir != null) {
+        final sharedReceiptsDir = Directory('${supportDir.path}/shared_receipts');
+        if (await sharedReceiptsDir.exists()) {
+          await sharedReceiptsDir.delete(recursive: true);
+        }
       }
     } catch (_) {}
     try {
-      final tempDir = await getTemporaryDirectory();
-      if (await tempDir.exists()) {
+      if (tempDir != null && await tempDir.exists()) {
         await for (final entity in tempDir.list()) {
           final name = entity.uri.pathSegments.lastWhere(
             (s) => s.isNotEmpty,
@@ -1023,6 +1084,8 @@ class AppDatabase extends _$AppDatabase {
 
   // ---------- Sinkronisasi cloud ----------
 
+  static const int _maxSafeAmount = 9999999999999; // 13 digits max
+
   /// Urutan penting: kategori & dompet lebih dulu karena dipakai transaksi.
   List<SyncTable> get syncTables => [
         SyncTable(
@@ -1033,7 +1096,13 @@ class AppDatabase extends _$AppDatabase {
               .map((r) => r.toJson())
               .toList(),
           applyRemote: (json) async {
-            final remote = Category.fromJson(json);
+            final parsed = Category.fromJson(json);
+            if (parsed.id.trim().isEmpty || parsed.name.trim().isEmpty) {
+              return false;
+            }
+            final remote = parsed.copyWith(
+              updatedAt: clampRemoteUpdatedAt(parsed.updatedAt),
+            );
             final local = await (select(categories)
                   ..where((r) => r.id.equals(remote.id)))
                 .getSingleOrNull();
@@ -1052,7 +1121,15 @@ class AppDatabase extends _$AppDatabase {
               .map((r) => r.toJson())
               .toList(),
           applyRemote: (json) async {
-            final remote = Wallet.fromJson(json);
+            final parsed = Wallet.fromJson(json);
+            if (parsed.id.trim().isEmpty ||
+                parsed.name.trim().isEmpty ||
+                parsed.initialBalance.abs() > _maxSafeAmount) {
+              return false;
+            }
+            final remote = parsed.copyWith(
+              updatedAt: clampRemoteUpdatedAt(parsed.updatedAt),
+            );
             final local = await (select(wallets)
                   ..where((r) => r.id.equals(remote.id)))
                 .getSingleOrNull();
@@ -1071,7 +1148,28 @@ class AppDatabase extends _$AppDatabase {
               .map((r) => r.toJson())
               .toList(),
           applyRemote: (json) async {
-            final remote = TransactionEntry.fromJson(json);
+            final parsed = TransactionEntry.fromJson(json);
+            if (parsed.id.trim().isEmpty ||
+                parsed.amount < 0 ||
+                parsed.amount > _maxSafeAmount) {
+              return false;
+            }
+            String? safeReceipt = parsed.receiptPath;
+            if (safeReceipt != null) {
+              final lower = safeReceipt.toLowerCase();
+              if (lower.endsWith('.sqlite') ||
+                  lower.endsWith('.sqlite-wal') ||
+                  lower.endsWith('.sqlite-shm') ||
+                  lower.endsWith('.db') ||
+                  lower.endsWith('.xml') ||
+                  safeReceipt.contains('..')) {
+                safeReceipt = null;
+              }
+            }
+            final remote = parsed.copyWith(
+              updatedAt: clampRemoteUpdatedAt(parsed.updatedAt),
+              receiptPath: Value(safeReceipt),
+            );
             final local = await (select(transactions)
                   ..where((r) => r.id.equals(remote.id)))
                 .getSingleOrNull();
@@ -1090,7 +1188,15 @@ class AppDatabase extends _$AppDatabase {
               .map((r) => r.toJson())
               .toList(),
           applyRemote: (json) async {
-            final remote = Budget.fromJson(json);
+            final parsed = Budget.fromJson(json);
+            if (parsed.id.trim().isEmpty ||
+                parsed.amount < 0 ||
+                parsed.amount > _maxSafeAmount) {
+              return false;
+            }
+            final remote = parsed.copyWith(
+              updatedAt: clampRemoteUpdatedAt(parsed.updatedAt),
+            );
             final localById = await (select(budgets)
                   ..where((r) => r.id.equals(remote.id)))
                 .getSingleOrNull();
@@ -1130,7 +1236,17 @@ class AppDatabase extends _$AppDatabase {
               .map((r) => r.toJson())
               .toList(),
           applyRemote: (json) async {
-            final remote = SavingsGoal.fromJson(json);
+            final parsed = SavingsGoal.fromJson(json);
+            if (parsed.id.trim().isEmpty ||
+                parsed.targetAmount < 0 ||
+                parsed.targetAmount > _maxSafeAmount ||
+                parsed.currentAmount < 0 ||
+                parsed.currentAmount > _maxSafeAmount) {
+              return false;
+            }
+            final remote = parsed.copyWith(
+              updatedAt: clampRemoteUpdatedAt(parsed.updatedAt),
+            );
             final local = await (select(savingsGoals)
                   ..where((r) => r.id.equals(remote.id)))
                 .getSingleOrNull();
@@ -1149,7 +1265,15 @@ class AppDatabase extends _$AppDatabase {
               .map((r) => r.toJson())
               .toList(),
           applyRemote: (json) async {
-            final remote = RecurringRule.fromJson(json);
+            final parsed = RecurringRule.fromJson(json);
+            if (parsed.id.trim().isEmpty ||
+                parsed.amount < 0 ||
+                parsed.amount > _maxSafeAmount) {
+              return false;
+            }
+            final remote = parsed.copyWith(
+              updatedAt: clampRemoteUpdatedAt(parsed.updatedAt),
+            );
             final local = await (select(recurringRules)
                   ..where((r) => r.id.equals(remote.id)))
                 .getSingleOrNull();
@@ -1168,7 +1292,17 @@ class AppDatabase extends _$AppDatabase {
               .map((r) => r.toJson())
               .toList(),
           applyRemote: (json) async {
-            final remote = Debt.fromJson(json);
+            final parsed = Debt.fromJson(json);
+            if (parsed.id.trim().isEmpty ||
+                parsed.amount < 0 ||
+                parsed.amount > _maxSafeAmount ||
+                parsed.paidAmount < 0 ||
+                parsed.paidAmount > _maxSafeAmount) {
+              return false;
+            }
+            final remote = parsed.copyWith(
+              updatedAt: clampRemoteUpdatedAt(parsed.updatedAt),
+            );
             final local = await (select(debts)
                   ..where((r) => r.id.equals(remote.id)))
                 .getSingleOrNull();
@@ -1187,7 +1321,15 @@ class AppDatabase extends _$AppDatabase {
               .map((r) => r.toJson())
               .toList(),
           applyRemote: (json) async {
-            final remote = DebtPayment.fromJson(json);
+            final parsed = DebtPayment.fromJson(json);
+            if (parsed.id.trim().isEmpty ||
+                parsed.amount < 0 ||
+                parsed.amount > _maxSafeAmount) {
+              return false;
+            }
+            final remote = parsed.copyWith(
+              updatedAt: clampRemoteUpdatedAt(parsed.updatedAt),
+            );
             final local = await (select(debtPayments)
                   ..where((r) => r.id.equals(remote.id)))
                 .getSingleOrNull();
@@ -1210,7 +1352,15 @@ class AppDatabase extends _$AppDatabase {
             if (!json.containsKey('title') || !json.containsKey('dueDate')) {
               return false;
             }
-            final remote = PendingTransaction.fromJson(json);
+            final parsed = PendingTransaction.fromJson(json);
+            if (parsed.id.trim().isEmpty ||
+                parsed.amount < 0 ||
+                parsed.amount > _maxSafeAmount) {
+              return false;
+            }
+            final remote = parsed.copyWith(
+              updatedAt: clampRemoteUpdatedAt(parsed.updatedAt),
+            );
             final local = await (select(pendingTransactions)
                   ..where((r) => r.id.equals(remote.id)))
                 .getSingleOrNull();
@@ -1229,7 +1379,15 @@ class AppDatabase extends _$AppDatabase {
               .map((r) => r.toJson())
               .toList(),
           applyRemote: (json) async {
-            final remote = TxTemplate.fromJson(json);
+            final parsed = TxTemplate.fromJson(json);
+            if (parsed.id.trim().isEmpty ||
+                parsed.amount < 0 ||
+                parsed.amount > _maxSafeAmount) {
+              return false;
+            }
+            final remote = parsed.copyWith(
+              updatedAt: clampRemoteUpdatedAt(parsed.updatedAt),
+            );
             final local = await (select(txTemplates)
                   ..where((r) => r.id.equals(remote.id)))
                 .getSingleOrNull();

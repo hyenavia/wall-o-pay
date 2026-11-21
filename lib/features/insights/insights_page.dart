@@ -266,7 +266,13 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                             color: item.accentColor.withValues(alpha: 0.35),
                           ),
                         ),
-                        child: Icon(item.icon, color: item.accentColor, size: 22),
+                        child: viceCityAssetForIcon(item.icon) != null
+                            ? Image.asset(
+                                viceCityAssetForIcon(item.icon)!,
+                                width: 22,
+                                height: 22,
+                              )
+                            : Icon(item.icon, color: item.accentColor, size: 22),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -385,7 +391,11 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
             icon: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Icon(Icons.auto_stories_outlined),
+                Image.asset(
+                  'assets/icons/vice_city/calendar.png',
+                  width: 22,
+                  height: 22,
+                ),
                 if (_isRecapUnseen(period.type))
                   Positioned(
                     right: -2,
@@ -936,7 +946,13 @@ class _SummarySubBox extends StatelessWidget {
                 width: 1,
               ),
             ),
-            child: Icon(icon, color: iconColor, size: 16),
+            child: viceCityAssetForIcon(icon) != null
+                ? Image.asset(
+                    viceCityAssetForIcon(icon)!,
+                    width: 16,
+                    height: 16,
+                  )
+                : Icon(icon, color: iconColor, size: 16),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -999,10 +1015,10 @@ class _PeriodComparisonCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(
-              Icons.info_outline_rounded,
-              color: AppColors.freshSage,
-              size: 20,
+            Image.asset(
+              'assets/icon-compress/090_line_chart-kompres.png',
+              width: 20,
+              height: 20,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1296,7 +1312,13 @@ class _SmartInsightCard extends StatelessWidget {
                       width: 1,
                     ),
                   ),
-                  child: Icon(item.icon, color: accent, size: 22),
+                  child: viceCityAssetForIcon(item.icon) != null
+                      ? Image.asset(
+                          viceCityAssetForIcon(item.icon)!,
+                          width: 22,
+                          height: 22,
+                        )
+                      : Icon(item.icon, color: accent, size: 22),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -1390,21 +1412,12 @@ class _LowDataCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.dewMint.withValues(alpha: 0.16),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.dewMint.withValues(alpha: 0.35),
-                width: 1,
-              ),
-            ),
-            child: const Icon(
-              Icons.auto_awesome_rounded,
-              color: AppColors.dewMint,
-              size: 36,
-            ),
+          Image.asset(
+            'assets/illustrations/empty_analytics.png',
+            width: 120,
+            height: 120,
+            fit: BoxFit.contain,
+            filterQuality: FilterQuality.medium,
           ),
           const SizedBox(height: 16),
           Text(
@@ -1706,10 +1719,10 @@ class _HarvestRecapBanner extends StatelessWidget {
                   color: AppColors.dewMint.withValues(alpha: 0.3),
                 ),
               ),
-              child: const Icon(
-                Icons.auto_stories_rounded,
-                color: AppColors.dewMint,
-                size: 20,
+              child: Image.asset(
+                'assets/icon-compress/094_pie_analytics-kompres.png',
+                width: 20,
+                height: 20,
               ),
             ),
             const SizedBox(width: 12),
@@ -1723,8 +1736,8 @@ class _HarvestRecapBanner extends StatelessWidget {
                         child: Text(
                           context.tr(
                             isWeekly
-                                ? 'Weekly Harvest Review'
-                                : 'Monthly Harvest Review',
+                                ? 'Weekly Financial Review'
+                                : 'Monthly Financial Review',
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -1874,10 +1887,10 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                       color: AppColors.dewMint.withValues(alpha: 0.16),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
-                      Icons.auto_stories_rounded,
-                      color: AppColors.dewMint,
-                      size: 22,
+                    child: Image.asset(
+                      'assets/icon-compress/094_pie_analytics-kompres.png',
+                      width: 22,
+                      height: 22,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -1893,7 +1906,7 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                           ),
                         ),
                         Text(
-                          context.tr('Glasshouse Harvest Review'),
+                          context.tr('Financial Review'),
                           style: const TextStyle(
                             fontSize: 12,
                             color: AppColors.freshSage,
@@ -1941,7 +1954,8 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 28),
                         child: EmptyStateCard(
-                          icon: Icons.eco_outlined,
+                          icon: Icons.insights_outlined,
+                          illustrationAsset: 'assets/illustrations/empty_analytics.png',
                           title: context.tr('No recap activity yet'),
                           subtitle: context.tr(
                             'No transactions were recorded during this completed period.',
@@ -2363,7 +2377,11 @@ class _NetWorthVitalityCard extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.spa_outlined, size: 16, color: tierColor),
+                    Image.asset(
+                      'assets/icons/vice_city/investment.png',
+                      width: 16,
+                      height: 16,
+                    ),
                     const SizedBox(width: 6),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -2424,11 +2442,11 @@ class _NetWorthVitalityCard extends StatelessWidget {
                 child: Text(
                   vitality.hasEnoughData
                       ? context.tr(
-                          'Glasshouse Vitality Score • {n}/4 pillars active',
+                          'Financial Health Score • {n}/4 pillars active',
                           {'n': vitality.activePillarCount},
                         )
                       : context.tr(
-                          'Record activity to unlock your Glasshouse Vitality Score',
+                          'Record activity to unlock your Financial Health Score',
                         ),
                   style: const TextStyle(
                     fontSize: 11.5,
@@ -2521,7 +2539,7 @@ class _VitalityDetailsSheet extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            context.tr('Glasshouse Vitality Score'),
+                            context.tr('Financial Health Score'),
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.white70,

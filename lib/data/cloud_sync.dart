@@ -204,13 +204,13 @@ class AutoSyncService {
       if (lastUid != uid) {
         debugPrint('[AutoSync] Account switch or new session ($lastUid -> $uid). Preparing local data...');
         if (lastUid != null) {
-          await prefs.remove('current_sync_user_id');
           await clearPullCursor(prefs, lastUid);
           await _db.resetAllData();
+          await prefs.remove('current_sync_user_id');
         } else if (discardGuestDataOnNextLogin) {
           discardGuestDataOnNextLogin = false;
-          await prefs.remove('current_sync_user_id');
           await _db.resetAllData();
+          await prefs.remove('current_sync_user_id');
           await _ref.read(profileProvider.notifier).clearLocal(ProfileController.guestId);
           await _ref.read(budgetRuleProvider.notifier).clearLocal();
           await Lock.instance.clearLocal('guest');
@@ -227,7 +227,13 @@ class AutoSyncService {
         if (epoch != _sessionEpoch) return;
         _ref.read(appPrefsProvider.notifier).loadForUser(uid);
         _ref.read(budgetRuleProvider.notifier).loadForUser(uid);
-        await Lock.instance.syncWithCloud(uid);
+        final pendingPinResetKey = 'pending_pin_reset_after_auth_$uid';
+        if (prefs.getBool(pendingPinResetKey) == true) {
+          await prefs.remove(pendingPinResetKey);
+          await Lock.instance.disable();
+        } else {
+          await Lock.instance.syncWithCloud(uid);
+        }
       }
       if (epoch != _sessionEpoch) return;
       discardGuestDataOnNextLogin = false;

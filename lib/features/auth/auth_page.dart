@@ -108,12 +108,9 @@ class _AuthPageState extends ConsumerState<AuthPage> {
       return;
     }
 
-    var discardGuest = false;
-    if (!_register) {
-      final keep = await _askGuestDataChoice();
-      if (keep == null) return;
-      discardGuest = !keep;
-    }
+    final keep = await _askGuestDataChoice();
+    if (keep == null) return;
+    final discardGuest = !keep;
 
     setState(() {
       _busy = true;
@@ -213,34 +210,53 @@ class _AuthPageState extends ConsumerState<AuthPage> {
     final canPop = Navigator.of(context).canPop();
 
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-          children: [
-            Row(
-              children: [
-                if (canPop) ...[
-                  IconButton(
-                    tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                    onPressed: _busy ? null : () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                  const SizedBox(width: 4),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/coastal_sunset_bg.jpg',
+            fit: BoxFit.cover,
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.midnightNavy.withValues(alpha: 0.90),
+                  AppColors.midnightNavy.withValues(alpha: 0.96),
                 ],
-                const BrandMark(size: 52),
-                const Spacer(),
-                SegmentedButton<String>(
-                  showSelectedIcon: false,
-                  style: const ButtonStyle(visualDensity: VisualDensity.compact),
-                  segments: const [
-                    ButtonSegment(value: 'en', label: Text('EN')),
-                    ButtonSegment(value: 'id', label: Text('ID')),
-                  ],
-                  selected: {localeCode},
-                  onSelectionChanged: (s) => prefs.setLocale(s.first),
-                ),
-              ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
             ),
+          ),
+          SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+              children: [
+                Row(
+                  children: [
+                    if (canPop) ...[
+                      IconButton(
+                        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                        onPressed: _busy ? null : () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_back_rounded),
+                      ),
+                      const SizedBox(width: 4),
+                    ],
+                    const BrandMark(size: 52),
+                    const Spacer(),
+                    SegmentedButton<String>(
+                      showSelectedIcon: false,
+                      style: const ButtonStyle(visualDensity: VisualDensity.compact),
+                      segments: const [
+                        ButtonSegment(value: 'en', label: Text('EN')),
+                        ButtonSegment(value: 'id', label: Text('ID')),
+                      ],
+                      selected: {localeCode},
+                      onSelectionChanged: (s) => prefs.setLocale(s.first),
+                    ),
+                  ],
+                ),
             const SizedBox(height: 24),
             Text(
               context.tr(_register ? 'Create account' : 'Welcome Back'),
@@ -380,8 +396,8 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                     : () => ref.read(skipAuthProvider.notifier).skip(),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size.fromHeight(50),
-                  foregroundColor: AppColors.dewMint,
-                  side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.35)),
+                  foregroundColor: AppColors.neonCyan,
+                  side: BorderSide(color: AppColors.neonCyan.withValues(alpha: 0.45)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -398,13 +414,15 @@ class _AuthPageState extends ConsumerState<AuthPage> {
                   '100% offline on this device. You can link an account anytime.',
                 ),
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: AppColors.freshSage),
+                style: const TextStyle(fontSize: 12, color: AppColors.mutedBlueGray),
               ),
             ],
           ],
         ),
       ),
-    );
+    ],
+  ),
+);
   }
 }
 

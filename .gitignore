@@ -62,3 +62,10 @@ android/app/*.keystore
 # Environment & secret configuration files
 .env
 .env.*
+
+# Security & threat modeling reports (never commit to git)
+threat-model/
+~/
+~
+
+

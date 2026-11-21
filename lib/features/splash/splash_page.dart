@@ -6,6 +6,7 @@ library;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/l10n.dart';
@@ -55,7 +56,7 @@ class GlasshouseCombinationLogo extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Ambient Halo Glow bernuansa botanical dew mint & emerald
+          // Ambient Halo Glow bernuansa Vice City sunset magenta & neon cyan
           Container(
             width: size * 1.15,
             height: size * 1.15,
@@ -63,8 +64,8 @@ class GlasshouseCombinationLogo extends StatelessWidget {
               shape: BoxShape.circle,
               gradient: RadialGradient(
                 colors: [
-                  AppColors.dewMint.withValues(alpha: 0.25),
-                  AppColors.emeraldLeaf.withValues(alpha: 0.15),
+                  AppColors.sunsetMagenta.withValues(alpha: 0.35),
+                  AppColors.neonCyan.withValues(alpha: 0.18),
                   Colors.transparent,
                 ],
                 stops: const [0.0, 0.55, 1.0],
@@ -112,21 +113,21 @@ class EnchantedGlasshouseBackgroundPainter extends CustomPainter {
     final h = size.height;
     if (w <= 0 || h <= 0) return;
 
-    // 1. Kanvas Latar Belakang Gradasi Moss Shadow & Glasshouse Green
+    // 1. Kanvas Latar Belakang Gradasi Deep Navy & Midnight Navy
     final bgPaint = Paint()
       ..shader = RadialGradient(
         center: const Alignment(0.2, -0.6),
         radius: 1.35,
         colors: [
-          const Color(0xFF1D3E33),
-          AppColors.glasshouseGreen.withValues(alpha: 0.92),
-          AppColors.mossShadow,
+          const Color(0xFF162354),
+          const Color(0xFF0F183C),
+          AppColors.midnightNavy,
         ],
         stops: const [0.0, 0.42, 1.0],
       ).createShader(Rect.fromLTWH(0, 0, w, h));
     canvas.drawRect(Rect.fromLTWH(0, 0, w, h), bgPaint);
 
-    // 2. Efek Cahaya Matahari Menembus Kaca (Soft Conservatory Sunbeams)
+    // 2. Efek Cahaya Sunset Menembus Cakrawala (Soft Sunset Sunbeams)
     final sunProgress = sunbeamAnimation.value;
     final sunAlpha = 0.05 + 0.04 * math.sin(sunProgress * math.pi * 2);
     final beamOffset = math.sin(sunProgress * math.pi * 2) * 14.0;
@@ -137,8 +138,8 @@ class EnchantedGlasshouseBackgroundPainter extends CustomPainter {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            AppColors.dewMint.withValues(alpha: sunAlpha * 1.5),
-            const Color(0xFFFAF4D0).withValues(alpha: sunAlpha * 0.9),
+            AppColors.sunsetOrange.withValues(alpha: sunAlpha * 1.5),
+            AppColors.sunsetMagenta.withValues(alpha: sunAlpha * 0.9),
             Colors.transparent,
           ],
           stops: const [0.0, 0.30, 1.0],
@@ -157,121 +158,99 @@ class EnchantedGlasshouseBackgroundPainter extends CustomPainter {
     drawSunbeam(w * 0.70, w * 0.18, 0.30);
     drawSunbeam(w * 0.25, w * 0.14, 0.38);
 
-    // 3. Garis Struktur Atap Kaca Konservatori (Subtle Glass Vault Trusses)
-    final trussPaint = Paint()
-      ..color = AppColors.dewMint.withValues(alpha: 0.045)
+    // 3. Lengkungan Cahaya Neon Sunset (Retro Horizon Arc Waves)
+    final arcPaintCyan = Paint()
+      ..color = AppColors.neonCyan.withValues(alpha: 0.05)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+
+    final arcArch1 = Path()
+      ..moveTo(0, h * 0.18)
+      ..cubicTo(w * 0.30, h * 0.06, w * 0.70, h * 0.06, w, h * 0.18);
+    canvas.drawPath(arcArch1, arcPaintCyan);
+
+    final arcPaintMagenta = Paint()
+      ..color = AppColors.sunsetMagenta.withValues(alpha: 0.04)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
-    final trussArch1 = Path()
-      ..moveTo(0, h * 0.14)
-      ..cubicTo(w * 0.28, -h * 0.04, w * 0.72, -h * 0.04, w, h * 0.14);
-    canvas.drawPath(trussArch1, trussPaint);
+    final arcArch2 = Path()
+      ..moveTo(0, h * 0.32)
+      ..cubicTo(w * 0.30, h * 0.20, w * 0.70, h * 0.20, w, h * 0.32);
+    canvas.drawPath(arcArch2, arcPaintMagenta);
 
-    final trussArch2 = Path()
-      ..moveTo(0, h * 0.28)
-      ..cubicTo(w * 0.28, h * 0.10, w * 0.72, h * 0.10, w, h * 0.28);
-    canvas.drawPath(trussArch2, trussPaint);
+    // 4. Siluet Pesisir Tropis Halus di Sudut Layar (Vice City Palms Silhouette)
+    _drawTropicalSilhouettes(canvas, size);
 
-    // 4. Siluet Dedaunan Emerald & Sage di Bagian Tepi (Minimalist Edge Framing)
-    _drawFoliageSilhouettes(canvas, size);
-
-    // 5. Partikel Cahaya & Butiran Embun Berpendar Halus (Enchanted Light Motes)
+    // 5. Partikel Cahaya Starlight & Sunset Dust Berpendar Halus
     final pTime = particleAnimation.value;
-    for (final mote in _motes) {
+    for (int i = 0; i < _motes.length; i++) {
+      final mote = _motes[i];
       final dyOffset = ((mote.y - pTime * 0.12 * mote.speed) % 1.0) * h;
       final dxOffset = mote.x * w + math.sin((pTime + mote.x) * math.pi * 2) * 6.0;
       final alphaPulse = (mote.baseAlpha * (0.7 + 0.3 * math.sin((pTime + mote.y) * math.pi * 4)))
           .clamp(0.0, 1.0);
 
+      final moteColor = (i % 3 == 0)
+          ? AppColors.sunsetMagenta
+          : (i % 3 == 1)
+              ? AppColors.goldenYellow
+              : AppColors.neonCyan;
+
       final motePaint = Paint()
-        ..color = AppColors.dewMint.withValues(alpha: alphaPulse)
+        ..color = moteColor.withValues(alpha: alphaPulse * 0.75)
         ..style = PaintingStyle.fill;
       canvas.drawCircle(Offset(dxOffset, dyOffset), mote.radius, motePaint);
 
       // Halo pendaran lembut
       final haloPaint = Paint()
-        ..color = Colors.white.withValues(alpha: alphaPulse * 0.45)
+        ..color = Colors.white.withValues(alpha: alphaPulse * 0.35)
         ..style = PaintingStyle.fill;
       canvas.drawCircle(Offset(dxOffset, dyOffset), mote.radius * 2.2, haloPaint);
     }
   }
 
-  /// Menggambar siluet dedaunan botani yang membingkai sudut layar secara elegan
-  void _drawFoliageSilhouettes(Canvas canvas, Size size) {
+  /// Menggambar siluet palem pesisir tropis bernuansa Vice City Sunset gelap
+  void _drawTropicalSilhouettes(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
 
-    final leafFillEmerald = Paint()
-      ..color = AppColors.emeraldLeaf.withValues(alpha: 0.16)
+    final palmPaint = Paint()
+      ..color = const Color(0xFF04081E).withValues(alpha: 0.65)
       ..style = PaintingStyle.fill;
 
-    final leafFillSage = Paint()
-      ..color = AppColors.freshSage.withValues(alpha: 0.12)
-      ..style = PaintingStyle.fill;
-
-    final stemPaint = Paint()
-      ..color = AppColors.freshSage.withValues(alpha: 0.10)
+    final trunkPaint = Paint()
+      ..color = const Color(0xFF04081E).withValues(alpha: 0.65)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
+      ..strokeWidth = 2.4
       ..strokeCap = StrokeCap.round;
 
-    // Helper daun tunggal organik
-    void drawLeaf(Offset origin, double angle, double length, double width, Paint paint) {
+    // Helper daun palem tunggal
+    void drawFrond(Offset origin, double angle, double length, double width) {
       canvas.save();
       canvas.translate(origin.dx, origin.dy);
       canvas.rotate(angle);
       final p = Path()
         ..moveTo(0, 0)
-        ..cubicTo(-width * 0.48, length * 0.35, -width * 0.50, length * 0.75, 0, length)
-        ..cubicTo(width * 0.50, length * 0.75, width * 0.48, length * 0.35, 0, 0)
+        ..cubicTo(-width * 0.45, length * 0.35, -width * 0.45, length * 0.75, 0, length)
+        ..cubicTo(width * 0.45, length * 0.75, width * 0.45, length * 0.35, 0, 0)
         ..close();
-      canvas.drawPath(p, paint);
+      canvas.drawPath(p, palmPaint);
       canvas.restore();
     }
 
-    // A. Sudut Kanan Atas: Ranting merambat halus menjuntai ke bawah
-    final stemTR = Path()
-      ..moveTo(w, -5)
-      ..cubicTo(w - 25, h * 0.05, w - 45, h * 0.12, w - 20, h * 0.22);
-    canvas.drawPath(stemTR, stemPaint);
+    // A. Sudut Kanan Atas: Siluet palem pesisir halus
+    canvas.drawLine(Offset(w + 10, -5), Offset(w - 28, h * 0.12), trunkPaint);
+    drawFrond(Offset(w - 28, h * 0.12), 0.6, 36.0, 14.0);
+    drawFrond(Offset(w - 28, h * 0.12), 1.1, 32.0, 13.0);
+    drawFrond(Offset(w - 28, h * 0.12), -0.4, 30.0, 12.0);
+    drawFrond(Offset(w - 28, h * 0.12), 1.6, 28.0, 11.0);
 
-    drawLeaf(Offset(w - 12, h * 0.03), 0.7, 32.0, 16.0, leafFillEmerald);
-    drawLeaf(Offset(w - 32, h * 0.07), -0.6, 28.0, 14.0, leafFillSage);
-    drawLeaf(Offset(w - 22, h * 0.12), 1.0, 26.0, 13.0, leafFillEmerald);
-    drawLeaf(Offset(w - 40, h * 0.16), -0.8, 24.0, 12.0, leafFillSage);
-    drawLeaf(Offset(w - 20, h * 0.22), 0.4, 20.0, 10.0, leafFillEmerald);
-
-    // B. Sudut Kiri Atas: Ranting merambat kecil
-    final stemTL = Path()
-      ..moveTo(-5, h * 0.04)
-      ..cubicTo(w * 0.06, h * 0.07, w * 0.10, h * 0.14, w * 0.04, h * 0.20);
-    canvas.drawPath(stemTL, stemPaint);
-
-    drawLeaf(Offset(w * 0.02, h * 0.05), -0.6, 26.0, 13.0, leafFillEmerald);
-    drawLeaf(Offset(w * 0.07, h * 0.09), 0.8, 24.0, 12.0, leafFillSage);
-    drawLeaf(Offset(w * 0.04, h * 0.15), -0.5, 20.0, 10.0, leafFillEmerald);
-
-    // C. Sudut Kiri Bawah: Siluet pakis & dedaunan botani bawah
-    final stemBL = Path()
-      ..moveTo(-10, h + 5)
-      ..cubicTo(w * 0.10, h * 0.90, w * 0.18, h * 0.88, w * 0.28, h * 0.91);
-    canvas.drawPath(stemBL, stemPaint);
-
-    drawLeaf(Offset(w * 0.04, h * 0.91), -1.5, 42.0, 20.0, leafFillEmerald);
-    drawLeaf(Offset(w * 0.12, h * 0.87), -1.1, 36.0, 18.0, leafFillSage);
-    drawLeaf(Offset(w * 0.20, h * 0.86), -0.8, 30.0, 15.0, leafFillEmerald);
-    drawLeaf(Offset(w * 0.28, h * 0.90), -0.5, 24.0, 12.0, leafFillSage);
-
-    // D. Sudut Kanan Bawah: Siluet dedaunan menjuntai
-    final stemBR = Path()
-      ..moveTo(w + 10, h * 0.86)
-      ..cubicTo(w * 0.86, h * 0.89, w * 0.78, h * 0.94, w * 0.70, h + 5);
-    canvas.drawPath(stemBR, stemPaint);
-
-    drawLeaf(Offset(w * 0.92, h * 0.87), 1.8, 38.0, 18.0, leafFillEmerald);
-    drawLeaf(Offset(w * 0.84, h * 0.90), 1.3, 32.0, 16.0, leafFillSage);
-    drawLeaf(Offset(w * 0.74, h * 0.94), 0.9, 26.0, 13.0, leafFillEmerald);
+    // B. Sudut Kiri Bawah: Siluet palem pesisir kecil
+    canvas.drawLine(Offset(-8, h + 8), Offset(w * 0.10, h * 0.88), trunkPaint);
+    drawFrond(Offset(w * 0.10, h * 0.88), -0.7, 34.0, 14.0);
+    drawFrond(Offset(w * 0.10, h * 0.88), -1.2, 30.0, 12.0);
+    drawFrond(Offset(w * 0.10, h * 0.88), 0.3, 28.0, 11.0);
   }
 
   @override
@@ -420,92 +399,100 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.mossShadow,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // 1. Lapisan Latar Belakang Enchanted Glasshouse
-          Positioned.fill(
-            child: RepaintBoundary(
-              child: CustomPaint(
-                painter: EnchantedGlasshouseBackgroundPainter(
-                  sunbeamAnimation: _ambientController,
-                  particleAnimation: _ambientController,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: AppColors.midnightNavy,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.midnightNavy,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            // 1. Lapisan Latar Belakang Vice City Sunset
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: EnchantedGlasshouseBackgroundPainter(
+                    sunbeamAnimation: _ambientController,
+                    particleAnimation: _ambientController,
+                  ),
                 ),
               ),
             ),
-          ),
 
-          // 2. Konten Tengah & Bawah
-          SafeArea(
-            child: Column(
-              children: [
-                const Spacer(flex: 4),
+            // 2. Konten Tengah & Bawah
+            SafeArea(
+              child: Column(
+                children: [
+                  const Spacer(flex: 4),
 
-                // --- BAGIAN TENGAH: Logo Utama & Nama Aplikasi ---
-                FadeTransition(
-                  opacity: _logoFade,
-                  child: ScaleTransition(
-                    scale: _logoScale,
-                    child: const GlasshouseCombinationLogo(
-                      size: 136,
-                      showGlow: true,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 22),
-                FadeTransition(
-                  opacity: _titleFade,
-                  child: SlideTransition(
-                    position: _titleSlide,
-                    child: Text(
-                      "Wall o' Pay",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.outfit(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w600, // Outfit SemiBold
-                        letterSpacing: -0.4,
-                        color: AppColors.softIvory,
+                  // --- BAGIAN TENGAH: Logo Utama & Nama Aplikasi ---
+                  FadeTransition(
+                    opacity: _logoFade,
+                    child: ScaleTransition(
+                      scale: _logoScale,
+                      child: const GlasshouseCombinationLogo(
+                        size: 136,
+                        showGlow: true,
                       ),
                     ),
                   ),
-                ),
-
-                const Spacer(flex: 5),
-
-                // --- BAGIAN BAWAH: Tagline & Indikator Loading Minimalis ---
-                FadeTransition(
-                  opacity: _taglineFade,
-                  child: SlideTransition(
-                    position: _taglineSlide,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          context.tr('Grow Your Financial Habits.'),
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.dmSans(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400, // DM Sans Regular
-                            letterSpacing: 0.25,
-                            color: AppColors.freshSage,
-                          ),
+                  const SizedBox(height: 22),
+                  FadeTransition(
+                    opacity: _titleFade,
+                    child: SlideTransition(
+                      position: _titleSlide,
+                      child: Text(
+                        "Wall o' Pay",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.outfit(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w600, // Outfit SemiBold
+                          letterSpacing: -0.4,
+                          color: AppColors.softWhite,
                         ),
-                        const SizedBox(height: 18),
-                        FadeTransition(
-                          opacity: _loadingFade,
-                          child: const _MinimalLoadingIndicator(),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 38),
-              ],
+
+                  const Spacer(flex: 5),
+
+                  // --- BAGIAN BAWAH: Tagline & Indikator Loading Minimalis ---
+                  FadeTransition(
+                    opacity: _taglineFade,
+                    child: SlideTransition(
+                      position: _taglineSlide,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            context.tr('Grow Your Financial Habits.'),
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.dmSans(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400, // DM Sans Regular
+                              letterSpacing: 0.25,
+                              color: AppColors.mutedBlueGray,
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          FadeTransition(
+                            opacity: _loadingFade,
+                            child: const _MinimalLoadingIndicator(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 38),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -567,15 +554,15 @@ class _MinimalLoadingIndicatorState extends State<_MinimalLoadingIndicator>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  AppColors.emeraldLeaf.withValues(alpha: 0.60),
-                  AppColors.dewMint.withValues(alpha: 0.90),
-                  AppColors.emeraldLeaf.withValues(alpha: 0.60),
+                  AppColors.sunsetMagenta.withValues(alpha: 0.70),
+                  AppColors.goldenYellow.withValues(alpha: 0.95),
+                  AppColors.neonCyan.withValues(alpha: 0.70),
                 ],
               ),
               borderRadius: BorderRadius.circular(2),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.dewMint.withValues(alpha: 0.35 * glowProgress),
+                  color: AppColors.sunsetMagenta.withValues(alpha: 0.35 * glowProgress),
                   blurRadius: 6,
                   spreadRadius: 0.5,
                 ),

@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/icons.dart';
 import '../../core/l10n.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
@@ -35,11 +36,13 @@ class MorePage extends ConsumerWidget {
       String subtitle,
       VoidCallback onTap,
     ) {
+      final customAsset = viceCityAssetForIcon(icon);
       return ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: Container(
           width: 40,
           height: 40,
+          padding: customAsset != null ? const EdgeInsets.all(7) : null,
           decoration: BoxDecoration(
             color: iconColor.withValues(alpha: 0.16),
             borderRadius: BorderRadius.circular(12),
@@ -48,7 +51,9 @@ class MorePage extends ConsumerWidget {
               width: 0.8,
             ),
           ),
-          child: Icon(icon, color: iconColor, size: 20),
+          child: customAsset != null
+              ? Image.asset(customAsset, fit: BoxFit.contain)
+              : Icon(icon, color: iconColor, size: 20),
         ),
         title: Text(
           title,

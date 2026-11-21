@@ -45,10 +45,313 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '3.0.0',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Vice City Sunset Major Release — Complete visual transformation centered on Slate Navy, Sunset Rose, Sunset Amber, and Neon Cyan palette, retro-modern Space Grotesk & Inter typography, 160+ custom 3D icons, coastal sunset skyline canopies, and the Neon Sunset Wallet emblem.',
+          textId:
+              'Rilis Mayor Vice City Sunset — Perombakan visual menyeluruh dengan palet Slate Navy, Sunset Rose, Sunset Amber, dan Neon Cyan, tipografi retro-modern Space Grotesk & Inter, 160+ ikon 3D kustom, kanopi sunset pesisir, serta lambang Neon Sunset Wallet.',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Security & Keystore Hardening — Hardware Keystore brute-force lockout, full local wipe on Forgot PIN reset with cross-device sync preservation, private lock-screen notifications, CSV formula injection defense, and strict Cloud Firestore Security Rules.',
+          textId:
+              'Penguatan Keamanan & Keystore — Proteksi lockout brute-force di Hardware Keystore, pembersihan data lokal aman saat reset Lupa PIN, sensor notifikasi layar kunci, proteksi injeksi formula CSV, dan aturan Cloud Firestore ketat.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.14',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Vice City Sunset Branding Transition — Replaced remaining Botanical / Glasshouse branding across About Wall o\' Pay, financial recap notification labels, README.md, ARCHITECTURE.md, and project metadata with the Vice City Sunset identity.',
+          textId:
+              'Transisi Branding Vice City Sunset — Mengganti seluruh sisa branding Botanical / Glasshouse pada Tentang Wall o\' Pay, label notifikasi rekap keuangan, README.md, ARCHITECTURE.md, dan metadata proyek menjadi identitas Vice City Sunset.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.13',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Security & Privacy Hardening — Enforced full local data wipe on Forgot PIN reset while preserving cross-device PIN sync until password re-authentication, moved brute-force lockout counters into Android Keystore / iOS Keychain, added CSV formula injection neutralization, redacted lock-screen debt notifications when PIN/Hide Balance is active, and hardened JSON backup, Share Intent, and Firestore Security Rules.',
+          textId:
+              'Penguatan Keamanan & Privasi — Memastikan penghapusan penuh data lokal saat reset Lupa PIN sembari menjaga sinkronisasi PIN otomatis antar-perangkat hingga pemilik login ulang dengan kata sandi, memindahkan penghitung lockout brute-force ke Android Keystore / iOS Keychain, menangkal injeksi rumus CSV, menyensor rincian notifikasi utang di layar kunci saat PIN/Sembunyikan Saldo aktif, serta memperkuat validasi backup JSON, Share Intent, dan Firestore Security Rules.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.12',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Landing Page Vice City Sunset Theme — Aligned the web landing page colors, typography, hero sunset background, and copywriting with the app\'s Vice City Sunset design system.',
+          textId:
+              'Tema Vice City Sunset Landing Page — Menyelaraskan warna, tipografi, latar belakang hero sunset, dan teks landing page dengan sistem desain Vice City Sunset aplikasi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.11',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Daily Financial Pulse Color Semantics — Switched Phase 1 (Safe) and Safe Daily Quota accents from Coral Rose to Warm Emerald green, separating Safe (Green), Caution (Orange), and Limit (Coral Rose).',
+          textId:
+              'Semantik Warna Daily Financial Pulse — Mengubah warna Phase 1 (Aman) dan angka kuota harian aman ke Hijau Zamrud hangat agar jelas berbeda antara Aman (Hijau), Waspada (Oranye), dan Batas Tercapai (Merah Coral).',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.10',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Profile Avatar Frame Upgrade — Updated the circular profile photo border across Home, Settings, and Profile with the new Vice City Sunset palm & skyline neon rim frame.',
+          textId:
+              'Pembaruan Bingkai Foto Profil — Memperbarui bingkai lingkaran foto profil di Beranda, Pengaturan, dan Profil dengan desain palem & skyline senja Vice City Sunset.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.9',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Functional Empty State Illustrations — Mapped each of the 6 Vice City Sunset illustrations to its exact context: empty transactions (wallet), empty search (magnifying glass), empty recurring/notifications (muted bell), empty savings/goals (coin jar), and empty insights/recap (analytics chart).',
+          textId:
+              'Pemetaan Ilustrasi Empty State Sesuai Fungsi — Memetakan ke-6 ilustrasi Vice City Sunset ke konteks masing-masing: transaksi kosong (dompet), pencarian kosong (kaca pembesar), jadwal/notifikasi kosong (lonceng), tabungan/target kosong (stoples koin), dan insight/rekap kosong (grafik analitik).',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.8',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Transparent App Launcher Icon — Replaced the boxed app icon with the clean transparent Vice City Sunset "W" wallet & palm emblem across Android, iOS, Web, and Windows.',
+          textId:
+              'Ikon Aplikasi Transparan — Mengganti ikon aplikasi berkotak dengan emblem transparan "W" dompet & palem Vice City Sunset yang bersih di Android, iOS, Web, dan Windows.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.7',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Complete Default Icon Leak Elimination — Replaced remaining Material icons across More Features, Settings switches & Guest Mode card, About Wall o\' Pay lore cards, Insights summary/recap/empty states, Category icon picker, and Recurring schedule tiles.',
+          textId:
+              'Pembersihan Total Kebocoran Ikon Default — Mengganti seluruh sisa ikon Material pada halaman Fitur Lainnya, sakelar Pengaturan & kartu Guest Mode, kartu filosofi Tentang Wall o\' Pay, ringkasan/rekap/empty state Insight, pemilih ikon Kategori, dan daftar Jadwal Berulang.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.6',
+      dateEn: 'November 21, 2026',
+      dateId: '21 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Full 160-Icon Integration & Audit — Mapped dedicated 3D icons to every transaction category and replaced remaining default Material icons across Home (eye balance toggle, recurring alarm), Transactions (PDF/CSV/calendar/receipt), Security (fingerprint & PIN), Debts (split bill group), Budget calculator, and Goals.',
+          textId:
+              'Integrasi & Audit Penuh 160 Ikon — Memetakan ikon 3D khusus ke setiap kategori transaksi serta mengganti sisa ikon default pada Beranda (tombol intip saldo, pengingat berulang), Transaksi (PDF/CSV/kalender/struk), Keamanan (sidik jari & PIN), Utang (grup patungan), Kalkulator Anggaran, dan Target Tabungan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.5',
+      dateEn: 'November 20, 2026',
+      dateId: '20 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Expanded Custom Icon Integration — Replaced default Material icons across Settings menu tiles and module switches, Home BalanceCard flow badges, Daily Pulse indicators, and Transactions filter bar with 3D Vice City assets.',
+          textId:
+              'Ekspansi Integrasi Ikon Kustom — Mengganti ikon default Material pada tile menu Pengaturan dan sakelar modul, lencana arus kas BalanceCard Beranda, indikator Daily Pulse, dan bilah filter Transaksi dengan aset 3D Vice City.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.4',
+      dateEn: 'November 20, 2026',
+      dateId: '20 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Sunset Elegance (Arah A) Theme Refinement — Elevated canvas to modern Slate Navy, softened accents to Sunset Coral Rose and Sunset Amber, and switched income semantics to warm emerald for natural, eye-friendly financial readability.',
+          textId:
+              'Penyempurnaan Tema Sunset Elegance (Arah A) — Menaikkan kanvas ke Slate Navy modern, melembutkan aksen ke Sunset Coral Rose dan Sunset Amber, serta memperbarui semantik pemasukan ke hijau zamrud ramah mata.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.3',
+      dateEn: 'November 20, 2026',
+      dateId: '20 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Comprehensive Custom Icon Integration — Replaced default Material icons across header actions, search bar, filter chips, cashflow cards, and budget pillars with the 25 compressed Vice City sunset icons.',
+          textId:
+              'Integrasi Ikon Kustom Menyeluruh — Mengganti ikon default Material pada aksi header, kolom pencarian, chip filter, kartu arus kas, dan pilar anggaran dengan 25 ikon kompres Vice City sunset.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.2',
+      dateEn: 'November 20, 2026',
+      dateId: '20 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Complete Residual Leaf Pruning — Fully eliminated legacy botanical leaf vines, Ivy branches, and greenhouse arches across all header canopies and background sheets in favor of sleek neon glows.',
+          textId:
+              'Pembersihan Total Sisa Dedaunan — Menghapus seluruh siluet ranting, juntaian daun botani, dan lengkungan kubah kaca lama pada kanopi header dan lembar latar, digantikan pendaran neon halus.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Prominent Vertical Sunset Background Integration — Activated the vibrant coastal sunset vertical background with balanced dark navy atmospheric scrim across Home, Transactions, Budget, and Insights.',
+          textId:
+              'Implementasi Latar Sunset Vertikal Terpadu — Mengaktifkan latar pemandangan kota pesisir senja vertikal dengan lapisan scrim dark navy seimbang di Beranda, Transaksi, Anggaran, dan Wawasan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.1',
+      dateEn: 'November 20, 2026',
+      dateId: '20 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Native & Flutter Splash Screen — Replaced legacy botanical background with Midnight Navy (#070D2B) across Android native launch and Flutter startup, eliminating startup color flashes.',
+          textId:
+              'Splash Screen Native & Flutter — Mengganti warna latar botani lama dengan Midnight Navy (#070D2B) pada peluncuran native Android dan Flutter, menghilangkan kilatan warna saat startup.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              '4 Main Pages Header Canopy (Concept A) — Integrated vertical Vice City portrait backdrop into Home, Transactions, Budget, and Insights header canopy while keeping existing layout sheets intact.',
+          textId:
+              'Kanopi Header 4 Halaman Utama (Konsep A) — Mengintegrasikan latar sunset vertikal Vice City pada kanopi header Beranda, Transaksi, Anggaran, dan Wawasan tanpa mengubah struktur tata letak lembar konten.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Settings Profile Card & Transparent Frame — Upgraded user profile card with Vice City coastal sunset skyline and neon edge highlight, accompanied by transparent circular Vice City profile frame.',
+          textId:
+              'Kartu Profil Pengaturan & Bingkai Transparan — Memperbarui kartu profil pengguna dengan panorama pesisir sunset Vice City dan garis tepi neon, dilengkapi bingkai profil melingkar transparan otentik.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Typography & Icon Set Refresh — Adopted Space Grotesk for headings and tabular financial amounts, Inter for body text, and refreshed internal icon system with 25 transparent icons.',
+          textId:
+              'Penyegaran Tipografi & Set Ikon — Menerapkan Space Grotesk untuk judul dan angka keuangan tabular, Inter untuk teks isi, serta memperbarui sistem ikon internal dengan 25 ikon transparan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '2.17.0',
+      dateEn: 'November 20, 2026',
+      dateId: '20 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Vice City Sunset Visual Rebranding — Adopted a balanced retro-modern design system featuring Midnight Navy, Deep Navy, Sunset Magenta, Coral Pink, Sunset Orange, Golden Yellow, and Neon Cyan with high-contrast financial readability.',
+          textId:
+              'Pembaruan Visual Vice City Sunset — Mengadopsi sistem desain retro-modern berimbang dengan Midnight Navy, Deep Navy, Sunset Magenta, Coral Pink, Sunset Orange, Golden Yellow, dan Neon Cyan dengan keterbacaan finansial tinggi.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'New Neon Sunset Logo & App Icons — Rebranded application icon, brand marks, and splash combination logo using the iconic Neon Sunset Wallet W Emblem with glowing dual-ring halo.',
+          textId:
+              'Logo & Ikon Aplikasi Neon Sunset Baru — Memperbarui ikon aplikasi, penanda merek, dan logo kombinasi splash dengan Neon Sunset Wallet W Emblem berbingkai pendar ganda.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Miami Sunset Finance Icon Set — Sliced and mapped 30 bespoke tropical neon icons across bottom navigation, category badges, transaction forms, filters, and settings.',
+          textId:
+              'Set Ikon Keuangan Miami Sunset — Memotong dan memetakan 30 ikon neon pesisir di navigasi bawah, lencana kategori, formulir transaksi, filter, dan pengaturan.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Tropical Neon Finance Empty States — Integrated 6 contextual illustrations for empty transactions, budgets, savings/goals, analytics, search, and notifications.',
+          textId:
+              'Ilustrasi Keadaan Kosong Tropical Neon — Mengintegrasikan 6 ilustrasi kontekstual untuk transaksi, anggaran, tabungan/tujuan, analitik, pencarian, dan notifikasi kosong.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Atmospheric Backdrops & Shared Components — Upgraded background sheets, hero cards, canopy painters, auth screens, lock screens, and onboarding flows with coastal skyline and neon arc wave visuals.',
+          textId:
+              'Latar Belakang & Komponen Bersama — Meningkatkan lembar latar belakang, hero card, painter kanopi, layar autentikasi, layar kunci, dan alur onboarding dengan latar skyline pesisir dan gelombang busur neon.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '2.16.2',
       dateEn: 'November 15, 2026',
       dateId: '15 November 2026',
-      isCurrent: true,
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,

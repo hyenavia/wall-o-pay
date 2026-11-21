@@ -72,7 +72,11 @@ Future<void> showTotalBudgetDialog(
                       width: 1,
                     ),
                   ),
-                  child: const Icon(Icons.calculate_outlined, color: AppColors.dewMint),
+                  child: Image.asset(
+                    'assets/icon-compress/073_calculator-kompres.png',
+                    width: 24,
+                    height: 24,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

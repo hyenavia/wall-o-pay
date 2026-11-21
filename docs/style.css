@@ -1,60 +1,77 @@
 /* ==========================================================================
-   Wall o' Pay - Enchanted Glasshouse Design System
-   Art Direction: Botanical Editorial + Organic Bento Grid
+   Wall o' Pay - Vice City Sunset Design System
+   Art Direction: Sunset Elegance + Retro-Modern Bento Grid
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
    1. Design Tokens & CSS Custom Properties
    -------------------------------------------------------------------------- */
 :root {
-  /* Official Enchanted Glasshouse Palette */
-  --moss-shadow: #10251F;        /* Deep night forest dark background */
-  --glasshouse-green: #23483B;   /* Primary conservatory pine green */
-  --emerald-leaf: #39745A;       /* Secondary botanical foliage accent */
-  --fresh-sage: #A9C5B1;         /* Soft soothing sage highlight */
-  --dew-mint: #D5E8DC;           /* Luminous morning dew mint */
-  --soft-ivory: #F7F8F4;         /* Crisp, elegant light editorial background */
+  /* Official Vice City Sunset Palette (Arah A: Sunset Elegance) */
+  --midnight-navy: #0F172A;      /* Primary canvas background (Slate 900) */
+  --deep-navy: #1E293B;          /* Card & elevated surface (Slate 800) */
+  --surface-container: #243044;  /* Elevated container & dialog surface */
+  --border-outline: #334155;     /* Subtle structural border */
+  --header-canopy-top: #090D16;  /* Atmospheric header canopy */
 
-  /* Paper Section Card Tokens (Warm Botanical Dew Surfaces) */
-  --paper-card: #EBF2ED;
-  --paper-card-gradient: linear-gradient(150deg, #EDF5F0 0%, #E2ECE5 100%);
-  --paper-card-elevated: #E1ECE5;
-  --paper-card-border: rgba(35, 72, 59, 0.16);
-  --paper-card-border-hover: rgba(57, 116, 90, 0.35);
-  --paper-card-inner: rgba(35, 72, 59, 0.07);
-  --paper-card-inner-border: rgba(35, 72, 59, 0.12);
+  --sunset-magenta: #FB7185;     /* Primary accent (Warm Sunset Rose / Coral 400) */
+  --coral-pink: #F43F5E;         /* Secondary accent / hover (Rose 500) */
+  --sunset-orange: #F97316;      /* Warm sunset orange highlight */
+  --golden-yellow: #FBBF24;      /* Positive highlight (Sunset Amber Gold) */
+  --neon-cyan: #38BDF8;          /* Secondary accent (Soft Sky Aqua) */
+  --soft-white: #F8FAFC;         /* Primary light text & crisp editorial surface */
+  --muted-blue-gray: #94A3B8;    /* Secondary muted text (Slate 400) */
+
+  /* Canonical Aliases (Preserving existing CSS variable hooks) */
+  --moss-shadow: var(--midnight-navy);
+  --glasshouse-green: var(--deep-navy);
+  --emerald-leaf: var(--sunset-magenta);
+  --fresh-sage: var(--neon-cyan);
+  --dew-mint: var(--soft-white);
+  --soft-ivory: #F8FAFC;
+
+  /* Editorial Section Card Tokens (Vice City Sunset Dark Surfaces) */
+  --paper-card: #1E293B;
+  --paper-card-gradient: linear-gradient(150deg, #1E293B 0%, #243044 100%);
+  --paper-card-elevated: #243044;
+  --paper-card-border: rgba(51, 65, 85, 0.9);
+  --paper-card-border-hover: rgba(251, 113, 133, 0.48);
+  --paper-card-inner: rgba(15, 23, 42, 0.55);
+  --paper-card-inner-border: rgba(51, 65, 85, 0.85);
 
   /* Semantic Typography & Surfaces */
-  --ink: #10251F;
-  --ink-secondary: #3D5A4C;
-  --ink-muted: #5F7A6B;
+  --ink: #F8FAFC;
+  --ink-secondary: #CBD5E1;
+  --ink-muted: #94A3B8;
 
-  --on-dark: #F7F8F4;
-  --on-dark-secondary: #D5E8DC;
-  --on-dark-muted: #8EA898;
+  --on-dark: #F8FAFC;
+  --on-dark-secondary: #CBD5E1;
+  --on-dark-muted: #94A3B8;
 
   /* Glassmorphism & Refraction Borders */
-  --glass-surface: rgba(22, 42, 34, 0.72);
-  --glass-surface-elevated: rgba(35, 72, 59, 0.55);
-  --glass-border: rgba(213, 232, 220, 0.18);
-  --glass-border-light: rgba(35, 72, 59, 0.12);
-  --glass-glow: rgba(57, 116, 90, 0.35);
+  --glass-surface: rgba(30, 41, 59, 0.78);
+  --glass-surface-elevated: rgba(36, 48, 68, 0.68);
+  --glass-border: rgba(148, 163, 184, 0.22);
+  --glass-border-light: rgba(15, 23, 42, 0.1);
+  --glass-glow: rgba(251, 113, 133, 0.3);
 
   /* Financial Status Accents */
-  --income: #4ADE80;            /* Lush green for income/surplus */
-  --expense: #FB7185;           /* Soft rose-coral for expenses */
-  --warning: #FBBF24;           /* Warm sunlight amber */
+  --income: #34D399;            /* Emerald 400 for income/surplus on dark */
+  --income-paper: #10B981;      /* Emerald 500 for light editorial cards */
+  --expense: #FB7185;           /* Warm Sunset Rose for expenses */
+  --warning: #F97316;           /* Warm Sunset Orange */
 
-  /* Typography Families */
-  --font-display: 'Outfit', sans-serif;
-  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-serif: 'Lora', Georgia, serif;
+  /* Typography Families (Aligned with app: Space Grotesk, Inter, IBM Plex Mono) */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Space Grotesk', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
 
   /* Elevations */
-  --shadow-sm: 0 4px 12px rgba(16, 37, 31, 0.08);
-  --shadow-md: 0 12px 32px rgba(16, 37, 31, 0.14);
-  --shadow-lg: 0 24px 60px rgba(16, 37, 31, 0.22);
-  --shadow-glow: 0 0 50px rgba(57, 116, 90, 0.28);
+  --shadow-sm: 0 4px 12px rgba(9, 13, 22, 0.08);
+  --shadow-md: 0 12px 32px rgba(9, 13, 22, 0.16);
+  --shadow-lg: 0 24px 60px rgba(9, 13, 22, 0.28);
+  --shadow-glow: 0 0 50px rgba(251, 113, 133, 0.24);
 }
 
 /* --------------------------------------------------------------------------
@@ -131,17 +148,17 @@ button {
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  background: rgba(169, 197, 177, 0.12);
-  color: var(--dew-mint);
-  border: 1px solid var(--glass-border);
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--neon-cyan);
+  border: 1px solid rgba(56, 189, 248, 0.28);
   backdrop-filter: blur(12px);
   margin-bottom: 20px;
 }
 
 .editorial-pill.light {
-  background: rgba(35, 72, 59, 0.08);
-  color: var(--glasshouse-green);
-  border-color: rgba(35, 72, 59, 0.15);
+  background: rgba(251, 113, 133, 0.14);
+  color: var(--sunset-magenta);
+  border-color: rgba(251, 113, 133, 0.32);
 }
 
 .pulse-dot {
@@ -171,14 +188,14 @@ h1 {
 }
 
 h1 em, h2 em, h3 em {
-  font-family: var(--font-serif);
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-weight: 700;
   font-style: italic;
-  color: var(--fresh-sage);
+  color: var(--sunset-magenta);
 }
 
 .paper h1 em, .paper h2 em, .paper h3 em {
-  color: var(--emerald-leaf);
+  color: var(--sunset-magenta);
 }
 
 h2 {
@@ -232,40 +249,40 @@ h3 {
 }
 
 .btn-primary {
-  background: var(--glasshouse-green);
-  color: var(--soft-ivory);
-  border: 1px solid var(--fresh-sage);
-  box-shadow: 0 4px 18px rgba(16, 37, 31, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  background: var(--sunset-magenta);
+  color: #FFFFFF;
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  box-shadow: 0 4px 18px rgba(244, 63, 94, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .btn-primary:hover {
-  background: var(--emerald-leaf);
+  background: var(--coral-pink);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(35, 72, 59, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 24px rgba(244, 63, 94, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
   color: #FFFFFF;
 }
 
 .btn-ghost {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--dew-mint);
+  background: rgba(36, 48, 68, 0.65);
+  color: var(--soft-white);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
 }
 
 .btn-ghost:hover {
-  background: rgba(169, 197, 177, 0.15);
-  border-color: var(--fresh-sage);
+  background: rgba(56, 189, 248, 0.14);
+  border-color: var(--neon-cyan);
   transform: translateY(-2px);
   color: #FFFFFF;
 }
 
 .btn-paper {
-  background: var(--glasshouse-green);
-  color: var(--soft-ivory);
+  background: var(--sunset-magenta);
+  color: #FFFFFF;
 }
 
 .btn-paper:hover {
-  background: var(--emerald-leaf);
+  background: var(--coral-pink);
   transform: translateY(-2px);
 }
 
@@ -289,11 +306,11 @@ header.glass-nav {
 
 header.glass-nav.scrolled {
   padding: 10px 0;
-  background: rgba(16, 37, 31, 0.85);
+  background: rgba(15, 23, 42, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--glass-border);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid var(--border-outline);
+  box-shadow: 0 8px 30px rgba(9, 13, 22, 0.45);
 }
 
 .nav-container {
@@ -324,13 +341,14 @@ header.glass-nav.scrolled {
 }
 
 .brand-version-badge {
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(169, 197, 177, 0.16);
-  color: var(--dew-mint);
-  border: 1px solid var(--glass-border);
+  background: rgba(251, 113, 133, 0.16);
+  color: var(--sunset-magenta);
+  border: 1px solid rgba(251, 113, 133, 0.32);
 }
 
 .nav-menu {
@@ -348,7 +366,7 @@ header.glass-nav.scrolled {
 }
 
 .nav-link:hover {
-  color: var(--dew-mint);
+  color: var(--neon-cyan);
 }
 
 .nav-actions {
@@ -365,7 +383,7 @@ header.glass-nav.scrolled {
 }
 
 /* --------------------------------------------------------------------------
-   6. Hero Section (Enchanted Glasshouse Atmosphere)
+   6. Hero Section (Vice City Sunset Atmosphere)
    -------------------------------------------------------------------------- */
 .hero-section {
   position: relative;
@@ -374,31 +392,52 @@ header.glass-nav.scrolled {
   align-items: center;
   padding-top: calc(90px + clamp(40px, 8vw, 80px));
   padding-bottom: clamp(60px, 10vw, 120px);
-  background: radial-gradient(circle at 75% 30%, rgba(57, 116, 90, 0.22) 0%, transparent 60%),
-              radial-gradient(circle at 20% 80%, rgba(35, 72, 59, 0.3) 0%, transparent 70%),
-              var(--moss-shadow);
+  background: var(--midnight-navy);
   overflow: hidden;
 }
 
-/* Greenhouse Light Beams & Botanical Silhouettes */
+/* Blurred Coastal Sunset Background Image */
+.hero-section::before {
+  content: '';
+  position: absolute;
+  inset: -24px;
+  background: url('images/hero-sunset.jpg') center center / cover no-repeat;
+  filter: blur(8px);
+  transform: scale(1.06);
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Vice City Sunset Atmospheric Scrim & Glow */
+.hero-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 75% 30%, rgba(251, 113, 133, 0.16) 0%, transparent 55%),
+    radial-gradient(circle at 20% 80%, rgba(56, 189, 248, 0.14) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(9, 13, 22, 0.72) 0%, rgba(15, 23, 42, 0.58) 52%, rgba(15, 23, 42, 0.94) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Sunset Ambient Light Beam */
 .hero-ambient-beam {
   position: absolute;
   top: -100px;
   right: 15%;
   width: 500px;
   height: 800px;
-  background: linear-gradient(135deg, rgba(213, 232, 220, 0.08) 0%, rgba(57, 116, 90, 0.02) 70%, transparent 100%);
+  background: linear-gradient(135deg, rgba(251, 113, 133, 0.09) 0%, rgba(56, 189, 248, 0.03) 70%, transparent 100%);
   transform: rotate(-25deg);
   pointer-events: none;
   filter: blur(40px);
+  z-index: 1;
 }
 
 .botanical-silhouette {
-  position: absolute;
-  fill: var(--fresh-sage);
-  opacity: 0.06;
-  pointer-events: none;
-  z-index: 1;
+  display: none;
 }
 
 .hero-grid {
@@ -461,12 +500,12 @@ header.glass-nav.scrolled {
 .phone-chassis {
   width: 320px;
   border-radius: 46px;
-  background: #0B1A15;
+  background: #090D16;
   padding: 11px;
-  border: 2px solid rgba(169, 197, 177, 0.3);
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6),
+  border: 2px solid rgba(51, 65, 85, 0.9);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.65),
               0 0 0 1px rgba(255, 255, 255, 0.06),
-              0 0 60px rgba(57, 116, 90, 0.25);
+              0 0 60px rgba(251, 113, 133, 0.18);
   position: relative;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -511,7 +550,7 @@ header.glass-nav.scrolled {
 .status-notch {
   width: 80px;
   height: 18px;
-  background: #0B1A15;
+  background: #090D16;
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -523,7 +562,7 @@ header.glass-nav.scrolled {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #1D372D;
+  background: #1E293B;
 }
 
 /* In-App Header */
@@ -544,13 +583,13 @@ header.glass-nav.scrolled {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--emerald-leaf), var(--glasshouse-green));
-  border: 1px solid var(--fresh-sage);
+  background: linear-gradient(135deg, var(--sunset-magenta), var(--coral-pink));
+  border: 1px solid rgba(251, 191, 36, 0.6);
   display: grid;
   place-items: center;
   font-weight: 700;
   font-size: 12px;
-  color: var(--soft-ivory);
+  color: #FFFFFF;
 }
 
 .mock-user-name {
@@ -566,12 +605,12 @@ header.glass-nav.scrolled {
 
 /* Hero Net Balance Card */
 .mock-hero-card {
-  background: linear-gradient(145deg, rgba(35, 72, 59, 0.9), rgba(22, 42, 34, 0.95));
-  border: 1px solid rgba(169, 197, 177, 0.28);
+  background: linear-gradient(145deg, rgba(36, 48, 68, 0.95), rgba(30, 41, 59, 0.98));
+  border: 1px solid var(--border-outline);
   border-radius: 18px;
   padding: 14px;
   margin-bottom: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 24px rgba(9, 13, 22, 0.35);
   position: relative;
   overflow: hidden;
 }
@@ -583,7 +622,7 @@ header.glass-nav.scrolled {
   right: -40px;
   width: 100px;
   height: 100px;
-  background: radial-gradient(circle, rgba(169, 197, 177, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(251, 113, 133, 0.2) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -595,11 +634,12 @@ header.glass-nav.scrolled {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--fresh-sage);
+  color: var(--neon-cyan);
 }
 
 .mock-hero-amount {
   font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
   font-size: 23px;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -614,7 +654,7 @@ header.glass-nav.scrolled {
   font-size: 10px;
   padding: 3px 8px;
   border-radius: 999px;
-  background: rgba(74, 222, 128, 0.14);
+  background: rgba(52, 211, 153, 0.14);
   color: var(--income);
   font-weight: 600;
 }
@@ -631,8 +671,8 @@ header.glass-nav.scrolled {
 
 /* Daily Budget Pulse Card */
 .mock-pulse-card {
-  background: rgba(22, 42, 34, 0.65);
-  border: 1px solid var(--glass-border);
+  background: var(--deep-navy);
+  border: 1px solid var(--border-outline);
   border-radius: 16px;
   padding: 12px;
   margin-bottom: 12px;
@@ -656,17 +696,19 @@ header.glass-nav.scrolled {
   font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
-  background: rgba(74, 222, 128, 0.2);
+  background: rgba(52, 211, 153, 0.18);
   color: var(--income);
   padding: 2px 6px;
   border-radius: 4px;
 }
 
 .mock-pulse-quota {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
   font-size: 16px;
   font-weight: 700;
   margin: 4px 0;
-  color: var(--dew-mint);
+  color: var(--soft-white);
 }
 
 .mock-quota-sub {
@@ -684,7 +726,7 @@ header.glass-nav.scrolled {
 
 .mock-meter-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--fresh-sage), var(--income));
+  background: linear-gradient(90deg, var(--neon-cyan), var(--income));
   border-radius: 999px;
 }
 
@@ -731,7 +773,7 @@ header.glass-nav.scrolled {
 }
 
 .tx-icon-sq.in {
-  background: rgba(74, 222, 128, 0.15);
+  background: rgba(52, 211, 153, 0.15);
   color: var(--income);
 }
 
@@ -786,22 +828,23 @@ header.glass-nav.scrolled {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--emerald-leaf);
+  background: var(--sunset-magenta);
+  border: 1px solid rgba(251, 191, 36, 0.55);
   color: #FFF;
   display: grid;
   place-items: center;
   font-size: 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.35);
 }
 
 /* Floating Badges outside the phone */
 .floating-glass-pill {
   position: absolute;
-  background: rgba(22, 42, 34, 0.88);
-  border: 1px solid var(--fresh-sage);
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.45);
   border-radius: 16px;
   padding: 12px 18px;
-  color: var(--soft-ivory);
+  color: var(--soft-white);
   backdrop-filter: blur(16px);
   box-shadow: var(--shadow-md);
   z-index: 12;
@@ -841,9 +884,13 @@ header.glass-nav.scrolled {
    8. Section Transitions & Waves
    -------------------------------------------------------------------------- */
 .paper {
-  background-color: var(--soft-ivory);
+  background:
+    radial-gradient(circle at 85% 15%, rgba(251, 113, 133, 0.07) 0%, transparent 45%),
+    radial-gradient(circle at 10% 85%, rgba(56, 189, 248, 0.06) 0%, transparent 45%),
+    var(--midnight-navy);
   color: var(--ink);
   position: relative;
+  border-top: 1px solid rgba(51, 65, 85, 0.35);
 }
 
 .dark-section {
@@ -877,27 +924,27 @@ header.glass-nav.scrolled {
   border-radius: 24px;
   padding: clamp(28px, 4vw, 40px);
   border: 1px solid var(--paper-card-border);
-  box-shadow: 0 8px 24px rgba(16, 37, 31, 0.07);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
   position: relative;
 }
 
 .intro-quote-card::before {
   content: '“';
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: 5rem;
   position: absolute;
   top: 10px;
   left: 20px;
-  color: rgba(169, 197, 177, 0.35);
+  color: rgba(251, 113, 133, 0.25);
   line-height: 1;
   pointer-events: none;
 }
 
 .intro-quote-text {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
   font-size: 1.25rem;
   line-height: 1.6;
-  color: var(--glasshouse-green);
+  color: var(--ink);
   position: relative;
   z-index: 1;
 }
@@ -909,7 +956,7 @@ header.glass-nav.scrolled {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--emerald-leaf);
+  color: var(--sunset-magenta);
   margin-top: 18px;
 }
 
@@ -930,18 +977,20 @@ header.glass-nav.scrolled {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(35, 72, 59, 0.1);
-  color: var(--glasshouse-green);
+  background: rgba(251, 113, 133, 0.16);
+  color: var(--sunset-magenta);
+  border: 1px solid rgba(251, 113, 133, 0.3);
   display: grid;
   place-items: center;
   font-size: 0.95rem;
+  font-weight: 700;
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 .intro-pillar-content h4 {
   font-size: 1.1rem;
-  color: var(--glasshouse-green);
+  color: var(--ink);
   margin-bottom: 4px;
 }
 
@@ -969,7 +1018,7 @@ header.glass-nav.scrolled {
   border-radius: 28px;
   padding: clamp(24px, 3.2vw, 36px);
   border: 1px solid var(--paper-card-border);
-  box-shadow: 0 6px 22px rgba(16, 37, 31, 0.06);
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.06);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -979,7 +1028,7 @@ header.glass-nav.scrolled {
 
 .bento-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 36px rgba(16, 37, 31, 0.12);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
   border-color: var(--paper-card-border-hover);
 }
 
@@ -1009,17 +1058,17 @@ header.glass-nav.scrolled {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: rgba(35, 72, 59, 0.08);
-  color: var(--glasshouse-green);
+  background: rgba(251, 113, 133, 0.14);
+  color: var(--sunset-magenta);
   display: grid;
   place-items: center;
   font-size: 1.25rem;
   margin-bottom: 14px;
-  border: 1px solid rgba(35, 72, 59, 0.12);
+  border: 1px solid rgba(251, 113, 133, 0.28);
 }
 
 .bento-card h3 {
-  color: var(--glasshouse-green);
+  color: var(--ink);
   margin-bottom: 8px;
 }
 
@@ -1059,9 +1108,10 @@ header.glass-nav.scrolled {
 
 .sparkline-stat-value {
   font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--glasshouse-green);
+  color: var(--ink);
 }
 
 /* 50/30/20 Pool Bars */
@@ -1087,7 +1137,7 @@ header.glass-nav.scrolled {
 
 .pool-track {
   height: 8px;
-  background: rgba(35, 72, 59, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 999px;
   overflow: hidden;
 }
@@ -1098,26 +1148,26 @@ header.glass-nav.scrolled {
 }
 
 .pool-fill.needs {
-  background: var(--glasshouse-green);
+  background: var(--sunset-magenta);
   width: 62%;
 }
 
 .pool-fill.wants {
-  background: var(--fresh-sage);
+  background: var(--neon-cyan);
   width: 40%;
 }
 
 .pool-fill.savings {
-  background: var(--emerald-leaf);
+  background: var(--income-paper);
   width: 85%;
 }
 
 /* Dark Bento Highlight Card (Offline-First Banner) */
 .bento-card.dark-card {
-  background: linear-gradient(135deg, var(--glasshouse-green), var(--moss-shadow));
+  background: linear-gradient(135deg, var(--deep-navy), var(--midnight-navy));
   color: var(--on-dark);
-  border-color: rgba(169, 197, 177, 0.25);
-  box-shadow: 0 16px 40px rgba(16, 37, 31, 0.35);
+  border-color: var(--border-outline);
+  box-shadow: 0 16px 40px rgba(9, 13, 22, 0.35);
 }
 
 .bento-card.dark-card h3 {
@@ -1129,9 +1179,9 @@ header.glass-nav.scrolled {
 }
 
 .bento-card.dark-card .bento-icon-badge {
-  background: rgba(169, 197, 177, 0.15);
-  color: var(--dew-mint);
-  border-color: var(--glass-border);
+  background: rgba(251, 113, 133, 0.16);
+  color: var(--sunset-magenta);
+  border-color: rgba(251, 113, 133, 0.32);
 }
 
 /* --------------------------------------------------------------------------
@@ -1164,15 +1214,16 @@ header.glass-nav.scrolled {
 }
 
 .showcase-tab-btn:hover {
-  background: rgba(169, 197, 177, 0.12);
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.35);
   color: #FFFFFF;
 }
 
 .showcase-tab-btn.active {
-  background: var(--glasshouse-green);
-  color: var(--soft-ivory);
-  border-color: var(--fresh-sage);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  background: var(--sunset-magenta);
+  color: #FFFFFF;
+  border-color: rgba(251, 191, 36, 0.55);
+  box-shadow: 0 4px 16px rgba(244, 63, 94, 0.35);
 }
 
 .showcase-stage-grid {
@@ -1256,7 +1307,7 @@ header.glass-nav.scrolled {
   border-radius: 24px;
   padding: 28px 22px;
   border: 1px solid var(--paper-card-border);
-  box-shadow: 0 6px 20px rgba(16, 37, 31, 0.06);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
   display: flex;
   flex-direction: column;
   transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
@@ -1265,7 +1316,7 @@ header.glass-nav.scrolled {
 .lore-pillar-card:hover {
   transform: translateY(-4px);
   border-color: var(--paper-card-border-hover);
-  box-shadow: 0 12px 28px rgba(16, 37, 31, 0.1);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
 }
 
 .lore-pillar-icon {
@@ -1275,7 +1326,7 @@ header.glass-nav.scrolled {
 
 .lore-pillar-card h3 {
   font-size: 1.15rem;
-  color: var(--glasshouse-green);
+  color: var(--ink);
   margin-bottom: 8px;
 }
 
@@ -1298,7 +1349,7 @@ header.glass-nav.scrolled {
   background: var(--paper-card);
   border-radius: 24px;
   border: 1px solid var(--paper-card-border);
-  box-shadow: 0 6px 22px rgba(16, 37, 31, 0.06);
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.06);
   margin-top: 36px;
 }
 
@@ -1315,17 +1366,17 @@ header.glass-nav.scrolled {
 }
 
 .comparison-table thead th {
-  background: rgba(35, 72, 59, 0.12);
+  background: rgba(36, 48, 68, 0.9);
   font-family: var(--font-display);
   font-weight: 700;
-  color: var(--glasshouse-green);
+  color: var(--ink);
 }
 
 .comparison-table th.col-highlight,
 .comparison-table td.col-highlight {
-  background: rgba(35, 72, 59, 0.08);
+  background: rgba(251, 113, 133, 0.1);
   font-weight: 600;
-  color: var(--glasshouse-green);
+  color: var(--ink);
 }
 
 .specs-guide-grid {
@@ -1340,14 +1391,14 @@ header.glass-nav.scrolled {
   border-radius: 24px;
   padding: clamp(24px, 3.5vw, 34px);
   border: 1px solid var(--paper-card-border);
-  box-shadow: 0 6px 20px rgba(16, 37, 31, 0.06);
+  box-shadow: 0 6px 20px rgba(9, 13, 22, 0.25);
 }
 
 .specs-row {
   display: flex;
   justify-content: space-between;
   padding: 10px 0;
-  border-bottom: 1px solid rgba(35, 72, 59, 0.08);
+  border-bottom: 1px solid rgba(51, 65, 85, 0.7);
   font-size: 0.92rem;
 }
 
@@ -1361,7 +1412,7 @@ header.glass-nav.scrolled {
 
 .specs-value {
   font-weight: 600;
-  color: var(--glasshouse-green);
+  color: var(--ink);
 }
 
 .install-steps {
@@ -1384,7 +1435,7 @@ header.glass-nav.scrolled {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--glasshouse-green);
+  background: var(--sunset-magenta);
   color: #FFF;
   display: grid;
   place-items: center;
@@ -1396,7 +1447,7 @@ header.glass-nav.scrolled {
 .step-info strong {
   display: block;
   font-size: 0.94rem;
-  color: var(--glasshouse-green);
+  color: var(--ink);
 }
 
 .step-info p {
@@ -1406,90 +1457,92 @@ header.glass-nav.scrolled {
 }
 
 /* --------------------------------------------------------------------------
-   14. Community Testimonials Section
+   14. Frequently Asked Questions (FAQ) Section
    -------------------------------------------------------------------------- */
-.testi-section {
+.faq-section {
   padding: clamp(60px, 9vw, 110px) 0;
 }
 
-.testimonial-card {
-  background: var(--paper-card-gradient);
-  border-radius: 28px;
-  padding: clamp(32px, 5vw, 54px);
-  border: 1px solid var(--paper-card-border);
-  box-shadow: 0 10px 30px rgba(16, 37, 31, 0.07);
+.faq-list {
   max-width: 820px;
   margin: 0 auto;
-  text-align: center;
-}
-
-.testimonial-quote {
-  font-family: var(--font-serif);
-  font-size: clamp(1.2rem, 2vw, 1.55rem);
-  font-style: italic;
-  line-height: 1.6;
-  color: var(--glasshouse-green);
-  margin-bottom: 20px;
-}
-
-.testimonial-author {
-  font-family: var(--font-sans);
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: var(--emerald-leaf);
-}
-
-.testimonial-controls {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.faq-item {
+  background: var(--paper-card-gradient);
+  border-radius: 20px;
+  border: 1px solid var(--paper-card-border);
+  box-shadow: 0 6px 20px rgba(9, 13, 22, 0.22);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
+}
+
+.faq-item:hover,
+.faq-item[open] {
+  border-color: var(--paper-card-border-hover);
+  box-shadow: 0 10px 28px rgba(9, 13, 22, 0.32);
+}
+
+.faq-question {
+  list-style: none;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
-  margin-top: 26px;
+  padding: 20px 24px;
+  font-family: var(--font-display);
+  font-size: clamp(1.02rem, 1.4vw, 1.15rem);
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
 }
 
-.testimonial-dots {
-  display: flex;
-  gap: 8px;
+.faq-question::-webkit-details-marker {
+  display: none;
 }
 
-.testimonial-dots button {
-  width: 10px;
-  height: 10px;
+.faq-chevron {
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: rgba(35, 72, 59, 0.2);
-  transition: all 0.2s ease;
-}
-
-.testimonial-dots button[aria-current="true"] {
-  width: 26px;
-  border-radius: 999px;
-  background: var(--glasshouse-green);
-}
-
-.testimonial-next-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(35, 72, 59, 0.08);
-  color: var(--glasshouse-green);
+  background: rgba(251, 113, 133, 0.14);
+  color: var(--sunset-magenta);
+  border: 1px solid rgba(251, 113, 133, 0.28);
   display: grid;
   place-items: center;
   font-size: 1.1rem;
-  transition: background 0.2s ease;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, background 0.25s ease;
 }
 
-.testimonial-next-btn:hover {
-  background: rgba(35, 72, 59, 0.16);
+.faq-item[open] .faq-chevron {
+  transform: rotate(45deg);
+  background: var(--sunset-magenta);
+  color: #FFFFFF;
+}
+
+.faq-answer {
+  padding: 0 24px 20px;
+  color: var(--ink-secondary);
+  font-size: 0.95rem;
+  line-height: 1.65;
+  border-top: 1px solid rgba(51, 65, 85, 0.45);
+  padding-top: 14px;
 }
 
 /* --------------------------------------------------------------------------
-   15. Final CTA Section (Arched Glasshouse Gateway)
+   15. Final CTA Section (Vice City Sunset Gateway)
    -------------------------------------------------------------------------- */
 .cta-section {
   padding: clamp(80px, 12vw, 150px) 0;
-  background: radial-gradient(circle at 50% 30%, rgba(57, 116, 90, 0.35) 0%, transparent 70%),
-              var(--moss-shadow);
+  background: radial-gradient(circle at 50% 30%, rgba(251, 113, 133, 0.22) 0%, transparent 65%),
+              radial-gradient(circle at 20% 80%, rgba(56, 189, 248, 0.14) 0%, transparent 60%),
+              var(--midnight-navy);
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -1506,16 +1559,16 @@ header.glass-nav.scrolled {
   width: 48px;
   height: 48px;
   margin: 0 auto 20px;
-  color: var(--fresh-sage);
+  color: var(--sunset-magenta);
 }
 
 /* --------------------------------------------------------------------------
    16. Minimalist Footer
    -------------------------------------------------------------------------- */
 footer.glass-footer {
-  background: #0B1A15;
+  background: var(--header-canopy-top);
   padding: 60px 0 36px;
-  border-top: 1px solid var(--glass-border);
+  border-top: 1px solid var(--border-outline);
   color: var(--on-dark-secondary);
   font-size: 0.92rem;
 }
@@ -1619,13 +1672,13 @@ footer.glass-footer {
     top: 70px;
     left: 0;
     width: 100%;
-    background: rgba(16, 37, 31, 0.98);
+    background: rgba(15, 23, 42, 0.98);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     flex-direction: column;
     padding: 30px 20px;
     gap: 20px;
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--border-outline);
     transform: translateY(-120%);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 999;

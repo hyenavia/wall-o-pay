@@ -7,7 +7,7 @@ Dokumen ini dirancang sebagai **bahan pembelajaran** sekaligus **panduan pemelih
 ## 1. Filosofi & Gambaran Besar Arsitektur
 
 **Wall o' Pay** dibangun dengan arsitektur **Offline-First Reactive Architecture** menggunakan:
-- **UI Layer:** Flutter (Material 3 dengan tema *Botanical Forest*).
+- **UI Layer:** Flutter (Material 3 dengan tema *Vice City Sunset*).
 - **State Management:** **Flutter Riverpod** (`Provider`, `StreamProvider`, `NotifierProvider`) untuk menghubungkan database dan preferensi secara reaktif ke antarmuka pengguna.
 - **Local Database (Sumber Kebenaran Utama):** **Drift (SQLite)** di `lib/data/app_database.dart` & **SharedPreferences** untuk pengaturan ringan. Aplikasi **100% berfungsi tanpa internet**.
 - **Cloud Sync (Pelengkap Cadangan):** **Firebase Auth** & **Cloud Firestore** yang berjalan secara asinkron di latar belakang (`AutoSyncService`) tanpa menghambat interaksi UI.
@@ -82,8 +82,8 @@ Folder ini berisi kode fondasi yang dipakai di seluruh fitur dan tidak bergantun
 
 | File | Peran & Tanggung Jawab |
 | :--- | :--- |
-| `theme.dart` | Definisi palet warna *Enchanted Glasshouse* (`AppColors`) dan konfigurasi tema Material 3 (`buildTheme`) dengan tipografi *Outfit* (heading) & *DM Sans* berfitur *tabular figures* (`appMoneyStyle`). |
-| `botanical_decorations.dart` | `CustomPainter` untuk menggambar ornamen dedaunan dan efek cahaya (*glow*) khas Wall o' Pay pada AppBar (`BotanicalCanopyPainter`), kartu utama (`BotanicalHeroCardPainter`), dan latar belakang (`BotanicalBackgroundPainter`). |
+| `theme.dart` | Definisi palet warna *Vice City Sunset* (`AppColors`) dan konfigurasi tema Material 3 (`buildTheme`) dengan tipografi *Space Grotesk* (heading), *Inter* (body), & *IBM Plex Mono* berfitur *tabular figures* (`appMoneyStyle`). |
+| `botanical_decorations.dart` | `CustomPainter` untuk menggambar gelombang busur neon, cahaya pesisir (*glow*), dan partikel bintang khas Vice City Sunset pada AppBar (`BotanicalCanopyPainter`), kartu utama (`BotanicalHeroCardPainter`), dan latar belakang (`BotanicalBackgroundPainter`). |
 | `brand.dart` | Widget logo aplikasi (`BrandMark`) dan tampilan layar pembuka (`SplashPage`). |
 | `format.dart` | Fungsi pemformatan nominal Rupiah (`rupiah`), pemisah ribuan (`formatThousands`, `ThousandsInputFormatter`), format tanggal (`dateLabel`, `shortDate`, `dayHeader`), dan sapaan waktu (`greeting`). |
 | `period.dart` | Model `Period` dan `PeriodType` (`monthly` / `weekly`). Menghitung tanggal awal & akhir periode (termasuk dukungan tanggal gajian kustom `firstDayOfMonth` dan hari awal minggu `firstDayOfWeek`), sisa hari (`daysLeft`), serta kunci periode (`key` seperti `2026-11`). |
@@ -104,7 +104,7 @@ Folder ini adalah "otak" penyimpanan dan pengolahan data aplikasi.
 | `feature_providers.dart` | Provider tambahan: pencarian transaksi SQL (`searchTransactionsProvider`), filter rentang tanggal, dan perhitungan *rollover* sisa anggaran periode sebelumnya (`carryOverProvider`, `effectiveBudgetProvider`). |
 | `budget_rule.dart` | Logika dan state penganggaran **50/30/20** (`BudgetBucket`: *Needs*, *Wants*, *Savings*) maupun alokasi nominal kustom per periode (`BudgetRuleNotifier`, `budget503020BreakdownProvider`). |
 | `prefs.dart` | Pengaturan personalisasi pengguna (`AppPrefs`: tema, bahasa, tipe periode bulanan/mingguan, hari awal minggu, tanggal gajian) beserta sinkronisasinya ke Firestore (`users/{uid}/meta/preferences`). |
-| `feature_prefs.dart` | Pengaturan fitur opsional (`FeaturePrefs`: *rollover* anggaran, peringatan anggaran 80%/100%, pengingat harian, dan notifikasi Harvest Recap `recapAlerts`). |
+| `feature_prefs.dart` | Pengaturan fitur opsional (`FeaturePrefs`: *rollover* anggaran, peringatan anggaran 80%/100%, pengingat harian, dan notifikasi Rekap Finansial `recapAlerts`). |
 | `module_prefs.dart` | Pengaturan modul aktif (`ModulePrefs`: `goals`, `debts`, `recurring`, `budget`, `transfer`) dengan preset **All Features** & **Minimalist** yang mengontrol visibilitas navigasi dan form. |
 | `profile.dart` | Pengelolaan nama panggilan (*nickname*) dan foto profil (`ProfileController`, disimpan sebagai Base64 di lokal & Firestore), serta `displayNameProvider` untuk sapaan di beranda. |
 | `auth_service.dart` | Layanan autentikasi Firebase (`AuthService`): login dengan email **atau** username (melalui koleksi Firestore `usernames`), pendaftaran akun, reset password, dan penghapusan akun permanen beserta seluruh data cloud. |
@@ -112,7 +112,7 @@ Folder ini adalah "otak" penyimpanan dan pengolahan data aplikasi.
 | `cloud_sync.dart` | Layanan sinkronisasi dua arah otomatis & inkremental (`AutoSyncService`). Menyimpan cursor penarikan per-user (`sync_pull_cursor_<uid>`) dengan buffer *clock-skew* 30 detik serta *fallback* full sync untuk penarikan awal/manual. |
 | `cloud_backup.dart` | Layanan pencadangan & pemulihan manual ke Cloud Firestore (`CloudBackupService` & `CloudBackupController`). |
 | `lock.dart` | Layanan keamanan PIN 6 digit dengan *2,048-iteration salted HMAC-SHA256 (v2)* yang tersimpan di Android Keystore / iOS Keychain (`flutter_secure_storage`), kunci biometrik, dan *Privacy Shield* (`FLAG_SECURE`). |
-| `notifications.dart` | Layanan notifikasi lokal Android (`NotificationService`), peringatan anggaran 80%/100% (`checkBudgetAfterExpense`), pengingat jatuh tempo utang (`checkDebtDueReminders`), serta notifikasi Harvest Recap periodik (`checkHarvestRecapNotification`). |
+| `notifications.dart` | Layanan notifikasi lokal Android (`NotificationService`), peringatan anggaran 80%/100% (`checkBudgetAfterExpense`), pengingat jatuh tempo utang (`checkDebtDueReminders`), serta notifikasi Rekap Finansial periodik (`checkHarvestRecapNotification`). |
 | `recurring_service.dart` | Kalkulasi tanggal jatuh tempo berikutnya (`calculateNextDueDate`) dan pencatatan/konfirmasi antrean transaksi berulang (`checkAndGenerateDue`, `confirmPendingItem`, `skipPendingItem`). |
 | `export_service.dart` | Ekspor riwayat transaksi ke `.csv` (8 kolom dengan filter dompet & rentang tanggal, BOM UTF-8), ekspor/impor cadangan penuh `.json`, serta pengecekan pengingat backup Mode Tamu (`shouldShowGuestBackupNudge`). |
 | `report_service.dart` | Pembuatan laporan keuangan formal `.pdf` (`ReportService`) dengan dukungan filter akun (`walletId`), tabel ringkasan, perincian kategori, *Needs vs Wants*, dan daftar transaksi. |
@@ -137,8 +137,8 @@ Setiap subfolder mewakili satu modul fitur di antarmuka pengguna:
   - `home_page.dart`: Halaman beranda ringkas (sapaan profil, kartu total saldo & arus kas periode, antrean konfirmasi rutin, progres anggaran, dan transaksi terbaru).
   - `daily_financial_pulse_card.dart`: Kartu indikator kesehatan finansial harian (*Safe* / *Caution* / *Limit*) berdasarkan kuota belanja harian yang aman.
 - **`insights/`**:
-  - `insights_page.dart`: Halaman analitik 3 tab (*Overview*, *Categories*, *Trend*), kartu **Net Worth & Vitality Score**, modal **Glasshouse Harvest Review**, dan *drill-down* transaksi kategori.
-  - `insight_engine.dart`: Mesin analitik deterministik (`InsightEngine`) untuk metrik periode, *Harvest Recap* mingguan/bulanan (`computeRecap`), *Net Worth* anti *double-counting* (`computeNetWorth`), dan **Vitality Score** 0–100 (`computeVitalityScore`).
+  - `insights_page.dart`: Halaman analitik 3 tab (*Overview*, *Categories*, *Trend*), kartu **Net Worth & Financial Health Score**, modal **Financial Review**, dan *drill-down* transaksi kategori.
+  - `insight_engine.dart`: Mesin analitik deterministik (`InsightEngine`) untuk metrik periode, *Financial Recap* mingguan/bulanan (`computeRecap`), *Net Worth* anti *double-counting* (`computeNetWorth`), dan **Financial Health Score** 0–100 (`computeVitalityScore`).
   - `charts.dart`: Widget grafik visual menggunakan `fl_chart` (`ExpensePieChart`, `TrendBarChart`, dan grafik tren pengeluaran).
 - **`more/` (`more_page.dart`)**: Halaman pusat navigasi menuju seluruh fitur lengkap aplikasi.
 - **`onboarding/` (`onboarding_gate.dart` & `onboarding_page.dart`)**: Alur pengenalan awal 4 langkah untuk mengatur periode, uang tunai awal, uang saku rutin, dan anggaran dasar.
@@ -178,9 +178,9 @@ $$\text{dailyAllowance} = \frac{\text{Pemasukan Periode Ini} - \text{Pengeluaran
 Lalu menentukan status kesehatan (`DailyHealthTier`):
 1. **Limit (Merah):** Jika total pengeluaran sudah mencapai/melebihi anggaran periode (`budgetSpent >= totalBudget`) atau saldo periode defisit (`balance <= 0`).
 2. **Caution / Waspada (Kuning):** Jika pemakaian anggaran $\ge 85\%$ atau pengeluaran hari ini melebihi kuota harian aman (`todayExpense > dailyAllowance`).
-3. **Safe / Aman (Hijau Sage):** Jika pengeluaran masih di bawah batas aman.
+3. **Safe / Aman (Hijau Emerald):** Jika pengeluaran masih di bawah batas aman.
 
-### D. Perhitungan *Net Worth* & *Glasshouse Vitality Score* (`insight_engine.dart`)
+### D. Perhitungan *Net Worth* & *Financial Health Score* (`insight_engine.dart`)
 - **Net Worth (`computeNetWorth`):**
   $$\text{Net Worth} = \text{Liquid Assets} + \text{Receivables} - \text{Liabilities}$$
   Dana *Savings Goals* (`allocatedGoalReserve`) dicatat terpisah dan tidak dijumlahkan ke *Liquid Assets* agar setoran tabungan yang sudah memotong saldo dompet maupun alokasi virtual tidak terhitung ganda.
@@ -194,7 +194,7 @@ Lalu menentukan status kesehatan (`DailyHealthTier`):
    - Gunakan `context.tr('English text')` di dalam widget.
    - Daftarkan terjemahan Bahasa Indonesianya pada peta `_id` di `lib/core/l10n.dart` (atau `idExtra` di `lib/core/l10n_extra.dart`).
 2. **Menggunakan Warna:**
-   - Selalu gunakan token warna dari `AppColors` di `lib/core/theme.dart` (`AppColors.deepForest`, `AppColors.sage`, `AppColors.income`, `AppColors.expense`, `AppColors.warning`) atau `Theme.of(context).colorScheme`.
+   - Selalu gunakan token warna dari `AppColors` di `lib/core/theme.dart` (`AppColors.midnightNavy`, `AppColors.deepNavy`, `AppColors.sunsetMagenta`, `AppColors.neonCyan`, `AppColors.income`, `AppColors.expense`, `AppColors.warning`) atau `Theme.of(context).colorScheme`.
 3. **Mengubah Skema Database (`tables.dart` / `app_database.dart`):**
    - Tambahkan kolom/tabel di `lib/data/tables.dart`.
    - Jalankan `dart run build_runner build --delete-conflicting-outputs` untuk memperbarui `app_database.g.dart`.

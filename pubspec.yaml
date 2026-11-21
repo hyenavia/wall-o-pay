@@ -1,5 +1,5 @@
 name: wall_o_pay
-description: "A new Flutter project."
+description: "Offline-first personal finance & cashflow tracker with Vice City Sunset aesthetic."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 2.16.2+135
+version: 3.0.0+151
 
 environment:
   sdk: ^3.13.7
@@ -81,8 +81,8 @@ flutter_launcher_icons:
   web:
     generate: true
     image_path: "assets/images/logo.png"
-    background_color: "#10251F"
-    theme_color: "#10251F"
+    background_color: "#0F172A"
+    theme_color: "#0F172A"
   windows:
     generate: true
     image_path: "assets/images/logo.png"
@@ -101,10 +101,18 @@ flutter:
   assets:
     - assets/images/logo.png
     - assets/images/logo_glasshouse.png
+    - assets/images/logo_vice_city.png
     - assets/images/logo_wordmark.png
     - assets/images/glasshouse_bg.jpg
+    - assets/images/vice_city_bg.jpg
+    - assets/images/vice_city_vertical_bg.jpg
+    - assets/images/coastal_sunset_bg.jpg
     - assets/images/frame_glasshouse.png
+    - assets/images/frame_vice_city.png
     - assets/icons/glasshouse/
+    - assets/icons/vice_city/
+    - assets/icon-compress/
+    - assets/illustrations/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

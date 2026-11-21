@@ -195,7 +195,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
             Row(
               children: [
                 Image.asset(
-                  'assets/icons/glasshouse/calculator.png',
+                  'assets/icons/vice_city/pie_chart.png',
                   width: 24,
                   height: 24,
                   fit: BoxFit.contain,

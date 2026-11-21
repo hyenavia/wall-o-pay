@@ -186,10 +186,19 @@ class ExportService {
           : trG('Imported {n} items from the backup file.', {'n': n});
     } on FormatException catch (e) {
       return trG('Import failed: {error}', {'error': trG(e.message)});
+    } catch (e) {
+      return trG('Import failed: {error}', {
+        'error': trG("This is not a Wall o' Pay backup file."),
+      });
     }
   }
 
-  static String _csvEscape(String s) => '"${s.replaceAll('"', '""')}"';
+  static final RegExp _csvFormulaTriggerRe = RegExp(r'^[\=\+\-\@\t\r]');
+
+  static String _csvEscape(String s) {
+    final sanitized = _csvFormulaTriggerRe.hasMatch(s.trimLeft()) ? "'$s" : s;
+    return '"${sanitized.replaceAll('"', '""')}"';
+  }
 
   Future<void> _share(String fileName, String content) async {
     final dir = await getTemporaryDirectory();

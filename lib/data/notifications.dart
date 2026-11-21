@@ -12,6 +12,7 @@ import '../core/format.dart';
 import '../core/l10n.dart';
 import '../core/period.dart';
 import 'app_database.dart';
+import 'lock.dart';
 import 'tables.dart' show DebtDirection, TxType;
 
 /// Notifikasi lokal: peringatan anggaran dan pengingat harian.
@@ -79,6 +80,7 @@ class NotificationService {
             trG('Budget alerts'),
             importance: Importance.high,
             priority: Priority.high,
+            visibility: NotificationVisibility.private,
           ),
         ),
       );
@@ -106,6 +108,7 @@ class NotificationService {
             trG('Debt reminders'),
             importance: Importance.high,
             priority: Priority.high,
+            visibility: NotificationVisibility.private,
           ),
         ),
       );
@@ -130,9 +133,10 @@ class NotificationService {
         NotificationDetails(
           android: AndroidNotificationDetails(
             'harvest_recap',
-            trG('Harvest recap notifications'),
+            trG('Financial recap notifications'),
             importance: Importance.defaultImportance,
             priority: Priority.defaultPriority,
+            visibility: NotificationVisibility.private,
           ),
         ),
       );
@@ -311,17 +315,25 @@ Future<void> checkDebtDueReminders(AppDatabase db) async {
           ? trG('Debt collection reminder')
           : trG('Debt repayment reminder');
 
-      final body = isLent
-          ? trG('{person} owes you {amount} due on {date}', {
-              'person': debt.person,
-              'amount': formattedAmount,
+      final redactSensitive = (prefs.getBool('pref_hide_balance') ?? false) ||
+          Lock.instance.state.value.enabled ||
+          Lock.instance.state.value.privacyShield;
+
+      final body = redactSensitive
+          ? trG('You have a scheduled debt or receivable due on {date}. Open Wall o\' Pay to review.', {
               'date': formattedDate,
             })
-          : trG('Your debt to {person} of {amount} is due on {date}', {
-              'person': debt.person,
-              'amount': formattedAmount,
-              'date': formattedDate,
-            });
+          : (isLent
+              ? trG('{person} owes you {amount} due on {date}', {
+                  'person': debt.person,
+                  'amount': formattedAmount,
+                  'date': formattedDate,
+                })
+              : trG('Your debt to {person} of {amount} is due on {date}', {
+                  'person': debt.person,
+                  'amount': formattedAmount,
+                  'date': formattedDate,
+                }));
 
       await NotificationService.instance.showDebtReminder(
         notificationId: debt.id.hashCode & 0x7fffffff,
@@ -398,8 +410,8 @@ Future<void> checkHarvestRecapNotification({
 
     final title = trG(
       periodType == PeriodType.weekly
-          ? 'Weekly Harvest Review'
-          : 'Monthly Harvest Review',
+          ? 'Weekly Financial Review'
+          : 'Monthly Financial Review',
     );
     final body = trG(
       'Your recap for {period} is ready inside Insights.',

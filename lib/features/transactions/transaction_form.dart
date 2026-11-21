@@ -590,7 +590,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
             Row(
               children: [
                 Image.asset(
-                  isEdit ? 'assets/icons/glasshouse/other.png' : 'assets/icons/glasshouse/add.png',
+                  isEdit ? 'assets/icons/vice_city/diamond.png' : 'assets/icons/vice_city/add.png',
                   width: 24,
                   height: 24,
                   fit: BoxFit.contain,
@@ -690,7 +690,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                 prefixText: 'Rp ',
                 suffixIcon: IconButton(
                   icon: Image.asset(
-                    'assets/icons/glasshouse/calculator.png',
+                    'assets/icons/vice_city/pie_chart.png',
                     width: 24,
                     height: 24,
                     fit: BoxFit.contain,
@@ -973,7 +973,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14),
                     leading: Image.asset(
-                      'assets/icons/glasshouse/calendar.png',
+                      'assets/icons/vice_city/calendar.png',
                       width: 22,
                       height: 22,
                       fit: BoxFit.contain,
