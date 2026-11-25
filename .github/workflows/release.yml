@@ -151,7 +151,7 @@ jobs:
         run: |
           for i in 1 2 3; do
             echo "Attempt $i to build release APK..."
-            flutter build apk --release --obfuscate --split-debug-info=build/symbols && break || {
+            flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols && break || {
               if [ $i -lt 3 ]; then
                 echo "Build attempt $i failed. Retrying in 15 seconds..."
                 sleep 15
@@ -169,12 +169,25 @@ jobs:
         run: |
           TAG="${{ steps.extract_info.outputs.tag }}"
           VERSION="${{ steps.extract_info.outputs.version }}"
-          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
-          
-          if [ -f "$APK_PATH" ]; then
-            # Salin ke file fisik dengan nama berbeda agar tidak bentrok name=app-release.apk
-            cp "$APK_PATH" "build/app/outputs/flutter-apk/Wall_o_Pay.apk"
-            cp "$APK_PATH" "build/app/outputs/flutter-apk/Wall_o_Pay_${TAG}.apk"
+          APK_DIR="build/app/outputs/flutter-apk"
+          ARM64_APK="${APK_DIR}/app-arm64-v8a-release.apk"
+          ARMEABI_APK="${APK_DIR}/app-armeabi-v7a-release.apk"
+          X86_64_APK="${APK_DIR}/app-x86_64-release.apk"
+
+          if [ -f "$ARM64_APK" ]; then
+            # Default Wall_o_Pay.apk menggunakan arm64-v8a (mayoritas perangkat Android modern)
+            cp "$ARM64_APK" "${APK_DIR}/Wall_o_Pay.apk"
+            cp "$ARM64_APK" "${APK_DIR}/Wall_o_Pay_${TAG}_arm64-v8a.apk"
+
+            ASSETS=("${APK_DIR}/Wall_o_Pay.apk" "${APK_DIR}/Wall_o_Pay_${TAG}_arm64-v8a.apk")
+            if [ -f "$ARMEABI_APK" ]; then
+              cp "$ARMEABI_APK" "${APK_DIR}/Wall_o_Pay_${TAG}_armeabi-v7a.apk"
+              ASSETS+=("${APK_DIR}/Wall_o_Pay_${TAG}_armeabi-v7a.apk")
+            fi
+            if [ -f "$X86_64_APK" ]; then
+              cp "$X86_64_APK" "${APK_DIR}/Wall_o_Pay_${TAG}_x86_64.apk"
+              ASSETS+=("${APK_DIR}/Wall_o_Pay_${TAG}_x86_64.apk")
+            fi
 
             # Jika rilis lama sudah ada (incomplete), bersihkan terlebih dahulu
             if gh release view "$TAG" > /dev/null 2>&1; then
@@ -186,8 +199,7 @@ jobs:
               --title "Wall o' Pay $TAG" \
               --notes-file release_notes.md \
               --target main \
-              "build/app/outputs/flutter-apk/Wall_o_Pay.apk" \
-              "build/app/outputs/flutter-apk/Wall_o_Pay_${TAG}.apk"
+              "${ASSETS[@]}"
           else
             if gh release view "$TAG" > /dev/null 2>&1; then
               gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || gh release delete "$TAG" --yes 2>/dev/null || true

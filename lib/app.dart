@@ -3,6 +3,7 @@
 library;
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -378,6 +379,69 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       return result ?? false;
     }
 
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final isWide = screenWidth >= 600;
+    final isExpanded = screenWidth >= 900;
+
+    final tabs = <(int, IconData, IconData, String, String)>[
+      (0, Icons.home_outlined, Icons.home, context.tr('Home'), 'assets/icons/vice_city/home.png'),
+      (1, Icons.receipt_long_outlined, Icons.receipt_long, context.tr('Transactions'), 'assets/icons/vice_city/card.png'),
+      if (budgetEnabled)
+        (2, Icons.pie_chart_outline, Icons.pie_chart, context.tr('Budget'), 'assets/icons/vice_city/pie_chart.png'),
+      (3, Icons.insights_outlined, Icons.insights, context.tr('Insight'), 'assets/icons/vice_city/growth.png'),
+    ];
+    final railSelectedIndex = tabs.indexWhere((t) => t.$1 == index).clamp(0, tabs.length - 1);
+
+    final fabButton = FloatingActionButton(
+      tooltip: context.tr('Add transaction'),
+      shape: const CircleBorder(),
+      backgroundColor: Colors.transparent,
+      elevation: 6,
+      onPressed: () => showTransactionForm(context),
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.sunsetMagenta,
+              AppColors.sunsetOrange,
+            ],
+          ),
+          border: Border.all(
+            color: AppColors.goldenYellow.withValues(alpha: 0.65),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.sunsetMagenta.withValues(alpha: 0.45),
+              blurRadius: 16,
+              spreadRadius: 1,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Image.asset(
+            'assets/icons/vice_city/add.png',
+            width: 32,
+            height: 32,
+          ),
+        ),
+      ),
+    );
+
+    final content = IndexedStack(
+      index: index,
+      children: [
+        for (int i = 0; i < _pages.length; i++)
+          _visitedTabs.contains(i) ? _pages[i] : const SizedBox.shrink(),
+      ],
+    );
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
@@ -391,109 +455,139 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
           SystemNavigator.pop();
         }
       },
-      child: Scaffold(
-        body: IndexedStack(
-          index: index,
-          children: [
-            for (int i = 0; i < _pages.length; i++)
-              _visitedTabs.contains(i) ? _pages[i] : const SizedBox.shrink(),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          tooltip: context.tr('Add transaction'),
-          shape: const CircleBorder(),
-          backgroundColor: Colors.transparent,
-          elevation: 6,
-          onPressed: () => showTransactionForm(context),
-          child: Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.sunsetMagenta,
-                  AppColors.sunsetOrange,
-                ],
-              ),
-              border: Border.all(
-                color: AppColors.goldenYellow.withValues(alpha: 0.65),
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.sunsetMagenta.withValues(alpha: 0.45),
-                  blurRadius: 16,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 3),
+      child: isWide
+          ? Scaffold(
+              body: SafeArea(
+                child: Row(
+                  children: [
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          child: SizedBox(
+                            height: math.max(constraints.maxHeight, 360.0),
+                            child: NavigationRail(
+                              extended: isExpanded,
+                              backgroundColor: AppColors.deepNavy,
+                              indicatorColor: AppColors.sunsetMagenta.withValues(alpha: 0.22),
+                              labelType: isExpanded
+                                  ? NavigationRailLabelType.none
+                                  : NavigationRailLabelType.all,
+                              selectedLabelTextStyle: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.goldenYellow,
+                              ),
+                              unselectedLabelTextStyle: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.mutedBlueGray.withValues(alpha: 0.82),
+                              ),
+                              leading: Padding(
+                                padding: const EdgeInsets.only(top: 12, bottom: 16),
+                                child: fabButton,
+                              ),
+                              selectedIndex: railSelectedIndex,
+                              onDestinationSelected: (railIdx) => notifier.set(tabs[railIdx].$1),
+                              destinations: [
+                                for (final t in tabs)
+                                  NavigationRailDestination(
+                                    icon: Opacity(
+                                      opacity: 0.65,
+                                      child: Image.asset(
+                                        t.$5,
+                                        width: 24,
+                                        height: 24,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                    selectedIcon: Image.asset(
+                                      t.$5,
+                                      width: 24,
+                                      height: 24,
+                                      fit: BoxFit.contain,
+                                    ),
+                                    label: Text(t.$4),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    VerticalDivider(
+                      width: 1,
+                      thickness: 1,
+                      color: AppColors.borderOutline.withValues(alpha: 0.75),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 920),
+                          child: content,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Center(
-              child: Image.asset(
-                'assets/icons/vice_city/add.png',
-                width: 32,
-                height: 32,
               ),
-            ),
-          ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: BottomAppBar(
-          shape: const CircularNotchedRectangle(),
-          notchMargin: 8,
-          height: 68,
-          padding: EdgeInsets.zero,
-          color: AppColors.deepNavy,
-          surfaceTintColor: Colors.transparent,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  color: AppColors.borderOutline.withValues(alpha: 0.75),
-                  width: 1.0,
-                ),
-              ),
-            ),
-            child: Row(
-              children: [
-                item(
-                  0,
-                  Icons.home_outlined,
-                  Icons.home,
-                  context.tr('Home'),
-                  glassIcon: 'assets/icons/vice_city/home.png',
-                ),
-                item(
-                  1,
-                  Icons.receipt_long_outlined,
-                  Icons.receipt_long,
-                  context.tr('Transactions'),
-                  glassIcon: 'assets/icons/vice_city/card.png',
-                ),
-                const SizedBox(width: 64),
-                if (budgetEnabled)
-                  item(
-                    2,
-                    Icons.pie_chart_outline,
-                    Icons.pie_chart,
-                    context.tr('Budget'),
-                    glassIcon: 'assets/icons/vice_city/pie_chart.png',
+            )
+          : Scaffold(
+              body: content,
+              floatingActionButton: fabButton,
+              floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+              bottomNavigationBar: BottomAppBar(
+                shape: const CircularNotchedRectangle(),
+                notchMargin: 8,
+                height: 68,
+                padding: EdgeInsets.zero,
+                color: AppColors.deepNavy,
+                surfaceTintColor: Colors.transparent,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(
+                        color: AppColors.borderOutline.withValues(alpha: 0.75),
+                        width: 1.0,
+                      ),
+                    ),
                   ),
-                item(
-                  3,
-                  Icons.insights_outlined,
-                  Icons.insights,
-                  context.tr('Insight'),
-                  glassIcon: 'assets/icons/vice_city/growth.png',
+                  child: Row(
+                    children: [
+                      item(
+                        0,
+                        Icons.home_outlined,
+                        Icons.home,
+                        context.tr('Home'),
+                        glassIcon: 'assets/icons/vice_city/home.png',
+                      ),
+                      item(
+                        1,
+                        Icons.receipt_long_outlined,
+                        Icons.receipt_long,
+                        context.tr('Transactions'),
+                        glassIcon: 'assets/icons/vice_city/card.png',
+                      ),
+                      const SizedBox(width: 64),
+                      if (budgetEnabled)
+                        item(
+                          2,
+                          Icons.pie_chart_outline,
+                          Icons.pie_chart,
+                          context.tr('Budget'),
+                          glassIcon: 'assets/icons/vice_city/pie_chart.png',
+                        ),
+                      item(
+                        3,
+                        Icons.insights_outlined,
+                        Icons.insights,
+                        context.tr('Insight'),
+                        glassIcon: 'assets/icons/vice_city/growth.png',
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 }

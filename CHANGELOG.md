@@ -4,6 +4,21 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.2] - 2026-11-25
+
+### Changed
+- **Tablet & Landscape Responsive Layout:**
+  - Switched `HomeShell` automatically from `BottomAppBar` to a compact `NavigationRail` on landscape/medium widths (`>= 600dp`) and an extended `NavigationRail` on tablets/desktops (`>= 900dp`), with a centered `maxWidth: 920` content shell.
+  - Constrained modal bottom sheets globally to `maxWidth: 640` and centered the `AuthPage` form within `maxWidth: 520` on wide screens.
+  - Replaced fixed column counts in the profile avatar and frame customizer grids with adaptive `SliverGridDelegateWithMaxCrossAxisExtent` layouts.
+
+## [3.1.1] - 2026-11-25
+
+### Changed
+- **APK Size Optimization (`--split-per-abi` & Asset Compression):**
+  - Enabled `--split-per-abi` in the release workflow so each Android architecture (`arm64-v8a`, `armeabi-v7a`, `x86_64`) ships in its own slim APK, with `Wall_o_Pay.apk` defaulting to `arm64-v8a`.
+  - Compressed and downscaled oversized image assets across `assets/` (from 42.97 MB down to 7.38 MB, saving 35.59 MB / 82.8%) without altering visual fidelity or asset paths.
+
 ## [3.1.0] - 2026-11-25
 
 ### Added

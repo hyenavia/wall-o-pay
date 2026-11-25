@@ -230,8 +230,11 @@ class _AuthPageState extends ConsumerState<AuthPage> {
             ),
           ),
           SafeArea(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 520),
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
               children: [
                 Row(
                   children: [
@@ -419,10 +422,12 @@ class _AuthPageState extends ConsumerState<AuthPage> {
             ],
           ],
         ),
+                ),
+              ),
+            ),
+        ],
       ),
-    ],
-  ),
-);
+    );
   }
 }
 

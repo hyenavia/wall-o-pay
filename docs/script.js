@@ -12,7 +12,7 @@
  */
 
 const REPO_NAME = "hyenavia/wall-o-pay";
-const APP_VERSION = "3.1.0";
+const APP_VERSION = "3.1.2";
 
 // Helper to update button label text without stripping SVG icon or shimmer span
 function setButtonLabel(button, text) {

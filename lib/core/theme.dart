@@ -160,6 +160,7 @@ ThemeData buildTheme() {
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: colors.cardSurface,
       surfaceTintColor: Colors.transparent,
+      constraints: const BoxConstraints(maxWidth: 640),
       dragHandleColor: AppColors.mutedBlueGray.withValues(alpha: 0.35),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),

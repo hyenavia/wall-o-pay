@@ -462,8 +462,8 @@ class _ProfileCustomizeSheetState
                     ? GridView.builder(
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                         gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 92,
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
                           childAspectRatio: 1.0,
@@ -537,8 +537,8 @@ class _ProfileCustomizeSheetState
                     : GridView.builder(
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                         gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 120,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
                           childAspectRatio: 0.92,

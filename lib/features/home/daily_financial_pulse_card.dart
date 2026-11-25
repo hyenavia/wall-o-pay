@@ -669,10 +669,15 @@ class DailyFinancialPulseCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  context.tr('No budget set yet.'),
-                  style: theme.textTheme.bodySmall?.copyWith(color: muted, fontSize: 11),
+                Expanded(
+                  child: Text(
+                    context.tr('No budget set yet.'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(color: muted, fontSize: 11),
+                  ),
                 ),
+                const SizedBox(width: 8),
                 TextButton(
                   style: TextButton.styleFrom(
                     visualDensity: VisualDensity.compact,

@@ -45,10 +45,40 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '3.1.0',
+      version: '3.1.2',
       dateEn: 'November 25, 2026',
       dateId: '25 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Tablet & Landscape Responsive Layout — Added adaptive NavigationRail (compact at 600dp+, extended at 900dp+), centered content/auth/bottom-sheet max widths, and adaptive profile customizer grids.',
+          textId:
+              'Layout Responsif Tablet & Landscape — Menambahkan NavigationRail adaptif (ringkas mulai 600dp, diperluas mulai 900dp), batas lebar konten/auth/bottom sheet yang terpusat, serta grid kustomisasi profil adaptif.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.1.1',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'APK Size Optimization — Enabled --split-per-abi release builds and compressed image assets from 42.97 MB down to 7.38 MB (82.8% reduction) for much faster downloads and smaller storage footprint.',
+          textId:
+              'Optimasi Ukuran APK — Mengaktifkan build --split-per-abi pada rilis dan mengompresi aset gambar dari 42,97 MB menjadi 7,38 MB (hemat 82,8%) agar unduhan lebih cepat dan hemat ruang penyimpanan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.1.0',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,
