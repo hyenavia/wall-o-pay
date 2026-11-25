@@ -4,6 +4,12 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.1] - 2026-11-25
+
+### Fixed
+- **Transparent Launcher Icon Corners:**
+  - Replaced the solid black exterior corners in `assets/images/app_launcher_icon.png` with a clean alpha-transparent background (`RGBA`) and regenerated all platform launcher icons via `flutter_launcher_icons`, eliminating black corner edges on the Android launcher icon.
+
 ## [3.2.0] - 2026-11-25
 
 ### Added

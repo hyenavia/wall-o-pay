@@ -45,10 +45,25 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '3.2.0',
+      version: '3.2.1',
       dateEn: 'November 25, 2026',
       dateId: '25 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Transparent Launcher Icon — Removed solid black corner edges on the launcher icon asset and regenerated platform icons with clean alpha transparency.',
+          textId:
+              'Ikon Launcher Transparan — Menghapus tepi hitam solid di sudut aset ikon launcher dan menghasilkan ulang ikon platform dengan transparansi alpha yang rapi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.2.0',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,
