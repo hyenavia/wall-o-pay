@@ -205,6 +205,32 @@ class SettingsPage extends ConsumerWidget {
                     onSelectionChanged: (s) => prefsCtl.setLocale(s.first),
                   ),
                 ),
+                const SizedBox(height: 20),
+                Text(context.tr('Currency'), style: theme.textTheme.labelLarge),
+                const SizedBox(height: 4),
+                Text(
+                  context.tr('Display symbol and number format across the app (no automatic exchange rate conversion).'),
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                ),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  initialValue: AppCurrency.normalize(prefs.currencyCode),
+                  isExpanded: true,
+                  decoration: appInput(context),
+                  items: [
+                    for (final c in AppCurrency.supported)
+                      DropdownMenuItem(
+                        value: c.code,
+                        child: Text(
+                          '${c.code} (${c.symbol.trim()}) — ${c.labelForLocale(prefs.localeCode)}',
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) prefsCtl.setCurrency(val);
+                  },
+                ),
                 const SizedBox(height: 16),
                 const Divider(height: 1),
                 ListTile(

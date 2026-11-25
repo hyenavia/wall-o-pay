@@ -45,10 +45,55 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '3.1.2',
+      version: '3.2.0',
       dateEn: 'November 25, 2026',
       dateId: '25 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Global Multi-Currency Support — Added selectable currency display (IDR default, USD, EUR, GBP, SGD, MYR, JPY) across Settings, Onboarding, quick chips, charts, and reports without altering existing local records, plus bilingual EN/ID & currency preview on the landing page.',
+          textId:
+              'Dukungan Multi-Mata Uang Global — Menambahkan pilihan mata uang (default IDR, USD, EUR, GBP, SGD, MYR, JPY) di Pengaturan, Onboarding, chip cepat, grafik, dan laporan tanpa mengubah data lama, serta landing page dwibahasa EN/ID dengan simulasi mata uang.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.1.4',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Landing Page Multi-Device & Motion Polish — Refined docs/ responsive breakpoints for phones (320px+), tablets (768px–1024px), and desktops, upgraded accessibility (skip link, 44×44px touch targets, aria-live), and streamlined purposeful UI motion.',
+          textId:
+              'Penyempurnaan Multi-Perangkat & Motion Landing Page — Menyesuaikan breakpoint responsif docs/ untuk HP (320px+), tablet (768px–1024px), dan desktop, meningkatkan aksesibilitas (skip link, target sentuh 44×44px, aria-live), serta merapikan animasi UI.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.1.3',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'ABI-Aware Updates & Release Guidance — In-app update checker now detects device CPU ABI (arm64-v8a, armeabi-v7a, x86_64) automatically, and the landing page displays an ABI compatibility note with a direct link to alternative builds.',
+          textId:
+              'Pembaruan Otomatis Sesuai ABI & Panduan Rilis — Pemeriksa pembaruan dalam aplikasi kini mendeteksi ABI CPU perangkat (arm64-v8a, armeabi-v7a, x86_64) secara otomatis, serta landing page menampilkan catatan kompatibilitas ABI beserta tautan ke varian lain.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.1.2',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,

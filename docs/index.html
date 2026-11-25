@@ -42,6 +42,7 @@
 </head>
 
 <body>
+  <a class="skip-link" href="#main-content" data-i18n="skipLink">Skip to main content</a>
   <!-- Ambient Subtle Mesh Lighting Elements -->
   <div class="ambient-mesh" aria-hidden="true">
     <div class="mesh-glow glow-top-right"></div>
@@ -54,21 +55,31 @@
     <div class="nav-wrap">
       <a class="logo" href="#home" aria-label="Wall o' Pay home">
         <img src="images/logo_wordmark.png" alt="Wall o' Pay" class="logo-wordmark-img" width="105" height="34">
-        <span class="app-version-tag">v3.1.2</span>
+        <span class="app-version-tag">v3.2.0</span>
       </a>
 
       <nav aria-label="Main Navigation">
         <ul class="nav-list">
-          <li><a class="nav-link on" href="#home"><span>Home</span></a></li>
-          <li><a class="nav-link" href="#capabilities"><span>Capabilities</span></a></li>
-          <li><a class="nav-link" href="#interactive"><span>Interactive</span></a></li>
-          <li><a class="nav-link" href="#widgets"><span>Widgets</span></a></li>
-          <li><a class="nav-link" href="#architecture"><span>Architecture</span></a></li>
-          <li><a class="nav-link" href="#faq"><span>FAQ</span></a></li>
+          <li><a class="nav-link on" href="#home"><span data-i18n="navHome">Home</span></a></li>
+          <li><a class="nav-link" href="#capabilities"><span data-i18n="navCapabilities">Capabilities</span></a></li>
+          <li><a class="nav-link" href="#interactive"><span data-i18n="navInteractive">Interactive</span></a></li>
+          <li><a class="nav-link" href="#widgets"><span data-i18n="navWidgets">Widgets</span></a></li>
+          <li><a class="nav-link" href="#architecture"><span data-i18n="navArchitecture">Architecture</span></a></li>
+          <li><a class="nav-link" href="#faq"><span data-i18n="navFaq">FAQ</span></a></li>
+          <li class="lang-drawer-item">
+            <div class="lang-switcher" role="group" aria-label="Language switcher">
+              <button type="button" class="lang-btn active" data-lang="en" aria-pressed="true">EN</button>
+              <button type="button" class="lang-btn" data-lang="id" aria-pressed="false">ID</button>
+            </div>
+          </li>
         </ul>
       </nav>
 
       <div class="header-action-group">
+        <div class="lang-switcher lang-switcher-header" role="group" aria-label="Language switcher">
+          <button type="button" class="lang-btn active" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" class="lang-btn" data-lang="id" aria-pressed="false">ID</button>
+        </div>
         <a class="btn btn-header-cta apk-download-btn" href="https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk">
           <span class="btn-shimmer" aria-hidden="true"></span>
           <svg class="btn-svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -76,7 +87,7 @@
             <polyline points="7 10 12 15 17 10"/>
             <line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
-          <span>Download APK</span>
+          <span data-i18n="downloadApkShort">Download APK</span>
         </a>
         <button class="mobile-toggle-btn" id="mobile-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
@@ -85,6 +96,7 @@
     </div>
   </header>
 
+  <main id="main-content">
   <!-- Hero Section (Spacious Editorial Art Direction) -->
   <section class="hero" id="home">
     <div class="hero-backdrop" aria-hidden="true"></div>
@@ -104,14 +116,14 @@
       <div class="hero-copy">
         <div class="hero-kicker">
           <span class="kicker-glow-dot" aria-hidden="true"></span>
-          <span>Version 3.1.2 · 100% Offline-First Finance</span>
+          <span data-i18n="heroKicker">Version 3.2.0 · 100% Offline-First Finance</span>
         </div>
-        <h1 class="hero-title">
+        <h1 class="hero-title" data-i18n-html="heroTitle">
           Grow Better<br>
           <em class="hero-title-accent">Financial Habits.</em>
         </h1>
-        <p class="hero-lead">
-          A personal finance fortress engineered for steady growth. Instant 0ms local SQLite writes, autonomous 50/30/20 budget pools, and real-time daily spending pulse radar—safeguarded by biometric Keystore security.
+        <p class="hero-lead" data-i18n="heroLead">
+          A personal finance fortress engineered for steady growth. Instant 0ms local SQLite writes, autonomous 50/30/20 budget pools, and multi-currency support (IDR &amp; 6 global currencies)—safeguarded by biometric Keystore security.
         </p>
         <div class="hero-actions">
           <a class="btn btn-primary apk-download-btn" id="hero-download-btn" href="https://github.com/hyenavia/wall-o-pay/releases/latest/download/Wall_o_Pay.apk">
@@ -124,39 +136,43 @@
             <span>Download APK</span>
           </a>
           <a class="btn btn-secondary" href="#capabilities">
-            <span>Explore Architecture</span>
+            <span data-i18n="heroExploreBtn">Explore Architecture</span>
             <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polyline points="6 9 12 15 18 9"/>
             </svg>
           </a>
         </div>
+        <p class="apk-abi-note" data-i18n-html="abiNote">
+          Default APK targets Android 64-bit (<code>arm64-v8a</code>). Using a 32-bit device or emulator?
+          <a href="https://github.com/hyenavia/wall-o-pay/releases/latest" target="_blank" rel="noopener">Choose another ABI on GitHub Releases</a>.
+        </p>
         <div class="hero-proof-bar">
           <div class="proof-item">
             <svg class="proof-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
-            <span>Zero Telemetry</span>
+            <span data-i18n="proofZeroTelemetry">Zero Telemetry</span>
           </div>
           <span class="proof-dot" aria-hidden="true">•</span>
           <div class="proof-item">
             <svg class="proof-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
             </svg>
-            <span>0ms Drift SQLite</span>
+            <span data-i18n="proofSqlite">0ms Drift SQLite</span>
           </div>
           <span class="proof-dot" aria-hidden="true">•</span>
           <div class="proof-item">
             <svg class="proof-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+              <circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
             </svg>
-            <span>50/30/20 Smart Pools</span>
+            <span data-i18n="proofGlobal">IDR &amp; Global Currencies</span>
           </div>
           <span class="proof-dot" aria-hidden="true">•</span>
           <div class="proof-item">
             <svg class="proof-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg>
-            <span>Free &amp; Open Source</span>
+            <span data-i18n="proofOpenSource">Free &amp; Open Source</span>
           </div>
         </div>
       </div>
@@ -179,8 +195,8 @@
             </svg>
           </div>
           <div class="telemetry-content">
-            <h3 class="telemetry-title">0ms Drift SQLite Engine</h3>
-            <p class="telemetry-desc">Pure offline-first architecture with instant sub-millisecond local queries.</p>
+            <h3 class="telemetry-title" data-i18n="cap1Title">0ms Drift SQLite Engine</h3>
+            <p class="telemetry-desc" data-i18n="cap1Desc">Pure offline-first architecture with instant sub-millisecond local queries.</p>
           </div>
         </div>
 
@@ -191,8 +207,8 @@
             </svg>
           </div>
           <div class="telemetry-content">
-            <h3 class="telemetry-title">Hardware Keystore Shield</h3>
-            <p class="telemetry-desc">2,048-iteration salted HMAC-SHA256 &amp; biometric unlock in Android sandbox.</p>
+            <h3 class="telemetry-title" data-i18n="cap2Title">Hardware Keystore Shield</h3>
+            <p class="telemetry-desc" data-i18n="cap2Desc">2,048-iteration salted HMAC-SHA256 &amp; biometric unlock in Android sandbox.</p>
           </div>
         </div>
 
@@ -203,8 +219,8 @@
             </svg>
           </div>
           <div class="telemetry-content">
-            <h3 class="telemetry-title">50/30/20 Smart Pools</h3>
-            <p class="telemetry-desc">Autonomous distribution into Needs, Wants, and Savings with monthly rollover.</p>
+            <h3 class="telemetry-title" data-i18n="cap3Title">50/30/20 Smart Pools</h3>
+            <p class="telemetry-desc" data-i18n="cap3Desc">Autonomous distribution into Needs, Wants, and Savings with monthly rollover.</p>
           </div>
         </div>
 
@@ -219,8 +235,8 @@
             </svg>
           </div>
           <div class="telemetry-content">
-            <h3 class="telemetry-title">Sovereign Data Vault</h3>
-            <p class="telemetry-desc">Zero ads, zero trackers, and free unmetered PDF, CSV &amp; JSON statement exports.</p>
+            <h3 class="telemetry-title" data-i18n="cap4Title">Sovereign Data Vault</h3>
+            <p class="telemetry-desc" data-i18n="cap4Desc">Zero ads, zero trackers, and free unmetered PDF, CSV &amp; JSON statement exports.</p>
           </div>
         </div>
       </div>
@@ -243,17 +259,23 @@
       </svg>
 
       <div class="track-narrative">
-        <span class="eyebrow-pill">✦ Interactive Engine ✦</span>
-        <h2 class="section-title">Command Your Flow, <em>In Real-Time</em></h2>
-        <p class="section-lead">
-          Tap any mode below to see how Wall o' Pay dynamically calculates and protects your financial horizon without leaving the page.
+        <span class="eyebrow-pill" data-i18n="trackEyebrow">✦ Interactive Engine ✦</span>
+        <h2 class="section-title" data-i18n-html="trackTitle">Command Your Flow, <em>In Real-Time</em></h2>
+        <p class="section-lead" data-i18n="trackLead">
+          Tap any mode below or switch currency to see how Wall o' Pay calculates and protects your financial horizon without leaving the page.
         </p>
 
-        <!-- Multi-Mode Switcher Pill Bar (Adapted from Lunera's Route Switcher) -->
+        <!-- Multi-Mode Switcher Pill Bar -->
         <div class="route-switcher-wrap" aria-label="Cashflow Engine Modes">
-          <div class="route-switcher-kicker">
-            <span class="route-pulse-dot" aria-hidden="true"></span>
-            <span>Adaptive Cashflow Engine</span>
+          <div class="route-switcher-bar-head">
+            <div class="route-switcher-kicker">
+              <span class="route-pulse-dot" aria-hidden="true"></span>
+              <span data-i18n="trackEngineKicker">Adaptive Cashflow Engine</span>
+            </div>
+            <div class="currency-switcher" role="group" aria-label="Preview currency">
+              <button type="button" class="currency-btn active" data-currency="IDR" aria-pressed="true">IDR · Rp</button>
+              <button type="button" class="currency-btn" data-currency="USD" aria-pressed="false">USD · $</button>
+            </div>
           </div>
           <div class="route-pills-bar" role="tablist" aria-label="Select cashflow command mode">
             <button class="route-pill active" data-mode="pulse" role="tab" aria-selected="true" title="Daily Budget Spending Pulse">
@@ -261,8 +283,8 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
               </span>
               <div class="route-pill-text">
-                <strong class="route-pill-name">Daily Pulse Radar</strong>
-                <span class="route-pill-detail">Safe spending speed</span>
+                <strong class="route-pill-name" data-i18n="modePulseName">Daily Pulse Radar</strong>
+                <span class="route-pill-detail" data-i18n="modePulseDetail">Safe spending speed</span>
               </div>
             </button>
             <button class="route-pill" data-mode="pools" role="tab" aria-selected="false" title="50/30/20 Smart Pools Allocation">
@@ -270,8 +292,8 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
               </span>
               <div class="route-pill-text">
-                <strong class="route-pill-name">50/30/20 Pools</strong>
-                <span class="route-pill-detail">Autonomous rollover</span>
+                <strong class="route-pill-name" data-i18n="modePoolsName">50/30/20 Pools</strong>
+                <span class="route-pill-detail" data-i18n="modePoolsDetail">Autonomous rollover</span>
               </div>
             </button>
             <button class="route-pill" data-mode="rapid" role="tab" aria-selected="false" title="5-Second Rapid Logging">
@@ -279,8 +301,8 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
               </span>
               <div class="route-pill-text">
-                <strong class="route-pill-name">Rapid 5s Logging</strong>
-                <span class="route-pill-detail">Inline arithmetic math</span>
+                <strong class="route-pill-name" data-i18n="modeRapidName">Rapid 5s Logging</strong>
+                <span class="route-pill-detail" data-i18n="modeRapidDetail">Inline arithmetic math</span>
               </div>
             </button>
             <button class="route-pill" data-mode="debt" role="tab" aria-selected="false" title="Debt & Custom Split Bills">
@@ -288,8 +310,8 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
               </span>
               <div class="route-pill-text">
-                <strong class="route-pill-name">Debt &amp; Split Bills</strong>
-                <span class="route-pill-detail">Due date payoff alerts</span>
+                <strong class="route-pill-name" data-i18n="modeDebtName">Debt &amp; Split Bills</strong>
+                <span class="route-pill-detail" data-i18n="modeDebtDetail">Due date payoff alerts</span>
               </div>
             </button>
           </div>
@@ -303,8 +325,8 @@
               </svg>
             </div>
             <div class="feature-text">
-              <strong>Dynamic Spending Pulse</strong>
-              <span>Dynamically calibrates your daily limit based on remaining month days and fixed obligations.</span>
+              <strong data-i18n="trackFeat1Title">Dynamic Spending Pulse</strong>
+              <span data-i18n="trackFeat1Desc">Dynamically calibrates your daily limit based on remaining month days and fixed obligations.</span>
             </div>
           </li>
           <li class="feature-item">
@@ -314,8 +336,8 @@
               </svg>
             </div>
             <div class="feature-text">
-              <strong>Offline-First Privacy Fortress</strong>
-              <span>Zero telemetry and zero trackers. Android Keystore encrypts your PIN on-device.</span>
+              <strong data-i18n="trackFeat2Title">Built in Indonesia, Ready Everywhere</strong>
+              <span data-i18n="trackFeat2Desc">Starts in Rupiah (IDR) and Indonesian or English, with instant switching to USD, EUR, GBP, SGD, MYR, and JPY.</span>
             </div>
           </li>
         </ul>
@@ -537,9 +559,9 @@
       </svg>
 
       <div class="section-header-center">
-        <span class="eyebrow-pill">✦ Glanceable Offline Care ✦</span>
-        <h2 class="section-title">Glanceable Numbers, <em>Right on Your Screen</em></h2>
-        <p class="section-lead">
+        <span class="eyebrow-pill" data-i18n="widgetsEyebrow">✦ Glanceable Offline Care ✦</span>
+        <h2 class="section-title" data-i18n-html="widgetsTitle">Glanceable Numbers, <em>Right on Your Screen</em></h2>
+        <p class="section-lead" data-i18n="widgetsLead">
           Command your cashflow without unlocking the full app. Native Android Home Screen widgets powered by Wall o' Pay's instant local Drift SQLite database.
         </p>
       </div>
@@ -555,18 +577,18 @@
           <!-- Widget 1: Daily Pulse Dial Widget -->
           <div class="widget-card">
             <div class="widget-hdr">
-              <span class="widget-brand-name">DAILY PULSE RADAR</span>
-              <span class="widget-pill-active">Safe</span>
+              <span class="widget-brand-name" data-i18n="w1Brand">DAILY PULSE RADAR</span>
+              <span class="widget-pill-active" data-i18n="w1Status">Safe</span>
             </div>
             <div style="text-align:center; padding:12px 0;">
               <svg viewBox="0 0 100 100" style="width:90px; height:90px; margin:0 auto;" aria-hidden="true">
                 <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(56,189,248,0.15)" stroke-width="6"/>
                 <circle cx="50" cy="50" r="40" fill="none" stroke="var(--emerald)" stroke-width="6" stroke-dasharray="251.2" stroke-dashoffset="65" stroke-linecap="round" transform="rotate(-90 50 50)"/>
-                <text x="50" y="48" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-size="16" font-weight="700" fill="#FFF">Rp 145K</text>
-                <text x="50" y="62" text-anchor="middle" font-family="'Inter', sans-serif" font-size="7.5" font-weight="600" fill="#38BDF8">SAFE TODAY</text>
+                <text id="widget-dial-val" x="50" y="48" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-size="16" font-weight="700" fill="#FFF">Rp 145K</text>
+                <text id="widget-dial-sub" x="50" y="62" text-anchor="middle" font-family="'Inter', sans-serif" font-size="7.5" font-weight="600" fill="#38BDF8">SAFE TODAY</text>
               </svg>
             </div>
-            <div style="font-size:11px; color:var(--text-secondary); text-align:center;">
+            <div style="font-size:11px; color:var(--text-secondary); text-align:center;" data-i18n="w1Foot">
               Remaining November Quota
             </div>
           </div>
@@ -574,20 +596,20 @@
           <!-- Widget 2: Quick Cashflow Log Widget -->
           <div class="widget-card">
             <div class="widget-hdr">
-              <span class="widget-brand-name">QUICK 5s LOG</span>
-              <span class="widget-pill-active" style="color:var(--sunset-magenta); background:rgba(251,113,133,0.16);">0ms Local</span>
+              <span class="widget-brand-name" data-i18n="w2Brand">QUICK 5s LOG</span>
+              <span class="widget-pill-active" style="color:var(--sunset-magenta); background:rgba(251,113,133,0.16);" data-i18n="w2Status">0ms Local</span>
             </div>
             <div style="display:flex; flex-direction:column; gap:8px;">
               <div class="phone-tx-tile" style="padding:6px 10px;">
-                <span>☕ Dining &amp; Coffee</span>
-                <strong style="color:var(--sunset-magenta);">-Rp 28.000</strong>
+                <span data-i18n="w2Item1">☕ Dining &amp; Coffee</span>
+                <strong id="widget-log-val-1" style="color:var(--sunset-magenta);">-Rp 28.000</strong>
               </div>
               <div class="phone-tx-tile" style="padding:6px 10px;">
-                <span>🛒 Supermarket Needs</span>
-                <strong style="color:var(--sunset-magenta);">-Rp 185.000</strong>
+                <span data-i18n="w2Item2">🛒 Supermarket Needs</span>
+                <strong id="widget-log-val-2" style="color:var(--sunset-magenta);">-Rp 185.000</strong>
               </div>
             </div>
-            <div style="margin-top:10px; font-size:11px; color:var(--mute); text-align:center;">
+            <div style="margin-top:10px; font-size:11px; color:var(--mute); text-align:center;" data-i18n="w2Foot">
               Tap icon on home screen to log in 5s
             </div>
           </div>
@@ -595,27 +617,27 @@
           <!-- Widget 3: 50/30/20 Snapshot Widget -->
           <div class="widget-card">
             <div class="widget-hdr">
-              <span class="widget-brand-name">50/30/20 ALLOCATION</span>
-              <span class="widget-pill-active" style="color:var(--neon-cyan); background:rgba(56,189,248,0.16);">Balanced</span>
+              <span class="widget-brand-name" data-i18n="w3Brand">50/30/20 ALLOCATION</span>
+              <span class="widget-pill-active" style="color:var(--neon-cyan); background:rgba(56,189,248,0.16);" data-i18n="w3Status">Balanced</span>
             </div>
             <div style="display:flex; flex-direction:column; gap:8px; font-size:11px;">
               <div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                  <span>Needs (50%)</span><span>62% spent</span>
+                  <span data-i18n="w3Needs">Needs (50%)</span><span data-i18n="w3NeedsPct">62% spent</span>
                 </div>
-                <div class="mock-meter-track"><div class="mock-meter-fill" style="width:62%; background:var(--sunset-magenta);"></div></div>
+                <div class="mock-meter-track"><div class="mock-meter-fill" style="transform: scaleX(0.62); background:var(--sunset-magenta);"></div></div>
               </div>
               <div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                  <span>Wants (30%)</span><span>40% spent</span>
+                  <span data-i18n="w3Wants">Wants (30%)</span><span data-i18n="w3WantsPct">40% spent</span>
                 </div>
-                <div class="mock-meter-track"><div class="mock-meter-fill" style="width:40%; background:var(--neon-cyan);"></div></div>
+                <div class="mock-meter-track"><div class="mock-meter-fill" style="transform: scaleX(0.40); background:var(--neon-cyan);"></div></div>
               </div>
               <div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                  <span>Savings (20%)</span><span style="color:var(--emerald);">85% saved</span>
+                  <span data-i18n="w3Savings">Savings (20%)</span><span style="color:var(--emerald);" data-i18n="w3SavingsPct">85% saved</span>
                 </div>
-                <div class="mock-meter-track"><div class="mock-meter-fill" style="width:85%; background:var(--emerald);"></div></div>
+                <div class="mock-meter-track"><div class="mock-meter-fill" style="transform: scaleX(0.85); background:var(--emerald);"></div></div>
               </div>
             </div>
           </div>
@@ -626,9 +648,9 @@
     <!-- Architectural Bento Grid & Interactive Live Calibrator (Scrubber) -->
     <section class="bento-section" id="architecture">
       <div class="section-header-center">
-        <span class="eyebrow-pill">✦ Architectural Integrity ✦</span>
-        <h2 class="section-title">Engineered for <em>Zero Compromise</em></h2>
-        <p class="section-lead">
+        <span class="eyebrow-pill" data-i18n="archEyebrow">✦ Architectural Integrity ✦</span>
+        <h2 class="section-title" data-i18n-html="archTitle">Engineered for <em>Zero Compromise</em></h2>
+        <p class="section-lead" data-i18n="archLead">
           Test drive our live budget calibrator below, or explore the cryptographic fortress shielding your financial privacy.
         </p>
       </div>
@@ -637,11 +659,17 @@
         <!-- 1. Interactive Pulse Calibrator (Span 8 - Adapting Lunera's Scrubber) -->
         <div class="bento-card scrubber-card bento-span-8">
           <div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span class="eyebrow-pill" style="margin-bottom:0;">Live Calibrator</span>
+            <div class="scrubber-top-row">
+              <div class="scrubber-top-left">
+                <span class="eyebrow-pill" style="margin-bottom:0;" data-i18n="calBadge">Live Calibrator</span>
+                <div class="currency-switcher" role="group" aria-label="Calibrator currency">
+                  <button type="button" class="currency-btn active" data-currency="IDR" aria-pressed="true">IDR</button>
+                  <button type="button" class="currency-btn" data-currency="USD" aria-pressed="false">USD</button>
+                </div>
+              </div>
               <span id="calibrator-income-readout" style="font-family:var(--serif); font-size:1.15rem; font-weight:700; color:var(--amber);">Rp 8.500.000 / mo</span>
             </div>
-            <h3 style="margin-top:14px; font-size:1.4rem;">Calibrate Your Daily Safe Velocity</h3>
+            <h3 style="margin-top:14px; font-size:1.4rem;" data-i18n="calTitle">Calibrate Your Daily Safe Velocity</h3>
             <p id="calibrator-hint-text" style="color:var(--text-secondary); font-size:0.92rem; margin-top:6px;">
               The signature Wall o' Pay sweet spot! Safe spending speed of Rp 145.000/day ensures zero month-end stress.
             </p>
@@ -651,27 +679,27 @@
           <div class="scrubber-range-wrap">
             <input type="range" min="0" max="5" value="2" class="scrubber-slider" id="income-scrubber-range" aria-label="Monthly income level">
             <div class="scrubber-ticks-row">
-              <span class="tick" data-step="0">3M</span>
-              <span class="tick" data-step="1">5M</span>
-              <span class="tick active" data-step="2">8.5M</span>
-              <span class="tick" data-step="3">12.5M</span>
-              <span class="tick" data-step="4">18M</span>
-              <span class="tick" data-step="5">25M</span>
+              <button type="button" class="tick" data-step="0">3M</button>
+              <button type="button" class="tick" data-step="1">5M</button>
+              <button type="button" class="tick active" data-step="2">8.5M</button>
+              <button type="button" class="tick" data-step="3">12.5M</button>
+              <button type="button" class="tick" data-step="4">18M</button>
+              <button type="button" class="tick" data-step="5">25M</button>
             </div>
           </div>
 
           <!-- Dynamic Output Grid -->
-          <div class="scrubber-readouts-grid">
+          <div class="scrubber-readouts-grid" aria-live="polite">
             <div class="scrubber-readout-col">
-              <small>Daily Safe Pulse</small>
+              <small data-i18n="calDailyLabel">Daily Safe Pulse</small>
               <strong id="calibrator-daily-quota" style="color:var(--mint);">Rp 145.000 <small>/ day</small></strong>
             </div>
             <div class="scrubber-readout-col">
-              <small>Needs (50%)</small>
+              <small data-i18n="calNeedsLabel">Needs (50%)</small>
               <strong id="calibrator-needs-amount">Rp 4.250.000</strong>
             </div>
             <div class="scrubber-readout-col">
-              <small>Savings (20%)</small>
+              <small data-i18n="calSavingsLabel">Savings (20%)</small>
               <strong id="calibrator-savings-amount" style="color:var(--emerald);">Rp 1.700.000</strong>
             </div>
           </div>
@@ -683,8 +711,8 @@
             <div class="telemetry-icon-box" style="margin-bottom:14px;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-            <h3>Hardware Biometric Keystore</h3>
-            <p style="font-size:0.88rem; color:var(--text-secondary); margin-top:8px;">
+            <h3 data-i18n="bentoKeyTitle">Hardware Biometric Keystore</h3>
+            <p style="font-size:0.88rem; color:var(--text-secondary); margin-top:8px;" data-i18n="bentoKeyDesc">
               PIN never stored in plaintext. Key-stretched with 2,048-iteration salted HMAC-SHA256 inside Android Keystore hardware.
             </p>
           </div>
@@ -699,8 +727,8 @@
             <div class="telemetry-icon-box" style="margin-bottom:14px;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
             </div>
-            <h3>Zero Cloud Latency</h3>
-            <p style="font-size:0.88rem; color:var(--text-secondary); margin-top:8px;">
+            <h3 data-i18n="bentoSqlTitle">Zero Cloud Latency</h3>
+            <p style="font-size:0.88rem; color:var(--text-secondary); margin-top:8px;" data-i18n="bentoSqlDesc">
               Drift SQLite compiles straight into native C SQLite bindings. Reads and writes take less than 0.2ms.
             </p>
           </div>
@@ -716,15 +744,16 @@
             <div class="telemetry-icon-box" style="margin-bottom:14px;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             </div>
-            <h3>Free &amp; Unlimited Data Export</h3>
-            <p style="font-size:0.92rem; color:var(--text-secondary); margin-top:8px;">
-              Your financial records belong strictly to you. Generate filtered PDF statement reports, raw CSV spreadsheets, or full JSON backups with zero subscription paywalls forever.
+            <h3 data-i18n="bentoExportTitle">Free Export &amp; Global Multi-Currency</h3>
+            <p style="font-size:0.92rem; color:var(--text-secondary); margin-top:8px;" data-i18n="bentoExportDesc">
+              Built with Indonesian Rupiah (IDR) as primary and ready for global users with USD, EUR, GBP, SGD, MYR, and JPY display—plus unlimited PDF, CSV, and JSON backups with zero paywalls.
             </p>
           </div>
           <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
-            <span class="feature-badge-pill">PDF Reports</span>
-            <span class="feature-badge-pill">CSV Spreadsheets</span>
-            <span class="feature-badge-pill">Encrypted JSON</span>
+            <span class="feature-badge-pill">IDR · USD · EUR · GBP · SGD · MYR · JPY</span>
+            <span class="feature-badge-pill" data-i18n="badgePdf">PDF Reports</span>
+            <span class="feature-badge-pill" data-i18n="badgeCsv">CSV Spreadsheets</span>
+            <span class="feature-badge-pill" data-i18n="badgeJson">JSON Backup</span>
           </div>
         </div>
       </div>
@@ -734,12 +763,12 @@
     <section class="faq" id="faq">
       <!-- Left: Companion Lore Card -->
       <div class="faq-companion">
-        <span class="eyebrow-pill">✦ The Wall o' Pay Lore ✦</span>
-        <h2 class="section-title" style="margin-top:12px;">Clear Answers.<br><em>Zero Surprises.</em></h2>
-        <p class="faq-lore-quote">
+        <span class="eyebrow-pill" data-i18n="faqEyebrow">✦ The Wall o' Pay Lore ✦</span>
+        <h2 class="section-title" style="margin-top:12px;" data-i18n-html="faqTitle">Clear Answers.<br><em>Zero Surprises.</em></h2>
+        <p class="faq-lore-quote" data-i18n="faqQuote">
           “A protective financial fortress where every payment you make and save is nurtured to grow into a brighter tomorrow.”
         </p>
-        <p style="font-size:0.92rem; color:var(--text-secondary); margin-top:18px; line-height:1.6;">
+        <p style="font-size:0.92rem; color:var(--text-secondary); margin-top:18px; line-height:1.6;" data-i18n="faqSub">
           Wall o' Pay is open-source, offline-first, and completely free of predatory trackers or forced cloud subscriptions.
         </p>
       </div>
@@ -748,51 +777,51 @@
       <div class="faq-list">
         <details class="faq-item" open>
           <summary class="faq-question">
-            <span>Is Wall o' Pay completely free and ad-free?</span>
+            <span data-i18n="faqQ1">Is Wall o' Pay completely free and ad-free?</span>
             <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </summary>
           <div class="faq-answer">
-            <p>Yes. Wall o' Pay is 100% open-source under the MIT License—there are no ads, no trackers, no subscriptions, and zero paywalls on PDF, CSV, or JSON exports.</p>
+            <p data-i18n="faqA1">Yes. Wall o' Pay is 100% open-source under the MIT License—there are no ads, no trackers, no subscriptions, and zero paywalls on PDF, CSV, or JSON exports.</p>
           </div>
         </details>
 
         <details class="faq-item">
           <summary class="faq-question">
-            <span>Does it work completely without an internet connection?</span>
+            <span data-i18n="faqQ2">Does it work completely without an internet connection?</span>
             <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </summary>
           <div class="faq-answer">
-            <p>Yes. Wall o' Pay uses an offline-first Drift SQLite engine, so logging transactions, checking your Daily Financial Pulse, and reviewing analytics work instantaneously with 0ms latency even in airplane mode.</p>
+            <p data-i18n="faqA2">Yes. Wall o' Pay uses an offline-first Drift SQLite engine, so logging transactions, checking your Daily Financial Pulse, and reviewing analytics work instantaneously with 0ms latency even in airplane mode.</p>
           </div>
         </details>
 
         <details class="faq-item">
           <summary class="faq-question">
-            <span>How do I back up or transfer data to a new phone?</span>
+            <span data-i18n="faqQ3">Can I use currencies other than Indonesian Rupiah (IDR)?</span>
             <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </summary>
           <div class="faq-answer">
-            <p>You remain in total control. Enable optional Cloud Sync when you want encrypted cross-device backups, or export your ledger anytime into standard JSON, CSV, or PDF files.</p>
+            <p data-i18n="faqA3">Yes. While IDR (Rp) is the primary default, you can switch anytime in Settings or Onboarding to USD ($), EUR (€), GBP (£), SGD (S$), MYR (RM), or JPY (¥) with matching number separators and quick-amount presets—all 100% offline.</p>
           </div>
         </details>
 
         <details class="faq-item">
           <summary class="faq-question">
-            <span>How are my PIN and biometric credentials protected?</span>
+            <span data-i18n="faqQ4">How are my PIN and biometric credentials protected?</span>
             <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </summary>
           <div class="faq-answer">
-            <p>Your PIN is never saved in plaintext—it is protected with 2,048-iteration salted HMAC-SHA256 hashing within the Android Keystore hardware module, alongside native biometric fingerprint and face unlock.</p>
+            <p data-i18n="faqA4">Your PIN is never saved in plaintext—it is protected with 2,048-iteration salted HMAC-SHA256 hashing within the Android Keystore hardware module, alongside native biometric fingerprint and face unlock.</p>
           </div>
         </details>
 
         <details class="faq-item">
           <summary class="faq-question">
-            <span>Why is it distributed as a direct APK via GitHub Releases?</span>
+            <span data-i18n="faqQ5">Why is it distributed as a direct APK via GitHub Releases?</span>
             <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </summary>
           <div class="faq-answer">
-            <p>Direct distribution via GitHub Releases allows anyone to inspect the source code, verify builds, and install updates immediately without corporate app store delays.</p>
+            <p data-i18n="faqA5">Direct distribution via GitHub Releases allows anyone to inspect the source code, verify builds, and install updates immediately without corporate app store delays.</p>
           </div>
         </details>
       </div>
@@ -801,12 +830,12 @@
     <!-- Key Art Showcase (Vice City Sunset Aesthetic & Wendy Companion) -->
     <section class="key-art-section" id="art-direction" aria-labelledby="key-art-title">
       <div class="key-art-header">
-        <span class="eyebrow-pill">✦ Vice City Sunset Aesthetic ✦</span>
-        <h2 class="section-title" id="key-art-title">
+        <span class="eyebrow-pill" data-i18n="artEyebrow">✦ Vice City Sunset Aesthetic ✦</span>
+        <h2 class="section-title" id="key-art-title" data-i18n-html="artTitle">
           Signature Atmosphere.<br>
           <em class="hero-title-accent">Built For Focus &amp; Financial Peace.</em>
         </h2>
-        <p class="section-lead" style="margin:16px auto 32px; max-width:54ch;">
+        <p class="section-lead" style="margin:16px auto 32px; max-width:54ch;" data-i18n="artLead">
           A neon-infused sanctuary engineered with 1980s synthwave nostalgia and cutting-edge offline computing.
         </p>
       </div>
@@ -822,9 +851,9 @@
     <section class="cta" id="download">
       <div class="cta-backdrop" aria-hidden="true"></div>
       <div class="cta-copy">
-        <span class="eyebrow-pill">✦ Sovereign Financial Sanctuary ✦</span>
-        <h2 class="section-title">Start Growing Your<br><em class="hero-title-accent">Financial Future.</em></h2>
-        <p class="section-lead" style="margin:20px auto 36px; max-width:48ch;">
+        <span class="eyebrow-pill" data-i18n="ctaEyebrow">✦ Sovereign Financial Sanctuary ✦</span>
+        <h2 class="section-title" data-i18n-html="ctaTitle">Start Growing Your<br><em class="hero-title-accent">Financial Future.</em></h2>
+        <p class="section-lead" style="margin:20px auto 36px; max-width:48ch;" data-i18n="ctaLead">
           Make every financial decision count with Wall o' Pay. 100% private, offline-first, and beautifully engineered for daily peace of mind.
         </p>
 
@@ -836,18 +865,23 @@
               <polyline points="7 10 12 15 17 10"/>
               <line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            <span>Download APK (<span class="app-version-tag">v3.1.2</span>)</span>
+            <span>Download APK (<span class="app-version-tag">v3.2.0</span>)</span>
           </a>
           <a class="btn btn-secondary" href="https://github.com/hyenavia/wall-o-pay/releases" target="_blank" rel="noopener">
-            <span>View Release Notes</span>
+            <span data-i18n="viewReleaseNotes">View Release Notes</span>
             <svg class="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline>
             </svg>
           </a>
         </div>
+        <p class="apk-abi-note apk-abi-note-center" data-i18n-html="abiNote">
+          Default APK targets Android 64-bit (<code>arm64-v8a</code>). Using a 32-bit device or emulator?
+          <a href="https://github.com/hyenavia/wall-o-pay/releases/latest" target="_blank" rel="noopener">Choose another ABI on GitHub Releases</a>.
+        </p>
       </div>
     </section>
   </div>
+  </main>
 
   <!-- Site Footer -->
   <footer class="site-footer">
@@ -857,28 +891,28 @@
           <div style="display:flex; align-items:center;">
             <img src="images/logo_wordmark.png" alt="Wall o' Pay" class="footer-wordmark-img" width="126" height="40">
           </div>
-          <p>Your money, under your control. A modern, offline-first personal finance application crafted with the Vice City Sunset aesthetic.</p>
+          <p data-i18n="footerTagline">Your money, under your control. A modern, offline-first personal finance application crafted in Indonesia with global multi-currency support.</p>
         </div>
 
         <div class="footer-col">
-          <h4>Navigation</h4>
+          <h4 data-i18n="footerNavTitle">Navigation</h4>
           <div class="footer-links">
-            <a href="#home">Home</a>
-            <a href="#capabilities">Capabilities</a>
-            <a href="#interactive">Interactive Engine</a>
-            <a href="#widgets">Android Widgets</a>
-            <a href="#architecture">Architecture</a>
-            <a href="#faq">FAQ</a>
+            <a href="#home" data-i18n="navHome">Home</a>
+            <a href="#capabilities" data-i18n="navCapabilities">Capabilities</a>
+            <a href="#interactive" data-i18n="footerInteractive">Interactive Engine</a>
+            <a href="#widgets" data-i18n="footerWidgets">Android Widgets</a>
+            <a href="#architecture" data-i18n="navArchitecture">Architecture</a>
+            <a href="#faq" data-i18n="navFaq">FAQ</a>
           </div>
         </div>
 
         <div class="footer-col">
-          <h4>Open Source &amp; Community</h4>
+          <h4 data-i18n="footerCommunityTitle">Open Source &amp; Community</h4>
           <div class="footer-links">
-            <a href="https://github.com/hyenavia/wall-o-pay" target="_blank" rel="noopener">GitHub Repository</a>
-            <a href="https://github.com/hyenavia/wall-o-pay/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
-            <a href="https://github.com/hyenavia/wall-o-pay/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
-            <a href="https://forms.gle/W5MNr8eeZcmiiPbp9" target="_blank" rel="noopener">Feedback Form</a>
+            <a href="https://github.com/hyenavia/wall-o-pay" target="_blank" rel="noopener" data-i18n="footerGithub">GitHub Repository</a>
+            <a href="https://github.com/hyenavia/wall-o-pay/blob/main/CHANGELOG.md" target="_blank" rel="noopener" data-i18n="footerChangelog">Changelog</a>
+            <a href="https://github.com/hyenavia/wall-o-pay/blob/main/LICENSE" target="_blank" rel="noopener" data-i18n="footerLicense">MIT License</a>
+            <a href="https://forms.gle/W5MNr8eeZcmiiPbp9" target="_blank" rel="noopener" data-i18n="footerFeedback">Feedback Form</a>
           </div>
         </div>
       </div>

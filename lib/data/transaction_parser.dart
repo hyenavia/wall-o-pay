@@ -5,21 +5,53 @@ import 'tables.dart';
 
 /// Parser utilitas teks untuk mendeteksi nominal, sumber aplikasi, dan kategori dari teks yang dibagikan pengguna.
 class TransactionParser {
-  /// Ekstrak nominal uang dalam format Rupiah (contoh: "Rp 25.000", "Rp25.000,00", "IDR 50.000").
+  /// Ekstrak nominal uang dari teks Rupiah (`Rp 25.000`, `IDR 50.000`) maupun
+  /// mata uang global (`$25`, `USD 1,250.00`, `EUR 120`, `RM 50`, `S$15`, `£20`, `¥1,500`).
   static int? extractAmount(String text) {
-    final regex = RegExp(
+    final idrRegex = RegExp(
       r'(?:Rp|IDR)\s*([0-9]{1,3}(?:\.[0-9]{3})*(?:,[0-9]{1,2})?|[0-9]+)',
       caseSensitive: false,
     );
-    final match = regex.firstMatch(text);
-    if (match == null) return null;
-
-    var numStr = match.group(1)!;
-    if (numStr.contains(',')) {
-      numStr = numStr.split(',')[0];
+    final idrMatch = idrRegex.firstMatch(text);
+    if (idrMatch != null) {
+      var numStr = idrMatch.group(1)!;
+      if (numStr.contains(',')) {
+        numStr = numStr.split(',')[0];
+      }
+      numStr = numStr.replaceAll('.', '').trim();
+      return int.tryParse(numStr);
     }
-    numStr = numStr.replaceAll('.', '').trim();
-    return int.tryParse(numStr);
+
+    final globalRegex = RegExp(
+      r'(?:USD|EUR|GBP|SGD|MYR|JPY|S\$|RM|\$|€|£|¥)\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]{1,3}(?:\.[0-9]{3})*(?:,[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)',
+      caseSensitive: false,
+    );
+    final globalMatch = globalRegex.firstMatch(text);
+    if (globalMatch == null) return null;
+
+    var numStr = globalMatch.group(1)!;
+    if (numStr.contains(',') && numStr.contains('.')) {
+      if (numStr.lastIndexOf('.') > numStr.lastIndexOf(',')) {
+        numStr = numStr.split('.')[0].replaceAll(',', '');
+      } else {
+        numStr = numStr.split(',')[0].replaceAll('.', '');
+      }
+    } else if (numStr.contains('.')) {
+      final parts = numStr.split('.');
+      if (parts.length == 2 && parts[1].length <= 2) {
+        numStr = parts[0];
+      } else {
+        numStr = numStr.replaceAll('.', '');
+      }
+    } else if (numStr.contains(',')) {
+      final parts = numStr.split(',');
+      if (parts.length == 2 && parts[1].length <= 2) {
+        numStr = parts[0];
+      } else {
+        numStr = numStr.replaceAll(',', '');
+      }
+    }
+    return int.tryParse(numStr.trim());
   }
 
   /// Deteksi nama aplikasi bank/e-wallet berdasarkan teks.

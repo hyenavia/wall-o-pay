@@ -775,7 +775,7 @@ class _PendingEditSheetState extends ConsumerState<_PendingEditSheet> {
               controller: _amountCtl,
               keyboardType: TextInputType.number,
               inputFormatters: amountFormatters(),
-              decoration: appInput(context, label: context.tr('Amount'), prefixText: 'Rp '),
+              decoration: appInput(context, label: context.tr('Amount'), prefixText: currencyInputPrefix),
             ),
             const SizedBox(height: 12),
             if (wallets.isNotEmpty) ...[
@@ -942,7 +942,7 @@ class _RecurringFormSheetState extends ConsumerState<_RecurringFormSheet> {
               controller: _amountCtl,
               keyboardType: TextInputType.number,
               inputFormatters: amountFormatters(),
-              decoration: appInput(context, label: context.tr('Amount'), prefixText: 'Rp '),
+              decoration: appInput(context, label: context.tr('Amount'), prefixText: currencyInputPrefix),
             ),
             const SizedBox(height: 14),
             Text(context.tr('Frequency'), style: theme.textTheme.labelMedium),

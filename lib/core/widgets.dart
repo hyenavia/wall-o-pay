@@ -947,7 +947,7 @@ class _AmountDialogState extends State<_AmountDialog> {
         autofocus: true,
         keyboardType: TextInputType.number,
         inputFormatters: amountFormatters(),
-        decoration: appInput(context, prefixText: 'Rp ', helper: widget.helper),
+        decoration: appInput(context, prefixText: currencyInputPrefix, helper: widget.helper),
       ),
       actions: [
         TextButton(

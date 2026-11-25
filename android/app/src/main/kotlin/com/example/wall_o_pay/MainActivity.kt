@@ -269,6 +269,9 @@ class MainActivity : FlutterFragmentActivity() {
                         result.error("VERSION_ERROR", e.message, null)
                     }
                 }
+                "getSupportedAbis" -> {
+                    result.success(Build.SUPPORTED_ABIS.toList())
+                }
                 else -> result.notImplemented()
             }
         }

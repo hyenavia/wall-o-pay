@@ -50,7 +50,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi fallback jika native method channel gagal membaca PackageManager.
-  static const fallbackVersion = '3.1.2';
+  static const fallbackVersion = '3.2.0';
   static String _resolvedVersion = fallbackVersion;
 
   /// Versi aplikasi saat ini. Dinamis dibaca dari native PackageManager Android atau fallback.
@@ -73,6 +73,58 @@ class UpdateCheckerService {
       debugPrint('Failed to get native version: $e');
     }
     return _resolvedVersion;
+  }
+
+  /// Mengambil daftar ABI CPU yang didukung perangkat Android berdasarkan urutan prioritas.
+  static Future<List<String>> getSupportedAbis() async {
+    try {
+      final abis = await _channel.invokeListMethod<String>('getSupportedAbis');
+      if (abis != null) {
+        return abis;
+      }
+    } catch (e) {
+      debugPrint('Failed to get supported ABIs: $e');
+    }
+    return const [];
+  }
+
+  /// Memilih URL unduhan APK terbaik berdasarkan prioritas ABI perangkat.
+  /// Mencocokkan aset `_*_<abi>.apk` terlebih dahulu, lalu fallback ke `Wall_o_Pay.apk`.
+  static String selectBestApkDownloadUrl(
+    List<dynamic>? assets,
+    List<String> supportedAbis,
+  ) {
+    if (assets == null || assets.isEmpty) return _directDownloadUrl;
+
+    for (final rawAbi in supportedAbis) {
+      final abi = rawAbi.trim().toLowerCase();
+      if (abi.isEmpty) continue;
+      final suffix = '_$abi.apk';
+      for (final a in assets) {
+        if (a is! Map) continue;
+        final assetName = (a['name'] as String? ?? '').toLowerCase();
+        if (assetName.endsWith(suffix)) {
+          final candidate = a['browser_download_url'] as String?;
+          if (candidate != null && isTrustedReleaseUrl(candidate)) {
+            return candidate;
+          }
+        }
+      }
+    }
+
+    for (final a in assets) {
+      if (a is! Map) continue;
+      final assetName = a['name'] as String? ?? '';
+      if (assetName == 'Wall_o_Pay.apk') {
+        final candidate = a['browser_download_url'] as String?;
+        if (candidate != null && isTrustedReleaseUrl(candidate)) {
+          return candidate;
+        }
+        break;
+      }
+    }
+
+    return _directDownloadUrl;
   }
 
   static const String _latestReleaseApi =
@@ -186,21 +238,10 @@ class UpdateCheckerService {
       final releaseNotes = (data['body'] as String? ?? '').trim();
       final releasePageUrl = (data['html_url'] as String? ?? '').trim();
 
-      // Cari URL download langsung untuk file Wall_o_Pay.apk
-      var downloadUrl = _directDownloadUrl;
+      // Pilih URL download APK yang sesuai ABI perangkat (fallback ke Wall_o_Pay.apk)
       final assets = data['assets'] as List<dynamic>?;
-      if (assets != null) {
-        for (final a in assets) {
-          final assetName = a['name'] as String? ?? '';
-          if (assetName == 'Wall_o_Pay.apk') {
-            final candidate = a['browser_download_url'] as String?;
-            if (candidate != null && isTrustedReleaseUrl(candidate)) {
-              downloadUrl = candidate;
-            }
-            break;
-          }
-        }
-      }
+      final supportedAbis = await getSupportedAbis();
+      final downloadUrl = selectBestApkDownloadUrl(assets, supportedAbis);
 
       final hasUpdate = _isVersionGreater(cleanTag, installedVersion);
 

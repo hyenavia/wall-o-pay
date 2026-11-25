@@ -4,6 +4,31 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0] - 2026-11-25
+
+### Added
+- **Global Multi-Currency Support (IDR Default + 6 Global Currencies):**
+  - Added `AppCurrency` registry in `lib/core/format.dart` supporting `IDR` (`Rp`, default), `USD` (`$`), `EUR` (`€`), `GBP` (`£`), `SGD` (`S$`), `MYR` (`RM`), and `JPY` (`¥`) with locale-aware thousand separators, compact chart/chip abbreviations, dynamic quick-amount chips, and dynamic admin fee presets without breaking existing SQLite data.
+  - Added `currencyCode` persistence in `AppPrefs` (`lib/data/prefs.dart`), JSON backup export/import, Cloud Firestore preference sync, and owner-scoped validation in `firestore.rules`.
+  - Added Currency selector in `SettingsPage` and `OnboardingPage` (Step 1), and expanded `TransactionParser.extractAmount` to parse both Indonesian (`Rp`/`IDR`) and global currency formats (`$`, `USD`, `EUR`, `GBP`, `SGD`, `MYR`, `RM`, `JPY`).
+- **Bilingual (`EN | ID`) & Multi-Currency Landing Page (`docs/`):**
+  - Added an accessible `EN | ID` language toggle (defaulting to `EN`) in the landing page header/mobile drawer and an interactive `IDR · Rp | USD · $` currency preview toggle synced across the phone mockups, Android widgets showcase, and live budget calibrator.
+
+## [3.1.4] - 2026-11-25
+
+### Changed
+- **Landing Page Multi-Device Responsive & Motion Audit (`docs/`):**
+  - Audited and refined `docs/index.html`, `docs/style.css`, and `docs/script.js` across mobile (`320px–480px`), tablet (`640px–1024px`), and desktop (`1025px–1440px+`) viewports.
+  - Expanded the mobile/tablet navigation drawer breakpoint to `<= 960px` with origin-aware transitions, accessible `44×44px` touch targets on calibrator tick buttons, a skip-to-content link, `<main>` landmark, `aria-live="polite"`, and `tabular-nums` on dynamic financial readouts.
+  - Replaced continuous infinite pulse/float animations and static-card hover lifts with a one-time hero entrance animation and tactile readout morph transitions.
+
+## [3.1.3] - 2026-11-25
+
+### Added
+- **ABI-Aware In-App Updates & Landing Page Notice:**
+  - Exposed Android `Build.SUPPORTED_ABIS` via `MainActivity` and updated `UpdateCheckerService` to automatically select the matching per-ABI APK (`arm64-v8a`, `armeabi-v7a`, or `x86_64`) with safe fallback to `Wall_o_Pay.apk`.
+  - Updated `docs/script.js` to deterministically prefer `Wall_o_Pay.apk` (`arm64-v8a`) and added an ABI compatibility note linking to GitHub Releases on `docs/index.html` for 32-bit and emulator users.
+
 ## [3.1.2] - 2026-11-25
 
 ### Changed

@@ -672,7 +672,7 @@ class _AccountFormState extends ConsumerState<AccountForm> {
               decoration: appInput(
                 context,
                 label: context.tr('Balance'),
-                prefixText: 'Rp ',
+                prefixText: currencyInputPrefix,
               ),
             ),
             const SizedBox(height: 14),

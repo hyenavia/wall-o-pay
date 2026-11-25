@@ -671,8 +671,8 @@ class InsightEngine {
       }
     }
 
-    // 7. Frequent Small Purchases ("Latte Factor" <= Rp 50.000, >= 3x)
-    const microThreshold = 50000;
+    // 7. Frequent Small Purchases ("Latte Factor")
+    final microThreshold = AppCurrency.current.microThreshold;
     final microTxs = expTxs.where((t) => t.amount > 0 && t.amount <= microThreshold).toList();
     if (microTxs.length >= 3) {
       final microTotal = microTxs.fold<int>(0, (sum, t) => sum + t.amount);
@@ -692,9 +692,10 @@ class InsightEngine {
       insights.add(SmartInsightItem(
         title: context.tr('Frequent Small Purchases'),
         description: context.tr(
-          'You made {count} small purchases (≤ Rp 50.000) totaling {amount}, mostly in {cat}.',
+          'You made {count} small purchases (≤ {limit}) totaling {amount}, mostly in {cat}.',
           {
             'count': '${microTxs.length}',
+            'limit': rupiah(microThreshold),
             'amount': rupiah(microTotal),
             'cat': topMicroCatName,
           },

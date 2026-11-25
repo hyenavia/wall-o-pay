@@ -683,7 +683,7 @@ class _PaymentDialogState extends ConsumerState<_PaymentDialog> {
                 autofocus: true,
                 keyboardType: TextInputType.number,
                 inputFormatters: amountFormatters(),
-                decoration: appInput(context, prefixText: 'Rp '),
+                decoration: appInput(context, prefixText: currencyInputPrefix),
               ),
             ],
             const SizedBox(height: 8),
@@ -867,7 +867,7 @@ class _DebtFormState extends ConsumerState<_DebtForm> {
               controller: _amount,
               keyboardType: TextInputType.number,
               inputFormatters: amountFormatters(),
-              decoration: appInput(context, label: context.tr('Amount'), prefixText: 'Rp '),
+              decoration: appInput(context, label: context.tr('Amount'), prefixText: currencyInputPrefix),
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -1088,7 +1088,7 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
               onChanged: (_) => setState(() {
                 _error = null;
               }),
-              decoration: appInput(context, label: context.tr('Total bill'), prefixText: 'Rp '),
+              decoration: appInput(context, label: context.tr('Total bill'), prefixText: currencyInputPrefix),
             ),
             const SizedBox(height: 14),
             TextField(
@@ -1155,7 +1155,7 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
                   decoration: appInput(
                     context,
                     label: names[i],
-                    prefixText: 'Rp ',
+                    prefixText: currencyInputPrefix,
                   ),
                 ),
                 const SizedBox(height: 10),

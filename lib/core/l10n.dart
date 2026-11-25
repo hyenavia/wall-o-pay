@@ -1051,6 +1051,13 @@ const Map<String, String> _id = {
       'Gunakan kembali pengaturan anggaran dari {period}',
   'Copy from {period}': 'Salin dari {period}',
   'Copied budget from {period}': 'Anggaran disalin dari {period}',
+  'Currency': 'Mata Uang',
+  'Display symbol and number format across the app (no automatic exchange rate conversion).':
+      'Simbol tampilan dan format angka di seluruh aplikasi (tanpa konversi kurs otomatis).',
+  'Free / {zero}': 'Gratis / {zero}',
+  'Free ({zero})': 'Gratis ({zero})',
+  'You made {count} small purchases (≤ {limit}) totaling {amount}, mostly in {cat}.':
+      'Anda melakukan {count} transaksi kecil (≤ {limit}) dengan total {amount}, terbanyak di {cat}.',
   // Wave 3 — Insights Drill-Down & Export Polish
   'Export': 'Ekspor',
   'Export PDF report': 'Ekspor laporan PDF',

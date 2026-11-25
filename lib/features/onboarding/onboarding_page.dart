@@ -110,7 +110,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       controller: c,
       keyboardType: TextInputType.number,
       inputFormatters: amountFormatters(),
-      decoration: appInput(context, label: label, prefixText: 'Rp '),
+      decoration: appInput(context, label: label, prefixText: currencyInputPrefix),
     );
   }
 
@@ -118,7 +118,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final muted = scheme.onSurface.withValues(alpha: 0.65);
-    final type = ref.watch(appPrefsProvider.select((p) => p.periodType));
+    final prefs = ref.watch(appPrefsProvider);
+    final type = prefs.periodType;
     final weekly = type == PeriodType.weekly;
 
     Widget heading(String title, String sub) => Column(
@@ -152,6 +153,29 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               context.tr('Pick how you plan your spending. You can change it later in Settings.'),
             ),
             const SizedBox(width: double.infinity, child: PeriodTypeToggle()),
+            const SizedBox(height: 20),
+            Text(context.tr('Currency'), style: theme.textTheme.labelLarge),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              initialValue: AppCurrency.normalize(prefs.currencyCode),
+              isExpanded: true,
+              decoration: appInput(context),
+              items: [
+                for (final c in AppCurrency.supported)
+                  DropdownMenuItem(
+                    value: c.code,
+                    child: Text(
+                      '${c.code} (${c.symbol.trim()}) — ${c.labelForLocale(prefs.localeCode)}',
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: (val) {
+                if (val != null) {
+                  ref.read(appPrefsProvider.notifier).setCurrency(val);
+                }
+              },
+            ),
           ],
         );
       case 1:

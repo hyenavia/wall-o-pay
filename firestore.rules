@@ -39,6 +39,7 @@ rules_version = '2';
 //   - preferences:
 //       - themeMode: string (optional, <= 20 chars)
 //       - localeCode: string (optional, <= 10 chars)
+//       - currencyCode: string (optional, 3..10 chars)
 //       - periodType: string (optional, <= 20 chars)
 //       - firstDayOfWeek: int (optional)
 //       - firstDayOfMonth: int (optional)
@@ -203,6 +204,7 @@ service cloud.firestore {
                  hasOnlyAllowedFields([
                    'themeMode',
                    'localeCode',
+                   'currencyCode',
                    'periodType',
                    'firstDayOfWeek',
                    'firstDayOfMonth',
@@ -218,6 +220,7 @@ service cloud.firestore {
                  ]) &&
                  isValidOptionalString('themeMode', 1, 20) &&
                  isValidOptionalString('localeCode', 1, 10) &&
+                 isValidOptionalString('currencyCode', 3, 10) &&
                  isValidOptionalString('periodType', 1, 20)
                )
              );

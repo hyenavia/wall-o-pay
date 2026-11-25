@@ -711,7 +711,7 @@ class _GoalDialogState extends State<_GoalDialog> {
               decoration: appInput(
                 context,
                 label: context.tr('Target amount'),
-                prefixText: 'Rp ',
+                prefixText: currencyInputPrefix,
               ),
             ),
             const SizedBox(height: 4),
@@ -797,7 +797,7 @@ class _GoalFundsDialogState extends ConsumerState<_GoalFundsDialog> {
               inputFormatters: amountFormatters(),
               decoration: appInput(
                 context,
-                prefixText: 'Rp ',
+                prefixText: currencyInputPrefix,
                 hint: widget.isDeposit ? '0' : formatThousands(maxWithdraw),
               ),
             ),

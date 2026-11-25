@@ -192,7 +192,7 @@ Future<void> showCategoryBudgetSheet(
                     fontFeatures: [FontFeature.tabularFigures()],
                   ),
                   decoration: InputDecoration(
-                    prefixText: 'Rp ',
+                    prefixText: currencyInputPrefix,
                     prefixStyle: const TextStyle(
                       color: AppColors.dewMint,
                       fontWeight: FontWeight.w700,

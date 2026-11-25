@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/format.dart';
 import '../core/l10n.dart';
 import '../core/period.dart';
 import 'feature_prefs.dart';
@@ -23,6 +24,7 @@ class AppPrefs {
   const AppPrefs({
     required this.themeMode,
     required this.localeCode,
+    this.currencyCode = 'IDR',
     required this.periodType,
     this.firstDayOfWeek = DateTime.monday,
     this.firstDayOfMonth = 1,
@@ -30,6 +32,7 @@ class AppPrefs {
 
   final ThemeMode themeMode;
   final String localeCode; // 'en' (default) atau 'id'
+  final String currencyCode; // 'IDR' (default) atau mata uang global
   final PeriodType periodType;
   final int firstDayOfWeek; // 1 (Monday) sampai 7 (Sunday)
   final int firstDayOfMonth; // 1 s.d. 28 (Hari/tanggal gajian)
@@ -37,6 +40,7 @@ class AppPrefs {
   AppPrefs copyWith({
     ThemeMode? themeMode,
     String? localeCode,
+    String? currencyCode,
     PeriodType? periodType,
     int? firstDayOfWeek,
     int? firstDayOfMonth,
@@ -44,6 +48,7 @@ class AppPrefs {
     return AppPrefs(
       themeMode: themeMode ?? this.themeMode,
       localeCode: localeCode ?? this.localeCode,
+      currencyCode: currencyCode ?? this.currencyCode,
       periodType: periodType ?? this.periodType,
       firstDayOfWeek: firstDayOfWeek ?? this.firstDayOfWeek,
       firstDayOfMonth: firstDayOfMonth ?? this.firstDayOfMonth,
@@ -55,6 +60,7 @@ class AppPrefs {
 class AppPrefsController extends Notifier<AppPrefs> {
   static const _kTheme = 'pref_theme';
   static const _kLocale = 'pref_locale';
+  static const _kCurrency = 'pref_currency';
   static const _kPeriod = 'pref_period';
   static const _kFirstDayOfWeek = 'pref_first_day_of_week';
   static const _kFirstDayOfMonth = 'pref_first_day_of_month';
@@ -97,15 +103,20 @@ class AppPrefsController extends Notifier<AppPrefs> {
       _ => ThemeMode.system,
     };
     final locale = (p.getString(_k(_kLocale, uid)) ?? p.getString(_kLocale)) == 'id' ? 'id' : 'en';
+    final currency = AppCurrency.normalize(
+      p.getString(_k(_kCurrency, uid)) ?? p.getString(_kCurrency),
+    );
     final periodStr = p.getString(_k(_kPeriod, uid)) ?? p.getString(_kPeriod);
     final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
     final firstDay = p.getInt(_k(_kFirstDayOfWeek, uid)) ?? p.getInt(_kFirstDayOfWeek) ?? DateTime.monday;
     final firstDayMonth = p.getInt(_k(_kFirstDayOfMonth, uid)) ?? p.getInt(_kFirstDayOfMonth) ?? 1;
 
     AppLocale.code = locale;
+    AppCurrency.code = currency;
     return AppPrefs(
       themeMode: theme,
       localeCode: locale,
+      currencyCode: currency,
       periodType: period,
       firstDayOfWeek: firstDay,
       firstDayOfMonth: firstDayMonth,
@@ -123,15 +134,20 @@ class AppPrefsController extends Notifier<AppPrefs> {
       _ => ThemeMode.system,
     };
     final locale = (p.getString(_k(_kLocale, uid)) ?? p.getString(_kLocale)) == 'id' ? 'id' : 'en';
+    final currency = AppCurrency.normalize(
+      p.getString(_k(_kCurrency, uid)) ?? p.getString(_kCurrency),
+    );
     final periodStr = p.getString(_k(_kPeriod, uid)) ?? p.getString(_kPeriod);
     final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
     final firstDay = p.getInt(_k(_kFirstDayOfWeek, uid)) ?? p.getInt(_kFirstDayOfWeek) ?? DateTime.monday;
     final firstDayMonth = p.getInt(_k(_kFirstDayOfMonth, uid)) ?? p.getInt(_kFirstDayOfMonth) ?? 1;
 
     AppLocale.code = locale;
+    AppCurrency.code = currency;
     state = AppPrefs(
       themeMode: theme,
       localeCode: locale,
+      currencyCode: currency,
       periodType: period,
       firstDayOfWeek: firstDay,
       firstDayOfMonth: firstDayMonth,
@@ -167,15 +183,18 @@ class AppPrefsController extends Notifier<AppPrefs> {
         _ => ThemeMode.system,
       };
       final locale = (data['localeCode'] as String?) == 'id' ? 'id' : 'en';
+      final currency = AppCurrency.normalize(data['currencyCode'] as String?);
       final periodStr = data['periodType'] as String?;
       final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
       final firstDay = (data['firstDayOfWeek'] as num?)?.toInt() ?? DateTime.monday;
       final firstDayMonth = (data['firstDayOfMonth'] as num?)?.toInt() ?? 1;
 
       AppLocale.code = locale;
+      AppCurrency.code = currency;
       state = AppPrefs(
         themeMode: theme,
         localeCode: locale,
+        currencyCode: currency,
         periodType: period,
         firstDayOfWeek: firstDay,
         firstDayOfMonth: firstDayMonth,
@@ -183,6 +202,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
 
       await p.setString(_k(_kTheme, uid), theme.name);
       await p.setString(_k(_kLocale, uid), locale);
+      await p.setString(_k(_kCurrency, uid), currency);
       await p.setString(_k(_kPeriod, uid), period.name);
       await p.setInt(_k(_kFirstDayOfWeek, uid), firstDay);
       await p.setInt(_k(_kFirstDayOfMonth, uid), firstDayMonth);
@@ -243,6 +263,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
       await doc.set({
         'themeMode': state.themeMode.name,
         'localeCode': state.localeCode,
+        'currencyCode': state.currencyCode,
         'periodType': state.periodType.name,
         'firstDayOfWeek': state.firstDayOfWeek,
         'firstDayOfMonth': state.firstDayOfMonth,
@@ -270,6 +291,7 @@ class AppPrefsController extends Notifier<AppPrefs> {
     return {
       'themeMode': state.themeMode.name,
       'localeCode': state.localeCode,
+      'currencyCode': state.currencyCode,
       'periodType': state.periodType.name,
       'firstDayOfWeek': state.firstDayOfWeek,
       'firstDayOfMonth': state.firstDayOfMonth,
@@ -294,15 +316,18 @@ class AppPrefsController extends Notifier<AppPrefs> {
       _ => ThemeMode.system,
     };
     final locale = (data['localeCode'] as String? ?? 'en') == 'id' ? 'id' : 'en';
+    final currency = AppCurrency.normalize(data['currencyCode'] as String?);
     final periodStr = data['periodType'] as String?;
     final period = periodStr == 'weekly' ? PeriodType.weekly : PeriodType.monthly;
     final firstDay = (data['firstDayOfWeek'] as num?)?.toInt() ?? DateTime.monday;
     final firstDayMonth = (data['firstDayOfMonth'] as num?)?.toInt() ?? 1;
 
     AppLocale.code = locale;
+    AppCurrency.code = currency;
     state = AppPrefs(
       themeMode: theme,
       localeCode: locale,
+      currencyCode: currency,
       periodType: period,
       firstDayOfWeek: firstDay,
       firstDayOfMonth: firstDayMonth,
@@ -310,12 +335,14 @@ class AppPrefsController extends Notifier<AppPrefs> {
 
     await p.setString(_kTheme, theme.name);
     await p.setString(_kLocale, locale);
+    await p.setString(_kCurrency, currency);
     await p.setString(_kPeriod, period.name);
     await p.setInt(_kFirstDayOfWeek, firstDay);
     await p.setInt(_kFirstDayOfMonth, firstDayMonth);
     if (uid != null) {
       await p.setString(_k(_kTheme, uid), theme.name);
       await p.setString(_k(_kLocale, uid), locale);
+      await p.setString(_k(_kCurrency, uid), currency);
       await p.setString(_k(_kPeriod, uid), period.name);
       await p.setInt(_k(_kFirstDayOfWeek, uid), firstDay);
       await p.setInt(_k(_kFirstDayOfMonth, uid), firstDayMonth);
@@ -372,6 +399,19 @@ class AppPrefsController extends Notifier<AppPrefs> {
     await p.setString(_kLocale, value);
     if (uid != null) {
       await p.setString(_k(_kLocale, uid), value);
+      uploadToCloud(uid);
+    }
+  }
+
+  Future<void> setCurrency(String code) async {
+    final value = AppCurrency.normalize(code);
+    AppCurrency.code = value;
+    state = state.copyWith(currencyCode: value);
+    final p = ref.read(sharedPreferencesProvider);
+    final uid = _uid();
+    await p.setString(_kCurrency, value);
+    if (uid != null) {
+      await p.setString(_k(_kCurrency, uid), value);
       uploadToCloud(uid);
     }
   }

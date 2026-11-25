@@ -155,7 +155,7 @@ Future<void> showTotalBudgetDialog(
                       fontFeatures: [FontFeature.tabularFigures()],
                     ),
                     decoration: InputDecoration(
-                      prefixText: 'Rp ',
+                      prefixText: currencyInputPrefix,
                       prefixStyle: const TextStyle(
                         color: AppColors.dewMint,
                         fontWeight: FontWeight.w700,
@@ -253,12 +253,12 @@ Future<void> showTotalBudgetDialog(
                         fontFeatures: [FontFeature.tabularFigures()],
                       ),
                       decoration: InputDecoration(
-                        prefixText: 'Rp ',
+                        prefixText: currencyInputPrefix,
                         prefixStyle: TextStyle(
                           color: BudgetBucket.savings.colorIn(ctx),
                           fontWeight: FontWeight.w700,
                         ),
-                        hintText: '100.000',
+                        hintText: '0',
                         hintStyle: TextStyle(
                           color: AppColors.freshSage.withValues(alpha: 0.5),
                         ),
@@ -333,12 +333,12 @@ Future<void> showTotalBudgetDialog(
                         fontFeatures: [FontFeature.tabularFigures()],
                       ),
                       decoration: InputDecoration(
-                        prefixText: 'Rp ',
+                        prefixText: currencyInputPrefix,
                         prefixStyle: TextStyle(
                           color: BudgetBucket.needs.colorIn(ctx),
                           fontWeight: FontWeight.w700,
                         ),
-                        hintText: '350.000',
+                        hintText: '0',
                         hintStyle: TextStyle(
                           color: AppColors.freshSage.withValues(alpha: 0.5),
                         ),
@@ -387,12 +387,12 @@ Future<void> showTotalBudgetDialog(
                         fontFeatures: [FontFeature.tabularFigures()],
                       ),
                       decoration: InputDecoration(
-                        prefixText: 'Rp ',
+                        prefixText: currencyInputPrefix,
                         prefixStyle: TextStyle(
                           color: BudgetBucket.wants.colorIn(ctx),
                           fontWeight: FontWeight.w700,
                         ),
-                        hintText: '150.000',
+                        hintText: '0',
                         hintStyle: TextStyle(
                           color: AppColors.freshSage.withValues(alpha: 0.5),
                         ),

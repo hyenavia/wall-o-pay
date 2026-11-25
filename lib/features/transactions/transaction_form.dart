@@ -687,7 +687,7 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
               decoration: appInput(
                 context,
                 label: context.tr('Amount'),
-                prefixText: 'Rp ',
+                prefixText: currencyInputPrefix,
                 suffixIcon: IconButton(
                   icon: Image.asset(
                     'assets/icons/vice_city/pie_chart.png',
@@ -710,40 +710,24 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     onTap: () {
                       final cur = parseAmount(_amount.text);
                       if (cur == 0) {
-                        _amount.text = '1.000';
+                        _amount.text = formatThousands(1000);
                       } else if (cur <= 999999999) {
                         _amount.text = formatThousands(cur * 1000);
                       }
                       setState(() => _error = null);
                     },
                   ),
-                  const SizedBox(width: 6),
-                  _QuickAmountChip(
-                    label: '+10rb',
-                    onTap: () {
-                      final cur = parseAmount(_amount.text);
-                      _amount.text = formatThousands(cur + 10000);
-                      setState(() => _error = null);
-                    },
-                  ),
-                  const SizedBox(width: 6),
-                  _QuickAmountChip(
-                    label: '+50rb',
-                    onTap: () {
-                      final cur = parseAmount(_amount.text);
-                      _amount.text = formatThousands(cur + 50000);
-                      setState(() => _error = null);
-                    },
-                  ),
-                  const SizedBox(width: 6),
-                  _QuickAmountChip(
-                    label: '+100rb',
-                    onTap: () {
-                      final cur = parseAmount(_amount.text);
-                      _amount.text = formatThousands(cur + 100000);
-                      setState(() => _error = null);
-                    },
-                  ),
+                  for (final chip in currencyQuickChips()) ...[
+                    const SizedBox(width: 6),
+                    _QuickAmountChip(
+                      label: chip.label,
+                      onTap: () {
+                        final cur = parseAmount(_amount.text);
+                        _amount.text = formatThousands(cur + chip.amount);
+                        setState(() => _error = null);
+                      },
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -823,7 +807,9 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                           _showAdminFee = false;
                         }),
                         child: Text(
-                          parseAmount(_fee.text) > 0 ? context.tr('Free / Rp 0') : context.tr('Hide admin fee'),
+                          parseAmount(_fee.text) > 0
+                              ? context.tr('Free / {zero}', {'zero': rupiah(0)})
+                              : context.tr('Hide admin fee'),
                           style: const TextStyle(fontSize: 12),
                         ),
                       ),
@@ -836,8 +822,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     inputFormatters: amountFormatters(),
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
-                      prefixText: 'Rp ',
-                      hintText: '0 (${context.tr("Free (Rp 0)")})',
+                      prefixText: currencyInputPrefix,
+                      hintText: '0 (${context.tr("Free ({zero})", {"zero": rupiah(0)})})',
                       helperText: context.tr('Deducted from source wallet as an admin fee expense'),
                     ),
                   ),
@@ -847,13 +833,12 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     runSpacing: 8,
                     children: [
                       for (final opt in [
-                        (amount: 0, label: 'Free (Rp 0)'),
-                        (amount: 1000, label: 'Rp 1.000'),
-                        (amount: 2500, label: 'Rp 2.500'),
-                        (amount: 6500, label: 'Rp 6.500'),
+                        (amount: 0, label: context.tr('Free ({zero})', {'zero': rupiah(0)})),
+                        for (final fee in AppCurrency.current.adminFees)
+                          (amount: fee, label: rupiah(fee)),
                       ])
                         ActionChip(
-                          label: Text(context.tr(opt.label)),
+                          label: Text(opt.label),
                           avatar: (opt.amount == 0 && parseAmount(_fee.text) == 0) ||
                                   (opt.amount > 0 && parseAmount(_fee.text) == opt.amount)
                               ? const Icon(Icons.check, size: 16)
@@ -1028,7 +1013,10 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                             padding: EdgeInsets.zero,
                           ),
                           onPressed: () => setState(() => _fee.clear()),
-                          child: Text(context.tr('Free / Rp 0'), style: const TextStyle(fontSize: 12)),
+                          child: Text(
+                            context.tr('Free / {zero}', {'zero': rupiah(0)}),
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         ),
                     ],
                   ),
@@ -1039,8 +1027,8 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     inputFormatters: amountFormatters(),
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
-                      prefixText: 'Rp ',
-                      hintText: '0 (${context.tr("Free (Rp 0)")})',
+                      prefixText: currencyInputPrefix,
+                      hintText: '0 (${context.tr("Free ({zero})", {"zero": rupiah(0)})})',
                       helperText: context.tr('Recorded as an additional admin fee expense'),
                     ),
                   ),
@@ -1050,13 +1038,12 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
                     runSpacing: 8,
                     children: [
                       for (final opt in [
-                        (amount: 0, label: 'Free (Rp 0)'),
-                        (amount: 1000, label: 'Rp 1.000'),
-                        (amount: 2500, label: 'Rp 2.500'),
-                        (amount: 5000, label: 'Rp 5.000'),
+                        (amount: 0, label: context.tr('Free ({zero})', {'zero': rupiah(0)})),
+                        for (final fee in AppCurrency.current.expenseAdminFees)
+                          (amount: fee, label: rupiah(fee)),
                       ])
                         ActionChip(
-                          label: Text(context.tr(opt.label)),
+                          label: Text(opt.label),
                           avatar: (opt.amount == 0 && parseAmount(_fee.text) == 0) ||
                                   (opt.amount > 0 && parseAmount(_fee.text) == opt.amount)
                               ? const Icon(Icons.check, size: 16)

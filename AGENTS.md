@@ -52,7 +52,7 @@ dari pengguna, dan jangan pernah menggunakan `--force` pada branch `main`.
 - **Design Token & Tema**: Gunakan selalu token warna dari `lib/core/theme.dart` (`AppColors.midnightNavy`, `AppColors.deepNavy`, `AppColors.sunsetMagenta`, `AppColors.neonCyan`, `AppColors.softWhite`). Hindari warna _hardcoded_ sembarangan.
 - **Multilingual Support**: Setiap teks antarmuka yang tampil ke pengguna harus didaftarkan di `lib/core/l10n.dart` agar mendukung Bahasa Indonesia dan Bahasa Inggris.
 - **Offline-First Integrity**: Database lokal menggunakan Drift SQLite (`lib/data/app_database.dart`). Operasi database harus tetap berfungsi lancar walau perangkat tidak terhubung ke internet. Sinkronisasi Firebase bersifat pelengkap cadangan _cloud_.
-- **Web Landing Page (`docs/`)**: Landing page untuk GitHub Pages harus selalu responsif, modern, menggunakan Bahasa Inggris profesional, dan mencerminkan fitur riil yang ada pada aplikasi.
+- **Web Landing Page (`docs/`)**: Landing page untuk GitHub Pages harus selalu responsif, modern, menggunakan Bahasa Inggris profesional (`EN`) sebagai bahasa default dengan dukungan toggle bilingual Bahasa Indonesia (`ID`) dan simulasi multi-mata uang (`IDR` utama + mata uang global), serta mencerminkan fitur riil yang ada pada aplikasi.
 
 ---
 
@@ -72,7 +72,7 @@ Karena aplikasi ini menyimpan data keuangan pengguna dan setiap `push` ke `main`
 
 - Jika tugas menyentuh area sensitif di atas, **berhenti dan beri tahu pengguna terlebih dahulu**
   bahwa tugas ini sebaiknya dikerjakan dengan model yang lebih kuat yang tersedia di akun
-  (misalnya Gemini 4 Argon atau Claude Opus 4.6/5.5), dengan effort High, sebelum dilanjutkan.
+  (misalnya Gemini 4 Carbon atau Claude Opus 4.6/5.5), dengan effort High, sebelum dilanjutkan.
 - Jangan pernah melakukan _hardcode_ secret atau API key di kode, dan jangan commit file kredensial (keystore, `.env`, dsb.) ke repositori.
 - Setiap perubahan skema database wajib menyertakan migrasi yang aman agar data pengguna yang sudah ada tidak hilang, dan tetap mematuhi prinsip Offline-First.
 - Validasi input pengguna sebelum disimpan ke database lokal maupun dikirim ke Firebase.
