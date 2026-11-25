@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show MemoryImage, Offset;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'cloud.dart';
 import 'cloud_sync.dart';
@@ -96,6 +97,7 @@ class ProfileController extends Notifier<ProfileState> {
   String _photoKey(String uid) => 'photo_$uid';
   String _frameKey(String uid) => 'profile_frame_$uid';
   String _updatedKey(String uid) => 'profile_updated_$uid';
+  String _syncedKey(String uid) => 'profile_synced_at_$uid';
 
   /// Batas maksimum panjang string Base64 foto profil (~600 KB binary) agar aman bagi memori & batas dokumen Firestore 1 MiB.
   static const maxPhotoBase64Length = 800000;
@@ -131,6 +133,23 @@ class ProfileController extends Notifier<ProfileState> {
   String? get _uid => ref.read(currentUserProvider)?.uid;
   String get _effectiveUid => _uid ?? guestId;
 
+  Future<int> _touchUpdated(SharedPreferences p, String uid) async {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final prev = p.getInt(_updatedKey(uid)) ?? 0;
+    final next = now > prev ? now : prev + 1;
+    await p.setInt(_updatedKey(uid), next);
+    return next;
+  }
+
+  /// Apakah profil akun [uid] memiliki perubahan lokal yang belum diunggah ke cloud.
+  bool hasPendingUpload(String uid) {
+    final p = ref.read(sharedPreferencesProvider);
+    final localAt = p.getInt(_updatedKey(uid)) ?? 0;
+    if (localAt <= 0) return false;
+    final syncedAt = p.getInt(_syncedKey(uid)) ?? 0;
+    return localAt > syncedAt;
+  }
+
   Future<void> setNickname(String value) async {
     final uid = _effectiveUid;
     final p = ref.read(sharedPreferencesProvider);
@@ -140,7 +159,7 @@ class ProfileController extends Notifier<ProfileState> {
     } else {
       await p.setString(_nickKey(uid), nick);
     }
-    await p.setInt(_updatedKey(uid), DateTime.now().millisecondsSinceEpoch);
+    await _touchUpdated(p, uid);
     state = ProfileState(
       nickname: nick.isEmpty ? null : nick,
       photo: state.photo,
@@ -159,7 +178,7 @@ class ProfileController extends Notifier<ProfileState> {
     } else {
       await p.setString(_photoKey(uid), base64Encode(bytes));
     }
-    await p.setInt(_updatedKey(uid), DateTime.now().millisecondsSinceEpoch);
+    await _touchUpdated(p, uid);
     state = ProfileState(
       nickname: state.nickname,
       photo: bytes,
@@ -179,7 +198,7 @@ class ProfileController extends Notifier<ProfileState> {
     } else {
       await p.setString(_frameKey(uid), normalized);
     }
-    await p.setInt(_updatedKey(uid), DateTime.now().millisecondsSinceEpoch);
+    await _touchUpdated(p, uid);
     state = ProfileState(
       nickname: state.nickname,
       photo: state.photo,
@@ -197,25 +216,59 @@ class ProfileController extends Notifier<ProfileState> {
       .collection('meta')
       .doc('profile');
 
-  /// Unggah profil ke cloud (dipanggil saat backup).
-  Future<void> uploadToCloud(String uid) async {
+  /// Membangun payload dokumen profil yang sesuai dengan aturan validasi Firestore.
+  @visibleForTesting
+  Map<String, dynamic> buildCloudPayload(String uid, {int? updatedAt}) {
     final p = ref.read(sharedPreferencesProvider);
-    await _doc(uid).set({
-      'nickname': p.getString(_nickKey(uid)),
-      'photo': p.getString(_photoKey(uid)),
-      'frameId': p.getString(_frameKey(uid)),
-      'updatedAt': p.getInt(_updatedKey(uid)) ?? 0,
-    }).timeout(_timeout);
+    final rawNick = p.getString(_nickKey(uid));
+    final nick = rawNick != null && rawNick.length > 100
+        ? rawNick.substring(0, 100)
+        : rawNick;
+    final rawPhoto = p.getString(_photoKey(uid));
+    final safePhoto = (rawPhoto != null && rawPhoto.length <= maxPhotoBase64Length)
+        ? rawPhoto
+        : null;
+    final rawFrame = p.getString(_frameKey(uid));
+    final frameId = profileFrameAssetPath(rawFrame) != null ? rawFrame : null;
+    return {
+      'nickname': nick,
+      'photo': safePhoto,
+      'frameId': frameId,
+      'updatedAt': updatedAt ?? (p.getInt(_updatedKey(uid)) ?? 0),
+    };
   }
 
-  /// Ambil profil dari cloud jika lebih baru dari yang ada di perangkat.
-  Future<void> restoreFromCloud(String uid) async {
+  /// Unggah profil ke cloud bila ada perubahan lokal atau dipaksa saat backup manual.
+  Future<void> uploadToCloud(String uid, {bool force = false}) async {
+    final p = ref.read(sharedPreferencesProvider);
+    final localAt = p.getInt(_updatedKey(uid)) ?? 0;
+    final syncedAt = p.getInt(_syncedKey(uid)) ?? 0;
+    if (localAt <= 0) return;
+    if (!force && localAt <= syncedAt) return;
+
     final snap = await _doc(uid).get().timeout(_timeout);
-    final data = snap.data();
-    if (data == null) return;
+    final remoteData = snap.data();
+    final remoteAt = (remoteData?['updatedAt'] as num?)?.toInt() ?? 0;
+    if (remoteData != null && remoteAt > localAt) {
+      await applyRemoteData(remoteData, uid);
+      return;
+    }
+    if (!force && snap.exists && remoteData != null && remoteAt == localAt) {
+      await p.setInt(_syncedKey(uid), localAt);
+      return;
+    }
+
+    await _doc(uid)
+        .set(buildCloudPayload(uid, updatedAt: localAt))
+        .timeout(_timeout);
+    await p.setInt(_syncedKey(uid), localAt);
+  }
+
+  /// Terapkan data profil dari cloud jika lebih baru dari data lokal di perangkat.
+  Future<bool> applyRemoteData(Map<String, dynamic> data, String uid) async {
     final p = ref.read(sharedPreferencesProvider);
     final remoteAt = (data['updatedAt'] as num?)?.toInt() ?? 0;
-    if (remoteAt <= (p.getInt(_updatedKey(uid)) ?? 0)) return;
+    if (remoteAt <= (p.getInt(_updatedKey(uid)) ?? 0)) return false;
 
     final nick = data['nickname'] is String ? data['nickname'] as String : null;
     final rawPhoto = data['photo'] is String ? data['photo'] as String : null;
@@ -228,11 +281,21 @@ class ProfileController extends Notifier<ProfileState> {
     photo == null ? await p.remove(_photoKey(uid)) : await p.setString(_photoKey(uid), photo);
     frameId == null ? await p.remove(_frameKey(uid)) : await p.setString(_frameKey(uid), frameId);
     await p.setInt(_updatedKey(uid), remoteAt);
+    await p.setInt(_syncedKey(uid), remoteAt);
     state = ProfileState(
       nickname: nick,
       photo: _safeDecodePhoto(photo),
       frameId: frameId,
     );
+    return true;
+  }
+
+  /// Ambil profil dari cloud jika lebih baru dari yang ada di perangkat.
+  Future<void> restoreFromCloud(String uid) async {
+    final snap = await _doc(uid).get().timeout(_timeout);
+    final data = snap.data();
+    if (data == null) return;
+    await applyRemoteData(data, uid);
   }
 
   /// Migrasikan profil mode tamu ke akun pengguna saat mendaftar/menautkan akun.
@@ -243,23 +306,30 @@ class ProfileController extends Notifier<ProfileState> {
     final guestFrame = p.getString(_frameKey(guestId));
     final guestUpdated = p.getInt(_updatedKey(guestId));
 
+    var migrated = false;
     if (guestNick != null && p.getString(_nickKey(uid)) == null) {
       await p.setString(_nickKey(uid), guestNick);
+      migrated = true;
     }
     if (guestPhoto != null && p.getString(_photoKey(uid)) == null) {
       await p.setString(_photoKey(uid), guestPhoto);
+      migrated = true;
     }
     if (guestFrame != null && p.getString(_frameKey(uid)) == null) {
       await p.setString(_frameKey(uid), guestFrame);
+      migrated = true;
     }
     if (guestUpdated != null && p.getInt(_updatedKey(uid)) == null) {
       await p.setInt(_updatedKey(uid), guestUpdated);
+    } else if (migrated && p.getInt(_updatedKey(uid)) == null) {
+      await _touchUpdated(p, uid);
     }
 
     await p.remove(_nickKey(guestId));
     await p.remove(_photoKey(guestId));
     await p.remove(_frameKey(guestId));
     await p.remove(_updatedKey(guestId));
+    await p.remove(_syncedKey(guestId));
 
     final b64 = p.getString(_photoKey(uid));
     final rawFrame = p.getString(_frameKey(uid));
@@ -278,6 +348,7 @@ class ProfileController extends Notifier<ProfileState> {
     await p.remove(_photoKey(effectiveUid));
     await p.remove(_frameKey(effectiveUid));
     await p.remove(_updatedKey(effectiveUid));
+    await p.remove(_syncedKey(effectiveUid));
     state = ProfileState();
   }
 }

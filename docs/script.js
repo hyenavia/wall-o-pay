@@ -14,7 +14,7 @@
  */
 
 const REPO_NAME = "hyenavia/wall-o-pay";
-const APP_VERSION = "3.4.1";
+const APP_VERSION = "3.4.2";
 
 let activeLang = "en";
 let activeCurrency = "IDR";

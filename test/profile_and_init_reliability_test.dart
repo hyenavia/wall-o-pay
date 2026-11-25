@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:drift/native.dart';
@@ -201,5 +202,114 @@ void main() {
       Lock.instance.isLocked.value = false;
       UpdateCheckerService.cancelPendingPrompt();
     });
+
+    test(
+      'ProfileController syncs nickname, photo, and frameId across devices via applyRemoteData and tracks pending uploads',
+      () async {
+        SharedPreferences.setMockInitialValues({});
+        final prefs = await SharedPreferences.getInstance();
+
+        final container = ProviderContainer(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            firebaseReadyProvider.overrideWithValue(false),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        final notifier = container.read(profileProvider.notifier);
+        const uid = 'uid-sync-1';
+
+        // Fresh profile has no pending upload (prevents empty overwrite on new device)
+        expect(notifier.hasPendingUpload(uid), isFalse);
+
+        // Apply remote personalization from another device
+        final samplePhoto = Uint8List.fromList([137, 80, 78, 71, 13, 10, 26, 10]);
+        final applied = await notifier.applyRemoteData({
+          'nickname': 'Wendy',
+          'photo': base64Encode(samplePhoto),
+          'frameId': 'border_05',
+          'updatedAt': 2000,
+        }, uid);
+        expect(applied, isTrue);
+
+        var profile = container.read(profileProvider);
+        expect(profile.nickname, 'Wendy');
+        expect(profile.photo, samplePhoto);
+        expect(profile.frameId, 'border_05');
+        expect(notifier.hasPendingUpload(uid), isFalse);
+
+        // Stale remote snapshot must not overwrite newer local data
+        final staleApplied = await notifier.applyRemoteData({
+          'nickname': 'OldName',
+          'frameId': 'border_02',
+          'updatedAt': 1500,
+        }, uid);
+        expect(staleApplied, isFalse);
+        expect(container.read(profileProvider).nickname, 'Wendy');
+
+        // Clearing remote photo & frameId with newer timestamp removes them locally
+        final cleared = await notifier.applyRemoteData({
+          'nickname': 'Wendy',
+          'photo': null,
+          'frameId': null,
+          'updatedAt': 3000,
+        }, uid);
+        expect(cleared, isTrue);
+        profile = container.read(profileProvider);
+        expect(profile.photo, isNull);
+        expect(profile.frameId, isNull);
+        expect(notifier.hasPendingUpload(uid), isFalse);
+      },
+    );
+
+    test(
+      'ProfileController marks pending upload on local edits, validates payload, migrates frameId, and clears sync state',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          'nickname_guest': 'GuestHero',
+          'profile_frame_guest': 'border_07',
+        });
+        final prefs = await SharedPreferences.getInstance();
+        const uid = 'uid-sync-2';
+
+        final container = ProviderContainer(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            firebaseReadyProvider.overrideWithValue(false),
+            currentUserProvider.overrideWithValue(null),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        final notifier = container.read(profileProvider.notifier);
+        await notifier.migrateGuestToUser(uid);
+
+        expect(prefs.getString('nickname_$uid'), 'GuestHero');
+        expect(prefs.getString('profile_frame_$uid'), 'border_07');
+        expect(notifier.hasPendingUpload(uid), isTrue);
+
+        final payload = notifier.buildCloudPayload(uid);
+        expect(payload.keys.toSet(), {'nickname', 'photo', 'frameId', 'updatedAt'});
+        expect(payload['nickname'], 'GuestHero');
+        expect(payload['frameId'], 'border_07');
+        expect(payload['updatedAt'], isA<int>());
+        expect((payload['updatedAt'] as int) > 0, isTrue);
+
+        // Verify firestore.rules permits all keys produced by buildCloudPayload
+        final rulesText = File('firestore.rules').readAsStringSync();
+        expect(
+          rulesText,
+          contains("hasOnlyAllowedFields(['nickname', 'photo', 'frameId', 'updatedAt'])"),
+        );
+
+        await notifier.clearLocal(uid);
+        expect(prefs.getString('nickname_$uid'), isNull);
+        expect(prefs.getString('profile_frame_$uid'), isNull);
+        expect(prefs.getInt('profile_updated_$uid'), isNull);
+        expect(prefs.getInt('profile_synced_at_$uid'), isNull);
+        expect(notifier.hasPendingUpload(uid), isFalse);
+      },
+    );
   });
 }

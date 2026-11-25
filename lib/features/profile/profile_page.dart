@@ -132,6 +132,13 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<String?>(profileProvider.select((s) => s.nickname), (prev, next) {
+      final expectedPrev = prev ?? '';
+      if (_nickname.text == expectedPrev && _nickname.text != (next ?? '')) {
+        _nickname.text = next ?? '';
+      }
+    });
+
     final colors = context.themeColors;
     final user = ref.watch(currentUserProvider);
     final username = ref.watch(usernameProvider);

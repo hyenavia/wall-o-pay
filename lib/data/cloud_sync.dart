@@ -307,7 +307,7 @@ class AutoSyncService {
       _subscriptions.add(snapSub);
     }
 
-    // 3. Dengarkan snapshot profil (nickname & foto)
+    // 3. Dengarkan snapshot profil (nickname, foto & bingkai)
     final profileSub = root
         .collection('meta')
         .doc('profile')
@@ -315,9 +315,9 @@ class AutoSyncService {
         .listen((snap) async {
       if (epoch != _sessionEpoch || _currentUid != uid) return;
       if (snap.metadata.hasPendingWrites) return;
-      if (snap.exists) {
+      if (snap.exists && snap.data() != null) {
         try {
-          await _ref.read(profileProvider.notifier).restoreFromCloud(uid);
+          await _ref.read(profileProvider.notifier).applyRemoteData(snap.data()!, uid);
         } catch (e) {
           debugPrint('[AutoSync] Error restoring profile snapshot: $e');
         }
@@ -633,7 +633,7 @@ class AutoSyncService {
       var totalUploaded = 0;
 
       // 1. Profil, anggaran, dan preferensi
-      await _ref.read(profileProvider.notifier).uploadToCloud(uid);
+      await _ref.read(profileProvider.notifier).uploadToCloud(uid, force: true);
       await _ref.read(budgetRuleProvider.notifier).uploadToCloud(uid);
       await _ref.read(appPrefsProvider.notifier).uploadToCloud(uid);
       totalUploaded += 3;
@@ -854,9 +854,12 @@ class AutoSyncService {
   Future<void> _pushLocalOnly(String uid, int epoch) async {
     if (epoch != _sessionEpoch ||
         _currentUid != uid ||
-        _isSyncing ||
         _isApplyingRemote ||
         Firebase.apps.isEmpty) {
+      return;
+    }
+    if (_isSyncing) {
+      schedulePush();
       return;
     }
     try {
@@ -864,6 +867,18 @@ class AutoSyncService {
       // Query hanya data lokal yang diperbarui sejak push terakhir (beri buffer 5 detik untuk clock skew)
       final since = _lastPushedAt.subtract(const Duration(seconds: 5));
       var hasChanges = false;
+
+      try {
+        final profileNotifier = _ref.read(profileProvider.notifier);
+        if (profileNotifier.hasPendingUpload(uid)) {
+          await profileNotifier.uploadToCloud(uid);
+          hasChanges = true;
+        }
+      } catch (e) {
+        debugPrint('[AutoSync] Warning pushing profile: $e');
+      }
+
+      if (epoch != _sessionEpoch || _currentUid != uid) return;
 
       for (final t in _db.syncTables) {
         if (epoch != _sessionEpoch || _currentUid != uid) return;

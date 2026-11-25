@@ -136,7 +136,7 @@ class CloudBackupController extends Notifier<BackupState> {
   Future<String> backup() {
     return _run((service, uid) async {
       final n = await service.backup(uid);
-      await ref.read(profileProvider.notifier).uploadToCloud(uid);
+      await ref.read(profileProvider.notifier).uploadToCloud(uid, force: true);
       await ref.read(budgetRuleProvider.notifier).uploadToCloud(uid);
       await ref.read(appPrefsProvider.notifier).uploadToCloud(uid);
       _last = DateTime.now();

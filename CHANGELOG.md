@@ -4,6 +4,14 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.2] - 2026-11-25
+
+### Fixed
+- **Cross-Device Profile Sync (`nickname`, `photo`, `frameId`)**:
+  - Updated `firestore.rules` to allow the optional `frameId` field in `/users/{uid}/meta/profile`, fixing silent `PERMISSION_DENIED` rejections during profile cloud uploads.
+  - Updated `AutoSyncService._pushLocalOnly` to push pending profile changes alongside Drift SQLite tables when `schedulePush()` fires, and switched the real-time `meta/profile` listener to apply snapshots directly via `ProfileController.applyRemoteData`.
+  - Added per-account sync tracking (`profile_synced_at_<uid>`) and remote timestamp conflict guards in `ProfileController.uploadToCloud` so unedited local sessions never overwrite cloud profiles and pending local edits retry reliably.
+
 ## [3.4.1] - 2026-11-25
 
 ### Changed

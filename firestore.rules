@@ -25,6 +25,7 @@ rules_version = '2';
 //   - profile:
 //       - nickname: string or null (optional, <= 100 chars)
 //       - photo: string or null (optional, Base64 avatar <= 800,000 chars)
+//       - frameId: string or null (optional, 1..50 chars matching ^[a-zA-Z0-9_-]{1,50}$)
 //       - updatedAt: int (required)
 //   - security:
 //       - hash: string or null (optional, <= 256 chars)
@@ -171,12 +172,20 @@ service cloud.firestore {
              (
                docId != 'profile' ||
                (
-                 hasOnlyAllowedFields(['nickname', 'photo', 'updatedAt']) &&
+                 hasOnlyAllowedFields(['nickname', 'photo', 'frameId', 'updatedAt']) &&
                  isValidOptionalString('nickname', 0, 100) &&
                  (
                    !('photo' in data) ||
                    data.photo == null ||
                    (data.photo is string && data.photo.size() <= 800000)
+                 ) &&
+                 (
+                   !('frameId' in data) ||
+                   data.frameId == null ||
+                   (data.frameId is string &&
+                    data.frameId.size() >= 1 &&
+                    data.frameId.size() <= 50 &&
+                    data.frameId.matches("^[a-zA-Z0-9_-]{1,50}$"))
                  )
                )
              ) &&

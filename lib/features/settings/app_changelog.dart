@@ -45,10 +45,25 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '3.4.1',
+      version: '3.4.2',
       dateEn: 'November 25, 2026',
       dateId: '25 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Cross-Device Profile Sync — Allowed profile frameId in Firestore rules, enabled automatic profile uploads in background debounced sync, and prevented stale/empty local states from overwriting cloud profile data.',
+          textId:
+              'Sinkronisasi Profil Antar Perangkat — Mengizinkan frameId profil di aturan Firestore, mengaktifkan unggah profil otomatis saat sinkronisasi latar belakang, serta mencegah data lokal kosong menimpa profil cloud.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.4.1',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.changed,
