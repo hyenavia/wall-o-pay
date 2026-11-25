@@ -32,11 +32,16 @@ class SettingsActions {
     try {
       final count = await ref.read(autoSyncServiceProvider).pushAllLocalToCloud();
       if (context.mounted) {
+        final colors = context.themeColors;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.cloud_done_rounded, color: AppColors.incomeOnDark, size: 20),
+                Icon(
+                  Icons.cloud_done_rounded,
+                  color: colors.isDark ? AppColors.incomeOnDark : Colors.white,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -44,11 +49,14 @@ class SettingsActions {
                       'Successfully sent {count} items to the cloud.',
                       {'count': count},
                     ),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               ],
             ),
-            backgroundColor: AppColors.glasshouseGreen,
+            backgroundColor: colors.isDark
+                ? AppColors.glasshouseGreen
+                : colors.income,
           ),
         );
       }
@@ -59,7 +67,7 @@ class SettingsActions {
             content: Text(
               context.tr('Failed to send data: {error}', {'error': e.toString()}),
             ),
-            backgroundColor: AppColors.expense,
+            backgroundColor: context.themeColors.expense,
           ),
         );
       }
@@ -76,11 +84,16 @@ class SettingsActions {
     try {
       final count = await ref.read(autoSyncServiceProvider).pullAllRemoteToLocal();
       if (context.mounted) {
+        final colors = context.themeColors;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.cloud_done_rounded, color: AppColors.incomeOnDark, size: 20),
+                Icon(
+                  Icons.cloud_done_rounded,
+                  color: colors.isDark ? AppColors.incomeOnDark : Colors.white,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -88,11 +101,14 @@ class SettingsActions {
                       'Successfully restored {count} items from the cloud.',
                       {'count': count},
                     ),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
               ],
             ),
-            backgroundColor: AppColors.glasshouseGreen,
+            backgroundColor: colors.isDark
+                ? AppColors.glasshouseGreen
+                : colors.income,
           ),
         );
       }
@@ -103,7 +119,7 @@ class SettingsActions {
             content: Text(
               context.tr('Failed to fetch data: {error}', {'error': e.toString()}),
             ),
-            backgroundColor: AppColors.expense,
+            backgroundColor: context.themeColors.expense,
           ),
         );
       }
@@ -114,10 +130,16 @@ class SettingsActions {
     try {
       await ref.read(autoSyncServiceProvider).triggerTwoWaySync();
       if (context.mounted) {
+        final colors = context.themeColors;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.tr('Synced with cloud.')),
-            backgroundColor: AppColors.glasshouseGreen,
+            content: Text(
+              context.tr('Synced with cloud.'),
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: colors.isDark
+                ? AppColors.glasshouseGreen
+                : colors.income,
           ),
         );
       }
@@ -126,7 +148,7 @@ class SettingsActions {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.tr('Sync failed: {error}', {'error': e.toString()})),
-            backgroundColor: AppColors.expense,
+            backgroundColor: context.themeColors.expense,
           ),
         );
       }

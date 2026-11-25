@@ -29,7 +29,7 @@ void main() {
       expect(colors.expense, AppColors.expenseOnDark);
       expect(colors.warning, AppColors.warning);
       expect(theme.colorScheme.primary, colors.primary);
-      expect(theme.colorScheme.secondary, colors.primary);
+      expect(theme.colorScheme.secondary, colors.accentSecondary);
       expect(theme.colorScheme.error, colors.expense);
       expect(theme.dividerColor, colors.borderOutline);
       expect(theme.dividerTheme.color, colors.borderOutline);

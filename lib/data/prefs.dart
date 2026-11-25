@@ -99,8 +99,8 @@ class AppPrefsController extends Notifier<AppPrefs> {
     final themeStr = p.getString(_k(_kTheme, uid)) ?? p.getString(_kTheme);
     final theme = switch (themeStr) {
       'light' => ThemeMode.light,
-      'dark' => ThemeMode.dark,
-      _ => ThemeMode.system,
+      'system' => ThemeMode.system,
+      _ => ThemeMode.dark,
     };
     final locale = (p.getString(_k(_kLocale, uid)) ?? p.getString(_kLocale)) == 'id' ? 'id' : 'en';
     final currency = AppCurrency.normalize(
@@ -130,8 +130,8 @@ class AppPrefsController extends Notifier<AppPrefs> {
     final themeStr = p.getString(_k(_kTheme, uid)) ?? p.getString(_kTheme);
     final theme = switch (themeStr) {
       'light' => ThemeMode.light,
-      'dark' => ThemeMode.dark,
-      _ => ThemeMode.system,
+      'system' => ThemeMode.system,
+      _ => ThemeMode.dark,
     };
     final locale = (p.getString(_k(_kLocale, uid)) ?? p.getString(_kLocale)) == 'id' ? 'id' : 'en';
     final currency = AppCurrency.normalize(
@@ -312,8 +312,8 @@ class AppPrefsController extends Notifier<AppPrefs> {
     final themeStr = data['themeMode'] as String?;
     final theme = switch (themeStr) {
       'light' => ThemeMode.light,
-      'dark' => ThemeMode.dark,
-      _ => ThemeMode.system,
+      'system' => ThemeMode.system,
+      _ => ThemeMode.dark,
     };
     final locale = (data['localeCode'] as String? ?? 'en') == 'id' ? 'id' : 'en';
     final currency = AppCurrency.normalize(data['currencyCode'] as String?);

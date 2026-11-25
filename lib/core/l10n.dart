@@ -1062,5 +1062,11 @@ const Map<String, String> _id = {
   'Export': 'Ekspor',
   'Export PDF report': 'Ekspor laporan PDF',
   'No matching transactions': 'Tidak ada transaksi yang cocok',
+  // Vice City Daylight Theme
+  'Appearance': 'Tampilan Tema',
+  'Choose between Vice City Sunset (Dark) and Vice City Daylight (Light).':
+      'Pilih suasana Vice City Sunset (Gelap) atau Vice City Daylight (Terang).',
+  'Sunset': 'Sunset',
+  'Daylight': 'Daylight',
 };
 

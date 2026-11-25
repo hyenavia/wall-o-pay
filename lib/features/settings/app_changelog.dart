@@ -45,10 +45,85 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
-      version: '3.2.1',
+      version: '3.4.1',
       dateEn: 'November 25, 2026',
       dateId: '25 November 2026',
       isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Simplified Appearance Selector — Kept only Sunset and Daylight options in Settings > Appearance, removing the System option.',
+          textId:
+              'Penyederhanaan Pilihan Tema — Menyisakan opsi Sunset dan Daylight saja pada Pengaturan > Tampilan Tema dengan menghilangkan tombol System.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.4.0',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Unified Phosphor Duotone Iconography — Migrated all functional, category, wallet, filter, chart, security, and action custom PNG icons across the entire app to theme-adaptive Phosphor Duotone icons for unified styling and crisp contrast in both Vice City Sunset and Vice City Daylight, while preserving custom mascot illustrations, avatars, profile frames, and backgrounds.',
+          textId:
+              'Ikonografi Phosphor Duotone Terpadu — Memigrasikan seluruh ikon fungsional, kategori, dompet, filter, grafik, keamanan, dan aksi dari PNG kustom ke Phosphor Duotone yang adaptif terhadap tema Vice City Sunset dan Vice City Daylight, sembari mempertahankan ilustrasi maskot Wendy, avatar, bingkai profil, dan latar belakang kustom.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.3.3',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Phosphor Duotone Navigation — Switched bottom navigation, wide-screen navigation rail, quick-add FAB icon, and exit prompt icon to Phosphor Duotone icons for unified styling and crisp contrast in both Vice City Sunset and Vice City Daylight.',
+          textId:
+              'Navigasi Phosphor Duotone — Mengganti ikon bilah navigasi bawah, navigation rail layar lebar, ikon tambah FAB, dan dialog keluar ke Phosphor Duotone agar lebih serasi dan kontras di tema Vice City Sunset maupun Vice City Daylight.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.3.2',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Vice City Daylight (Phase 2 — Core Tabs & Forms) — Migrated Home, Transactions, Transaction Form, Calculator Sheet, Budget, Insights, and Analytics Charts to adaptive semantic theme roles with Ocean Sapphire hero anchors and WCAG AA Daylight readability.',
+          textId:
+              'Vice City Daylight (Fase 2 — Tab Inti & Formulir) — Memigrasikan layar Beranda, Transaksi, Formulir Transaksi, Kalkulator Mini, Anggaran, Wawasan, dan Grafik Analitik ke peran warna tema adaptif dengan hero card Ocean Sapphire dan keterbacaan WCAG AA di mode Daylight.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.3.0',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Vice City Daylight Light Theme (Phase 1) — Added WCAG AA-calibrated light theme tokens, three Daylight coastal background assets, theme switcher (Sunset / Daylight / System) in Settings, and light-adaptive core widgets while preserving Vice City Sunset as the default.',
+          textId:
+              'Tema Terang Vice City Daylight (Fase 1) — Menambahkan token tema terang terkalibrasi WCAG AA, tiga aset latar pesisir Daylight, pemilih tema (Sunset / Daylight / Sistem) di Pengaturan, serta adaptasi komponen inti dengan tetap mempertahankan Vice City Sunset sebagai bawaan.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.2.1',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.fixed,
@@ -2604,12 +2679,12 @@ class AppChangelogSheet extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: AppColors.deepForest.withValues(alpha: 0.12),
+                        color: context.themeColors.primary.withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.history_edu_rounded,
-                        color: AppColors.deepForest,
+                        color: context.themeColors.primary,
                         size: 24,
                       ),
                     ),
@@ -2678,8 +2753,9 @@ class _ReleaseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
     final muted = theme.colorScheme.onSurface.withValues(alpha: 0.6);
-    const primaryCol = AppColors.deepForest;
+    final primaryCol = colors.primary;
 
     return Container(
       decoration: BoxDecoration(
@@ -2718,8 +2794,8 @@ class _ReleaseCard extends StatelessWidget {
                   ),
                   child: Text(
                     isIndonesian ? 'TERBARU' : 'LATEST',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: colors.onPrimary,
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.5,
@@ -2752,6 +2828,7 @@ class _ChangeItemRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
 
     Color badgeBg;
     Color badgeFg;
@@ -2759,18 +2836,18 @@ class _ChangeItemRow extends StatelessWidget {
 
     switch (item.type) {
       case ChangeType.added:
-        badgeBg = const Color(0x1B4CAF50);
-        badgeFg = Colors.green.shade700;
+        badgeFg = colors.income;
+        badgeBg = badgeFg.withValues(alpha: 0.14);
         badgeLabel = isIndonesian ? 'BARU' : 'ADDED';
         break;
       case ChangeType.changed:
-        badgeBg = const Color(0x1B2196F3);
-        badgeFg = Colors.blue.shade700;
+        badgeFg = colors.accentSecondary;
+        badgeBg = badgeFg.withValues(alpha: 0.14);
         badgeLabel = isIndonesian ? 'UBAH' : 'CHANGED';
         break;
       case ChangeType.fixed:
-        badgeBg = const Color(0x1BFF9800);
-        badgeFg = Colors.orange.shade800;
+        badgeFg = colors.warning;
+        badgeBg = badgeFg.withValues(alpha: 0.14);
         badgeLabel = isIndonesian ? 'PERBAIKAN' : 'FIXED';
         break;
     }

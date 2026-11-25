@@ -450,23 +450,29 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                     ? context.tr('Enter 6-digit PIN or scan fingerprint')
                     : context.tr('Enter 6-digit PIN or use biometric');
 
+        final colors = context.themeColors;
         return Scaffold(
           body: Stack(
             fit: StackFit.expand,
             children: [
-              // Atmospheric Coastal Sunset Background
+              // Atmospheric Coastal Background
               Image.asset(
-                'assets/images/coastal_sunset_bg.jpg',
+                colors.coastalBgAsset,
                 fit: BoxFit.cover,
               ),
-              // Midnight Navy & Deep Shadow Gradient Overlay
+              // Signature Dark / Ocean Sapphire Gradient Overlay
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [
-                      AppColors.midnightNavy.withValues(alpha: 0.88),
-                      AppColors.midnightNavy.withValues(alpha: 0.96),
-                    ],
+                    colors: colors.isDark
+                        ? [
+                            AppColors.midnightNavy.withValues(alpha: 0.88),
+                            AppColors.midnightNavy.withValues(alpha: 0.96),
+                          ]
+                        : [
+                            const Color(0xFF0A4DA6).withValues(alpha: 0.82),
+                            const Color(0xFF082E6E).withValues(alpha: 0.94),
+                          ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
@@ -516,8 +522,8 @@ class _LockScreenState extends ConsumerState<LockScreen> {
                               : Center(
                                   child: Text(
                                     msg!,
-                                    style: const TextStyle(
-                                      color: Color(0xFFFFB3C7),
+                                    style: TextStyle(
+                                      color: colors.onHeroExpense,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 13,
                                     ),
@@ -610,6 +616,7 @@ class _PinFlowState extends State<_PinFlow> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     final titleText = widget.create
         ? (first == null
             ? context.tr('Create 6-digit PIN')
@@ -618,12 +625,17 @@ class _PinFlowState extends State<_PinFlow> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              AppColors.deepForest,
-              Color(0xFF0F241A),
-            ],
+            colors: colors.isDark
+                ? const [
+                    AppColors.deepForest,
+                    Color(0xFF0F241A),
+                  ]
+                : const [
+                    Color(0xFF0A4DA6),
+                    Color(0xFF082E6E),
+                  ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -666,8 +678,8 @@ class _PinFlowState extends State<_PinFlow> {
                               : Center(
                                   child: Text(
                                     msg!,
-                                    style: const TextStyle(
-                                      color: Color(0xFFFFB3C7),
+                                    style: TextStyle(
+                                      color: colors.onHeroExpense,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 13,
                                     ),

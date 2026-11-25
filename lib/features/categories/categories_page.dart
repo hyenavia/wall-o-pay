@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
 import '../../core/icons.dart';
 import '../../core/l10n.dart';
@@ -18,6 +19,8 @@ class CategoriesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
+    final tabAccent = colors.isDark ? AppColors.dewMint : colors.primary;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -25,9 +28,9 @@ class CategoriesPage extends StatelessWidget {
           context,
           title: Text(context.tr('Categories')),
           bottom: TabBar(
-            indicatorColor: AppColors.dewMint,
-            labelColor: AppColors.dewMint,
-            unselectedLabelColor: AppColors.freshSage,
+            indicatorColor: tabAccent,
+            labelColor: tabAccent,
+            unselectedLabelColor: colors.textMuted,
             indicatorWeight: 3,
             tabs: [
               Tab(text: context.tr('Expense')),
@@ -58,6 +61,7 @@ class _CategoryList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.themeColors;
     final async = ref.watch(categoriesProvider);
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -79,7 +83,9 @@ class _CategoryList extends ConsumerWidget {
             height: 1,
             indent: 72,
             endIndent: 16,
-            color: AppColors.borderOutline.withValues(alpha: 0.25),
+            color: colors.borderOutline.withValues(
+              alpha: colors.isDark ? 0.25 : 0.6,
+            ),
           ),
           itemBuilder: (context, i) {
             final c = list[i];
@@ -94,16 +100,16 @@ class _CategoryList extends ConsumerWidget {
               ),
               title: Text(
                 context.tr(c.name),
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
-                  color: AppColors.softIvory,
+                  color: colors.textPrimary,
                 ),
               ),
-              trailing: const Icon(
+              trailing: Icon(
                 Icons.edit_outlined,
                 size: 20,
-                color: AppColors.freshSage,
+                color: colors.textMuted,
               ),
             );
           },
@@ -115,15 +121,18 @@ class _CategoryList extends ConsumerWidget {
 
 /// Form tambah kategori, atau ubah jika [category] diisi.
 Future<void> showCategoryForm(BuildContext context, {Category? category}) {
+  final colors = context.themeColors;
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    backgroundColor: AppColors.mossShadow,
+    backgroundColor: colors.cardSurface,
     shape: RoundedRectangleBorder(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       side: BorderSide(
-        color: AppColors.dewMint.withValues(alpha: 0.25),
+        color: colors.isDark
+            ? AppColors.dewMint.withValues(alpha: 0.25)
+            : colors.borderOutline,
         width: 1,
       ),
     ),
@@ -246,13 +255,15 @@ class _CategoryFormState extends ConsumerState<CategoryForm> {
                 for (final e in categoryIcons.entries)
                   ChoiceChip(
                     showCheckmark: false,
-                    label: viceCityAssetFor(e.key) != null
-                        ? Image.asset(
-                            viceCityAssetFor(e.key)!,
-                            width: 22,
-                            height: 22,
-                          )
-                        : Icon(e.value, size: 20),
+                    label: AppDuotoneIcon(
+                      phosphorForKey(e.key) ??
+                          phosphorForIcon(e.value) ??
+                          PhosphorIconsDuotone.squaresFour,
+                      size: 20,
+                      color: _icon == e.key
+                          ? Color(_color)
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
                     selected: _icon == e.key,
                     onSelected: (_) => setState(() => _icon = e.key),
                   ),
@@ -292,8 +303,8 @@ class _CategoryFormState extends ConsumerState<CategoryForm> {
             const SizedBox(height: 16),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.dewMint,
-                foregroundColor: AppColors.deepForest,
+                backgroundColor: context.themeColors.primary,
+                foregroundColor: context.themeColors.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -310,7 +321,7 @@ class _CategoryFormState extends ConsumerState<CategoryForm> {
                 padding: const EdgeInsets.only(top: 8),
                 child: TextButton.icon(
                   style: TextButton.styleFrom(
-                    foregroundColor: AppColors.expenseOnDark,
+                    foregroundColor: context.themeColors.expense,
                   ),
                   onPressed: _delete,
                   icon: const Icon(Icons.delete_outline),

@@ -3,8 +3,10 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
 import 'format.dart';
+import 'icons.dart';
 import 'l10n.dart';
 import 'theme.dart';
 
@@ -14,15 +16,16 @@ Future<int?> showCalculatorSheet(
   BuildContext context, {
   int? initialValue,
 }) {
+  final colors = context.themeColors;
   return showModalBottomSheet<int>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
-    backgroundColor: AppColors.cardSurface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    backgroundColor: colors.cardSurface,
+    shape: RoundedRectangleBorder(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       side: BorderSide(
-        color: Color(0xFF2A4D3E),
+        color: colors.borderOutline,
         width: 1.0,
       ),
     ),
@@ -183,6 +186,14 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
+    final opBg = colors.isDark
+        ? const Color(0xFF1B4434).withValues(alpha: 0.85)
+        : colors.primary.withValues(alpha: 0.12);
+    final opFg = colors.isDark ? AppColors.dewMint : colors.primary;
+    final opBorder = colors.isDark
+        ? AppColors.dewMint.withValues(alpha: 0.30)
+        : colors.primary.withValues(alpha: 0.30);
 
     return SafeArea(
       child: Padding(
@@ -194,26 +205,27 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
             // Header
             Row(
               children: [
-                Image.asset(
-                  'assets/new_asset/props/prop_09.png',
-                  width: 28,
-                  height: 28,
-                  fit: BoxFit.contain,
+                AppDuotoneIcon(
+                  PhosphorIconsDuotone.calculator,
+                  size: 24,
+                  color: opFg,
                 ),
                 const SizedBox(width: 10),
                 Text(
                   context.tr('Calculator'),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: AppColors.softIvory,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const Spacer(),
                 IconButton(
                   icon: const Icon(Icons.close, size: 20),
                   style: IconButton.styleFrom(
-                    backgroundColor: AppColors.surfaceContainer.withValues(alpha: 0.6),
-                    foregroundColor: AppColors.freshSage,
+                    backgroundColor: colors.surfaceContainer.withValues(
+                      alpha: colors.isDark ? 0.6 : 1.0,
+                    ),
+                    foregroundColor: colors.textMuted,
                   ),
                   onPressed: () => Navigator.pop(context),
                 ),
@@ -225,15 +237,21 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainer.withValues(alpha: 0.85),
+                color: colors.surfaceContainer.withValues(
+                  alpha: colors.isDark ? 0.85 : 1.0,
+                ),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: AppColors.dewMint.withValues(alpha: 0.22),
+                  color: colors.isDark
+                      ? AppColors.dewMint.withValues(alpha: 0.22)
+                      : colors.borderOutline,
                   width: 1.0,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
+                    color: colors.isDark
+                        ? Colors.black.withValues(alpha: 0.25)
+                        : const Color(0xFF1A0E33).withValues(alpha: 0.06),
                     blurRadius: 10,
                     offset: const Offset(0, 3),
                   ),
@@ -255,7 +273,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                           _formulaText.isEmpty ? '0' : _formulaText,
                           style: context.moneyStyle(
                             fontSize: 14,
-                            color: AppColors.freshSage.withValues(alpha: 0.85),
+                            color: colors.textMuted,
                             letterSpacing: 0.5,
                           ),
                           maxLines: 1,
@@ -270,7 +288,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                             style: context.moneyStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.incomeOnDark,
+                              color: colors.income,
                             ),
                           ),
                         ),
@@ -291,33 +309,35 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: 'C',
                       onPressed: _onClear,
-                      color: AppColors.expense.withValues(alpha: 0.18),
-                      textColor: AppColors.expenseOnDark,
-                      borderColor: AppColors.expense.withValues(alpha: 0.35),
+                      color: colors.expense.withValues(alpha: 0.14),
+                      textColor: colors.expense,
+                      borderColor: colors.expense.withValues(alpha: 0.35),
                     ),
                     const SizedBox(width: 8),
                     _calcBtn(
                       icon: Icons.backspace_outlined,
                       onPressed: _onBackspace,
-                      color: AppColors.surfaceContainer.withValues(alpha: 0.65),
-                      textColor: AppColors.freshSage,
+                      color: colors.surfaceContainer.withValues(
+                        alpha: colors.isDark ? 0.65 : 1.0,
+                      ),
+                      textColor: colors.textMuted,
                     ),
                     const SizedBox(width: 8),
                     _calcBtn(
                       label: '÷',
                       onPressed: () => _onOperator('÷'),
-                      color: const Color(0xFF1B4434).withValues(alpha: 0.85),
-                      textColor: AppColors.dewMint,
-                      borderColor: AppColors.dewMint.withValues(alpha: 0.30),
+                      color: opBg,
+                      textColor: opFg,
+                      borderColor: opBorder,
                       isOperator: true,
                     ),
                     const SizedBox(width: 8),
                     _calcBtn(
                       label: '×',
                       onPressed: () => _onOperator('×'),
-                      color: const Color(0xFF1B4434).withValues(alpha: 0.85),
-                      textColor: AppColors.dewMint,
-                      borderColor: AppColors.dewMint.withValues(alpha: 0.30),
+                      color: opBg,
+                      textColor: opFg,
+                      borderColor: opBorder,
                       isOperator: true,
                     ),
                   ],
@@ -336,9 +356,9 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: '-',
                       onPressed: () => _onOperator('-'),
-                      color: const Color(0xFF1B4434).withValues(alpha: 0.85),
-                      textColor: AppColors.dewMint,
-                      borderColor: AppColors.dewMint.withValues(alpha: 0.30),
+                      color: opBg,
+                      textColor: opFg,
+                      borderColor: opBorder,
                       isOperator: true,
                     ),
                   ],
@@ -357,9 +377,9 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: '+',
                       onPressed: () => _onOperator('+'),
-                      color: const Color(0xFF1B4434).withValues(alpha: 0.85),
-                      textColor: AppColors.dewMint,
-                      borderColor: AppColors.dewMint.withValues(alpha: 0.30),
+                      color: opBg,
+                      textColor: opFg,
+                      borderColor: opBorder,
                       isOperator: true,
                     ),
                   ],
@@ -378,9 +398,11 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: '=',
                       onPressed: _onEquals,
-                      color: AppColors.emeraldLeaf,
+                      color: colors.isDark ? AppColors.emeraldLeaf : colors.accentSecondary,
                       textColor: Colors.white,
-                      borderColor: AppColors.dewMint.withValues(alpha: 0.45),
+                      borderColor: colors.isDark
+                          ? AppColors.dewMint.withValues(alpha: 0.45)
+                          : colors.accentSecondary,
                       isOperator: true,
                     ),
                   ],
@@ -395,7 +417,7 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                     _calcBtn(
                       label: '000',
                       onPressed: _onTripleZero,
-                      textColor: AppColors.dewMint,
+                      textColor: colors.highlightGold,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -406,20 +428,27 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: AppColors.dewMint.withValues(alpha: 0.45),
+                              color: colors.isDark
+                                  ? AppColors.dewMint.withValues(alpha: 0.45)
+                                  : colors.primary,
                               width: 1.2,
                             ),
-                            gradient: const LinearGradient(
+                            gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: [
-                                Color(0xFF2E634D),
-                                Color(0xFF1B4434),
-                              ],
+                              colors: colors.isDark
+                                  ? const [
+                                      Color(0xFF2E634D),
+                                      Color(0xFF1B4434),
+                                    ]
+                                  : [
+                                      colors.primary,
+                                      const Color(0xFF9C1048),
+                                    ],
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.emeraldLeaf.withValues(alpha: 0.25),
+                                color: colors.primary.withValues(alpha: 0.25),
                                 blurRadius: 10,
                                 offset: const Offset(0, 3),
                               ),
@@ -435,7 +464,11 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(Icons.check, size: 20, color: AppColors.dewMint),
+                                    Icon(
+                                      Icons.check,
+                                      size: 20,
+                                      color: colors.isDark ? AppColors.dewMint : Colors.white,
+                                    ),
                                     const SizedBox(width: 6),
                                     Text(
                                       context.tr('Use Amount'),
@@ -472,9 +505,16 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
     Color? borderColor,
     bool isOperator = false,
   }) {
-    final bg = color ?? AppColors.surfaceContainer.withValues(alpha: 0.65);
-    final border = borderColor ?? AppColors.dewMint.withValues(alpha: 0.14);
-    final fg = textColor ?? AppColors.softIvory;
+    final colors = context.themeColors;
+    final bg = color ??
+        (colors.isDark
+            ? colors.surfaceContainer.withValues(alpha: 0.65)
+            : colors.cardSurface);
+    final border = borderColor ??
+        (colors.isDark
+            ? AppColors.dewMint.withValues(alpha: 0.14)
+            : colors.borderOutline);
+    final fg = textColor ?? colors.textPrimary;
 
     return Expanded(
       child: SizedBox(
@@ -491,8 +531,8 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
             child: InkWell(
               onTap: onPressed,
               borderRadius: BorderRadius.circular(16),
-              splashColor: AppColors.dewMint.withValues(alpha: 0.15),
-              highlightColor: AppColors.dewMint.withValues(alpha: 0.08),
+              splashColor: colors.primary.withValues(alpha: 0.14),
+              highlightColor: colors.primary.withValues(alpha: 0.08),
               child: Center(
                 child: icon != null
                     ? Icon(icon, color: fg, size: 20)

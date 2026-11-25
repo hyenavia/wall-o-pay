@@ -4,8 +4,10 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
 import '../../core/format.dart';
+import '../../core/icons.dart';
 import '../../core/l10n.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
@@ -26,6 +28,7 @@ class BudgetPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
     final period = ref.watch(selectedPeriodProvider);
     final prevPeriod = ref.watch(prevPeriodProvider);
     final catsAsync = ref.watch(categoriesProvider);
@@ -105,10 +108,10 @@ class BudgetPage extends ConsumerWidget {
                             ),
                           ),
                           FilledButton.tonalIcon(
-                            icon: Image.asset(
-                              'assets/icons/vice_city/settings.png',
-                              width: 15,
-                              height: 15,
+                            icon: AppDuotoneIcon(
+                              PhosphorIconsDuotone.gearSix,
+                              size: 16,
+                              color: colors.isDark ? AppColors.dewMint : Colors.white,
                             ),
                             label: Text(
                               breakdown.totalBudget > 0
@@ -123,11 +126,10 @@ class BudgetPage extends ConsumerWidget {
                               backgroundColor: Colors.white.withValues(
                                 alpha: 0.16,
                               ),
-                              foregroundColor: AppColors.dewMint,
+                              foregroundColor: colors.isDark ? AppColors.dewMint : Colors.white,
                               side: BorderSide(
-                                color: AppColors.dewMint.withValues(
-                                  alpha: 0.35,
-                                ),
+                                color: (colors.isDark ? AppColors.dewMint : Colors.white)
+                                    .withValues(alpha: 0.35),
                                 width: 1,
                               ),
                               padding: const EdgeInsets.symmetric(
@@ -154,8 +156,8 @@ class BudgetPage extends ConsumerWidget {
                         AppProgressBar(
                           value: breakdown.overallRatio,
                           color: breakdown.overallRatio > 1
-                              ? AppColors.expenseOnDark
-                              : AppColors.dewMint,
+                              ? colors.onHeroExpense
+                              : (colors.isDark ? AppColors.dewMint : colors.onHeroIncome),
                           backgroundColor: Colors.white.withValues(alpha: 0.18),
                         ),
                         const SizedBox(height: 8),
@@ -180,8 +182,8 @@ class BudgetPage extends ConsumerWidget {
                               }),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: breakdown.overallRatio > 1
-                                    ? AppColors.expenseOnDark
-                                    : AppColors.dewMint,
+                                    ? colors.onHeroExpense
+                                    : (colors.isDark ? AppColors.dewMint : colors.onHeroIncome),
                                 fontWeight: FontWeight.w800,
                                 fontFeatures: const [
                                   FontFeature.tabularFigures(),
@@ -195,9 +197,9 @@ class BudgetPage extends ConsumerWidget {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: AppColors.expenseOnDark.withValues(alpha: 0.15),
+                              color: colors.onHeroExpense.withValues(alpha: 0.18),
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppColors.expenseOnDark.withValues(alpha: 0.35)),
+                              border: Border.all(color: colors.onHeroExpense.withValues(alpha: 0.40)),
                             ),
                             child: Row(
                               children: [
@@ -211,10 +213,10 @@ class BudgetPage extends ConsumerWidget {
                                 Expanded(
                                   child: Text(
                                     context.tr('Budget capacity exceeded! Pace remaining expenses carefully.'),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
-                                      color: AppColors.expenseOnDark,
+                                      color: colors.onHeroExpense,
                                     ),
                                   ),
                                 ),
@@ -228,11 +230,14 @@ class BudgetPage extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0F221B)
-                                .withValues(alpha: 0.70),
+                            color: colors.isDark
+                                ? const Color(0xFF0F221B).withValues(alpha: 0.70)
+                                : Colors.black.withValues(alpha: 0.22),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: AppColors.dewMint.withValues(alpha: 0.18),
+                              color: colors.isDark
+                                  ? AppColors.dewMint.withValues(alpha: 0.18)
+                                  : Colors.white.withValues(alpha: 0.22),
                               width: 1,
                             ),
                           ),
@@ -241,18 +246,18 @@ class BudgetPage extends ConsumerWidget {
                             children: [
                               Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.pie_chart_outline_rounded,
                                     size: 14,
-                                    color: AppColors.dewMint,
+                                    color: colors.isDark ? AppColors.dewMint : Colors.white,
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
                                     context.tr('50/30/20 Budgeting Rule'),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
-                                      color: AppColors.dewMint,
+                                      color: colors.isDark ? AppColors.dewMint : Colors.white,
                                       letterSpacing: 0.4,
                                     ),
                                   ),
@@ -269,7 +274,9 @@ class BudgetPage extends ConsumerWidget {
                                           : 50,
                                       child: Container(
                                         height: 7,
-                                        color: const Color(0xFF38B271),
+                                        color: colors.isDark
+                                            ? const Color(0xFF38B271)
+                                            : const Color(0xFF6EE7B7),
                                       ),
                                     ),
                                     const SizedBox(width: 2),
@@ -279,7 +286,9 @@ class BudgetPage extends ConsumerWidget {
                                           : 30,
                                       child: Container(
                                         height: 7,
-                                        color: const Color(0xFFE8A33D),
+                                        color: colors.isDark
+                                            ? const Color(0xFFE8A33D)
+                                            : const Color(0xFFFDE68A),
                                       ),
                                     ),
                                     const SizedBox(width: 2),
@@ -300,7 +309,9 @@ class BudgetPage extends ConsumerWidget {
                                 children: [
                                   Expanded(
                                     child: _ratioLegend(
-                                      const Color(0xFF38B271),
+                                      colors.isDark
+                                          ? const Color(0xFF38B271)
+                                          : const Color(0xFF6EE7B7),
                                       '${breakdown.needsPercentage}% ${context.tr('Needs')}',
                                       rupiah(breakdown.needsBudget),
                                     ),
@@ -308,7 +319,9 @@ class BudgetPage extends ConsumerWidget {
                                   const SizedBox(width: 6),
                                   Expanded(
                                     child: _ratioLegend(
-                                      const Color(0xFFE8A33D),
+                                      colors.isDark
+                                          ? const Color(0xFFE8A33D)
+                                          : const Color(0xFFFDE68A),
                                       '${breakdown.wantsPercentage}% ${context.tr('Wants')}',
                                       rupiah(breakdown.wantsBudget),
                                     ),
@@ -337,15 +350,15 @@ class BudgetPage extends ConsumerWidget {
                         ),
                         const SizedBox(height: 12),
                         FilledButton.icon(
-                          icon: Image.asset(
-                            'assets/icons/vice_city/add.png',
-                            width: 18,
-                            height: 18,
+                          icon: AppDuotoneIcon(
+                            PhosphorIconsDuotone.plusCircle,
+                            size: 18,
+                            color: colors.isDark ? AppColors.deepForest : colors.primary,
                           ),
                           label: Text(context.tr('Set Total Budget')),
                           style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.dewMint,
-                            foregroundColor: AppColors.deepForest,
+                            backgroundColor: colors.isDark ? AppColors.dewMint : Colors.white,
+                            foregroundColor: colors.isDark ? AppColors.deepForest : colors.primary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -368,10 +381,14 @@ class BudgetPage extends ConsumerWidget {
                     margin: const EdgeInsets.only(top: 10, bottom: 2),
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: AppColors.mossShadow.withValues(alpha: 0.9),
+                      color: colors.isDark
+                          ? AppColors.mossShadow.withValues(alpha: 0.9)
+                          : colors.cardSurface,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: AppColors.dewMint.withValues(alpha: 0.3),
+                        color: colors.isDark
+                            ? AppColors.dewMint.withValues(alpha: 0.3)
+                            : colors.borderOutline,
                         width: 1,
                       ),
                     ),
@@ -383,14 +400,12 @@ class BudgetPage extends ConsumerWidget {
                             Container(
                               padding: const EdgeInsets.all(7),
                               decoration: BoxDecoration(
-                                color: AppColors.dewMint.withValues(
-                                  alpha: 0.16,
-                                ),
+                                color: colors.accentSecondary.withValues(alpha: 0.14),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.content_copy_rounded,
-                                color: AppColors.dewMint,
+                                color: colors.accentSecondary,
                                 size: 16,
                               ),
                             ),
@@ -401,10 +416,10 @@ class BudgetPage extends ConsumerWidget {
                                 children: [
                                   Text(
                                     context.tr('No budget set for this period'),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 13,
-                                      color: AppColors.softIvory,
+                                      color: colors.textPrimary,
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -421,9 +436,9 @@ class BudgetPage extends ConsumerWidget {
                                             'Reuse budget setup from {period}',
                                             {'period': prevPeriod.label},
                                           ),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
-                                      color: AppColors.freshSage,
+                                      color: colors.textMuted,
                                     ),
                                   ),
                                 ],
@@ -446,14 +461,10 @@ class BudgetPage extends ConsumerWidget {
                               ),
                             ),
                             style: FilledButton.styleFrom(
-                              backgroundColor: AppColors.dewMint.withValues(
-                                alpha: 0.18,
-                              ),
-                              foregroundColor: AppColors.dewMint,
+                              backgroundColor: colors.primary.withValues(alpha: 0.14),
+                              foregroundColor: colors.primary,
                               side: BorderSide(
-                                color: AppColors.dewMint.withValues(
-                                  alpha: 0.35,
-                                ),
+                                color: colors.primary.withValues(alpha: 0.35),
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -500,10 +511,14 @@ class BudgetPage extends ConsumerWidget {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.mossShadow.withValues(alpha: 0.85),
+                      color: colors.isDark
+                          ? AppColors.mossShadow.withValues(alpha: 0.85)
+                          : colors.cardSurface,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: AppColors.dewMint.withValues(alpha: 0.25),
+                        color: colors.isDark
+                            ? AppColors.dewMint.withValues(alpha: 0.25)
+                            : colors.borderOutline,
                         width: 1,
                       ),
                     ),
@@ -512,12 +527,12 @@ class BudgetPage extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: AppColors.dewMint.withValues(alpha: 0.15),
+                            color: colors.accentSecondary.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.redo_rounded,
-                            color: AppColors.dewMint,
+                            color: colors.accentSecondary,
                             size: 16,
                           ),
                         ),
@@ -528,11 +543,11 @@ class BudgetPage extends ConsumerWidget {
                               'Rollover active: +{amount} from last period',
                               {'amount': rupiah(totalCarry)},
                             ),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
-                              color: AppColors.softIvory,
-                              fontFeatures: [FontFeature.tabularFigures()],
+                              color: colors.textPrimary,
+                              fontFeatures: const [FontFeature.tabularFigures()],
                             ),
                           ),
                         ),
@@ -615,7 +630,9 @@ class BudgetPage extends ConsumerWidget {
                     decoration: BoxDecoration(
                       border: Border(
                         top: BorderSide(
-                          color: AppColors.dewMint.withValues(alpha: 0.12),
+                          color: colors.borderOutline.withValues(
+                            alpha: colors.isDark ? 0.35 : 0.9,
+                          ),
                           width: 1,
                         ),
                       ),
@@ -630,42 +647,39 @@ class BudgetPage extends ConsumerWidget {
                         height: 36,
                         padding: const EdgeInsets.all(7),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF5EEAD4)
-                              .withValues(alpha: 0.16),
+                          color: colors.transfer.withValues(alpha: 0.14),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: const Color(0xFF5EEAD4)
-                                .withValues(alpha: 0.35),
+                            color: colors.transfer.withValues(alpha: 0.35),
                             width: 1,
                           ),
                         ),
-                        child: Image.asset(
-                          'assets/icons/vice_city/goals.png',
-                          width: 20,
-                          height: 20,
-                          fit: BoxFit.contain,
+                        child: AppDuotoneIcon(
+                          PhosphorIconsDuotone.target,
+                          size: 20,
+                          color: colors.transfer,
                         ),
                       ),
                       title: Text(
                         context.tr('Manage Savings Goals'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
-                          color: AppColors.softIvory,
+                          color: colors.textPrimary,
                         ),
                       ),
                       subtitle: Text(
                         context.tr(
                           'View your active savings targets in Goals tab.',
                         ),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.freshSage,
+                          color: colors.textMuted,
                         ),
                       ),
-                      trailing: const Icon(
+                      trailing: Icon(
                         Icons.chevron_right,
-                        color: AppColors.freshSage,
+                        color: colors.textMuted,
                       ),
                       onTap: () {
                         Navigator.push(

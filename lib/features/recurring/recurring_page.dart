@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
 import '../../core/format.dart';
 import '../../core/icons.dart';
@@ -28,6 +29,7 @@ class RecurringPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.themeColors;
     final rulesAsync = ref.watch(recurringRulesProvider);
     final pendingList =
         ref.watch(pendingTransactionsProvider).value ?? const <PendingTransaction>[];
@@ -147,7 +149,9 @@ class RecurringPage extends ConsumerWidget {
                             style: context.moneyStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.dewMint,
+                              color: colors.isDark
+                                  ? AppColors.dewMint
+                                  : AppColors.goldenYellow,
                             ),
                           ),
                         ],
@@ -217,8 +221,8 @@ class RecurringPage extends ConsumerWidget {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: context.themeColors.heroBackground,
-        foregroundColor: Colors.white,
+        backgroundColor: colors.isDark ? colors.heroBackground : colors.primary,
+        foregroundColor: colors.isDark ? Colors.white : colors.onPrimary,
         icon: const Icon(Icons.add),
         label: Text(context.tr('Add Schedule')),
         onPressed: () => _showAddOrEditDialog(context),
@@ -390,19 +394,19 @@ class _PendingSectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Image.asset(
-          'assets/icon-compress/098_alarm_clock-kompres.png',
-          width: 18,
-          height: 18,
+        AppDuotoneIcon(
+          PhosphorIconsDuotone.alarm,
+          size: 18,
+          color: context.themeColors.highlightGold,
         ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             context.tr('Pending Confirmation ({count})', {'count': count}),
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 14.5,
-              color: AppColors.softIvory,
+              color: context.themeColors.textPrimary,
             ),
           ),
         ),
@@ -432,11 +436,12 @@ class _PendingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     final isTransfer = pending.type == TxType.transfer;
     final isIncome = pending.type == TxType.income;
     final accentColor = isTransfer
-        ? AppColors.dewMint
-        : (isIncome ? AppColors.incomeOnDark : AppColors.expenseOnDark);
+        ? colors.transfer
+        : (isIncome ? colors.income : colors.expense);
     final sign = isTransfer ? '' : (isIncome ? '+' : '-');
     final walletSummary = isTransfer && wallet != null && toWallet != null
         ? '${context.tr(wallet!.name)} -> ${context.tr(toWallet!.name)}'
@@ -453,7 +458,7 @@ class _PendingCard extends StatelessWidget {
                 icon: isTransfer
                     ? Icons.swap_horiz_rounded
                     : iconFor(category?.icon ?? 'more'),
-                color: category != null ? Color(category!.colorValue) : AppColors.dewMint,
+                color: category != null ? Color(category!.colorValue) : colors.transfer,
                 size: 40,
                 categoryKey: category?.id,
               ),
@@ -464,10 +469,10 @@ class _PendingCard extends StatelessWidget {
                   children: [
                     Text(
                       pending.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
-                        color: AppColors.softIvory,
+                        color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -475,9 +480,9 @@ class _PendingCard extends StatelessWidget {
                       walletSummary.isNotEmpty
                           ? '${context.tr('Due {date}', {'date': shortDate(pending.dueDate)})} • $walletSummary'
                           : context.tr('Due {date}', {'date': shortDate(pending.dueDate)}),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.freshSage,
+                        color: colors.textMuted,
                       ),
                     ),
                   ],
@@ -500,8 +505,12 @@ class _PendingCard extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: onSkip,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.freshSage,
-                    side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.22)),
+                    foregroundColor: colors.textMuted,
+                    side: BorderSide(
+                      color: colors.isDark
+                          ? AppColors.dewMint.withValues(alpha: 0.22)
+                          : colors.inputBorder,
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
@@ -512,8 +521,12 @@ class _PendingCard extends StatelessWidget {
               OutlinedButton(
                 onPressed: onEdit,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.softIvory,
-                  side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.25)),
+                  foregroundColor: colors.textPrimary,
+                  side: BorderSide(
+                    color: colors.isDark
+                        ? AppColors.dewMint.withValues(alpha: 0.25)
+                        : colors.inputBorder,
+                  ),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
@@ -530,8 +543,8 @@ class _PendingCard extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.dewMint,
-                    foregroundColor: AppColors.deepForest,
+                    backgroundColor: colors.primary,
+                    foregroundColor: colors.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
@@ -568,12 +581,13 @@ class _RuleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     final isTransfer = rule.type == TxType.transfer;
     final isIncome = rule.type == TxType.income;
-    final catColor = category != null ? Color(category!.colorValue) : AppColors.sage;
+    final catColor = category != null ? Color(category!.colorValue) : colors.primary;
     final amountColor = isTransfer
-        ? AppColors.dewMint
-        : (isIncome ? AppColors.incomeOnDark : AppColors.expenseOnDark);
+        ? colors.transfer
+        : (isIncome ? colors.income : colors.expense);
     final sign = isTransfer ? '' : (isIncome ? '+' : '-');
     final walletLabel = isTransfer && wallet != null && toWallet != null
         ? '${context.tr(wallet!.name)} -> ${context.tr(toWallet!.name)}'
@@ -587,17 +601,19 @@ class _RuleCard extends StatelessWidget {
           Container(
             width: 42,
             height: 42,
-            padding: const EdgeInsets.all(9),
             decoration: BoxDecoration(
               color: catColor.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: Image.asset(
-              isTransfer
-                  ? 'assets/icons/vice_city/transfer.png'
-                  : (viceCityAssetFor(category?.icon ?? 'more') ??
-                      'assets/icons/vice_city/diamond.png'),
-              fit: BoxFit.contain,
+            child: Center(
+              child: AppDuotoneIcon(
+                isTransfer
+                    ? PhosphorIconsDuotone.arrowsLeftRight
+                    : (phosphorForKey(category?.icon ?? 'more') ??
+                        PhosphorIconsDuotone.squaresFour),
+                size: 20,
+                color: catColor,
+              ),
             ),
           ),
           const SizedBox(width: 12),
@@ -613,7 +629,7 @@ class _RuleCard extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
-                          color: AppColors.softIvory,
+                          color: colors.textPrimary,
                           decoration: rule.isActive ? null : TextDecoration.lineThrough,
                         ),
                       ),
@@ -633,9 +649,9 @@ class _RuleCard extends StatelessWidget {
                   walletLabel.isNotEmpty ? '$freqText • $walletLabel' : freqText,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.freshSage,
+                    color: colors.textMuted,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -644,9 +660,9 @@ class _RuleCard extends StatelessWidget {
                   context.tr('Next due: {date}', {
                     'date': shortDate(rule.nextDueDate),
                   }),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.dewMint,
+                    color: colors.isDark ? AppColors.dewMint : colors.primary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -676,7 +692,7 @@ class _RuleCard extends StatelessWidget {
                 value: 'record_now',
                 child: Row(
                   children: [
-                    const Icon(Icons.play_arrow_rounded, size: 18, color: AppColors.incomeOnDark),
+                    Icon(Icons.play_arrow_rounded, size: 18, color: colors.income),
                     const SizedBox(width: 8),
                     Text(context.tr('Record now')),
                   ],
@@ -814,8 +830,12 @@ class _PendingEditSheetState extends ConsumerState<_PendingEditSheet> {
             const SizedBox(height: 18),
             FilledButton(
               style: FilledButton.styleFrom(
-                backgroundColor: context.themeColors.heroBackground,
-                foregroundColor: Colors.white,
+                backgroundColor: context.isDarkMode
+                    ? context.themeColors.heroBackground
+                    : context.themeColors.primary,
+                foregroundColor: context.isDarkMode
+                    ? Colors.white
+                    : context.themeColors.onPrimary,
                 minimumSize: const Size.fromHeight(48),
               ),
               onPressed: () async {
@@ -1063,8 +1083,12 @@ class _RecurringFormSheetState extends ConsumerState<_RecurringFormSheet> {
               height: 48,
               child: FilledButton(
                 style: FilledButton.styleFrom(
-                  backgroundColor: context.themeColors.heroBackground,
-                  foregroundColor: Colors.white,
+                  backgroundColor: context.isDarkMode
+                      ? context.themeColors.heroBackground
+                      : context.themeColors.primary,
+                  foregroundColor: context.isDarkMode
+                      ? Colors.white
+                      : context.themeColors.onPrimary,
                 ),
                 onPressed: () async {
                   final title = _titleCtl.text.trim();

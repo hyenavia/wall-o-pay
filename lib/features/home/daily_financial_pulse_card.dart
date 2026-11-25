@@ -3,8 +3,10 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
 import '../../core/format.dart';
+import '../../core/icons.dart';
 import '../../core/l10n.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
@@ -203,8 +205,8 @@ class DailyFinancialPulseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final muted = scheme.onSurface.withValues(alpha: 0.65);
     final colors = context.themeColors;
+    final muted = colors.textMuted;
     final safeColor = colors.income;
     final warningColor = colors.warning;
     final limitColor = colors.expense;
@@ -246,34 +248,56 @@ class DailyFinancialPulseCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.cardSurface,
+        color: colors.cardSurface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.dewMint.withValues(alpha: 0.20),
+          color: colors.isDark
+              ? AppColors.dewMint.withValues(alpha: 0.20)
+              : colors.borderOutline,
           width: 1.0,
         ),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            statusColor.withValues(alpha: 0.10),
-            AppColors.cardSurface.withValues(alpha: 0.96),
-            AppColors.surfaceContainer.withValues(alpha: 0.90),
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.22),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: statusColor.withValues(alpha: 0.12),
-            blurRadius: 10,
-            spreadRadius: -2,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        gradient: colors.isDark
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  statusColor.withValues(alpha: 0.10),
+                  colors.cardSurface.withValues(alpha: 0.96),
+                  colors.surfaceContainer.withValues(alpha: 0.90),
+                ],
+              )
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color.alphaBlend(
+                    statusColor.withValues(alpha: 0.06),
+                    colors.cardSurface,
+                  ),
+                  colors.cardSurface,
+                ],
+              ),
+        boxShadow: colors.isDark
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.22),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: statusColor.withValues(alpha: 0.12),
+                  blurRadius: 10,
+                  spreadRadius: -2,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: const Color(0xFF1A0E33).withValues(alpha: 0.06),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,14 +334,14 @@ class DailyFinancialPulseCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Image.asset(
+                          AppDuotoneIcon(
                             currentTier == DailyHealthTier.safe
-                                ? 'assets/icons/vice_city/growth.png'
+                                ? PhosphorIconsDuotone.trendUp
                                 : (currentTier == DailyHealthTier.caution
-                                    ? 'assets/icons/vice_city/pulse.png'
-                                    : 'assets/icons/vice_city/minus.png'),
-                            width: 14,
-                            height: 14,
+                                    ? PhosphorIconsDuotone.pulse
+                                    : PhosphorIconsDuotone.trendDown),
+                            size: 14,
+                            color: statusColor,
                           ),
                           const SizedBox(width: 5),
                           Flexible(
@@ -441,10 +465,14 @@ class DailyFinancialPulseCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceContainer.withValues(alpha: 0.60),
+                    color: colors.surfaceContainer.withValues(
+                      alpha: colors.isDark ? 0.60 : 0.85,
+                    ),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: AppColors.dewMint.withValues(alpha: 0.12),
+                      color: colors.isDark
+                          ? AppColors.dewMint.withValues(alpha: 0.12)
+                          : colors.borderOutline,
                       width: 1.0,
                     ),
                   ),
@@ -476,10 +504,14 @@ class DailyFinancialPulseCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceContainer.withValues(alpha: 0.60),
+                    color: colors.surfaceContainer.withValues(
+                      alpha: colors.isDark ? 0.60 : 0.85,
+                    ),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: AppColors.dewMint.withValues(alpha: 0.12),
+                      color: colors.isDark
+                          ? AppColors.dewMint.withValues(alpha: 0.12)
+                          : colors.borderOutline,
                       width: 1.0,
                     ),
                   ),
@@ -512,7 +544,7 @@ class DailyFinancialPulseCard extends StatelessWidget {
             const SizedBox(height: 12),
             AppProgressBar(
               value: quotaRatio,
-              color: isExceeded ? warningColor : AppColors.sage,
+              color: isExceeded ? warningColor : colors.primary,
               backgroundColor: scheme.surfaceContainerHighest,
               height: 6,
             ),
@@ -561,7 +593,9 @@ class DailyFinancialPulseCard extends StatelessWidget {
                       Icon(
                         Icons.event_repeat_rounded,
                         size: 13,
-                        color: onTapUpcomingBills != null ? AppColors.dewMint : muted,
+                        color: onTapUpcomingBills != null
+                            ? colors.accentSecondary
+                            : muted,
                       ),
                       const SizedBox(width: 6),
                       Expanded(
@@ -580,7 +614,7 @@ class DailyFinancialPulseCard extends StatelessWidget {
                         Icon(
                           Icons.chevron_right_rounded,
                           size: 15,
-                          color: AppColors.dewMint.withValues(alpha: 0.8),
+                          color: colors.accentSecondary.withValues(alpha: 0.85),
                         ),
                       ],
                     ],
@@ -598,8 +632,8 @@ class DailyFinancialPulseCard extends StatelessWidget {
               final pct = (budgetSpent * 100 / totalBudget).round();
               final overAmount = budgetSpent - totalBudget;
               final statusColor = isOver
-                  ? AppColors.expenseOnDark
-                  : ((budgetSpent / totalBudget) >= 0.85 ? warningColor : AppColors.sage);
+                  ? colors.expense
+                  : ((budgetSpent / totalBudget) >= 0.85 ? warningColor : colors.primary);
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -656,8 +690,8 @@ class DailyFinancialPulseCard extends StatelessWidget {
                   AppProgressBar(
                     value: (budgetSpent / totalBudget).clamp(0.0, 1.0),
                     color: isOver
-                        ? AppColors.expense
-                        : ((budgetSpent / totalBudget) >= 0.85 ? warningColor : AppColors.sage),
+                        ? colors.expense
+                        : ((budgetSpent / totalBudget) >= 0.85 ? warningColor : colors.primary),
                     backgroundColor: scheme.surfaceContainerHighest,
                     height: 6,
                   ),
@@ -740,7 +774,7 @@ class _PhaseInfoSheet extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white24,
+                  color: colors.textMuted.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -754,7 +788,11 @@ class _PhaseInfoSheet extends StatelessWidget {
                     color: colors.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Image.asset('assets/icons/vice_city/pulse.png', width: 24, height: 24),
+                  child: AppDuotoneIcon(
+                    PhosphorIconsDuotone.pulse,
+                    size: 22,
+                    color: colors.primary,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -784,10 +822,14 @@ class _PhaseInfoSheet extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.surfaceContainer.withValues(alpha: 0.72),
+                color: colors.surfaceContainer.withValues(
+                  alpha: colors.isDark ? 0.72 : 0.90,
+                ),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: AppColors.dewMint.withValues(alpha: 0.18),
+                  color: colors.isDark
+                      ? AppColors.dewMint.withValues(alpha: 0.18)
+                      : colors.borderOutline,
                 ),
               ),
               child: Column(
@@ -797,7 +839,7 @@ class _PhaseInfoSheet extends StatelessWidget {
                     context.tr('How your quota is calculated'),
                     style: theme.textTheme.labelLarge?.copyWith(
                       fontWeight: FontWeight.w800,
-                      color: AppColors.dewMint,
+                      color: colors.accentSecondary,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -841,8 +883,7 @@ class _PhaseInfoSheet extends StatelessWidget {
             const SizedBox(height: 16),
             _PhaseDetailTile(
               color: colors.income,
-              icon: Icons.spa_rounded,
-              customAsset: 'assets/icons/vice_city/growth.png',
+              duotoneIcon: PhosphorIconsDuotone.trendUp,
               phaseBadge: context.tr('Safe'),
               phaseTitle: context.tr('Phase 1: Safe Financial Health'),
               description: context.tr('Spending is well within limits. Keep up the mindful pace!'),
@@ -850,9 +891,8 @@ class _PhaseInfoSheet extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _PhaseDetailTile(
-              color: AppColors.warning,
-              icon: Icons.speed_rounded,
-              customAsset: 'assets/icons/vice_city/pulse.png',
+              color: colors.warning,
+              duotoneIcon: PhosphorIconsDuotone.pulse,
               phaseBadge: context.tr('Caution'),
               phaseTitle: context.tr('Phase 2: Spending Velocity Warning'),
               description: context.tr('Today\'s spending has passed your daily quota. Balance it out tomorrow.'),
@@ -861,8 +901,7 @@ class _PhaseInfoSheet extends StatelessWidget {
             const SizedBox(height: 12),
             _PhaseDetailTile(
               color: colors.expense,
-              icon: Icons.shield_outlined,
-              customAsset: 'assets/icons/vice_city/minus.png',
+              duotoneIcon: PhosphorIconsDuotone.trendDown,
               phaseBadge: context.tr('Limit'),
               phaseTitle: context.tr('Phase 3: Budget Limit Reached'),
               description: context.tr('Expenses have reached the period limit. Focus on essentials only.'),
@@ -938,8 +977,7 @@ class _BreakdownRow extends StatelessWidget {
 class _PhaseDetailTile extends StatelessWidget {
   const _PhaseDetailTile({
     required this.color,
-    required this.icon,
-    this.customAsset,
+    required this.duotoneIcon,
     required this.phaseBadge,
     required this.phaseTitle,
     required this.description,
@@ -947,8 +985,7 @@ class _PhaseDetailTile extends StatelessWidget {
   });
 
   final Color color;
-  final IconData icon;
-  final String? customAsset;
+  final PhosphorDuotoneIconData duotoneIcon;
   final String phaseBadge;
   final String phaseTitle;
   final String description;
@@ -984,9 +1021,7 @@ class _PhaseDetailTile extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    customAsset != null
-                        ? Image.asset(customAsset!, width: 12, height: 12)
-                        : Icon(icon, size: 12, color: color),
+                    AppDuotoneIcon(duotoneIcon, size: 13, color: color),
                     const SizedBox(width: 4),
                     Text(
                       phaseBadge,
@@ -1056,7 +1091,7 @@ void _showWendyAdviceSheet(BuildContext context, DailyHealthTier tier) {
       'assets/new_asset/expression/expression_02.png',
       "Wendy's Advice: Surplus Trajectory",
       'Consistent pacing builds surplus reserves. Consider sweeping extra surplus into your savings goals!',
-      AppColors.neonCyan,
+      colors.accentSecondary,
     ),
     (
       'assets/new_asset/expression/expression_03.png',
@@ -1068,13 +1103,13 @@ void _showWendyAdviceSheet(BuildContext context, DailyHealthTier tier) {
       'assets/new_asset/expression/expression_04.png',
       "Wendy's Advice: Balanced Discipline",
       'Your Needs, Wants, and Savings pools are harmoniously balanced. Keep this steady momentum going!',
-      AppColors.goldenYellow,
+      colors.highlightGold,
     ),
     (
       'assets/new_asset/expression/expression_05.png',
       "Wendy's Advice: Savings Streak",
       'Great financial habits pay off over time. Your commitment to saving regularly is building real freedom.',
-      AppColors.sunsetMagenta,
+      colors.primary,
     ),
     (
       'assets/new_asset/expression/expression_06.png',
@@ -1086,25 +1121,25 @@ void _showWendyAdviceSheet(BuildContext context, DailyHealthTier tier) {
       'assets/new_asset/expression/expression_07.png',
       "Wendy's Advice: Debt Due Reminder",
       'Check your upcoming debt and split bill schedules so you never get caught off guard by due dates.',
-      AppColors.goldenYellow,
+      colors.highlightGold,
     ),
     (
       'assets/new_asset/expression/expression_08.png',
       "Wendy's Advice: Mindful Wants",
       'Notice if spontaneous wants are outpacing your essentials. A quick pause before purchasing works wonders.',
-      AppColors.sunsetOrange,
+      colors.warning,
     ),
     (
       'assets/new_asset/expression/expression_09.png',
       "Wendy's Advice: Emergency Shield",
       'Building an untouchable 3-month emergency reserve ensures peace of mind through any unexpected storm.',
-      AppColors.neonCyan,
+      colors.accentSecondary,
     ),
     (
       'assets/new_asset/expression/expression_10.png',
       "Wendy's Advice: Month-End Victory",
       'Celebrate your monthly financial progress. Every conscious decision sharpens your mastery over money!',
-      AppColors.softWhite,
+      colors.textPrimary,
     ),
   ];
 
@@ -1128,12 +1163,12 @@ void _showWendyAdviceSheet(BuildContext context, DailyHealthTier tier) {
             margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
             decoration: BoxDecoration(
-              color: AppColors.midnightNavy,
+              color: colors.isDark ? AppColors.midnightNavy : colors.cardSurface,
               borderRadius: BorderRadius.circular(24),
               border: Border.all(color: adviceColor.withValues(alpha: 0.35)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.45),
+                  color: Colors.black.withValues(alpha: colors.isDark ? 0.45 : 0.16),
                   blurRadius: 28,
                   offset: const Offset(0, -6),
                 ),
@@ -1146,7 +1181,7 @@ void _showWendyAdviceSheet(BuildContext context, DailyHealthTier tier) {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.20),
+                    color: colors.textMuted.withValues(alpha: 0.30),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -1172,19 +1207,19 @@ void _showWendyAdviceSheet(BuildContext context, DailyHealthTier tier) {
                 Text(
                   context.tr(titleKey),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.softWhite,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   context.tr(adviceKey),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: AppColors.mutedBlueGray,
+                    color: colors.textMuted,
                     height: 1.5,
                   ),
                 ),
@@ -1208,11 +1243,13 @@ void _showWendyAdviceSheet(BuildContext context, DailyHealthTier tier) {
                             shape: BoxShape.circle,
                             color: isSelected
                                 ? item.$4.withValues(alpha: 0.25)
-                                : AppColors.deepNavy,
+                                : colors.surfaceContainer,
                             border: Border.all(
                               color: isSelected
                                   ? item.$4
-                                  : AppColors.borderOutline.withValues(alpha: 0.5),
+                                  : colors.borderOutline.withValues(
+                                      alpha: colors.isDark ? 0.5 : 1.0,
+                                    ),
                               width: isSelected ? 2.0 : 1.0,
                             ),
                           ),
@@ -1229,8 +1266,8 @@ void _showWendyAdviceSheet(BuildContext context, DailyHealthTier tier) {
                   height: 48,
                   child: FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.sunsetMagenta,
-                      foregroundColor: Colors.white,
+                      backgroundColor: colors.primary,
+                      foregroundColor: colors.onPrimary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
                     onPressed: () => Navigator.pop(sheetCtx),

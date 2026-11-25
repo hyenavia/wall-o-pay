@@ -94,7 +94,7 @@ Future<void> showReportDialog(BuildContext context) async {
                   Text(
                     ctx.tr('Filter by account'),
                     style: Theme.of(ctx).textTheme.labelMedium?.copyWith(
-                          color: AppColors.freshSage,
+                          color: ctx.themeColors.textMuted,
                           fontWeight: FontWeight.w700,
                         ),
                   ),

@@ -30,21 +30,23 @@ Future<void> showCategoryBudgetSheet(
         : '',
   );
 
+  final sheetColors = context.themeColors;
   await showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: AppColors.mossShadow,
+    backgroundColor: sheetColors.cardSurface,
     shape: RoundedRectangleBorder(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       side: BorderSide(
-        color: AppColors.dewMint.withValues(alpha: 0.25),
+        color: sheetColors.borderOutline,
         width: 1,
       ),
     ),
     builder: (ctx) {
       return StatefulBuilder(
         builder: (ctx, setState) {
+          final colors = ctx.themeColors;
           return Padding(
             padding: EdgeInsets.fromLTRB(
               20,
@@ -61,7 +63,7 @@ Future<void> showCategoryBudgetSheet(
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.dewMint.withValues(alpha: 0.35),
+                      color: colors.textMuted.withValues(alpha: 0.35),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -82,17 +84,17 @@ Future<void> showCategoryBudgetSheet(
                         children: [
                           Text(
                             categoryName(context, category),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 17,
-                              color: AppColors.softIvory,
+                              color: colors.textPrimary,
                             ),
                           ),
                           Text(
                             context.tr('Manage Category & Budget'),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.freshSage,
+                              color: colors.textMuted,
                             ),
                           ),
                         ],
@@ -103,10 +105,10 @@ Future<void> showCategoryBudgetSheet(
                 const SizedBox(height: 20),
                 Text(
                   context.tr('Select Budget Group'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
-                    color: AppColors.softIvory,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -116,48 +118,57 @@ Future<void> showCategoryBudgetSheet(
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 3),
-                          child: ChoiceChip(
-                            side: BorderSide(
-                              color: selectedBucket == b
-                                  ? b.color
-                                  : AppColors.dewMint.withValues(alpha: 0.2),
-                              width: 1,
-                            ),
-                            backgroundColor: AppColors.emeraldLeaf.withValues(alpha: 0.25),
-                            label: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  b.icon,
-                                  size: 18,
-                                  color: selectedBucket == b ? AppColors.deepForest : b.color,
+                          child: Builder(
+                            builder: (_) {
+                              final bColor = b.colorIn(ctx);
+                              final isSelected = selectedBucket == b;
+                              final onSelectedFg = colors.isDark
+                                  ? AppColors.deepForest
+                                  : Colors.white;
+                              return ChoiceChip(
+                                side: BorderSide(
+                                  color: isSelected ? bColor : colors.inputBorder,
+                                  width: 1,
                                 ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  b.shortName(context),
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: selectedBucket == b
-                                        ? FontWeight.w800
-                                        : FontWeight.normal,
-                                    color: selectedBucket == b ? AppColors.deepForest : AppColors.softIvory,
-                                  ),
+                                backgroundColor: colors.isDark
+                                    ? AppColors.emeraldLeaf.withValues(alpha: 0.25)
+                                    : colors.surfaceContainer,
+                                label: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      b.icon,
+                                      size: 18,
+                                      color: isSelected ? onSelectedFg : bColor,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      b.shortName(context),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w800
+                                            : FontWeight.normal,
+                                        color: isSelected ? onSelectedFg : colors.textPrimary,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${b.percentage}%',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        color: isSelected
+                                            ? onSelectedFg.withValues(alpha: 0.85)
+                                            : colors.textMuted,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  '${b.percentage}%',
-                                  style: TextStyle(
-                                    fontSize: 9,
-                                    color: selectedBucket == b
-                                        ? AppColors.deepForest.withValues(alpha: 0.8)
-                                        : AppColors.freshSage,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            selected: selectedBucket == b,
-                            selectedColor: b.color,
-                            onSelected: (val) {
-                              if (val) setState(() => selectedBucket = b);
+                                selected: isSelected,
+                                selectedColor: bColor,
+                                onSelected: (val) {
+                                  if (val) setState(() => selectedBucket = b);
+                                },
+                              );
                             },
                           ),
                         ),
@@ -167,18 +178,18 @@ Future<void> showCategoryBudgetSheet(
                 const SizedBox(height: 20),
                 Text(
                   context.tr('Specific category limit (optional)'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
-                    color: AppColors.softIvory,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   context.tr('Enter 0 to remove specific limit'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.freshSage,
+                    color: colors.textMuted,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -186,42 +197,40 @@ Future<void> showCategoryBudgetSheet(
                   controller: budgetController,
                   keyboardType: TextInputType.number,
                   inputFormatters: amountFormatters(),
-                  style: const TextStyle(
-                    color: AppColors.softIvory,
+                  style: TextStyle(
+                    color: colors.textPrimary,
                     fontWeight: FontWeight.w600,
-                    fontFeatures: [FontFeature.tabularFigures()],
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                   decoration: InputDecoration(
                     prefixText: currencyInputPrefix,
-                    prefixStyle: const TextStyle(
-                      color: AppColors.dewMint,
+                    prefixStyle: TextStyle(
+                      color: colors.isDark ? AppColors.dewMint : colors.primary,
                       fontWeight: FontWeight.w700,
                     ),
                     hintText: '0',
                     hintStyle: TextStyle(
-                      color: AppColors.freshSage.withValues(alpha: 0.5),
+                      color: colors.textMuted.withValues(alpha: 0.6),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(
-                        color: AppColors.dewMint.withValues(alpha: 0.25),
-                      ),
+                      borderSide: BorderSide(color: colors.inputBorder),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(
-                        color: AppColors.dewMint.withValues(alpha: 0.25),
-                      ),
+                      borderSide: BorderSide(color: colors.inputBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(
-                        color: AppColors.dewMint,
+                      borderSide: BorderSide(
+                        color: colors.primary,
                         width: 1.5,
                       ),
                     ),
                     filled: true,
-                    fillColor: AppColors.deepForest.withValues(alpha: 0.6),
+                    fillColor: colors.isDark
+                        ? AppColors.deepForest.withValues(alpha: 0.6)
+                        : colors.surfaceContainer,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -229,8 +238,8 @@ Future<void> showCategoryBudgetSheet(
                   width: double.infinity,
                   child: FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.dewMint,
-                      foregroundColor: AppColors.deepForest,
+                      backgroundColor: colors.primary,
+                      foregroundColor: colors.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),

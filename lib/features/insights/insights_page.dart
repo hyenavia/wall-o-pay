@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
 import '../../core/format.dart';
 import '../../core/icons.dart';
@@ -66,7 +67,10 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
     return prefs.getString(key) != _completedRecapPeriod(type).key;
   }
 
-  Future<void> _openRecapSheet(BuildContext context, PeriodType initialType) async {
+  Future<void> _openRecapSheet(
+    BuildContext context,
+    PeriodType initialType,
+  ) async {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -90,10 +94,8 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (_) => _VitalityDetailsSheet(
-        netWorth: netWorth,
-        vitality: vitality,
-      ),
+      builder: (_) =>
+          _VitalityDetailsSheet(netWorth: netWorth, vitality: vitality),
     );
   }
 
@@ -115,6 +117,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
       isScrollControlled: true,
       showDragHandle: true,
       builder: (ctx) {
+        final colors = ctx.themeColors;
         final maxH = MediaQuery.of(ctx).size.height * 0.78;
         return ConstrainedBox(
           constraints: BoxConstraints(maxHeight: maxH),
@@ -140,16 +143,17 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                           children: [
                             Text(
                               context.tr(category.name),
-                              style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                              style: Theme.of(ctx).textTheme.titleMedium
+                                  ?.copyWith(
                                     fontWeight: FontWeight.w800,
-                                    color: AppColors.softIvory,
+                                    color: colors.textPrimary,
                                   ),
                             ),
                             Text(
                               '${period.label()} • ${category.txCount == 1 ? context.tr('1 transaction') : context.tr('{count} transactions', {'count': category.txCount})}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.freshSage,
+                                color: colors.textMuted,
                               ),
                             ),
                           ],
@@ -163,7 +167,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                             style: ctx.moneyStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.expenseOnDark,
+                              color: colors.expense,
                             ),
                           ),
                           Text(
@@ -171,7 +175,9 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                             style: ctx.moneyStyle(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.dewMint,
+                              color: colors.isDark
+                                  ? AppColors.dewMint
+                                  : colors.primary,
                             ),
                           ),
                         ],
@@ -181,7 +187,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                 ),
                 Divider(
                   height: 1,
-                  color: AppColors.borderOutline.withValues(alpha: 0.35),
+                  color: colors.borderOutline.withValues(alpha: 0.35),
                 ),
                 if (matchingTxs.isEmpty)
                   Padding(
@@ -189,7 +195,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                     child: Center(
                       child: Text(
                         context.tr('No expenses in this period.'),
-                        style: const TextStyle(color: AppColors.freshSage),
+                        style: TextStyle(color: colors.textMuted),
                       ),
                     ),
                   )
@@ -202,16 +208,19 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                       separatorBuilder: (_, _) => Divider(
                         height: 1,
                         indent: 68,
-                        color: AppColors.borderOutline.withValues(alpha: 0.25),
+                        color: colors.borderOutline.withValues(alpha: 0.25),
                       ),
                       itemBuilder: (_, idx) {
                         final t = matchingTxs[idx];
                         return TransactionTile(
                           entry: t,
                           category: cats[t.categoryId],
-                          wallet: t.walletId != null ? wallets[t.walletId!] : null,
-                          toWallet:
-                              t.toWalletId != null ? wallets[t.toWalletId!] : null,
+                          wallet: t.walletId != null
+                              ? wallets[t.walletId!]
+                              : null,
+                          toWallet: t.toWalletId != null
+                              ? wallets[t.toWalletId!]
+                              : null,
                           trailingNote: shortDate(t.date),
                           onTap: () {
                             Navigator.pop(ctx);
@@ -235,7 +244,10 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
     required Period period,
     required List<TransactionEntry> periodTxs,
   }) {
-    final matchingTxs = InsightEngine.filterTransactionsForInsight(item, periodTxs);
+    final matchingTxs = InsightEngine.filterTransactionsForInsight(
+      item,
+      periodTxs,
+    );
     final totalAmount = matchingTxs.fold<int>(0, (sum, t) => sum + t.amount);
     final cats = ref.read(categoryMapProvider);
     final wallets = ref.read(walletMapProvider);
@@ -245,6 +257,8 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
       isScrollControlled: true,
       showDragHandle: true,
       builder: (ctx) {
+        final colors = ctx.themeColors;
+        final accent = colors.resolveAccent(item.accentColor);
         final maxH = MediaQuery.of(ctx).size.height * 0.78;
         return ConstrainedBox(
           constraints: BoxConstraints(maxHeight: maxH),
@@ -260,19 +274,18 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: item.accentColor.withValues(alpha: 0.16),
+                          color: accent.withValues(alpha: 0.16),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: item.accentColor.withValues(alpha: 0.35),
+                            color: accent.withValues(alpha: 0.35),
                           ),
                         ),
-                        child: viceCityAssetForIcon(item.icon) != null
-                            ? Image.asset(
-                                viceCityAssetForIcon(item.icon)!,
-                                width: 22,
-                                height: 22,
-                              )
-                            : Icon(item.icon, color: item.accentColor, size: 22),
+                        child: AppDuotoneIcon(
+                          phosphorForIcon(item.icon) ??
+                              PhosphorIconsDuotone.chartBar,
+                          color: accent,
+                          size: 22,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -281,16 +294,17 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                           children: [
                             Text(
                               item.title,
-                              style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                              style: Theme.of(ctx).textTheme.titleMedium
+                                  ?.copyWith(
                                     fontWeight: FontWeight.w800,
-                                    color: AppColors.softIvory,
+                                    color: colors.textPrimary,
                                   ),
                             ),
                             Text(
                               '${period.label()} • ${matchingTxs.length == 1 ? context.tr('1 transaction') : context.tr('{count} transactions', {'count': matchingTxs.length})}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
-                                color: AppColors.freshSage,
+                                color: colors.textMuted,
                               ),
                             ),
                           ],
@@ -302,8 +316,8 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
                           color: item.filterType == TxType.income
-                              ? AppColors.incomeOnDark
-                              : AppColors.expenseOnDark,
+                              ? colors.income
+                              : colors.expense,
                         ),
                       ),
                     ],
@@ -311,7 +325,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                 ),
                 Divider(
                   height: 1,
-                  color: AppColors.borderOutline.withValues(alpha: 0.35),
+                  color: colors.borderOutline.withValues(alpha: 0.35),
                 ),
                 if (matchingTxs.isEmpty)
                   Padding(
@@ -319,7 +333,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                     child: Center(
                       child: Text(
                         context.tr('No matching transactions'),
-                        style: const TextStyle(color: AppColors.freshSage),
+                        style: TextStyle(color: colors.textMuted),
                       ),
                     ),
                   )
@@ -332,16 +346,19 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                       separatorBuilder: (_, _) => Divider(
                         height: 1,
                         indent: 68,
-                        color: AppColors.borderOutline.withValues(alpha: 0.25),
+                        color: colors.borderOutline.withValues(alpha: 0.25),
                       ),
                       itemBuilder: (_, idx) {
                         final t = matchingTxs[idx];
                         return TransactionTile(
                           entry: t,
                           category: cats[t.categoryId],
-                          wallet: t.walletId != null ? wallets[t.walletId!] : null,
-                          toWallet:
-                              t.toWalletId != null ? wallets[t.toWalletId!] : null,
+                          wallet: t.walletId != null
+                              ? wallets[t.walletId!]
+                              : null,
+                          toWallet: t.toWalletId != null
+                              ? wallets[t.toWalletId!]
+                              : null,
                           trailingNote: shortDate(t.date),
                           onTap: () {
                             Navigator.pop(ctx);
@@ -366,6 +383,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
     final period = ref.watch(selectedPeriodProvider);
     final isWeekly = period.type == PeriodType.weekly;
     final cats = ref.watch(categoryMapProvider);
@@ -391,10 +409,10 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
             icon: Stack(
               clipBehavior: Clip.none,
               children: [
-                Image.asset(
-                  'assets/icons/vice_city/calendar.png',
-                  width: 22,
-                  height: 22,
+                const AppDuotoneIcon(
+                  PhosphorIconsDuotone.calendarBlank,
+                  size: 22,
+                  color: Colors.white,
                 ),
                 if (_isRecapUnseen(period.type))
                   Positioned(
@@ -403,8 +421,10 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                     child: Container(
                       width: 8,
                       height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.dewMint,
+                      decoration: BoxDecoration(
+                        color: colors.isDark
+                            ? AppColors.dewMint
+                            : AppColors.goldenYellow,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -561,9 +581,9 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                       children: [
                         Text(
                           context.tr('Income vs Expense Comparison'),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.freshSage,
+                            color: colors.textMuted,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -599,14 +619,18 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: summary.isDeficit
-                                    ? AppColors.expenseOnDark.withValues(alpha: 0.18)
-                                    : AppColors.incomeOnDark.withValues(alpha: 0.18),
+                                color:
+                                    (summary.isDeficit
+                                            ? colors.onHeroExpense
+                                            : colors.onHeroIncome)
+                                        .withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(
-                                  color: summary.isDeficit
-                                      ? AppColors.expenseOnDark.withValues(alpha: 0.4)
-                                      : AppColors.incomeOnDark.withValues(alpha: 0.4),
+                                  color:
+                                      (summary.isDeficit
+                                              ? colors.onHeroExpense
+                                              : colors.onHeroIncome)
+                                          .withValues(alpha: 0.4),
                                   width: 1,
                                 ),
                               ),
@@ -619,8 +643,8 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                         : Icons.trending_up_rounded,
                                     size: 14,
                                     color: summary.isDeficit
-                                        ? AppColors.expenseOnDark
-                                        : AppColors.incomeOnDark,
+                                        ? colors.onHeroExpense
+                                        : colors.onHeroIncome,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
@@ -631,8 +655,8 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                       fontSize: 11,
                                       fontWeight: FontWeight.w700,
                                       color: summary.isDeficit
-                                          ? AppColors.expenseOnDark
-                                          : AppColors.incomeOnDark,
+                                          ? colors.onHeroExpense
+                                          : colors.onHeroIncome,
                                     ),
                                   ),
                                 ],
@@ -690,8 +714,11 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                 label: context.tr('Income'),
                                 amount: rupiah(summary.totalIncome),
                                 icon: Icons.arrow_downward_rounded,
-                                iconColor: AppColors.incomeOnDark,
-                                bgColor: const Color(0xFF0F221B).withValues(alpha: 0.65),
+                                iconColor: colors.onHeroIncome,
+                                bgColor: colors.isDark
+                                    ? const Color(0xFF0F221B)
+                                          .withValues(alpha: 0.65)
+                                    : Colors.black.withValues(alpha: 0.22),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -700,8 +727,11 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                 label: context.tr('Expense'),
                                 amount: rupiah(summary.totalExpense),
                                 icon: Icons.arrow_upward_rounded,
-                                iconColor: AppColors.expenseOnDark,
-                                bgColor: const Color(0xFF0F221B).withValues(alpha: 0.65),
+                                iconColor: colors.onHeroExpense,
+                                bgColor: colors.isDark
+                                    ? const Color(0xFF0F221B)
+                                          .withValues(alpha: 0.65)
+                                    : Colors.black.withValues(alpha: 0.22),
                               ),
                             ),
                           ],
@@ -720,7 +750,8 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                   _NetWorthVitalityCard(
                     netWorth: netWorth,
                     vitality: vitality,
-                    onTap: () => _openVitalitySheet(context, netWorth, vitality),
+                    onTap: () =>
+                        _openVitalitySheet(context, netWorth, vitality),
                   ),
                   const SizedBox(height: 12),
                   _PeriodComparisonCard(
@@ -752,9 +783,9 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                     : context.tr(
                                         'Weekly spending distribution',
                                       ),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
-                                  color: AppColors.freshSage,
+                                  color: colors.textMuted,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -763,7 +794,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                 style: context.moneyStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w800,
-                                  color: AppColors.expenseOnDark,
+                                  color: colors.expense,
                                 ),
                               ),
                             ],
@@ -775,7 +806,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                           ),
                           const SizedBox(height: 10),
                           Divider(
-                            color: AppColors.borderOutline.withValues(alpha: 0.3),
+                            color: colors.borderOutline.withValues(alpha: 0.3),
                           ),
                           const SizedBox(height: 6),
                           Row(
@@ -785,9 +816,9 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                 isWeekly
                                     ? context.tr('Daily average:')
                                     : context.tr('Weekly average:'),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
-                                  color: AppColors.freshSage,
+                                  color: colors.textMuted,
                                 ),
                               ),
                               Text(
@@ -802,7 +833,7 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                                 style: context.moneyStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.softIvory,
+                                  color: colors.textPrimary,
                                 ),
                               ),
                             ],
@@ -817,11 +848,11 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                           item: item,
                           onTap: item.hasDrillDown
                               ? () => _openSmartInsightDrillDown(
-                                    context: context,
-                                    item: item,
-                                    period: period,
-                                    periodTxs: currentTxs,
-                                  )
+                                  context: context,
+                                  item: item,
+                                  period: period,
+                                  periodTxs: currentTxs,
+                                )
                               : null,
                         ),
                     ],
@@ -862,11 +893,19 @@ class _InsightsPageState extends ConsumerState<InsightsPage> {
                   child: SegmentedButton<int>(
                     showSelectedIcon: false,
                     style: SegmentedButton.styleFrom(
-                      selectedBackgroundColor: AppColors.dewMint.withValues(alpha: 0.22),
-                      selectedForegroundColor: AppColors.dewMint,
-                      foregroundColor: AppColors.freshSage,
+                      selectedBackgroundColor: colors.isDark
+                          ? AppColors.dewMint.withValues(alpha: 0.22)
+                          : colors.primary,
+                      selectedForegroundColor: colors.isDark
+                          ? AppColors.dewMint
+                          : colors.onPrimary,
+                      foregroundColor: colors.isDark
+                          ? AppColors.freshSage
+                          : colors.textPrimary,
                       side: BorderSide(
-                        color: AppColors.dewMint.withValues(alpha: 0.25),
+                        color: colors.isDark
+                            ? AppColors.dewMint.withValues(alpha: 0.25)
+                            : colors.inputBorder,
                       ),
                     ),
                     segments: [
@@ -924,13 +963,16 @@ class _SummarySubBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: AppColors.dewMint.withValues(alpha: 0.18),
+          color: colors.isDark
+              ? AppColors.dewMint.withValues(alpha: 0.18)
+              : Colors.white.withValues(alpha: 0.22),
           width: 1,
         ),
       ),
@@ -946,13 +988,11 @@ class _SummarySubBox extends StatelessWidget {
                 width: 1,
               ),
             ),
-            child: viceCityAssetForIcon(icon) != null
-                ? Image.asset(
-                    viceCityAssetForIcon(icon)!,
-                    width: 16,
-                    height: 16,
-                  )
-                : Icon(icon, color: iconColor, size: 16),
+            child: AppDuotoneIcon(
+              phosphorForIcon(icon) ?? PhosphorIconsDuotone.chartBar,
+              color: iconColor,
+              size: 16,
+            ),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -1002,23 +1042,35 @@ class _PeriodComparisonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
 
     if (summary.prevTotalExpense == 0) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.cardSurface,
+          color: colors.cardSurface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppColors.borderOutline.withValues(alpha: 0.4),
+            color: colors.borderOutline.withValues(
+              alpha: colors.isDark ? 0.4 : 0.7,
+            ),
           ),
+          boxShadow: colors.isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
         ),
         child: Row(
           children: [
-            Image.asset(
-              'assets/icon-compress/090_line_chart-kompres.png',
-              width: 20,
-              height: 20,
+            AppDuotoneIcon(
+              PhosphorIconsDuotone.chartLineUp,
+              size: 20,
+              color: colors.textMuted,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1027,7 +1079,7 @@ class _PeriodComparisonCard extends StatelessWidget {
                   'prev': prevPeriodName,
                 }),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.freshSage,
+                  color: colors.textMuted,
                 ),
               ),
             ),
@@ -1041,8 +1093,8 @@ class _PeriodComparisonCard extends StatelessWidget {
     final pct = summary.expensePctChange?.abs().toStringAsFixed(1) ?? '0';
 
     final Color badgeColor = isSame
-        ? AppColors.freshSage
-        : (isLower ? AppColors.incomeOnDark : AppColors.expenseOnDark);
+        ? colors.textMuted
+        : (isLower ? colors.income : colors.expense);
 
     final IconData badgeIcon = isSame
         ? Icons.horizontal_rule_rounded
@@ -1085,12 +1137,23 @@ class _PeriodComparisonCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: AppColors.cardSurface.withValues(alpha: 0.95),
+        color: colors.isDark
+            ? AppColors.cardSurface.withValues(alpha: 0.95)
+            : colors.cardSurface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: badgeColor.withValues(alpha: 0.35),
+          color: badgeColor.withValues(alpha: colors.isDark ? 0.35 : 0.45),
           width: 1,
         ),
+        boxShadow: colors.isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1123,7 +1186,7 @@ class _PeriodComparisonCard extends StatelessWidget {
                 Text(
                   subtitle,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.freshSage,
+                    color: colors.textMuted,
                   ),
                 ),
               ],
@@ -1150,122 +1213,123 @@ class _TopCategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
+    final rankAccent = colors.isDark ? AppColors.dewMint : colors.primary;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: rank <= 3
-                      ? AppColors.emeraldLeaf.withValues(alpha: 0.35)
-                      : AppColors.cardSurface,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
                     color: rank <= 3
-                        ? AppColors.dewMint.withValues(alpha: 0.3)
-                        : AppColors.borderOutline.withValues(alpha: 0.3),
-                    width: 0.8,
+                        ? (colors.isDark
+                              ? AppColors.emeraldLeaf.withValues(alpha: 0.35)
+                              : colors.primary.withValues(alpha: 0.14))
+                        : colors.cardSurface,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: rank <= 3
+                          ? rankAccent.withValues(alpha: 0.3)
+                          : colors.borderOutline.withValues(alpha: 0.3),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Text(
+                    '#$rank',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: rank <= 3 ? rankAccent : colors.textMuted,
+                    ),
                   ),
                 ),
-                child: Text(
-                  '#$rank',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: rank <= 3
-                        ? AppColors.dewMint
-                        : AppColors.freshSage,
+                const SizedBox(width: 10),
+                CategoryBadge(
+                  icon: iconFor(category.icon),
+                  color: category.color,
+                  categoryKey: category.icon,
+                  size: 34,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.tr(category.name),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        '${category.txCount} ${context.tr('transactions')}',
+                        style: TextStyle(color: colors.textMuted, fontSize: 11),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(width: 10),
-              CategoryBadge(
-                icon: iconFor(category.icon),
-                color: category.color,
-                categoryKey: category.icon,
-                size: 34,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      context.tr(category.name),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
+                      rupiah(category.amount),
+                      style: context.moneyStyle(
                         fontSize: 14,
-                        color: AppColors.softIvory,
+                        fontWeight: FontWeight.w800,
+                        color: colors.textPrimary,
                       ),
                     ),
-                    Text(
-                      '${category.txCount} ${context.tr('transactions')}',
-                      style: const TextStyle(
-                        color: AppColors.freshSage,
-                        fontSize: 11,
-                      ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${category.percentage.toStringAsFixed(1)}%',
+                          style: context.moneyStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: rankAccent,
+                          ),
+                        ),
+                        if (category.pctChange != null) ...[
+                          const SizedBox(width: 4),
+                          Text(
+                            '(${category.pctChange! >= 0 ? '+' : ''}${category.pctChange!.toStringAsFixed(0)}%)',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: category.pctChange! > 0
+                                  ? colors.expense
+                                  : colors.income,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    rupiah(category.amount),
-                    style: context.moneyStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.softIvory,
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${category.percentage.toStringAsFixed(1)}%',
-                        style: context.moneyStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.dewMint,
-                        ),
-                      ),
-                      if (category.pctChange != null) ...[
-                        const SizedBox(width: 4),
-                        Text(
-                          '(${category.pctChange! >= 0 ? '+' : ''}${category.pctChange!.toStringAsFixed(0)}%)',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: category.pctChange! > 0
-                                ? AppColors.expenseOnDark
-                                : AppColors.incomeOnDark,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          AppProgressBar(
-            value: category.percentage / 100,
-            color: category.color,
-            backgroundColor: AppColors.mossShadow.withValues(alpha: 0.6),
-            height: 6,
-          ),
-        ],
+              ],
+            ),
+            const SizedBox(height: 8),
+            AppProgressBar(
+              value: category.percentage / 100,
+              color: category.color,
+              backgroundColor: colors.isDark
+                  ? AppColors.mossShadow.withValues(alpha: 0.6)
+                  : colors.surfaceContainer,
+              height: 6,
+            ),
+          ],
         ),
       ),
     );
@@ -1280,16 +1344,28 @@ class _SmartInsightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = item.accentColor;
+    final colors = context.themeColors;
+    final accent = colors.resolveAccent(item.accentColor);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: AppColors.cardSurface,
+        color: colors.cardSurface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: AppColors.borderOutline.withValues(alpha: 0.45),
+          color: colors.borderOutline.withValues(
+            alpha: colors.isDark ? 0.45 : 0.7,
+          ),
         ),
+        boxShadow: colors.isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -1312,13 +1388,11 @@ class _SmartInsightCard extends StatelessWidget {
                       width: 1,
                     ),
                   ),
-                  child: viceCityAssetForIcon(item.icon) != null
-                      ? Image.asset(
-                          viceCityAssetForIcon(item.icon)!,
-                          width: 22,
-                          height: 22,
-                        )
-                      : Icon(item.icon, color: accent, size: 22),
+                  child: AppDuotoneIcon(
+                    phosphorForIcon(item.icon) ?? PhosphorIconsDuotone.chartBar,
+                    color: accent,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -1331,10 +1405,10 @@ class _SmartInsightCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               item.title,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w800,
                                 fontSize: 14,
-                                color: AppColors.softIvory,
+                                color: colors.textPrimary,
                               ),
                             ),
                           ),
@@ -1363,10 +1437,10 @@ class _SmartInsightCard extends StatelessWidget {
                             ),
                           if (onTap != null) ...[
                             const SizedBox(width: 4),
-                            const Icon(
+                            Icon(
                               Icons.chevron_right_rounded,
                               size: 16,
-                              color: AppColors.freshSage,
+                              color: colors.textMuted,
                             ),
                           ],
                         ],
@@ -1374,9 +1448,9 @@ class _SmartInsightCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         item.description,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.freshSage,
+                          color: colors.textMuted,
                           height: 1.4,
                         ),
                       ),
@@ -1400,15 +1474,27 @@ class _LowDataCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
 
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: AppColors.cardSurface,
+        color: colors.cardSurface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.borderOutline.withValues(alpha: 0.45),
+          color: colors.borderOutline.withValues(
+            alpha: colors.isDark ? 0.45 : 0.7,
+          ),
         ),
+        boxShadow: colors.isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
+                ),
+              ],
       ),
       child: Column(
         children: [
@@ -1425,7 +1511,7 @@ class _LowDataCard extends StatelessWidget {
             textAlign: TextAlign.center,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
-              color: AppColors.softIvory,
+              color: colors.textPrimary,
             ),
           ),
           const SizedBox(height: 8),
@@ -1435,7 +1521,7 @@ class _LowDataCard extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.freshSage,
+              color: colors.textMuted,
               height: 1.4,
             ),
           ),
@@ -1448,8 +1534,8 @@ class _LowDataCard extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w800),
             ),
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.dewMint,
-              foregroundColor: AppColors.deepForest,
+              backgroundColor: colors.primary,
+              foregroundColor: colors.onPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -1469,12 +1555,13 @@ class _NeedsWantsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     final total = needTotal + wantTotal;
     final needPct = total == 0 ? 0 : ((needTotal / total) * 100).round();
     final wantPct = total == 0 ? 0 : 100 - needPct;
 
-    const needColor = Color(0xFF38B271);
-    const wantColor = Color(0xFFE8A33D);
+    final needColor = colors.isDark ? const Color(0xFF38B271) : colors.income;
+    final wantColor = colors.isDark ? const Color(0xFFE8A33D) : colors.warning;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1492,7 +1579,7 @@ class _NeedsWantsCard extends StatelessWidget {
                       color: needColor.withValues(alpha: 0.16),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.check_circle_outline,
                       size: 14,
                       color: needColor,
@@ -1504,10 +1591,10 @@ class _NeedsWantsCard extends StatelessWidget {
                       '${context.tr('Needs')}: $needPct%',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
-                        color: AppColors.softIvory,
+                        color: colors.textPrimary,
                       ),
                     ),
                   ),
@@ -1525,7 +1612,7 @@ class _NeedsWantsCard extends StatelessWidget {
                       color: wantColor.withValues(alpha: 0.16),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.favorite_border,
                       size: 14,
                       color: wantColor,
@@ -1537,10 +1624,10 @@ class _NeedsWantsCard extends StatelessWidget {
                       '${context.tr('Wants')}: $wantPct%',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 13,
-                        color: AppColors.softIvory,
+                        color: colors.textPrimary,
                       ),
                     ),
                   ),
@@ -1559,8 +1646,7 @@ class _NeedsWantsCard extends StatelessWidget {
                   flex: needTotal,
                   child: Container(height: 8, color: needColor),
                 ),
-              if (needTotal > 0 && wantTotal > 0)
-                const SizedBox(width: 2),
+              if (needTotal > 0 && wantTotal > 0) const SizedBox(width: 2),
               if (wantTotal > 0)
                 Expanded(
                   flex: wantTotal,
@@ -1605,6 +1691,7 @@ class _TrendTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     final periods = [for (var i = 5; i >= 0; i--) period.shift(-i)];
 
     return AppCard(
@@ -1628,10 +1715,10 @@ class _TrendTable extends StatelessWidget {
                       dense: true,
                       title: Text(
                         p.label(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
-                          color: AppColors.softIvory,
+                          color: colors.textPrimary,
                         ),
                       ),
                       trailing: Column(
@@ -1643,7 +1730,7 @@ class _TrendTable extends StatelessWidget {
                             style: context.moneyStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.incomeOnDark,
+                              color: colors.income,
                             ),
                           ),
                           Text(
@@ -1651,7 +1738,7 @@ class _TrendTable extends StatelessWidget {
                             style: context.moneyStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.expenseOnDark,
+                              color: colors.expense,
                             ),
                           ),
                         ],
@@ -1662,7 +1749,7 @@ class _TrendTable extends StatelessWidget {
                         height: 1,
                         indent: 16,
                         endIndent: 16,
-                        color: AppColors.borderOutline.withValues(alpha: 0.3),
+                        color: colors.borderOutline.withValues(alpha: 0.3),
                       ),
                   ],
                 );
@@ -1689,6 +1776,8 @@ class _HarvestRecapBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
+    final badgeAccent = colors.isDark ? AppColors.dewMint : colors.primary;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
@@ -1698,31 +1787,40 @@ class _HarvestRecapBanner extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.emeraldLeaf.withValues(alpha: 0.24),
-              AppColors.cardSurface.withValues(alpha: 0.96),
-            ],
+            colors: colors.isDark
+                ? [
+                    AppColors.emeraldLeaf.withValues(alpha: 0.24),
+                    AppColors.cardSurface.withValues(alpha: 0.96),
+                  ]
+                : [colors.primary.withValues(alpha: 0.08), colors.cardSurface],
           ),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: AppColors.dewMint.withValues(alpha: hasUnread ? 0.55 : 0.26),
+            color: badgeAccent.withValues(alpha: hasUnread ? 0.55 : 0.26),
           ),
+          boxShadow: colors.isDark
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(9),
               decoration: BoxDecoration(
-                color: AppColors.dewMint.withValues(alpha: 0.16),
+                color: badgeAccent.withValues(alpha: 0.16),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: AppColors.dewMint.withValues(alpha: 0.3),
-                ),
+                border: Border.all(color: badgeAccent.withValues(alpha: 0.3)),
               ),
-              child: Image.asset(
-                'assets/icon-compress/094_pie_analytics-kompres.png',
-                width: 20,
-                height: 20,
+              child: AppDuotoneIcon(
+                PhosphorIconsDuotone.chartPieSlice,
+                size: 20,
+                color: badgeAccent,
               ),
             ),
             const SizedBox(width: 12),
@@ -1741,10 +1839,10 @@ class _HarvestRecapBanner extends StatelessWidget {
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.softIvory,
+                            color: colors.textPrimary,
                           ),
                         ),
                       ),
@@ -1756,15 +1854,15 @@ class _HarvestRecapBanner extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.dewMint.withValues(alpha: 0.2),
+                            color: badgeAccent.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             context.tr('Ready'),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.dewMint,
+                              color: badgeAccent,
                             ),
                           ),
                         ),
@@ -1778,20 +1876,13 @@ class _HarvestRecapBanner extends StatelessWidget {
                     }),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 11.5,
-                      color: AppColors.freshSage,
-                    ),
+                    style: TextStyle(fontSize: 11.5, color: colors.textMuted),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.dewMint,
-              size: 20,
-            ),
+            Icon(Icons.chevron_right_rounded, color: badgeAccent, size: 20),
           ],
         ),
       ),
@@ -1800,10 +1891,7 @@ class _HarvestRecapBanner extends StatelessWidget {
 }
 
 class _FinancialRecapSheet extends ConsumerStatefulWidget {
-  const _FinancialRecapSheet({
-    required this.initialType,
-    this.onViewed,
-  });
+  const _FinancialRecapSheet({required this.initialType, this.onViewed});
 
   final PeriodType initialType;
   final VoidCallback? onViewed;
@@ -1840,13 +1928,13 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
       priorPeriod.start,
       completedPeriod.end,
     );
-    final completedTxs =
-        txs.where((t) => completedPeriod.contains(t.date)).toList();
+    final completedTxs = txs
+        .where((t) => completedPeriod.contains(t.date))
+        .toList();
     final priorTxs = txs.where((t) => priorPeriod.contains(t.date)).toList();
 
     final cats = ref.read(categoryMapProvider);
-    final goals =
-        ref.read(savingsGoalsProvider).value ?? const <SavingsGoal>[];
+    final goals = ref.read(savingsGoalsProvider).value ?? const <SavingsGoal>[];
 
     final prefs = ref.read(sharedPreferencesProvider);
     final seenKey = type == PeriodType.weekly
@@ -1868,6 +1956,8 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
+    final recapAccent = colors.isDark ? AppColors.dewMint : colors.primary;
     final maxH = MediaQuery.of(context).size.height * 0.85;
 
     return ConstrainedBox(
@@ -1884,13 +1974,13 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.dewMint.withValues(alpha: 0.16),
+                      color: recapAccent.withValues(alpha: 0.16),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Image.asset(
-                      'assets/icon-compress/094_pie_analytics-kompres.png',
-                      width: 22,
-                      height: 22,
+                    child: AppDuotoneIcon(
+                      PhosphorIconsDuotone.chartPieSlice,
+                      size: 22,
+                      color: recapAccent,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -1902,14 +1992,14 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                           context.tr('Financial Recap'),
                           style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: AppColors.softIvory,
+                            color: colors.textPrimary,
                           ),
                         ),
                         Text(
                           context.tr('Financial Review'),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.freshSage,
+                            color: colors.textMuted,
                           ),
                         ),
                       ],
@@ -1955,7 +2045,8 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                         padding: const EdgeInsets.symmetric(vertical: 28),
                         child: EmptyStateCard(
                           icon: Icons.insights_outlined,
-                          illustrationAsset: 'assets/illustrations/empty_analytics.png',
+                          illustrationAsset:
+                              'assets/illustrations/empty_analytics.png',
                           title: context.tr('No recap activity yet'),
                           subtitle: context.tr(
                             'No transactions were recorded during this completed period.',
@@ -1999,10 +2090,11 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                                         vertical: 3,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: (recap.isDeficit
-                                                ? AppColors.expenseOnDark
-                                                : AppColors.incomeOnDark)
-                                            .withValues(alpha: 0.18),
+                                        color:
+                                            (recap.isDeficit
+                                                    ? colors.onHeroExpense
+                                                    : colors.onHeroIncome)
+                                                .withValues(alpha: 0.18),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Text(
@@ -2016,8 +2108,8 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                                           fontSize: 11,
                                           fontWeight: FontWeight.w800,
                                           color: recap.isDeficit
-                                              ? AppColors.expenseOnDark
-                                              : AppColors.incomeOnDark,
+                                              ? colors.onHeroExpense
+                                              : colors.onHeroIncome,
                                         ),
                                       ),
                                     ),
@@ -2063,8 +2155,8 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                       color: recap.expensePctChange! <= 0
-                                          ? AppColors.incomeOnDark
-                                          : AppColors.expenseOnDark,
+                                          ? colors.onHeroIncome
+                                          : colors.onHeroExpense,
                                     ),
                                   ),
                                 ],
@@ -2076,9 +2168,13 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                                         label: context.tr('Income'),
                                         amount: rupiah(recap.totalIncome),
                                         icon: Icons.arrow_downward_rounded,
-                                        iconColor: AppColors.incomeOnDark,
-                                        bgColor: const Color(0xFF0F221B)
-                                            .withValues(alpha: 0.65),
+                                        iconColor: colors.onHeroIncome,
+                                        bgColor: colors.isDark
+                                            ? const Color(0xFF0F221B)
+                                                  .withValues(alpha: 0.65)
+                                            : Colors.black.withValues(
+                                                alpha: 0.22,
+                                              ),
                                       ),
                                     ),
                                     const SizedBox(width: 10),
@@ -2087,9 +2183,13 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                                         label: context.tr('Expense'),
                                         amount: rupiah(recap.totalExpense),
                                         icon: Icons.arrow_upward_rounded,
-                                        iconColor: AppColors.expenseOnDark,
-                                        bgColor: const Color(0xFF0F221B)
-                                            .withValues(alpha: 0.65),
+                                        iconColor: colors.onHeroExpense,
+                                        bgColor: colors.isDark
+                                            ? const Color(0xFF0F221B)
+                                                  .withValues(alpha: 0.65)
+                                            : Colors.black.withValues(
+                                                alpha: 0.22,
+                                              ),
                                       ),
                                     ),
                                   ],
@@ -2102,7 +2202,7 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                             Text(
                               context.tr('Top Categories'),
                               style: theme.textTheme.labelLarge?.copyWith(
-                                color: AppColors.dewMint,
+                                color: recapAccent,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
@@ -2110,9 +2210,11 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                             AppCard(
                               child: Column(
                                 children: [
-                                  for (int i = 0;
-                                      i < recap.topCategories.length;
-                                      i++)
+                                  for (
+                                    int i = 0;
+                                    i < recap.topCategories.length;
+                                    i++
+                                  )
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 6,
@@ -2140,17 +2242,17 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                                                   context.tr(
                                                     recap.topCategories[i].name,
                                                   ),
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontWeight: FontWeight.w700,
                                                     fontSize: 13.5,
-                                                    color: AppColors.softIvory,
+                                                    color: colors.textPrimary,
                                                   ),
                                                 ),
                                                 Text(
                                                   '${recap.topCategories[i].txCount} ${context.tr('transactions')} • ${recap.topCategories[i].percentage.toStringAsFixed(0)}%',
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontSize: 11,
-                                                    color: AppColors.freshSage,
+                                                    color: colors.textMuted,
                                                   ),
                                                 ),
                                               ],
@@ -2163,7 +2265,7 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                                             style: context.moneyStyle(
                                               fontSize: 13.5,
                                               fontWeight: FontWeight.w800,
-                                              color: AppColors.softIvory,
+                                              color: colors.textPrimary,
                                             ),
                                           ),
                                         ],
@@ -2182,16 +2284,16 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                                 children: [
                                   Text(
                                     '${context.tr('Needs')}: $needPct%',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.w700,
-                                      color: AppColors.incomeOnDark,
+                                      color: colors.income,
                                     ),
                                   ),
                                   Text(
                                     '${context.tr('Wants')}: $wantPct%',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.w700,
-                                      color: AppColors.warning,
+                                      color: colors.warning,
                                     ),
                                   ),
                                 ],
@@ -2217,7 +2319,7 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                                   },
                                 ),
                                 icon: Icons.trending_down_rounded,
-                                accentColor: AppColors.incomeOnDark,
+                                accentColor: colors.income,
                               ),
                             ),
                           ],
@@ -2240,7 +2342,7 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                                   },
                                 ),
                                 icon: Icons.trending_up_rounded,
-                                accentColor: AppColors.warning,
+                                accentColor: colors.warning,
                               ),
                             ),
                           ],
@@ -2256,17 +2358,17 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                                     children: [
                                       Text(
                                         context.tr('Savings Goals Progress'),
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontWeight: FontWeight.w700,
                                           fontSize: 13,
-                                          color: AppColors.softIvory,
+                                          color: colors.textPrimary,
                                         ),
                                       ),
                                       Text(
                                         '${recap.activeGoalsCount} ${context.tr('Goals')}',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 11.5,
-                                          color: AppColors.freshSage,
+                                          color: colors.textMuted,
                                         ),
                                       ),
                                     ],
@@ -2275,11 +2377,14 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                                   AppProgressBar(
                                     value: recap.goalsTargetTotal > 0
                                         ? recap.goalsSavedTotal /
-                                            recap.goalsTargetTotal
+                                              recap.goalsTargetTotal
                                         : 0,
-                                    color: AppColors.dewMint,
-                                    backgroundColor:
-                                        AppColors.mossShadow.withValues(alpha: 0.6),
+                                    color: recapAccent,
+                                    backgroundColor: colors.isDark
+                                        ? AppColors.mossShadow.withValues(
+                                            alpha: 0.6,
+                                          )
+                                        : colors.surfaceContainer,
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
@@ -2287,7 +2392,7 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
                                     style: context.moneyStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w700,
-                                      color: AppColors.dewMint,
+                                      color: recapAccent,
                                     ),
                                   ),
                                 ],
@@ -2308,13 +2413,36 @@ class _FinancialRecapSheetState extends ConsumerState<_FinancialRecapSheet> {
   }
 }
 
-(String labelKey, Color color) _vitalityTierMeta(VitalityTier tier) {
+(String labelKey, Color color) _vitalityTierMeta(
+  BuildContext context,
+  VitalityTier tier, {
+  bool onHero = false,
+}) {
+  final colors = context.themeColors;
+  if (onHero) {
+    return switch (tier) {
+      VitalityTier.thriving => ('Thriving', colors.onHeroIncome),
+      VitalityTier.steadyGrowth => (
+        'Steady Growth',
+        colors.isDark ? AppColors.dewMint : AppColors.goldenYellow,
+      ),
+      VitalityTier.needsCare => (
+        'Needs Care',
+        colors.isDark ? AppColors.warning : const Color(0xFFFCD34D),
+      ),
+      VitalityTier.fragile => ('Fragile', colors.onHeroExpense),
+      VitalityTier.starter => (
+        'Starter',
+        colors.isDark ? AppColors.freshSage : Colors.white70,
+      ),
+    };
+  }
   return switch (tier) {
-    VitalityTier.thriving => ('Thriving', AppColors.incomeOnDark),
-    VitalityTier.steadyGrowth => ('Steady Growth', AppColors.dewMint),
-    VitalityTier.needsCare => ('Needs Care', AppColors.warning),
-    VitalityTier.fragile => ('Fragile', AppColors.expenseOnDark),
-    VitalityTier.starter => ('Starter', AppColors.freshSage),
+    VitalityTier.thriving => ('Thriving', colors.income),
+    VitalityTier.steadyGrowth => ('Steady Growth', colors.accentSecondary),
+    VitalityTier.needsCare => ('Needs Care', colors.warning),
+    VitalityTier.fragile => ('Fragile', colors.expense),
+    VitalityTier.starter => ('Starter', colors.textMuted),
   };
 }
 
@@ -2331,7 +2459,8 @@ class _NetWorthVitalityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (tierKey, tierColor) = _vitalityTierMeta(vitality.tier);
+    final colors = context.themeColors;
+    final (tierKey, tierColor) = _vitalityTierMeta(context, vitality.tier);
     return AppCard(
       onTap: onTap,
       child: Column(
@@ -2339,11 +2468,17 @@ class _NetWorthVitalityCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Image.asset(
-                'assets/new_asset/props/prop_11.png',
-                width: 32,
-                height: 32,
-                fit: BoxFit.contain,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: colors.primary.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: AppDuotoneIcon(
+                  PhosphorIconsDuotone.sparkle,
+                  size: 22,
+                  color: colors.primary,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -2352,10 +2487,10 @@ class _NetWorthVitalityCard extends StatelessWidget {
                   children: [
                     Text(
                       context.tr('Net Worth'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.freshSage,
+                        color: colors.textMuted,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -2365,29 +2500,30 @@ class _NetWorthVitalityCard extends StatelessWidget {
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
                         color: netWorth.netWorth >= 0
-                            ? AppColors.softIvory
-                            : AppColors.expenseOnDark,
+                            ? colors.textPrimary
+                            : colors.expense,
                       ),
                     ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: tierColor.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: tierColor.withValues(alpha: 0.38),
-                  ),
+                  border: Border.all(color: tierColor.withValues(alpha: 0.38)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-                      'assets/icons/vice_city/investment.png',
-                      width: 16,
-                      height: 16,
+                    AppDuotoneIcon(
+                      PhosphorIconsDuotone.plant,
+                      size: 16,
+                      color: tierColor,
                     ),
                     const SizedBox(width: 6),
                     Column(
@@ -2426,19 +2562,19 @@ class _NetWorthVitalityCard extends StatelessWidget {
               _NetWorthChip(
                 label: context.tr('Liquid Assets'),
                 amount: rupiah(netWorth.liquidAssets),
-                color: AppColors.dewMint,
+                color: colors.accentSecondary,
               ),
               if (netWorth.receivables > 0)
                 _NetWorthChip(
                   label: context.tr('Receivables'),
                   amount: '+${rupiah(netWorth.receivables)}',
-                  color: AppColors.incomeOnDark,
+                  color: colors.income,
                 ),
               if (netWorth.liabilities > 0)
                 _NetWorthChip(
                   label: context.tr('Liabilities'),
                   amount: '-${rupiah(netWorth.liabilities)}',
-                  color: AppColors.expenseOnDark,
+                  color: colors.expense,
                 ),
             ],
           ),
@@ -2455,16 +2591,13 @@ class _NetWorthVitalityCard extends StatelessWidget {
                       : context.tr(
                           'Record activity to unlock your Financial Health Score',
                         ),
-                  style: const TextStyle(
-                    fontSize: 11.5,
-                    color: AppColors.freshSage,
-                  ),
+                  style: TextStyle(fontSize: 11.5, color: colors.textMuted),
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
                 size: 18,
-                color: AppColors.freshSage,
+                color: colors.textMuted,
               ),
             ],
           ),
@@ -2487,12 +2620,13 @@ class _NetWorthChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           '$label: ',
-          style: const TextStyle(fontSize: 11.5, color: AppColors.freshSage),
+          style: TextStyle(fontSize: 11.5, color: colors.textMuted),
         ),
         Text(
           amount,
@@ -2508,17 +2642,20 @@ class _NetWorthChip extends StatelessWidget {
 }
 
 class _VitalityDetailsSheet extends StatelessWidget {
-  const _VitalityDetailsSheet({
-    required this.netWorth,
-    required this.vitality,
-  });
+  const _VitalityDetailsSheet({required this.netWorth, required this.vitality});
 
   final NetWorthSummary netWorth;
   final VitalityScoreSummary vitality;
 
   @override
   Widget build(BuildContext context) {
-    final (tierKey, tierColor) = _vitalityTierMeta(vitality.tier);
+    final colors = context.themeColors;
+    final (tierKey, tierColor) = _vitalityTierMeta(
+      context,
+      vitality.tier,
+      onHero: true,
+    );
+    final pillarAccent = colors.isDark ? AppColors.dewMint : colors.primary;
     final maxH = MediaQuery.of(context).size.height * 0.84;
 
     return ConstrainedBox(
@@ -2532,19 +2669,18 @@ class _VitalityDetailsSheet extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Image.asset(
-                      'assets/new_asset/props/prop_11.png',
-                      width: 24,
-                      height: 24,
-                      fit: BoxFit.contain,
+                    AppDuotoneIcon(
+                      PhosphorIconsDuotone.sparkle,
+                      size: 22,
+                      color: pillarAccent,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       context.tr('Net Worth & Vitality Score'),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.softIvory,
-                          ),
+                        fontWeight: FontWeight.w800,
+                        color: colors.textPrimary,
+                      ),
                     ),
                   ],
                 ),
@@ -2586,7 +2722,9 @@ class _VitalityDetailsSheet extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        vitality.hasEnoughData ? '${vitality.score} / 100' : '-- / 100',
+                        vitality.hasEnoughData
+                            ? '${vitality.score} / 100'
+                            : '-- / 100',
                         style: context.moneyStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w800,
@@ -2595,7 +2733,9 @@ class _VitalityDetailsSheet extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       AppProgressBar(
-                        value: vitality.hasEnoughData ? vitality.score / 100.0 : 0.0,
+                        value: vitality.hasEnoughData
+                            ? vitality.score / 100.0
+                            : 0.0,
                         color: tierColor,
                         backgroundColor: Colors.white.withValues(alpha: 0.14),
                       ),
@@ -2609,40 +2749,40 @@ class _VitalityDetailsSheet extends StatelessWidget {
                     children: [
                       Text(
                         context.tr('Net Worth Breakdown'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 13.5,
-                          color: AppColors.softIvory,
+                          color: colors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 10),
                       _NetWorthLine(
                         label: context.tr('Liquid Assets'),
                         amount: rupiah(netWorth.liquidAssets),
-                        color: AppColors.dewMint,
+                        color: colors.accentSecondary,
                       ),
                       const SizedBox(height: 6),
                       _NetWorthLine(
                         label: context.tr('Receivables'),
                         amount: '+${rupiah(netWorth.receivables)}',
-                        color: AppColors.incomeOnDark,
+                        color: colors.income,
                       ),
                       const SizedBox(height: 6),
                       _NetWorthLine(
                         label: context.tr('Liabilities'),
                         amount: '-${rupiah(netWorth.liabilities)}',
-                        color: AppColors.expenseOnDark,
+                        color: colors.expense,
                       ),
                       Divider(
                         height: 18,
-                        color: AppColors.borderOutline.withValues(alpha: 0.35),
+                        color: colors.borderOutline.withValues(alpha: 0.35),
                       ),
                       _NetWorthLine(
                         label: context.tr('Net Worth'),
                         amount: rupiah(netWorth.netWorth),
                         color: netWorth.netWorth >= 0
-                            ? AppColors.softIvory
-                            : AppColors.expenseOnDark,
+                            ? colors.textPrimary
+                            : colors.expense,
                         bold: true,
                       ),
                       if (netWorth.allocatedGoalReserve > 0) ...[
@@ -2652,9 +2792,9 @@ class _VitalityDetailsSheet extends StatelessWidget {
                             'Allocated to Savings Goals: {amount} (already tracked inside accounts or virtual reserve).',
                             {'amount': rupiah(netWorth.allocatedGoalReserve)},
                           ),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11.5,
-                            color: AppColors.freshSage,
+                            color: colors.textMuted,
                           ),
                         ),
                       ],
@@ -2664,10 +2804,10 @@ class _VitalityDetailsSheet extends StatelessWidget {
                 const SizedBox(height: 14),
                 Text(
                   context.tr('Vitality Pillars'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 13.5,
-                    color: AppColors.softIvory,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -2685,10 +2825,10 @@ class _VitalityDetailsSheet extends StatelessWidget {
                               children: [
                                 Text(
                                   context.tr(p.labelKey),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 13.5,
-                                    color: AppColors.softIvory,
+                                    color: colors.textPrimary,
                                   ),
                                 ),
                                 Text(
@@ -2699,8 +2839,8 @@ class _VitalityDetailsSheet extends StatelessWidget {
                                     fontSize: 12.5,
                                     fontWeight: FontWeight.w800,
                                     color: p.active
-                                        ? AppColors.dewMint
-                                        : AppColors.freshSage,
+                                        ? pillarAccent
+                                        : colors.textMuted,
                                   ),
                                 ),
                               ],
@@ -2709,19 +2849,20 @@ class _VitalityDetailsSheet extends StatelessWidget {
                             AppProgressBar(
                               value: p.active ? p.ratio : 0.0,
                               color: p.ratio >= 0.7
-                                  ? AppColors.incomeOnDark
+                                  ? colors.income
                                   : (p.ratio >= 0.4
-                                      ? AppColors.warning
-                                      : AppColors.expenseOnDark),
-                              backgroundColor:
-                                  AppColors.mossShadow.withValues(alpha: 0.6),
+                                        ? colors.warning
+                                        : colors.expense),
+                              backgroundColor: colors.isDark
+                                  ? AppColors.mossShadow.withValues(alpha: 0.6)
+                                  : colors.surfaceContainer,
                             ),
                             const SizedBox(height: 6),
                             Text(
                               context.tr(p.detailKey, p.detailArgs),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11.5,
-                                color: AppColors.freshSage,
+                                color: colors.textMuted,
                               ),
                             ),
                           ],
@@ -2753,6 +2894,7 @@ class _NetWorthLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -2761,7 +2903,7 @@ class _NetWorthLine extends StatelessWidget {
           style: TextStyle(
             fontSize: bold ? 13.5 : 12.5,
             fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
-            color: bold ? AppColors.softIvory : AppColors.freshSage,
+            color: bold ? colors.textPrimary : colors.textMuted,
           ),
         ),
         Text(

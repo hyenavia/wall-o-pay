@@ -132,6 +132,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     final user = ref.watch(currentUserProvider);
     final username = ref.watch(usernameProvider);
 
@@ -154,9 +155,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(48, 44),
-                    foregroundColor: AppColors.softWhite,
+                    foregroundColor: colors.textPrimary,
                     side: BorderSide(
-                      color: AppColors.neonCyan.withValues(alpha: 0.45),
+                      color: colors.accentSecondary.withValues(alpha: 0.45),
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -166,10 +167,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       vertical: 10,
                     ),
                   ),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.auto_fix_high_rounded,
                     size: 18,
-                    color: AppColors.neonCyan,
+                    color: colors.accentSecondary,
                   ),
                   onPressed: () => _showPhotoBottomSheet(context),
                   label: Text(context.tr('Customize Avatar & Frame')),
@@ -198,20 +199,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   const SizedBox(height: 8),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(
+                    leading: Icon(
                       Icons.alternate_email,
-                      color: AppColors.freshSage,
+                      color: colors.textMuted,
                     ),
                     title: Text(
                       username,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.softIvory,
+                        color: colors.textPrimary,
                       ),
                     ),
                     subtitle: Text(
                       context.tr('Username'),
-                      style: const TextStyle(color: AppColors.freshSage),
+                      style: TextStyle(color: colors.textMuted),
                     ),
                   ),
                 ],
@@ -219,20 +220,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   const SizedBox(height: 4),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(
+                    leading: Icon(
                       Icons.mail_outline,
-                      color: AppColors.freshSage,
+                      color: colors.textMuted,
                     ),
                     title: Text(
                       user!.email!,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.softIvory,
+                        color: colors.textPrimary,
                       ),
                     ),
                     subtitle: Text(
                       context.tr('Email'),
-                      style: const TextStyle(color: AppColors.freshSage),
+                      style: TextStyle(color: colors.textMuted),
                     ),
                   ),
                 ],
@@ -243,21 +244,27 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         ? 'You are in Guest mode. Your profile is saved locally on this device.'
                         : 'Your username is used to log in and cannot be changed.',
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.freshSage,
+                    color: colors.textMuted,
                   ),
                 ),
                 const SizedBox(height: 18),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.glasshouseGreen,
-                    foregroundColor: AppColors.softIvory,
+                    backgroundColor: colors.isDark
+                        ? AppColors.glasshouseGreen
+                        : colors.primary,
+                    foregroundColor: colors.isDark
+                        ? AppColors.softIvory
+                        : colors.onPrimary,
                     minimumSize: const Size.fromHeight(48),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                       side: BorderSide(
-                        color: AppColors.dewMint.withValues(alpha: 0.35),
+                        color: colors.isDark
+                            ? AppColors.dewMint.withValues(alpha: 0.35)
+                            : colors.primary,
                         width: 1,
                       ),
                     ),
@@ -310,6 +317,8 @@ class _ProfileCustomizeSheetState
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
+    final selBorder = colors.isDark ? AppColors.goldenYellow : colors.primary;
     final profile = ref.watch(profileProvider);
     final hasPhoto = profile.photo != null;
     final currentFrameId = profile.frameId;
@@ -321,7 +330,7 @@ class _ProfileCustomizeSheetState
     final previewFrameAsset = profileFrameAssetPath(_pendingFrameId);
     final Widget previewAvatarCore = CircleAvatar(
       radius: 34,
-      backgroundColor: AppColors.surfaceContainer,
+      backgroundColor: colors.surfaceContainer,
       child: _pendingChibiAsset != null
           ? ClipOval(
               child: Image.asset(
@@ -378,11 +387,11 @@ class _ProfileCustomizeSheetState
         constraints: BoxConstraints(maxHeight: maxH),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColors.midnightNavy,
+            color: colors.isDark ? AppColors.midnightNavy : colors.bg,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             border: Border(
               top: BorderSide(
-                color: AppColors.borderOutline.withValues(alpha: 0.9),
+                color: colors.borderOutline.withValues(alpha: 0.9),
                 width: 1.2,
               ),
             ),
@@ -395,7 +404,7 @@ class _ProfileCustomizeSheetState
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.mutedBlueGray.withValues(alpha: 0.4),
+                  color: colors.textMuted.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -406,18 +415,18 @@ class _ProfileCustomizeSheetState
                     Expanded(
                       child: Text(
                         context.tr('Customize Avatar & Frame'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.softWhite,
+                          color: colors.textPrimary,
                         ),
                       ),
                     ),
                     if (hasPhoto)
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.delete_outline_rounded,
-                          color: AppColors.expenseOnDark,
+                          color: colors.expense,
                         ),
                         tooltip: context.tr('Remove photo'),
                         onPressed: () {
@@ -426,9 +435,9 @@ class _ProfileCustomizeSheetState
                         },
                       ),
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.close_rounded,
-                        color: AppColors.softWhite,
+                        color: colors.textPrimary,
                       ),
                       tooltip: context.tr('Close'),
                       onPressed: () => Navigator.of(context).pop(),
@@ -509,15 +518,16 @@ class _ProfileCustomizeSheetState
                                   padding: const EdgeInsets.all(4),
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? AppColors.sunsetMagenta
-                                            .withValues(alpha: 0.16)
-                                        : AppColors.deepNavy,
+                                        ? colors.primary.withValues(alpha: 0.14)
+                                        : colors.cardSurface,
                                     borderRadius: BorderRadius.circular(16),
                                     border: Border.all(
                                       color: isSelected
-                                          ? AppColors.goldenYellow
-                                          : AppColors.neonCyan
-                                              .withValues(alpha: 0.30),
+                                          ? selBorder
+                                          : colors.isDark
+                                              ? AppColors.neonCyan
+                                                  .withValues(alpha: 0.30)
+                                              : colors.borderOutline,
                                       width: isSelected ? 2.0 : 1.0,
                                     ),
                                   ),
@@ -564,14 +574,13 @@ class _ProfileCustomizeSheetState
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
                                     color: isSelected
-                                        ? AppColors.sunsetMagenta
-                                            .withValues(alpha: 0.16)
-                                        : AppColors.deepNavy,
+                                        ? colors.primary.withValues(alpha: 0.14)
+                                        : colors.cardSurface,
                                     borderRadius: BorderRadius.circular(16),
                                     border: Border.all(
                                       color: isSelected
-                                          ? AppColors.goldenYellow
-                                          : AppColors.borderOutline,
+                                          ? selBorder
+                                          : colors.borderOutline,
                                       width: isSelected ? 2.0 : 1.0,
                                     ),
                                   ),
@@ -584,8 +593,8 @@ class _ProfileCustomizeSheetState
                                                 Icons.block_rounded,
                                                 size: 32,
                                                 color: isSelected
-                                                    ? AppColors.goldenYellow
-                                                    : AppColors.mutedBlueGray,
+                                                    ? selBorder
+                                                    : colors.textMuted,
                                               )
                                             : Image.asset(
                                                 profileFrameAssetPath(id)!,
@@ -603,8 +612,8 @@ class _ProfileCustomizeSheetState
                                               ? FontWeight.w700
                                               : FontWeight.w500,
                                           color: isSelected
-                                              ? AppColors.softWhite
-                                              : AppColors.mutedBlueGray,
+                                              ? colors.textPrimary
+                                              : colors.textMuted,
                                         ),
                                       ),
                                     ],
@@ -619,10 +628,10 @@ class _ProfileCustomizeSheetState
               Container(
                 padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
                 decoration: BoxDecoration(
-                  color: AppColors.deepNavy,
+                  color: colors.cardSurface,
                   border: Border(
                     top: BorderSide(
-                      color: AppColors.borderOutline.withValues(alpha: 0.8),
+                      color: colors.borderOutline.withValues(alpha: 0.8),
                     ),
                   ),
                 ),
@@ -644,10 +653,10 @@ class _ProfileCustomizeSheetState
                                   }),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.softWhite,
+                              color: colors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -660,8 +669,8 @@ class _ProfileCustomizeSheetState
                             style: TextStyle(
                               fontSize: 12,
                               color: hasPendingChanges
-                                  ? AppColors.neonCyan
-                                  : AppColors.mutedBlueGray,
+                                  ? colors.accentSecondary
+                                  : colors.textMuted,
                             ),
                           ),
                         ],
@@ -674,9 +683,9 @@ class _ProfileCustomizeSheetState
                           Navigator.of(context).pop();
                           widget.onViewPhoto();
                         },
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.visibility_outlined,
-                          color: AppColors.neonCyan,
+                          color: colors.accentSecondary,
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -712,12 +721,12 @@ class _ProfileCustomizeSheetState
                               }
                             },
                       child: _saving
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: AppColors.midnightNavy,
+                                color: colors.onPrimary,
                               ),
                             )
                           : Text(
@@ -750,29 +759,30 @@ class _CustomizeActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
-          color: AppColors.surfaceContainer.withValues(alpha: 0.75),
+          color: colors.surfaceContainer.withValues(alpha: 0.75),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.borderOutline),
+          border: Border.all(color: colors.borderOutline),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 24, color: AppColors.neonCyan),
+            Icon(icon, size: 24, color: colors.accentSecondary),
             const SizedBox(height: 4),
             Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w600,
-                color: AppColors.softWhite,
+                color: colors.textPrimary,
               ),
             ),
           ],
@@ -795,6 +805,8 @@ class _PhotoActionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
+    final accent = colors.isDark ? AppColors.dewMint : colors.primary;
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: onTap,
@@ -808,21 +820,21 @@ class _PhotoActionItem extends StatelessWidget {
               height: 56,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.dewMint.withValues(alpha: 0.12),
+                color: accent.withValues(alpha: 0.12),
                 border: Border.all(
-                  color: AppColors.dewMint.withValues(alpha: 0.35),
+                  color: accent.withValues(alpha: 0.35),
                   width: 1.0,
                 ),
               ),
-              child: Icon(icon, color: AppColors.dewMint, size: 26),
+              child: Icon(icon, color: accent, size: 26),
             ),
             const SizedBox(height: 8),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: AppColors.softIvory,
+                color: colors.textPrimary,
               ),
             ),
           ],

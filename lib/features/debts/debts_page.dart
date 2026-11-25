@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
 import '../../core/format.dart';
 import '../../core/icons.dart';
@@ -81,6 +82,7 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     final debtsAsync = ref.watch(debtsProvider);
 
     return Scaffold(
@@ -90,10 +92,10 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
         actions: [
           IconButton(
             tooltip: context.tr('Split a bill'),
-            icon: Image.asset(
-              'assets/icon-compress/106_users_group-kompres.png',
-              width: 24,
-              height: 24,
+            icon: const AppDuotoneIcon(
+              PhosphorIconsDuotone.handshake,
+              size: 22,
+              color: Colors.white,
             ),
             onPressed: () => showSplitSheet(context),
           ),
@@ -147,11 +149,17 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
               SegmentedButton<DebtDirection>(
                 showSelectedIcon: false,
                 style: SegmentedButton.styleFrom(
-                  selectedBackgroundColor: AppColors.dewMint.withValues(alpha: 0.22),
-                  selectedForegroundColor: AppColors.dewMint,
-                  foregroundColor: AppColors.freshSage,
+                  selectedBackgroundColor: colors.isDark
+                      ? AppColors.dewMint.withValues(alpha: 0.22)
+                      : colors.primary,
+                  selectedForegroundColor:
+                      colors.isDark ? AppColors.dewMint : colors.onPrimary,
+                  foregroundColor:
+                      colors.isDark ? AppColors.freshSage : colors.textPrimary,
                   side: BorderSide(
-                    color: AppColors.dewMint.withValues(alpha: 0.25),
+                    color: colors.isDark
+                        ? AppColors.dewMint.withValues(alpha: 0.25)
+                        : colors.inputBorder,
                   ),
                 ),
                 segments: [
@@ -176,7 +184,7 @@ class _DebtsPageState extends ConsumerState<DebtsPage> {
               const SizedBox(height: 8),
               Text(
                 context.tr('Debts are a separate ledger and do not change your account balances.'),
-                style: const TextStyle(fontSize: 12, color: AppColors.freshSage),
+                style: TextStyle(fontSize: 12, color: colors.textMuted),
               ),
               const SizedBox(height: 12),
               if (list.isEmpty)
@@ -243,6 +251,8 @@ class _DebtCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
+    final activeAccent = colors.isDark ? AppColors.dewMint : colors.primary;
     final left = debt.amount - debt.paidAmount;
     final done = left <= 0;
     final ratio = debt.amount == 0 ? 0.0 : debt.paidAmount / debt.amount;
@@ -261,7 +271,7 @@ class _DebtCard extends StatelessWidget {
               children: [
                 CategoryBadge(
                   icon: done ? Icons.check : Icons.person_outline,
-                  color: done ? AppColors.incomeOnDark : AppColors.dewMint,
+                  color: done ? colors.income : activeAccent,
                   size: 40,
                 ),
                 const SizedBox(width: 12),
@@ -271,10 +281,10 @@ class _DebtCard extends StatelessWidget {
                     children: [
                       Text(
                         debt.person,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
-                          color: AppColors.softIvory,
+                          color: colors.textPrimary,
                         ),
                       ),
                       if (debt.note.isNotEmpty)
@@ -282,9 +292,9 @@ class _DebtCard extends StatelessWidget {
                           debt.note,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.freshSage,
+                            color: colors.textMuted,
                           ),
                         ),
                     ],
@@ -293,15 +303,15 @@ class _DebtCard extends StatelessWidget {
                 Text(
                   done ? context.tr('Settled') : rupiah(left),
                   style: done
-                      ? const TextStyle(
+                      ? TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.incomeOnDark,
+                          color: colors.income,
                         )
                       : context.moneyStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.softIvory,
+                          color: colors.textPrimary,
                         ),
                 ),
               ],
@@ -309,8 +319,10 @@ class _DebtCard extends StatelessWidget {
             const SizedBox(height: 10),
             AppProgressBar(
               value: ratio,
-              color: done ? AppColors.incomeOnDark : AppColors.dewMint,
-              backgroundColor: AppColors.mossShadow.withValues(alpha: 0.6),
+              color: done ? colors.income : activeAccent,
+              backgroundColor: colors.isDark
+                  ? AppColors.mossShadow.withValues(alpha: 0.6)
+                  : colors.surfaceContainer,
             ),
             const SizedBox(height: 6),
             Row(
@@ -321,10 +333,10 @@ class _DebtCard extends StatelessWidget {
                       'paid': rupiah(debt.paidAmount),
                       'total': rupiah(debt.amount),
                     }),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
-                      color: AppColors.freshSage,
-                      fontFeatures: [FontFeature.tabularFigures()],
+                      color: colors.textMuted,
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
                 ),
@@ -333,7 +345,7 @@ class _DebtCard extends StatelessWidget {
                     context.tr('Due {date}', {'date': shortDate(debt.dueDate!)}),
                     style: TextStyle(
                       fontSize: 11,
-                      color: overdue ? AppColors.expenseOnDark : AppColors.freshSage,
+                      color: overdue ? colors.expense : colors.textMuted,
                       fontWeight: overdue ? FontWeight.w700 : FontWeight.w500,
                     ),
                   ),
@@ -388,6 +400,7 @@ class _DebtDetail extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
     final muted = theme.colorScheme.onSurface.withValues(alpha: 0.6);
     final liveDebt = (ref.watch(debtsProvider).value ?? const <Debt>[])
         .firstWhere((d) => d.id == debt.id, orElse: () => debt);
@@ -490,10 +503,10 @@ class _DebtDetail extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: AppColors.incomeOnDark.withValues(alpha: 0.12),
+                    color: colors.income.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: AppColors.incomeOnDark.withValues(alpha: 0.35),
+                      color: colors.income.withValues(alpha: 0.35),
                     ),
                   ),
                   child: Row(
@@ -510,10 +523,10 @@ class _DebtDetail extends ConsumerWidget {
                           children: [
                             Text(
                               context.tr('Debt Settled!'),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w800,
                                 fontSize: 15,
-                                color: AppColors.incomeOnDark,
+                                color: colors.income,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -534,7 +547,7 @@ class _DebtDetail extends ConsumerWidget {
                   context.tr('Payment History'),
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.dewMint,
+                    color: colors.isDark ? AppColors.dewMint : colors.primary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -543,10 +556,14 @@ class _DebtDetail extends ConsumerWidget {
                     margin: const EdgeInsets.only(bottom: 6),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceContainer.withValues(alpha: 0.72),
+                      color: colors.surfaceContainer.withValues(
+                        alpha: colors.isDark ? 0.72 : 0.85,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: AppColors.dewMint.withValues(alpha: 0.14),
+                        color: colors.isDark
+                            ? AppColors.dewMint.withValues(alpha: 0.14)
+                            : colors.borderOutline,
                       ),
                     ),
                     child: Row(
@@ -557,18 +574,18 @@ class _DebtDetail extends ConsumerWidget {
                             children: [
                               Text(
                                 shortDate(p.date),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 12.5,
-                                  color: AppColors.softIvory,
+                                  color: colors.textPrimary,
                                 ),
                               ),
                               if (p.walletId != null && wallets[p.walletId!] != null)
                                 Text(
                                   context.tr(wallets[p.walletId!]!.name),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 11,
-                                    color: AppColors.freshSage,
+                                    color: colors.textMuted,
                                   ),
                                 ),
                             ],
@@ -579,16 +596,16 @@ class _DebtDetail extends ConsumerWidget {
                           style: context.moneyStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.incomeOnDark,
+                            color: colors.income,
                           ),
                         ),
                         IconButton(
                           tooltip: context.tr('Delete payment'),
                           visualDensity: VisualDensity.compact,
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.delete_outline,
                             size: 18,
-                            color: AppColors.freshSage,
+                            color: colors.textMuted,
                           ),
                           onPressed: () async {
                             final db = ref.read(databaseProvider);
@@ -1170,7 +1187,9 @@ class _SplitSheetState extends ConsumerState<_SplitSheet> {
                     fontWeight: FontWeight.w700,
                     color: customMyShare < 0
                         ? context.themeColors.expense
-                        : AppColors.dewMint,
+                        : (context.isDarkMode
+                            ? AppColors.dewMint
+                            : context.themeColors.primary),
                   ),
                 ),
             ],

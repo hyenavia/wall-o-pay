@@ -36,12 +36,13 @@ class TransactionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
     final isIncome = entry.type == TxType.income;
     final isTransfer = entry.type == TxType.transfer;
 
     final catName = categoryName(context, category);
     final color = isTransfer
-        ? const Color(0xFF00897B)
+        ? colors.transfer
         : Color(category?.colorValue ?? 0xFF607D8B);
 
     final title = isTransfer
@@ -58,7 +59,7 @@ class TransactionTile extends StatelessWidget {
       subtitle = (entry.note.isEmpty ? context.tr(isIncome ? 'Income' : 'Expense') : catName) + wName;
     }
 
-    final muted = AppColors.freshSage.withValues(alpha: 0.75);
+    final muted = colors.textMuted;
 
     return MergeSemantics(
       child: Semantics(
@@ -86,7 +87,7 @@ class TransactionTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.softIvory,
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -111,8 +112,8 @@ class TransactionTile extends StatelessWidget {
                     fontSize: 14.5,
                     fontWeight: FontWeight.w800,
                     color: isTransfer
-                        ? const Color(0xFF5EEAD4)
-                        : (isIncome ? AppColors.incomeOnDark : AppColors.expenseOnDark),
+                        ? colors.transfer
+                        : (isIncome ? colors.income : colors.expense),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -120,7 +121,11 @@ class TransactionTile extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (entry.receiptPath != null) ...[
-                      Icon(Icons.receipt_long_rounded, size: 13, color: AppColors.dewMint.withValues(alpha: 0.85)),
+                      Icon(
+                        Icons.receipt_long_rounded,
+                        size: 13,
+                        color: colors.highlightGold.withValues(alpha: 0.85),
+                      ),
                       const SizedBox(width: 3),
                     ],
                     Text(
@@ -148,10 +153,11 @@ class TransactionGroupCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     final divider = Divider(
       height: 1,
       indent: 70,
-      color: AppColors.borderOutline.withValues(alpha: 0.55),
+      color: colors.borderOutline.withValues(alpha: colors.isDark ? 0.55 : 0.90),
     );
     return AppCard(
       padding: EdgeInsets.zero,

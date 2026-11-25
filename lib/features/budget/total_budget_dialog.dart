@@ -50,13 +50,14 @@ Future<void> showTotalBudgetDialog(
           // Kustom: hitung sisa yang belum teralokasi
           final allocatedCustom = needsVal + wantsVal + savingsVal;
           final remainingToAllocate = totalVal - allocatedCustom;
+          final colors = ctx.themeColors;
 
           return AlertDialog(
-            backgroundColor: AppColors.mossShadow,
+            backgroundColor: colors.cardSurface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(28),
               side: BorderSide(
-                color: AppColors.dewMint.withValues(alpha: 0.25),
+                color: colors.borderOutline,
                 width: 1,
               ),
             ),
@@ -66,10 +67,10 @@ Future<void> showTotalBudgetDialog(
                   width: 38,
                   height: 38,
                   decoration: BoxDecoration(
-                    color: AppColors.dewMint.withValues(alpha: 0.16),
+                    color: colors.primary.withValues(alpha: 0.14),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: AppColors.dewMint.withValues(alpha: 0.35),
+                      color: colors.primary.withValues(alpha: 0.35),
                       width: 1,
                     ),
                   ),
@@ -84,10 +85,10 @@ Future<void> showTotalBudgetDialog(
                 Expanded(
                   child: Text(
                     context.tr('Total Budget'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 18,
-                      color: AppColors.softIvory,
+                      color: colors.textPrimary,
                     ),
                   ),
                 ),
@@ -101,11 +102,11 @@ Future<void> showTotalBudgetDialog(
                   // Mode Toggle: Standar 50/30/20 vs Kustom Nominal
                   SegmentedButton<int>(
                     style: SegmentedButton.styleFrom(
-                      selectedBackgroundColor: AppColors.dewMint.withValues(alpha: 0.25),
-                      selectedForegroundColor: AppColors.dewMint,
-                      foregroundColor: AppColors.freshSage,
+                      selectedBackgroundColor: colors.primary,
+                      selectedForegroundColor: colors.onPrimary,
+                      foregroundColor: colors.textPrimary,
                       side: BorderSide(
-                        color: AppColors.dewMint.withValues(alpha: 0.25),
+                        color: colors.inputBorder,
                       ),
                     ),
                     segments: [
@@ -137,10 +138,10 @@ Future<void> showTotalBudgetDialog(
                   // Input Total Anggaran
                   Text(
                     context.tr('Total Budget'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 12,
-                      color: AppColors.softIvory,
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -149,42 +150,40 @@ Future<void> showTotalBudgetDialog(
                     keyboardType: TextInputType.number,
                     inputFormatters: amountFormatters(),
                     autofocus: totalVal == 0,
-                    style: const TextStyle(
-                      color: AppColors.softIvory,
+                    style: TextStyle(
+                      color: colors.textPrimary,
                       fontWeight: FontWeight.w600,
-                      fontFeatures: [FontFeature.tabularFigures()],
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                     decoration: InputDecoration(
                       prefixText: currencyInputPrefix,
-                      prefixStyle: const TextStyle(
-                        color: AppColors.dewMint,
+                      prefixStyle: TextStyle(
+                        color: colors.isDark ? AppColors.dewMint : colors.primary,
                         fontWeight: FontWeight.w700,
                       ),
                       hintText: '0',
                       hintStyle: TextStyle(
-                        color: AppColors.freshSage.withValues(alpha: 0.5),
+                        color: colors.textMuted.withValues(alpha: 0.6),
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(
-                          color: AppColors.dewMint.withValues(alpha: 0.25),
-                        ),
+                        borderSide: BorderSide(color: colors.inputBorder),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(
-                          color: AppColors.dewMint.withValues(alpha: 0.25),
-                        ),
+                        borderSide: BorderSide(color: colors.inputBorder),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(
-                          color: AppColors.dewMint,
+                        borderSide: BorderSide(
+                          color: colors.primary,
                           width: 1.5,
                         ),
                       ),
                       filled: true,
-                      fillColor: AppColors.deepForest.withValues(alpha: 0.6),
+                      fillColor: colors.isDark
+                          ? AppColors.deepForest.withValues(alpha: 0.6)
+                          : colors.surfaceContainer,
                     ),
                     onChanged: (_) => setState(() {}),
                   ),
@@ -194,37 +193,42 @@ Future<void> showTotalBudgetDialog(
                     // Pratinjau Standar 50/30/20
                     Text(
                       context.tr('Budget Split Preview:'),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
-                        color: AppColors.softIvory,
+                        color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppColors.deepForest.withValues(alpha: 0.5),
+                        color: colors.isDark
+                            ? AppColors.deepForest.withValues(alpha: 0.5)
+                            : colors.surfaceContainer,
                         borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: AppColors.dewMint.withValues(alpha: 0.2),
+                          color: colors.borderOutline,
                         ),
                       ),
                       child: Column(
                         children: [
                           _previewRow(
+                            ctx,
                             BudgetBucket.needs.colorIn(ctx),
                             context.tr('Needs (50%)'),
                             rupiah(stdNeeds),
                           ),
-                          Divider(height: 12, color: AppColors.borderOutline.withValues(alpha: 0.4)),
+                          Divider(height: 12, color: colors.borderOutline.withValues(alpha: 0.6)),
                           _previewRow(
+                            ctx,
                             BudgetBucket.wants.colorIn(ctx),
                             context.tr('Wants (30%)'),
                             rupiah(stdWants),
                           ),
-                          Divider(height: 12, color: AppColors.borderOutline.withValues(alpha: 0.4)),
+                          Divider(height: 12, color: colors.borderOutline.withValues(alpha: 0.6)),
                           _previewRow(
+                            ctx,
                             BudgetBucket.savings.colorIn(ctx),
                             context.tr('Savings & Goals (20%)'),
                             rupiah(stdSavings),
@@ -247,10 +251,10 @@ Future<void> showTotalBudgetDialog(
                       controller: savingsCtrl,
                       keyboardType: TextInputType.number,
                       inputFormatters: amountFormatters(),
-                      style: const TextStyle(
-                        color: AppColors.softIvory,
+                      style: TextStyle(
+                        color: colors.textPrimary,
                         fontWeight: FontWeight.w600,
-                        fontFeatures: [FontFeature.tabularFigures()],
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                       decoration: InputDecoration(
                         prefixText: currencyInputPrefix,
@@ -260,18 +264,18 @@ Future<void> showTotalBudgetDialog(
                         ),
                         hintText: '0',
                         hintStyle: TextStyle(
-                          color: AppColors.freshSage.withValues(alpha: 0.5),
+                          color: colors.textMuted.withValues(alpha: 0.6),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: BudgetBucket.savings.colorIn(ctx).withValues(alpha: 0.35),
+                            color: BudgetBucket.savings.colorIn(ctx).withValues(alpha: 0.45),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: BudgetBucket.savings.colorIn(ctx).withValues(alpha: 0.35),
+                            color: BudgetBucket.savings.colorIn(ctx).withValues(alpha: 0.45),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -295,7 +299,7 @@ Future<void> showTotalBudgetDialog(
                         child: TextButton.icon(
                           style: TextButton.styleFrom(
                             visualDensity: VisualDensity.compact,
-                            foregroundColor: AppColors.dewMint,
+                            foregroundColor: colors.accentSecondary,
                           ),
                           icon: const Icon(Icons.auto_awesome, size: 14),
                           label: Text(
@@ -327,10 +331,10 @@ Future<void> showTotalBudgetDialog(
                       controller: needsCtrl,
                       keyboardType: TextInputType.number,
                       inputFormatters: amountFormatters(),
-                      style: const TextStyle(
-                        color: AppColors.softIvory,
+                      style: TextStyle(
+                        color: colors.textPrimary,
                         fontWeight: FontWeight.w600,
-                        fontFeatures: [FontFeature.tabularFigures()],
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                       decoration: InputDecoration(
                         prefixText: currencyInputPrefix,
@@ -340,18 +344,18 @@ Future<void> showTotalBudgetDialog(
                         ),
                         hintText: '0',
                         hintStyle: TextStyle(
-                          color: AppColors.freshSage.withValues(alpha: 0.5),
+                          color: colors.textMuted.withValues(alpha: 0.6),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: BudgetBucket.needs.colorIn(ctx).withValues(alpha: 0.35),
+                            color: BudgetBucket.needs.colorIn(ctx).withValues(alpha: 0.45),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: BudgetBucket.needs.colorIn(ctx).withValues(alpha: 0.35),
+                            color: BudgetBucket.needs.colorIn(ctx).withValues(alpha: 0.45),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -381,10 +385,10 @@ Future<void> showTotalBudgetDialog(
                       controller: wantsCtrl,
                       keyboardType: TextInputType.number,
                       inputFormatters: amountFormatters(),
-                      style: const TextStyle(
-                        color: AppColors.softIvory,
+                      style: TextStyle(
+                        color: colors.textPrimary,
                         fontWeight: FontWeight.w600,
-                        fontFeatures: [FontFeature.tabularFigures()],
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
                       decoration: InputDecoration(
                         prefixText: currencyInputPrefix,
@@ -394,18 +398,18 @@ Future<void> showTotalBudgetDialog(
                         ),
                         hintText: '0',
                         hintStyle: TextStyle(
-                          color: AppColors.freshSage.withValues(alpha: 0.5),
+                          color: colors.textMuted.withValues(alpha: 0.6),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: BudgetBucket.wants.colorIn(ctx).withValues(alpha: 0.35),
+                            color: BudgetBucket.wants.colorIn(ctx).withValues(alpha: 0.45),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
-                            color: BudgetBucket.wants.colorIn(ctx).withValues(alpha: 0.35),
+                            color: BudgetBucket.wants.colorIn(ctx).withValues(alpha: 0.45),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -426,14 +430,12 @@ Future<void> showTotalBudgetDialog(
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
-                        color: remainingToAllocate == 0
-                            ? AppColors.emeraldLeaf.withValues(alpha: 0.35)
-                            : const Color(0xFFE8A33D).withValues(alpha: 0.15),
+                        color: (remainingToAllocate == 0 ? colors.income : colors.warning)
+                            .withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: remainingToAllocate == 0
-                              ? AppColors.dewMint.withValues(alpha: 0.3)
-                              : const Color(0xFFE8A33D).withValues(alpha: 0.3),
+                          color: (remainingToAllocate == 0 ? colors.income : colors.warning)
+                              .withValues(alpha: 0.35),
                           width: 1,
                         ),
                       ),
@@ -444,24 +446,20 @@ Future<void> showTotalBudgetDialog(
                                 ? Icons.check_circle_outline
                                 : Icons.info_outline,
                             size: 16,
-                            color: remainingToAllocate == 0
-                                ? AppColors.dewMint
-                                : const Color(0xFFE8A33D),
+                            color: remainingToAllocate == 0 ? colors.income : colors.warning,
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               remainingToAllocate == 0
-                                    ? context.tr('All funds allocated')
-                                    : context.tr('Remaining to allocate: {amount}', {
-                                        'amount': rupiah(remainingToAllocate),
-                                      }),
+                                  ? context.tr('All funds allocated')
+                                  : context.tr('Remaining to allocate: {amount}', {
+                                      'amount': rupiah(remainingToAllocate),
+                                    }),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: remainingToAllocate == 0
-                                    ? AppColors.dewMint
-                                    : const Color(0xFFE8A33D),
+                                color: remainingToAllocate == 0 ? colors.income : colors.warning,
                                 fontFeatures: const [FontFeature.tabularFigures()],
                               ),
                             ),
@@ -478,13 +476,13 @@ Future<void> showTotalBudgetDialog(
                 onPressed: () => Navigator.pop(ctx),
                 child: Text(
                   context.tr('Cancel'),
-                  style: const TextStyle(color: AppColors.freshSage),
+                  style: TextStyle(color: colors.textMuted),
                 ),
               ),
               FilledButton(
                 style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.dewMint,
-                  foregroundColor: AppColors.deepForest,
+                  backgroundColor: colors.primary,
+                  foregroundColor: colors.onPrimary,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () async {
@@ -514,7 +512,8 @@ Future<void> showTotalBudgetDialog(
   );
 }
 
-Widget _previewRow(Color color, String title, String amount) {
+Widget _previewRow(BuildContext context, Color color, String title, String amount) {
+  final colors = context.themeColors;
   return Row(
     children: [
       Container(
@@ -536,16 +535,16 @@ Widget _previewRow(Color color, String title, String amount) {
       Expanded(
         child: Text(
           title,
-          style: const TextStyle(fontSize: 12, color: AppColors.softIvory),
+          style: TextStyle(fontSize: 12, color: colors.textPrimary),
         ),
       ),
       Text(
         amount,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
-          color: AppColors.softIvory,
-          fontFeatures: [FontFeature.tabularFigures()],
+          color: colors.textPrimary,
+          fontFeatures: const [FontFeature.tabularFigures()],
         ),
       ),
     ],

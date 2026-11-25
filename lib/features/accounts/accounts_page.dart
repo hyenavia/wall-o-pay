@@ -7,6 +7,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
 import '../../core/format.dart';
 import '../../core/icons.dart';
@@ -158,12 +159,14 @@ class _AccountCategoryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
+    final headerAccent = colors.isDark ? AppColors.dewMint : colors.primary;
     final subtotalWidget = Text(
       subtotalFormatted,
       style: context.moneyStyle(
         fontSize: 14,
         fontWeight: FontWeight.w800,
-        color: AppColors.freshSage,
+        color: colors.textMuted,
       ),
     );
 
@@ -176,45 +179,52 @@ class _AccountCategoryHeader extends StatelessWidget {
             height: 32,
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: AppColors.dewMint.withValues(alpha: 0.16),
+              color: headerAccent.withValues(alpha: 0.16),
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppColors.dewMint.withValues(alpha: 0.35),
+                color: headerAccent.withValues(alpha: 0.35),
                 width: 1,
               ),
             ),
-            child: (icon == Icons.account_balance_outlined || icon == Icons.credit_card_outlined)
-                ? Image.asset('assets/new_asset/props/prop_06.png', fit: BoxFit.contain)
-                : (icon == Icons.payments_outlined)
-                    ? Image.asset('assets/new_asset/props/prop_07.png', fit: BoxFit.contain)
-                    : (viceCityAssetForIcon(icon) != null
-                        ? Image.asset(viceCityAssetForIcon(icon)!, fit: BoxFit.contain)
-                        : Icon(icon, size: 16, color: AppColors.dewMint)),
+            child: Center(
+              child: AppDuotoneIcon(
+                (icon == Icons.account_balance_outlined ||
+                        icon == Icons.credit_card_outlined)
+                    ? PhosphorIconsDuotone.bank
+                    : (icon == Icons.payments_outlined
+                        ? PhosphorIconsDuotone.money
+                        : (phosphorForIcon(icon) ?? PhosphorIconsDuotone.wallet)),
+                size: 18,
+                color: headerAccent,
+              ),
+            ),
           ),
           const SizedBox(width: 10),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 16,
-              color: AppColors.softIvory,
+              color: colors.textPrimary,
             ),
           ),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
             decoration: BoxDecoration(
-              color: AppColors.emeraldLeaf.withValues(alpha: 0.35),
+              color: colors.isDark
+                  ? AppColors.emeraldLeaf.withValues(alpha: 0.35)
+                  : colors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: AppColors.dewMint.withValues(alpha: 0.25),
+                color: headerAccent.withValues(alpha: 0.25),
                 width: 0.8,
               ),
             ),
             child: Text(
               '$count',
-              style: const TextStyle(
-                color: AppColors.dewMint,
+              style: TextStyle(
+                color: headerAccent,
                 fontWeight: FontWeight.w800,
                 fontSize: 11,
               ),
@@ -236,6 +246,7 @@ class AccountsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
     final accountsAsync = ref.watch(walletsProvider);
     final balances = ref.watch(walletBalancesProvider);
     final walletMap = ref.watch(walletMapProvider);
@@ -382,17 +393,17 @@ class AccountsPage extends ConsumerWidget {
                               children: [
                                 Text(
                                   context.tr(a.name),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 15,
-                                    color: AppColors.softIvory,
+                                    color: colors.textPrimary,
                                   ),
                                 ),
                                 Text(
                                   accountKindLabel(context, a.type),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.freshSage,
+                                    color: colors.textMuted,
                                   ),
                                 ),
                               ],
@@ -404,7 +415,7 @@ class AccountsPage extends ConsumerWidget {
                               style: context.moneyStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.softIvory,
+                                color: colors.textPrimary,
                               ),
                             ),
                           ),
@@ -421,26 +432,26 @@ class AccountsPage extends ConsumerWidget {
                     children: [
                       for (final t in transfers.take(10))
                         ListTile(
-                          leading: const CategoryBadge(
+                          leading: CategoryBadge(
                             icon: Icons.swap_horiz_rounded,
-                            color: Color(0xFF00897B),
+                            color: colors.transfer,
                             categoryKey: 'swap_horiz',
                             size: 38,
                           ),
                           title: Text(
                             '${context.tr(walletMap[t.walletId]?.name ?? 'Wallet')}'
                             ' → ${context.tr(walletMap[t.toWalletId]?.name ?? 'Wallet')}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 14,
-                              color: AppColors.softIvory,
+                              color: colors.textPrimary,
                             ),
                           ),
                           subtitle: Text(
                             t.note.isEmpty ? shortDate(t.date) : '${shortDate(t.date)} • ${t.note}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: AppColors.freshSage,
+                              color: colors.textMuted,
                             ),
                           ),
                           trailing: Row(
@@ -452,7 +463,7 @@ class AccountsPage extends ConsumerWidget {
                                   style: context.moneyStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF5EEAD4),
+                                    color: colors.transfer,
                                   ),
                                 ),
                               ),

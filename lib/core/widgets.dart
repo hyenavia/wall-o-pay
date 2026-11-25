@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
 import '../data/app_database.dart';
 import '../data/prefs.dart';
@@ -25,11 +26,12 @@ PreferredSizeWidget pageAppBar(
   Widget? bottom,
   double bottomHeight = 0,
 }) {
+  final colors = context.themeColors;
   return AppBar(
     title: title,
     actions: actions,
     centerTitle: false,
-    backgroundColor: AppColors.headerCanopyTop,
+    backgroundColor: colors.headerCanopyTop,
     foregroundColor: Colors.white,
     surfaceTintColor: Colors.transparent,
     elevation: 0,
@@ -43,7 +45,7 @@ PreferredSizeWidget pageAppBar(
       fit: StackFit.expand,
       children: [
         Image.asset(
-          'assets/images/vice_city_vertical_bg.jpg',
+          colors.verticalBgAsset,
           fit: BoxFit.cover,
           alignment: Alignment.topCenter,
         ),
@@ -52,20 +54,28 @@ PreferredSizeWidget pageAppBar(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                AppColors.headerCanopyTop.withValues(alpha: 0.15),
-                AppColors.headerCanopyBottom.withValues(alpha: 0.55),
-              ],
+              colors: colors.isDark
+                  ? [
+                      colors.headerCanopyTop.withValues(alpha: 0.15),
+                      colors.headerCanopyBottom.withValues(alpha: 0.55),
+                    ]
+                  : [
+                      colors.headerCanopyTop.withValues(alpha: 0.52),
+                      colors.headerCanopyBottom.withValues(alpha: 0.68),
+                    ],
             ),
           ),
         ),
-        const ExcludeSemantics(
+        ExcludeSemantics(
           child: IgnorePointer(
             child: RepaintBoundary(
               child: CustomPaint(
                 size: Size.infinite,
                 isComplex: true,
-                painter: BotanicalCanopyPainter(opacity: 0.12),
+                painter: BotanicalCanopyPainter(
+                  opacity: 0.12,
+                  isDark: colors.isDark,
+                ),
               ),
             ),
           ),
@@ -90,6 +100,7 @@ class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -97,11 +108,11 @@ class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
         Container(
           height: edge,
           decoration: BoxDecoration(
-            color: AppColors.cardSurface,
+            color: colors.isDark ? colors.cardSurface : colors.bg,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             border: Border(
               top: BorderSide(
-                color: AppColors.borderOutline.withValues(alpha: 0.85),
+                color: colors.borderOutline.withValues(alpha: colors.isDark ? 0.85 : 1.0),
                 width: 1.2,
               ),
             ),
@@ -113,32 +124,33 @@ class _SheetEdge extends StatelessWidget implements PreferredSizeWidget {
 }
 
 /// AppBar bersih dan elegan untuk halaman sekunder/detail di luar tab utama.
-/// Menggunakan warna dasar midnightNavy tanpa latar foto atau lengkungan lembar agar fokus penuh pada konten.
 PreferredSizeWidget secondaryAppBar(
   BuildContext context, {
   required Widget title,
   List<Widget>? actions,
   PreferredSizeWidget? bottom,
 }) {
+  final colors = context.themeColors;
   return AppBar(
     title: title,
     actions: actions,
     bottom: bottom,
     centerTitle: false,
-    backgroundColor: AppColors.midnightNavy,
-    foregroundColor: AppColors.softWhite,
+    backgroundColor: colors.bg,
+    foregroundColor: colors.textPrimary,
     surfaceTintColor: Colors.transparent,
     elevation: 0,
     scrolledUnderElevation: 0,
-    systemOverlayStyle: SystemUiOverlayStyle.light,
-    iconTheme: const IconThemeData(color: AppColors.softWhite),
-    actionsIconTheme: const IconThemeData(color: AppColors.softWhite),
+    systemOverlayStyle:
+        colors.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+    iconTheme: IconThemeData(color: colors.textPrimary),
+    actionsIconTheme: IconThemeData(color: colors.textPrimary),
     titleTextStyle: Theme.of(context).textTheme.titleLarge
-        ?.copyWith(fontWeight: FontWeight.w700, color: AppColors.softWhite),
+        ?.copyWith(fontWeight: FontWeight.w700, color: colors.textPrimary),
   );
 }
 
-/// Gaya field input yang seragam bergaya Enchanted Glasshouse.
+/// Gaya field input yang seragam untuk tema Vice City Sunset & Daylight.
 InputDecoration appInput(
   BuildContext context, {
   String? label,
@@ -149,6 +161,7 @@ InputDecoration appInput(
   Widget? suffixIcon,
 }) {
   final scheme = Theme.of(context).colorScheme;
+  final colors = context.themeColors;
   OutlineInputBorder border(Color c, [double w = 1]) => OutlineInputBorder(
     borderRadius: BorderRadius.circular(16),
     borderSide: BorderSide(color: c, width: w),
@@ -156,26 +169,35 @@ InputDecoration appInput(
   return InputDecoration(
     labelText: label,
     labelStyle: TextStyle(
-      color: AppColors.freshSage.withValues(alpha: 0.9),
+      color: colors.accentSecondary.withValues(alpha: colors.isDark ? 0.9 : 1.0),
       fontWeight: FontWeight.w600,
     ),
     hintText: hint,
     hintStyle: TextStyle(color: scheme.onSurface.withValues(alpha: 0.65)),
     prefixIcon: prefixIcon,
     prefixText: prefixText,
-    prefixStyle: const TextStyle(
-      color: AppColors.dewMint,
+    prefixStyle: TextStyle(
+      color: colors.isDark ? AppColors.dewMint : colors.primary,
       fontWeight: FontWeight.w700,
     ),
     helperText: helper,
     helperStyle: TextStyle(color: scheme.onSurface.withValues(alpha: 0.72)),
     suffixIcon: suffixIcon,
     filled: true,
-    fillColor: AppColors.surfaceContainer.withValues(alpha: 0.70),
+    fillColor: colors.isDark
+        ? AppColors.surfaceContainer.withValues(alpha: 0.70)
+        : colors.surfaceContainer,
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    border: border(AppColors.dewMint.withValues(alpha: 0.16)),
-    enabledBorder: border(AppColors.dewMint.withValues(alpha: 0.16)),
-    focusedBorder: border(AppColors.dewMint.withValues(alpha: 0.55), 1.5),
+    border: border(
+      colors.isDark ? AppColors.dewMint.withValues(alpha: 0.16) : colors.inputBorder,
+    ),
+    enabledBorder: border(
+      colors.isDark ? AppColors.dewMint.withValues(alpha: 0.16) : colors.inputBorder,
+    ),
+    focusedBorder: border(
+      colors.isDark ? AppColors.dewMint.withValues(alpha: 0.55) : colors.primary,
+      1.5,
+    ),
   );
 }
 
@@ -206,10 +228,12 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
+    final borderColor = colors.borderOutline.withValues(alpha: colors.isDark ? 0.8 : 1.0);
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(20),
       side: BorderSide(
-        color: AppColors.borderOutline.withValues(alpha: 0.8),
+        color: borderColor,
         width: 1.0,
       ),
     );
@@ -218,20 +242,25 @@ class AppCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.borderOutline.withValues(alpha: 0.8),
+          color: borderColor,
           width: 1.0,
         ),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.cardSurface.withValues(alpha: 0.95),
-            AppColors.surfaceContainer.withValues(alpha: 0.88),
-          ],
-        ),
+        color: colors.isDark ? null : colors.cardSurface,
+        gradient: colors.isDark
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  colors.cardSurface.withValues(alpha: 0.95),
+                  colors.surfaceContainer.withValues(alpha: 0.88),
+                ],
+              )
+            : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
+            color: colors.isDark
+                ? Colors.black.withValues(alpha: 0.25)
+                : const Color(0xFF1A0E33).withValues(alpha: 0.06),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
@@ -250,7 +279,7 @@ class AppCard extends StatelessWidget {
   }
 }
 
-/// Kartu sorotan (HeroCard) untuk saldo, total anggaran, dan sorotan utama bergaya Vice City Sunset.
+/// Kartu sorotan (HeroCard) untuk saldo, total anggaran, dan sorotan utama bergaya Vice City Sunset & Daylight.
 class HeroCard extends StatelessWidget {
   const HeroCard({
     super.key,
@@ -263,6 +292,7 @@ class HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(24),
     );
@@ -272,42 +302,72 @@ class HeroCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
         shape: shape,
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF2B1554), // Midnight Purple (calibrated)
-            Color(0xFF14092B), // Deep Twilight Purple
-          ],
+          colors: colors.isDark
+              ? const [
+                  Color(0xFF2B1554), // Midnight Purple (calibrated)
+                  Color(0xFF14092B), // Deep Twilight Purple
+                ]
+              : const [
+                  Color(0xFF0A4DA6), // Ocean Sapphire
+                  Color(0xFF082E6E), // Deep Coastal Blue
+                ],
         ),
-        shadows: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.40),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: AppColors.sunsetMagenta.withValues(alpha: 0.16),
-            blurRadius: 16,
-            spreadRadius: -2,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        shadows: colors.isDark
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.40),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: AppColors.sunsetMagenta.withValues(alpha: 0.16),
+                  blurRadius: 16,
+                  spreadRadius: -2,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: const Color(0xFF0A4DA6).withValues(alpha: 0.22),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
       ),
       child: Stack(
         children: [
-          // Background neon arcs samar di dalam kartu
+          // Background neon/daylight waves samar di dalam kartu
           Positioned.fill(
             child: ExcludeSemantics(
               child: Opacity(
-                opacity: 0.18,
+                opacity: colors.isDark ? 0.18 : 0.42,
                 child: Image.asset(
-                  'assets/images/vice_city_bg.jpg',
+                  colors.heroBgAsset,
                   fit: BoxFit.cover,
                 ),
               ),
             ),
           ),
+          if (!colors.isDark)
+            Positioned.fill(
+              child: ExcludeSemantics(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFF0A4DA6).withValues(alpha: 0.48),
+                        const Color(0xFF082E6E).withValues(alpha: 0.62),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
           // Garis tepi kaca spekular
           Positioned.fill(
             child: IgnorePointer(
@@ -315,19 +375,21 @@ class HeroCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: AppColors.borderOutline.withValues(alpha: 0.9),
+                    color: colors.isDark
+                        ? AppColors.borderOutline.withValues(alpha: 0.9)
+                        : Colors.white.withValues(alpha: 0.28),
                     width: 1.2,
                   ),
                 ),
               ),
             ),
           ),
-          const Positioned.fill(
+          Positioned.fill(
             child: IgnorePointer(
               child: RepaintBoundary(
                 child: CustomPaint(
                   isComplex: true,
-                  painter: BotanicalHeroCardPainter(),
+                  painter: BotanicalHeroCardPainter(isDark: colors.isDark),
                 ),
               ),
             ),
@@ -345,7 +407,7 @@ class HeroCard extends StatelessWidget {
   }
 }
 
-/// Lencana ikon kategori persegi membulat bergaya Vice City Sunset.
+/// Lencana ikon kategori persegi membulat bergaya Vice City Sunset & Daylight.
 class CategoryBadge extends StatelessWidget {
   const CategoryBadge({
     super.key,
@@ -362,12 +424,12 @@ class CategoryBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final assetPath =
-        glasshouseAssetFor(categoryKey) ?? glasshouseAssetForIcon(icon);
+    final colors = context.themeColors;
+    final duotoneIcon = phosphorForCategoryOrIcon(categoryKey, icon);
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(size * 0.32),
       side: BorderSide(
-        color: AppColors.borderOutline.withValues(alpha: 0.8),
+        color: colors.borderOutline.withValues(alpha: colors.isDark ? 0.8 : 1.0),
         width: 1.0,
       ),
     );
@@ -376,31 +438,37 @@ class CategoryBadge extends StatelessWidget {
       width: size,
       height: size,
       decoration: ShapeDecoration(
-        color: AppColors.surfaceContainer.withValues(alpha: 0.85),
+        color: colors.isDark
+            ? colors.surfaceContainer.withValues(alpha: 0.85)
+            : colors.surfaceContainer,
         shape: shape,
-        shadows: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.22),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-          BoxShadow(
-            color: color.withValues(alpha: 0.20),
-            blurRadius: 6,
-            spreadRadius: -1,
-          ),
-        ],
+        shadows: colors.isDark
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.22),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+                BoxShadow(
+                  color: color.withValues(alpha: 0.20),
+                  blurRadius: 6,
+                  spreadRadius: -1,
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: const Color(0xFF1A0E33).withValues(alpha: 0.05),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: Center(
-        child: assetPath != null
-            ? Image.asset(
-                assetPath,
-                width: size * 0.72,
-                height: size * 0.72,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.medium,
-              )
-            : Icon(icon, color: color, size: size * 0.5),
+        child: AppDuotoneIcon(
+          duotoneIcon,
+          size: size * 0.56,
+          color: color,
+        ),
       ),
     );
   }
@@ -446,7 +514,7 @@ class AppChip extends StatelessWidget {
     this.subtitle,
     this.icon,
     this.categoryKey,
-    this.assetPath,
+    this.duotoneIcon,
   });
 
   final String label;
@@ -455,30 +523,34 @@ class AppChip extends StatelessWidget {
   final VoidCallback onSelected;
   final IconData? icon;
   final String? categoryKey;
-  final String? assetPath;
+  final PhosphorDuotoneIconData? duotoneIcon;
 
   @override
   Widget build(BuildContext context) {
-    final resolvedAsset =
-        assetPath ??
-        glasshouseAssetFor(categoryKey) ??
-        (icon != null ? glasshouseAssetForIcon(icon!) : null);
-    final fg = selected ? Colors.white : AppColors.softIvory;
+    final colors = context.themeColors;
+    final resolvedDuotone =
+        duotoneIcon ??
+        phosphorForKey(categoryKey) ??
+        (icon != null ? phosphorForIcon(icon!) : null);
+    final fg = selected
+        ? (colors.isDark ? Colors.white : colors.onPrimary)
+        : colors.textPrimary;
+    final iconColor = selected
+        ? (colors.isDark ? AppColors.dewMint : colors.onPrimary)
+        : colors.accentSecondary;
 
     Widget? avatarWidget;
-    if (resolvedAsset != null) {
-      avatarWidget = Image.asset(
-        resolvedAsset,
-        width: 18,
-        height: 18,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.medium,
+    if (resolvedDuotone != null) {
+      avatarWidget = AppDuotoneIcon(
+        resolvedDuotone,
+        size: 17,
+        color: iconColor,
       );
     } else if (icon != null) {
       avatarWidget = Icon(
         icon,
         size: 18,
-        color: selected ? AppColors.dewMint : AppColors.freshSage,
+        color: iconColor,
       );
     }
 
@@ -496,7 +568,11 @@ class AppChip extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10.5,
                     fontWeight: FontWeight.w600,
-                    color: selected ? AppColors.dewMint : AppColors.freshSage,
+                    color: selected
+                        ? (colors.isDark
+                            ? AppColors.dewMint
+                            : colors.onPrimary.withValues(alpha: 0.9))
+                        : colors.accentSecondary,
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
@@ -505,12 +581,18 @@ class AppChip extends StatelessWidget {
       selected: selected,
       onSelected: (_) => onSelected(),
       showCheckmark: false,
-      selectedColor: const Color(0xFF1B4434),
-      backgroundColor: AppColors.surfaceContainer.withValues(alpha: 0.70),
+      selectedColor: colors.isDark ? const Color(0xFF1B4434) : colors.primary,
+      backgroundColor: colors.isDark
+          ? AppColors.surfaceContainer.withValues(alpha: 0.70)
+          : colors.surfaceContainer,
       side: BorderSide(
         color: selected
-            ? AppColors.dewMint.withValues(alpha: 0.60)
-            : AppColors.dewMint.withValues(alpha: 0.16),
+            ? (colors.isDark
+                ? AppColors.dewMint.withValues(alpha: 0.60)
+                : colors.primary)
+            : (colors.isDark
+                ? AppColors.dewMint.withValues(alpha: 0.16)
+                : colors.inputBorder),
         width: selected ? 1.2 : 1.0,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -537,6 +619,7 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     return Padding(
       padding: const EdgeInsets.only(top: 20, bottom: 8),
       child: Row(
@@ -552,7 +635,7 @@ class SectionHeader extends StatelessWidget {
             TextButton(
               onPressed: onAction,
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.freshSage,
+                foregroundColor: colors.accentSecondary,
                 textStyle: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
@@ -579,11 +662,12 @@ class PeriodSwitcher extends ConsumerWidget {
 
   final bool compact;
 
-  /// Teks dan ikon putih, untuk dipakai di atas header hijau.
+  /// Teks dan ikon putih, untuk dipakai di atas header gelap.
   final bool onDark;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.themeColors;
     final period = ref.watch(selectedPeriodProvider);
     final notifier = ref.read(selectedAnchorProvider.notifier);
     final style = compact
@@ -596,7 +680,7 @@ class PeriodSwitcher extends ConsumerWidget {
           tooltip: context.tr('Previous period'),
           visualDensity: compact ? VisualDensity.compact : null,
           onPressed: () => notifier.step(-1),
-          color: onDark ? Colors.white : AppColors.freshSage,
+          color: onDark ? Colors.white : colors.accentSecondary,
           icon: const Icon(Icons.chevron_left),
         ),
         Flexible(
@@ -605,7 +689,7 @@ class PeriodSwitcher extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
             style: style?.copyWith(
               fontWeight: FontWeight.w700,
-              color: onDark ? Colors.white : AppColors.softIvory,
+              color: onDark ? Colors.white : colors.textPrimary,
             ),
           ),
         ),
@@ -613,7 +697,7 @@ class PeriodSwitcher extends ConsumerWidget {
           tooltip: context.tr('Next period'),
           visualDensity: compact ? VisualDensity.compact : null,
           onPressed: () => notifier.step(1),
-          color: onDark ? Colors.white : AppColors.freshSage,
+          color: onDark ? Colors.white : colors.accentSecondary,
           icon: const Icon(Icons.chevron_right),
         ),
       ],
@@ -629,13 +713,16 @@ class PeriodTypeToggle extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.themeColors;
     final type = ref.watch(appPrefsProvider.select((p) => p.periodType));
     if (compact) {
       final isMonthly = type == PeriodType.monthly;
       final shape = RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide(
-          color: AppColors.dewMint.withValues(alpha: 0.22),
+          color: colors.isDark
+              ? AppColors.dewMint.withValues(alpha: 0.22)
+              : colors.inputBorder,
           width: 1.0,
         ),
       );
@@ -649,7 +736,9 @@ class PeriodTypeToggle extends ConsumerWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: ShapeDecoration(
-            color: AppColors.surfaceContainer.withValues(alpha: 0.85),
+            color: colors.isDark
+                ? AppColors.surfaceContainer.withValues(alpha: 0.85)
+                : colors.surfaceContainer,
             shape: shape,
           ),
           child: Row(
@@ -660,15 +749,15 @@ class PeriodTypeToggle extends ConsumerWidget {
                     ? Icons.calendar_month_outlined
                     : Icons.view_week_outlined,
                 size: 15,
-                color: AppColors.freshSage,
+                color: colors.accentSecondary,
               ),
               const SizedBox(width: 5),
               Text(
                 context.tr(isMonthly ? 'Monthly' : 'Weekly'),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.softIvory,
+                  color: colors.textPrimary,
                 ),
               ),
             ],
@@ -1006,22 +1095,26 @@ class EmptyStateCard extends StatelessWidget {
             textAlign: TextAlign.center,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w800,
-              color: colors.textPrimary,
+              color: colors.isDark ? colors.textPrimary : Colors.white,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(color: colors.textMuted),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colors.isDark
+                  ? colors.textMuted
+                  : Colors.white.withValues(alpha: 0.85),
+            ),
           ),
           if (actionLabel != null) ...[
             const SizedBox(height: 18),
             FilledButton(
               onPressed: onAction,
               style: FilledButton.styleFrom(
-                backgroundColor: colors.primary,
-                foregroundColor: colors.onPrimary,
+                backgroundColor: colors.isDark ? colors.primary : Colors.white,
+                foregroundColor: colors.isDark ? colors.onPrimary : colors.primary,
                 minimumSize: const Size.fromHeight(48),
               ),
               child: Text(actionLabel!),
@@ -1087,26 +1180,33 @@ class BotanicalBackgroundSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF0E1738), // Deep Navy canopy at top
-            Color(0xFF090F2C), // Subtle Midnight Navy
-            Color(0xFF070D2B), // Deep Midnight Navy Canvas
-          ],
-          stops: [0.0, 0.40, 1.0],
+          colors: colors.isDark
+              ? const [
+                  Color(0xFF0E1738), // Deep Navy canopy at top
+                  Color(0xFF090F2C), // Subtle Midnight Navy
+                  Color(0xFF070D2B), // Deep Midnight Navy Canvas
+                ]
+              : [
+                  colors.bg,
+                  const Color(0xFFF3EEFA),
+                  colors.bg,
+                ],
+          stops: const [0.0, 0.40, 1.0],
         ),
       ),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Suasana Sunset Vertikal Vice City
+          // Suasana Sunset / Daylight Vertikal Vice City
           Positioned.fill(
             child: Image.asset(
-              'assets/images/vice_city_vertical_bg.jpg',
+              colors.verticalBgAsset,
               fit: BoxFit.cover,
               alignment: Alignment.center,
             ),
@@ -1117,22 +1217,28 @@ class BotanicalBackgroundSheet extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    const Color(0xFF0E1738).withValues(alpha: 0.78),
-                    const Color(0xFF070D2B).withValues(alpha: 0.85),
-                    const Color(0xFF070D2B).withValues(alpha: 0.92),
-                  ],
+                  colors: colors.isDark
+                      ? [
+                          const Color(0xFF0E1738).withValues(alpha: 0.78),
+                          const Color(0xFF070D2B).withValues(alpha: 0.85),
+                          const Color(0xFF070D2B).withValues(alpha: 0.92),
+                        ]
+                      : [
+                          colors.bg.withValues(alpha: 0.86),
+                          colors.bg.withValues(alpha: 0.94),
+                          colors.bg.withValues(alpha: 0.97),
+                        ],
                   stops: const [0.0, 0.40, 1.0],
                 ),
               ),
             ),
           ),
-          const Positioned.fill(
+          Positioned.fill(
             child: IgnorePointer(
               child: RepaintBoundary(
                 child: CustomPaint(
                   isComplex: true,
-                  painter: BotanicalBackgroundPainter(),
+                  painter: BotanicalBackgroundPainter(isDark: colors.isDark),
                 ),
               ),
             ),
@@ -1150,8 +1256,10 @@ class BotanicalBackgroundSheet extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      AppColors.cardSurface.withValues(alpha: 0.85),
-                      AppColors.cardSurface.withValues(alpha: 0.0),
+                      (colors.isDark ? colors.cardSurface : colors.bg)
+                          .withValues(alpha: 0.85),
+                      (colors.isDark ? colors.cardSurface : colors.bg)
+                          .withValues(alpha: 0.0),
                     ],
                   ),
                 ),

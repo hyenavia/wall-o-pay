@@ -50,7 +50,7 @@ final availableUpdateProvider =
 
 class UpdateCheckerService {
   /// Versi fallback jika native method channel gagal membaca PackageManager.
-  static const fallbackVersion = '3.2.1';
+  static const fallbackVersion = '3.4.1';
   static String _resolvedVersion = fallbackVersion;
 
   /// Versi aplikasi saat ini. Dinamis dibaca dari native PackageManager Android atau fallback.
@@ -319,6 +319,7 @@ class UpdateCheckerService {
       barrierDismissible: true,
       builder: (ctx) {
         final theme = Theme.of(ctx);
+        final colors = ctx.themeColors;
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
@@ -329,12 +330,12 @@ class UpdateCheckerService {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.deepForest.withValues(alpha: 0.1),
+                  color: colors.primary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.rocket_launch_rounded,
-                  color: AppColors.deepForest,
+                  color: colors.primary,
                   size: 26,
                 ),
               ),
@@ -426,8 +427,8 @@ class UpdateCheckerService {
               icon: const Icon(Icons.download_rounded, size: 18),
               label: Text(ctx.tr('Update Now')),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.deepForest,
-                foregroundColor: Colors.white,
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

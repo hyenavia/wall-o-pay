@@ -28,6 +28,8 @@ class MorePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final modules = ref.watch(modulePrefsProvider);
+    final colors = context.themeColors;
+    final primaryBadge = colors.primary;
 
     Widget tile(
       IconData icon,
@@ -36,13 +38,12 @@ class MorePage extends ConsumerWidget {
       String subtitle,
       VoidCallback onTap,
     ) {
-      final customAsset = viceCityAssetForIcon(icon);
+      final duotone = phosphorForIcon(icon);
       return ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         leading: Container(
           width: 40,
           height: 40,
-          padding: customAsset != null ? const EdgeInsets.all(7) : null,
           decoration: BoxDecoration(
             color: iconColor.withValues(alpha: 0.16),
             borderRadius: BorderRadius.circular(12),
@@ -51,26 +52,29 @@ class MorePage extends ConsumerWidget {
               width: 0.8,
             ),
           ),
-          child: customAsset != null
-              ? Image.asset(customAsset, fit: BoxFit.contain)
-              : Icon(icon, color: iconColor, size: 20),
+          child: Center(
+            child: duotone != null
+                ? AppDuotoneIcon(duotone, color: iconColor, size: 21)
+                : Icon(icon, color: iconColor, size: 20),
+          ),
         ),
         title: Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 14.5,
-            color: AppColors.softIvory,
+            color: colors.textPrimary,
           ),
         ),
         subtitle: Text(
           subtitle,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.freshSage,
-          ),
+          style: TextStyle(fontSize: 12, color: colors.textMuted),
         ),
-        trailing: const Icon(Icons.chevron_right, size: 20, color: AppColors.dewMint),
+        trailing: Icon(
+          Icons.chevron_right,
+          size: 20,
+          color: colors.isDark ? AppColors.dewMint : colors.textMuted,
+        ),
         onTap: onTap,
       );
     }
@@ -78,19 +82,24 @@ class MorePage extends ConsumerWidget {
     List<Widget> withDividers(List<Widget> tiles) {
       final result = <Widget>[];
       for (var i = 0; i < tiles.length; i++) {
-        if (i > 0) result.add(const Divider(height: 1, indent: 68));
+        if (i > 0) {
+          result.add(
+            Divider(
+              height: 1,
+              indent: 68,
+              color: colors.borderOutline.withValues(
+                alpha: colors.isDark ? 0.35 : 0.7,
+              ),
+            ),
+          );
+        }
         result.add(tiles[i]);
       }
       return result;
     }
 
-    void open(Widget page) => Navigator.push(
-          context,
-          MaterialPageRoute<void>(builder: (_) => page),
-        );
-
-    final colors = context.themeColors;
-    const primaryBadge = AppColors.sage;
+    void open(Widget page) =>
+        Navigator.push(context, MaterialPageRoute<void>(builder: (_) => page));
 
     final moneyTiles = <Widget>[
       tile(
@@ -138,7 +147,7 @@ class MorePage extends ConsumerWidget {
       if (modules.recurring)
         tile(
           Icons.event_repeat,
-          const Color(0xFF60A5FA),
+          colors.isDark ? const Color(0xFF60A5FA) : colors.accentSecondary,
           context.tr('Recurring'),
           context.tr('Allowance, rent, and other repeating items'),
           () => open(const RecurringPage()),
@@ -148,7 +157,7 @@ class MorePage extends ConsumerWidget {
     final toolTiles = <Widget>[
       tile(
         Icons.category_outlined,
-        const Color(0xFFA78BFA),
+        colors.isDark ? const Color(0xFFA78BFA) : const Color(0xFF7C3AED),
         context.tr('Categories'),
         context.tr('Expense and income categories'),
         () => open(const CategoriesPage()),
@@ -162,7 +171,7 @@ class MorePage extends ConsumerWidget {
       ),
       tile(
         Icons.settings_outlined,
-        Colors.white70,
+        colors.isDark ? Colors.white70 : colors.textMuted,
         context.tr('Settings'),
         context.tr('Profile, language, security, and backup'),
         () => open(const SettingsPage()),
@@ -170,7 +179,10 @@ class MorePage extends ConsumerWidget {
     ];
 
     return Scaffold(
-      appBar: secondaryAppBar(context, title: Text(context.tr('More Features'))),
+      appBar: secondaryAppBar(
+        context,
+        title: Text(context.tr('More Features')),
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
         children: [

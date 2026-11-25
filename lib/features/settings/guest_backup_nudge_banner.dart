@@ -85,15 +85,16 @@ class _GuestBackupNudgeBannerState
           now: DateTime.now(),
         );
         if (!shouldShow) return const SizedBox.shrink();
+        final colors = context.themeColors;
 
         return Container(
           margin: widget.margin,
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.warning.withValues(alpha: 0.12),
+            color: colors.warning.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: AppColors.warning.withValues(alpha: 0.4),
+              color: colors.warning.withValues(alpha: 0.4),
             ),
           ),
           child: Column(
@@ -102,9 +103,9 @@ class _GuestBackupNudgeBannerState
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.shield_outlined,
-                    color: AppColors.warning,
+                    color: colors.warning,
                     size: 20,
                   ),
                   const SizedBox(width: 10),
@@ -114,10 +115,10 @@ class _GuestBackupNudgeBannerState
                       children: [
                         Text(
                           context.tr('Back up your local records'),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 13.5,
-                            color: AppColors.softIvory,
+                            color: colors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 2),
@@ -126,9 +127,9 @@ class _GuestBackupNudgeBannerState
                             'You have {count} local transactions without a recent backup. Save a JSON copy so your data stays safe.',
                             {'count': txCount},
                           ),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.freshSage,
+                            color: colors.textMuted,
                             height: 1.35,
                           ),
                         ),
@@ -137,10 +138,10 @@ class _GuestBackupNudgeBannerState
                   ),
                   IconButton(
                     visualDensity: VisualDensity.compact,
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.close_rounded,
                       size: 18,
-                      color: AppColors.freshSage,
+                      color: colors.textMuted,
                     ),
                     tooltip: context.tr('Dismiss'),
                     onPressed: () async {
@@ -164,8 +165,8 @@ class _GuestBackupNudgeBannerState
                   icon: const Icon(Icons.file_upload_outlined, size: 16),
                   label: Text(context.tr('Backup Now')),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.warning,
-                    foregroundColor: AppColors.mossShadow,
+                    backgroundColor: colors.warning,
+                    foregroundColor: colors.isDark ? AppColors.mossShadow : Colors.white,
                     visualDensity: VisualDensity.compact,
                   ),
                 ),

@@ -258,6 +258,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     final last = _step == _lastStep;
 
     return Scaffold(
@@ -265,16 +266,21 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         fit: StackFit.expand,
         children: [
           Image.asset(
-            'assets/images/coastal_sunset_bg.jpg',
+            colors.coastalBgAsset,
             fit: BoxFit.cover,
           ),
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  AppColors.midnightNavy.withValues(alpha: 0.90),
-                  AppColors.midnightNavy.withValues(alpha: 0.96),
-                ],
+                colors: colors.isDark
+                    ? [
+                        AppColors.midnightNavy.withValues(alpha: 0.90),
+                        AppColors.midnightNavy.withValues(alpha: 0.96),
+                      ]
+                    : [
+                        colors.bg.withValues(alpha: 0.86),
+                        colors.bg.withValues(alpha: 0.96),
+                      ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -291,7 +297,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                       const BrandMark(size: 40),
                       const Spacer(),
                       TextButton(
-                        style: TextButton.styleFrom(foregroundColor: AppColors.neonCyan),
+                        style: TextButton.styleFrom(
+                          foregroundColor: colors.accentSecondary,
+                        ),
                         onPressed: _saving ? null : widget.onDone,
                         child: Text(context.tr('Skip')),
                       ),
@@ -305,7 +313,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     children: [
                       if (_step > 0)
                         TextButton(
-                          style: TextButton.styleFrom(foregroundColor: AppColors.neonCyan),
+                          style: TextButton.styleFrom(
+                            foregroundColor: colors.accentSecondary,
+                          ),
                           onPressed: _saving ? null : () => setState(() => _step--),
                           child: Text(context.tr('Back')),
                         ),
@@ -322,20 +332,25 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                               },
                         style: FilledButton.styleFrom(
                           minimumSize: const Size(140, 52),
-                          backgroundColor: AppColors.sunsetMagenta,
-                          foregroundColor: Colors.white,
+                          backgroundColor: colors.primary,
+                          foregroundColor: colors.onPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                             side: BorderSide(
-                              color: AppColors.goldenYellow.withValues(alpha: 0.45),
+                              color: colors.isDark
+                                  ? AppColors.goldenYellow.withValues(alpha: 0.45)
+                                  : colors.primary,
                             ),
                           ),
                         ),
                         child: _saving
-                            ? const SizedBox(
+                            ? SizedBox(
                                 height: 20,
                                 width: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: colors.onPrimary,
+                                ),
                               )
                             : Text(
                                 context.tr(last ? 'Finish' : 'Next'),
@@ -347,7 +362,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   const SizedBox(height: 6),
                   Text(
                     context.tr('Step {n} of {total}', {'n': _step + 1, 'total': _lastStep + 1}),
-                    style: const TextStyle(fontSize: 12, color: AppColors.mutedBlueGray),
+                    style: TextStyle(fontSize: 12, color: colors.textMuted),
                   ),
                 ],
               ),

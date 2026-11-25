@@ -9,12 +9,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
 import 'core/brand.dart';
 import 'core/l10n.dart';
 import 'core/theme.dart';
 import 'core/widgets.dart';
+
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'data/cloud.dart';
 import 'data/cloud_sync.dart';
 import 'data/feature_prefs.dart';
@@ -47,9 +50,9 @@ class WallOPayApp extends ConsumerWidget {
       title: "Wall o' Pay",
       scaffoldMessengerKey: rootScaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.dark,
-      theme: buildTheme(),
-      darkTheme: buildTheme(),
+      themeMode: prefs.themeMode,
+      theme: buildLightTheme(),
+      darkTheme: buildDarkTheme(),
       locale: Locale(prefs.localeCode),
       supportedLocales: AppLocale.supported,
       localizationsDelegates: [
@@ -173,7 +176,8 @@ class HomeShell extends ConsumerStatefulWidget {
   ConsumerState<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserver {
+class _HomeShellState extends ConsumerState<HomeShell>
+    with WidgetsBindingObserver {
   final Set<int> _visitedTabs = {0};
 
   static const _pages = <Widget>[
@@ -257,37 +261,30 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     });
 
     final colors = context.themeColors;
-    final budgetEnabled = ref.watch(modulePrefsProvider.select((m) => m.budget));
+    final budgetEnabled = ref.watch(
+      modulePrefsProvider.select((m) => m.budget),
+    );
     final rawIndex = ref.watch(tabIndexProvider);
     final index = (!budgetEnabled && rawIndex == 2) ? 0 : rawIndex;
     _visitedTabs.add(index);
     final notifier = ref.read(tabIndexProvider.notifier);
 
-    Widget item(int i, IconData icon, IconData activeIcon, String label, {String? glassIcon}) {
+    Widget item(int i, PhosphorDuotoneIconData icon, String label) {
       final selected = index == i;
-      const activeColor = AppColors.goldenYellow;
-      final inactiveColor = AppColors.mutedBlueGray.withValues(alpha: 0.82);
+      final activeColor = colors.isDark
+          ? AppColors.goldenYellow
+          : colors.primary;
+      final inactiveColor = colors.isDark
+          ? AppColors.mutedBlueGray.withValues(alpha: 0.82)
+          : colors.textMuted;
 
-      final Widget iconWidget;
-      if (glassIcon != null) {
-        iconWidget = AnimatedOpacity(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutCubic,
-          opacity: selected ? 1.0 : 0.65,
-          child: Image.asset(
-            glassIcon,
-            width: 26,
-            height: 26,
-            fit: BoxFit.contain,
-          ),
-        );
-      } else {
-        iconWidget = Icon(
-          selected ? activeIcon : icon,
-          color: selected ? activeColor : inactiveColor,
-          size: 26,
-        );
-      }
+      final iconColor = selected ? activeColor : inactiveColor;
+      final iconWidget = PhosphorDuotoneIcon(
+        icon,
+        color: iconColor,
+        secondaryColor: iconColor.withValues(alpha: selected ? 0.28 : 0.14),
+        size: 25,
+      );
 
       return Expanded(
         child: Semantics(
@@ -313,7 +310,9 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 11,
-                          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                          fontWeight: selected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                           color: selected ? activeColor : inactiveColor,
                         ),
                       ),
@@ -331,17 +330,20 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       final result = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           icon: Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: colors.primary.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: Image.asset(
-              'assets/icons/vice_city/logout.png',
-              width: 32,
-              height: 32,
+            child: PhosphorDuotoneIcon(
+              PhosphorIconsDuotone.signOut,
+              color: colors.primary,
+              secondaryColor: colors.primary.withValues(alpha: 0.24),
+              size: 30,
             ),
           ),
           title: Text(
@@ -358,18 +360,28 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
             OutlinedButton(
               onPressed: () => Navigator.of(ctx).pop(false),
               style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 10,
+                ),
               ),
               child: Text(ctx.tr('Stay in App')),
             ),
             FilledButton(
               onPressed: () => Navigator.of(ctx).pop(true),
               style: FilledButton.styleFrom(
-                backgroundColor: colors.heroBackground,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 10,
+                ),
               ),
               child: Text(ctx.tr('Exit')),
             ),
@@ -383,14 +395,16 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     final isWide = screenWidth >= 600;
     final isExpanded = screenWidth >= 900;
 
-    final tabs = <(int, IconData, IconData, String, String)>[
-      (0, Icons.home_outlined, Icons.home, context.tr('Home'), 'assets/icons/vice_city/home.png'),
-      (1, Icons.receipt_long_outlined, Icons.receipt_long, context.tr('Transactions'), 'assets/icons/vice_city/card.png'),
+    final tabs = <(int, PhosphorDuotoneIconData, String)>[
+      (0, PhosphorIconsDuotone.house, context.tr('Home')),
+      (1, PhosphorIconsDuotone.receipt, context.tr('Transactions')),
       if (budgetEnabled)
-        (2, Icons.pie_chart_outline, Icons.pie_chart, context.tr('Budget'), 'assets/icons/vice_city/pie_chart.png'),
-      (3, Icons.insights_outlined, Icons.insights, context.tr('Insight'), 'assets/icons/vice_city/growth.png'),
+        (2, PhosphorIconsDuotone.chartPieSlice, context.tr('Budget')),
+      (3, PhosphorIconsDuotone.chartLineUp, context.tr('Insight')),
     ];
-    final railSelectedIndex = tabs.indexWhere((t) => t.$1 == index).clamp(0, tabs.length - 1);
+    final railSelectedIndex = tabs
+        .indexWhere((t) => t.$1 == index)
+        .clamp(0, tabs.length - 1);
 
     final fabButton = FloatingActionButton(
       tooltip: context.tr('Add transaction'),
@@ -403,32 +417,33 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
         height: 56,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.sunsetMagenta,
-              AppColors.sunsetOrange,
-            ],
+            colors: colors.isDark
+                ? const [AppColors.sunsetMagenta, AppColors.sunsetOrange]
+                : [colors.primary, AppColors.sunsetMagenta],
           ),
           border: Border.all(
-            color: AppColors.goldenYellow.withValues(alpha: 0.65),
+            color: colors.isDark
+                ? AppColors.goldenYellow.withValues(alpha: 0.65)
+                : Colors.white.withValues(alpha: 0.45),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.sunsetMagenta.withValues(alpha: 0.45),
+              color: colors.primary.withValues(alpha: 0.42),
               blurRadius: 16,
               spreadRadius: 1,
               offset: const Offset(0, 3),
             ),
           ],
         ),
-        child: Center(
-          child: Image.asset(
-            'assets/icons/vice_city/add.png',
-            width: 32,
-            height: 32,
+        child: const Center(
+          child: PhosphorDuotoneIcon(
+            PhosphorIconsDuotone.plus,
+            size: 28,
+            color: Colors.white,
           ),
         ),
       ),
@@ -467,46 +482,69 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
                             height: math.max(constraints.maxHeight, 360.0),
                             child: NavigationRail(
                               extended: isExpanded,
-                              backgroundColor: AppColors.deepNavy,
-                              indicatorColor: AppColors.sunsetMagenta.withValues(alpha: 0.22),
+                              backgroundColor: colors.cardSurface,
+                              indicatorColor: colors.primary.withValues(
+                                alpha: 0.16,
+                              ),
                               labelType: isExpanded
                                   ? NavigationRailLabelType.none
                                   : NavigationRailLabelType.all,
-                              selectedLabelTextStyle: const TextStyle(
+                              selectedLabelTextStyle: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.goldenYellow,
+                                color: colors.isDark
+                                    ? AppColors.goldenYellow
+                                    : colors.primary,
                               ),
                               unselectedLabelTextStyle: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
-                                color: AppColors.mutedBlueGray.withValues(alpha: 0.82),
+                                color: colors.isDark
+                                    ? AppColors.mutedBlueGray.withValues(
+                                        alpha: 0.82,
+                                      )
+                                    : colors.textMuted,
                               ),
                               leading: Padding(
-                                padding: const EdgeInsets.only(top: 12, bottom: 16),
+                                padding: const EdgeInsets.only(
+                                  top: 12,
+                                  bottom: 16,
+                                ),
                                 child: fabButton,
                               ),
                               selectedIndex: railSelectedIndex,
-                              onDestinationSelected: (railIdx) => notifier.set(tabs[railIdx].$1),
+                              onDestinationSelected: (railIdx) =>
+                                  notifier.set(tabs[railIdx].$1),
                               destinations: [
                                 for (final t in tabs)
                                   NavigationRailDestination(
-                                    icon: Opacity(
-                                      opacity: 0.65,
-                                      child: Image.asset(
-                                        t.$5,
-                                        width: 24,
-                                        height: 24,
-                                        fit: BoxFit.contain,
-                                      ),
+                                    icon: PhosphorDuotoneIcon(
+                                      t.$2,
+                                      size: 24,
+                                      color: colors.isDark
+                                          ? AppColors.mutedBlueGray.withValues(
+                                              alpha: 0.82,
+                                            )
+                                          : colors.textMuted,
+                                      secondaryColor:
+                                          (colors.isDark
+                                                  ? AppColors.mutedBlueGray
+                                                  : colors.textMuted)
+                                              .withValues(alpha: 0.14),
                                     ),
-                                    selectedIcon: Image.asset(
-                                      t.$5,
-                                      width: 24,
-                                      height: 24,
-                                      fit: BoxFit.contain,
+                                    selectedIcon: PhosphorDuotoneIcon(
+                                      t.$2,
+                                      size: 24,
+                                      color: colors.isDark
+                                          ? AppColors.goldenYellow
+                                          : colors.primary,
+                                      secondaryColor:
+                                          (colors.isDark
+                                                  ? AppColors.goldenYellow
+                                                  : colors.primary)
+                                              .withValues(alpha: 0.28),
                                     ),
-                                    label: Text(t.$4),
+                                    label: Text(t.$3),
                                   ),
                               ],
                             ),
@@ -517,7 +555,9 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
                     VerticalDivider(
                       width: 1,
                       thickness: 1,
-                      color: AppColors.borderOutline.withValues(alpha: 0.75),
+                      color: colors.borderOutline.withValues(
+                        alpha: colors.isDark ? 0.75 : 1.0,
+                      ),
                     ),
                     Expanded(
                       child: Center(
@@ -534,54 +574,45 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
           : Scaffold(
               body: content,
               floatingActionButton: fabButton,
-              floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerDocked,
               bottomNavigationBar: BottomAppBar(
                 shape: const CircularNotchedRectangle(),
                 notchMargin: 8,
                 height: 68,
                 padding: EdgeInsets.zero,
-                color: AppColors.deepNavy,
+                color: colors.cardSurface,
                 surfaceTintColor: Colors.transparent,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     border: Border(
                       top: BorderSide(
-                        color: AppColors.borderOutline.withValues(alpha: 0.75),
+                        color: colors.borderOutline.withValues(
+                          alpha: colors.isDark ? 0.75 : 1.0,
+                        ),
                         width: 1.0,
                       ),
                     ),
                   ),
                   child: Row(
                     children: [
-                      item(
-                        0,
-                        Icons.home_outlined,
-                        Icons.home,
-                        context.tr('Home'),
-                        glassIcon: 'assets/icons/vice_city/home.png',
-                      ),
+                      item(0, PhosphorIconsDuotone.house, context.tr('Home')),
                       item(
                         1,
-                        Icons.receipt_long_outlined,
-                        Icons.receipt_long,
+                        PhosphorIconsDuotone.receipt,
                         context.tr('Transactions'),
-                        glassIcon: 'assets/icons/vice_city/card.png',
                       ),
                       const SizedBox(width: 64),
                       if (budgetEnabled)
                         item(
                           2,
-                          Icons.pie_chart_outline,
-                          Icons.pie_chart,
+                          PhosphorIconsDuotone.chartPieSlice,
                           context.tr('Budget'),
-                          glassIcon: 'assets/icons/vice_city/pie_chart.png',
                         ),
                       item(
                         3,
-                        Icons.insights_outlined,
-                        Icons.insights,
+                        PhosphorIconsDuotone.chartLineUp,
                         context.tr('Insight'),
-                        glassIcon: 'assets/icons/vice_city/growth.png',
                       ),
                     ],
                   ),
@@ -597,11 +628,12 @@ class _AuthLoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: AppColors.bg,
+    final colors = context.themeColors;
+    return Scaffold(
+      backgroundColor: colors.bg,
       body: Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(AppColors.sage),
+          valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
         ),
       ),
     );

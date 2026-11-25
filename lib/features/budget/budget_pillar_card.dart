@@ -3,6 +3,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
 import '../../core/format.dart';
 import '../../core/icons.dart';
@@ -43,9 +44,10 @@ class BudgetPillarCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     final bucketColor = bucket.colorIn(context);
     final isOver = allocated > 0 && spent > allocated;
-    final color = isOver ? AppColors.expenseOnDark : bucketColor;
+    final color = isOver ? colors.expense : bucketColor;
 
     return AppCard(
       padding: EdgeInsets.zero,
@@ -71,15 +73,14 @@ class BudgetPillarCard extends StatelessWidget {
                         ),
                       ),
                       child: Center(
-                        child: Image.asset(
+                        child: AppDuotoneIcon(
                           bucket == BudgetBucket.needs
-                              ? 'assets/new_asset/props/prop_01.png'
+                              ? PhosphorIconsDuotone.house
                               : (bucket == BudgetBucket.wants
-                                  ? 'assets/new_asset/props/prop_04.png'
-                                  : 'assets/new_asset/props/prop_02.png'),
-                          width: 24,
-                          height: 24,
-                          fit: BoxFit.contain,
+                                  ? PhosphorIconsDuotone.sparkle
+                                  : PhosphorIconsDuotone.piggyBank),
+                          size: 22,
+                          color: bucketColor,
                         ),
                       ),
                     ),
@@ -90,10 +91,10 @@ class BudgetPillarCard extends StatelessWidget {
                         children: [
                           Text(
                             bucket.label(context, percentage),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 16,
-                              color: AppColors.softIvory,
+                              color: colors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -105,8 +106,8 @@ class BudgetPillarCard extends StatelessWidget {
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: isOver
-                                  ? AppColors.expenseOnDark
-                                  : AppColors.freshSage,
+                                  ? colors.expense
+                                  : colors.textMuted,
                             ),
                           ),
                         ],
@@ -138,15 +139,17 @@ class BudgetPillarCard extends StatelessWidget {
                 AppProgressBar(
                   value: allocated == 0 ? 0.0 : ratio,
                   color: color,
-                  backgroundColor: AppColors.mossShadow.withValues(alpha: 0.6),
+                  backgroundColor: colors.isDark
+                      ? AppColors.mossShadow.withValues(alpha: 0.6)
+                      : colors.surfaceContainer,
                 ),
                 if (isOver) ...[
                   const SizedBox(height: 6),
                   Text(
                     context.tr('Over budget by {amount}', {'amount': rupiah(spent - allocated)}),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
-                      color: AppColors.expenseOnDark,
+                      color: colors.expense,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -154,7 +157,10 @@ class BudgetPillarCard extends StatelessWidget {
               ],
             ),
           ),
-          Divider(height: 1, color: AppColors.borderOutline.withValues(alpha: 0.4)),
+          Divider(
+            height: 1,
+            color: colors.borderOutline.withValues(alpha: colors.isDark ? 0.4 : 0.9),
+          ),
 
           // Daftar Sub-Kategori di dalam pilar
           if (categories.isEmpty)
@@ -165,7 +171,7 @@ class BudgetPillarCard extends StatelessWidget {
                   context.tr('No categories in this group'),
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.freshSage.withValues(alpha: 0.6),
+                    color: colors.textMuted,
                     fontStyle: FontStyle.italic,
                   ),
                 ),
@@ -176,8 +182,11 @@ class BudgetPillarCard extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: categories.length,
-              separatorBuilder: (context, index) =>
-                  Divider(height: 1, indent: 64, color: AppColors.borderOutline.withValues(alpha: 0.3)),
+              separatorBuilder: (context, index) => Divider(
+                height: 1,
+                indent: 64,
+                color: colors.borderOutline.withValues(alpha: colors.isDark ? 0.3 : 0.8),
+              ),
               itemBuilder: (ctx, i) {
                 final c = categories[i];
                 final cSpent = categorySpent[c.id] ?? 0;
@@ -199,10 +208,10 @@ class BudgetPillarCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           categoryName(context, c),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
-                            color: AppColors.softIvory,
+                            color: colors.textPrimary,
                           ),
                         ),
                       ),
@@ -210,20 +219,24 @@ class BudgetPillarCard extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: AppColors.emeraldLeaf.withValues(alpha: 0.3),
+                            color: colors.isDark
+                                ? AppColors.emeraldLeaf.withValues(alpha: 0.3)
+                                : colors.primary.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: AppColors.dewMint.withValues(alpha: 0.3),
+                              color: colors.isDark
+                                  ? AppColors.dewMint.withValues(alpha: 0.3)
+                                  : colors.primary.withValues(alpha: 0.35),
                               width: 0.8,
                             ),
                           ),
                           child: Text(
                             '+${rupiah(cCarry)}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
-                              color: AppColors.dewMint,
-                              fontFeatures: [FontFeature.tabularFigures()],
+                              color: colors.isDark ? AppColors.dewMint : colors.primary,
+                              fontFeatures: const [FontFeature.tabularFigures()],
                             ),
                           ),
                         ),
@@ -241,21 +254,24 @@ class BudgetPillarCard extends StatelessWidget {
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: (hasSpecificLimit && cSpent > cBudget)
-                          ? AppColors.expenseOnDark
-                          : AppColors.freshSage,
+                          ? colors.expense
+                          : colors.textMuted,
                     ),
                   ),
-                  trailing: const Icon(
+                  trailing: Icon(
                     Icons.chevron_right,
                     size: 18,
-                    color: AppColors.freshSage,
+                    color: colors.textMuted,
                   ),
                 );
               },
             ),
 
           if (footerWidget != null) ...[
-            Divider(height: 1, color: AppColors.borderOutline.withValues(alpha: 0.4)),
+            Divider(
+              height: 1,
+              color: colors.borderOutline.withValues(alpha: colors.isDark ? 0.4 : 0.9),
+            ),
             footerWidget!,
           ],
         ],

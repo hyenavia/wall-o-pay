@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wall_o_pay/app.dart';
 import 'package:wall_o_pay/core/l10n.dart';
@@ -23,8 +24,9 @@ void main() {
 
   Future<void> pumpHomeShellAtSize(
     WidgetTester tester,
-    Size size,
-  ) async {
+    Size size, {
+    ThemeData? theme,
+  }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -45,7 +47,7 @@ void main() {
           currentUserProvider.overrideWithValue(null),
         ],
         child: MaterialApp(
-          theme: buildTheme(),
+          theme: theme ?? buildTheme(),
           locale: const Locale('en'),
           supportedLocales: AppLocale.supported,
           localizationsDelegates: [
@@ -68,28 +70,67 @@ void main() {
   }
 
   group('HomeShell Responsive Layout Tests', () {
-    testWidgets('Portrait phone uses BottomAppBar and omits NavigationRail', (tester) async {
+    testWidgets('Portrait phone uses BottomAppBar and omits NavigationRail', (
+      tester,
+    ) async {
       await pumpHomeShellAtSize(tester, const Size(390, 844));
 
       expect(find.byType(BottomAppBar), findsOneWidget);
       expect(find.byType(NavigationRail), findsNothing);
+      expect(find.byType(PhosphorDuotoneIcon), findsWidgets);
+      expect(find.byIcon(PhosphorIconsDuotone.house.primary), findsOneWidget);
+      expect(find.byIcon(PhosphorIconsDuotone.plus.primary), findsOneWidget);
 
       await unmountAndFlush(tester);
     });
 
-    testWidgets('Landscape phone uses compact NavigationRail without BottomAppBar', (tester) async {
-      await pumpHomeShellAtSize(tester, const Size(844, 390));
+    testWidgets(
+      'Portrait phone BottomAppBar renders Phosphor Duotone icons cleanly in Light Mode',
+      (tester) async {
+        await pumpHomeShellAtSize(
+          tester,
+          const Size(390, 844),
+          theme: buildLightTheme(),
+        );
 
-      expect(find.byType(BottomAppBar), findsNothing);
-      final railFinder = find.byType(NavigationRail);
-      expect(railFinder, findsOneWidget);
-      final rail = tester.widget<NavigationRail>(railFinder);
-      expect(rail.extended, isFalse);
+        expect(find.byType(BottomAppBar), findsOneWidget);
+        expect(find.byIcon(PhosphorIconsDuotone.house.primary), findsOneWidget);
+        expect(
+          find.byIcon(PhosphorIconsDuotone.receipt.primary),
+          findsOneWidget,
+        );
+        expect(
+          find.byIcon(PhosphorIconsDuotone.chartPieSlice.primary),
+          findsOneWidget,
+        );
+        expect(
+          find.byIcon(PhosphorIconsDuotone.chartLineUp.primary),
+          findsOneWidget,
+        );
+        expect(find.byIcon(PhosphorIconsDuotone.plus.primary), findsOneWidget);
 
-      await unmountAndFlush(tester);
-    });
+        await unmountAndFlush(tester);
+      },
+    );
 
-    testWidgets('Tablet uses extended NavigationRail without BottomAppBar', (tester) async {
+    testWidgets(
+      'Landscape phone uses compact NavigationRail without BottomAppBar',
+      (tester) async {
+        await pumpHomeShellAtSize(tester, const Size(844, 390));
+
+        expect(find.byType(BottomAppBar), findsNothing);
+        final railFinder = find.byType(NavigationRail);
+        expect(railFinder, findsOneWidget);
+        final rail = tester.widget<NavigationRail>(railFinder);
+        expect(rail.extended, isFalse);
+
+        await unmountAndFlush(tester);
+      },
+    );
+
+    testWidgets('Tablet uses extended NavigationRail without BottomAppBar', (
+      tester,
+    ) async {
       await pumpHomeShellAtSize(tester, const Size(1024, 768));
 
       expect(find.byType(BottomAppBar), findsNothing);

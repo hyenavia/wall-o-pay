@@ -91,10 +91,12 @@ class EnchantedGlasshouseBackgroundPainter extends CustomPainter {
   EnchantedGlasshouseBackgroundPainter({
     required this.sunbeamAnimation,
     required this.particleAnimation,
+    this.isDark = true,
   }) : super(repaint: Listenable.merge([sunbeamAnimation, particleAnimation]));
 
   final Animation<double> sunbeamAnimation;
   final Animation<double> particleAnimation;
+  final bool isDark;
 
   // Koordinat partikel tetap agar pergerakan halus tanpa re-seed acak
   static const List<_MoteData> _motes = [
@@ -116,21 +118,27 @@ class EnchantedGlasshouseBackgroundPainter extends CustomPainter {
     final h = size.height;
     if (w <= 0 || h <= 0) return;
 
-    // 1. Kanvas Latar Belakang Gradasi Deep Navy & Midnight Navy
+    // 1. Kanvas Latar Belakang Gradasi Deep Navy (Sunset) / Ocean Sapphire (Daylight)
     final bgPaint = Paint()
       ..shader = RadialGradient(
         center: const Alignment(0.2, -0.6),
         radius: 1.35,
-        colors: [
-          const Color(0xFF162354),
-          const Color(0xFF0F183C),
-          AppColors.midnightNavy,
-        ],
+        colors: isDark
+            ? [
+                const Color(0xFF162354),
+                const Color(0xFF0F183C),
+                AppColors.midnightNavy,
+              ]
+            : const [
+                Color(0xFF0E5EC4),
+                Color(0xFF0A4DA6),
+                Color(0xFF082E6E),
+              ],
         stops: const [0.0, 0.42, 1.0],
       ).createShader(Rect.fromLTWH(0, 0, w, h));
     canvas.drawRect(Rect.fromLTWH(0, 0, w, h), bgPaint);
 
-    // 2. Efek Cahaya Sunset Menembus Cakrawala (Soft Sunset Sunbeams)
+    // 2. Efek Cahaya Sunset / Daylight Menembus Cakrawala
     final sunProgress = sunbeamAnimation.value;
     final sunAlpha = 0.05 + 0.04 * math.sin(sunProgress * math.pi * 2);
     final beamOffset = math.sin(sunProgress * math.pi * 2) * 14.0;
@@ -140,11 +148,17 @@ class EnchantedGlasshouseBackgroundPainter extends CustomPainter {
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            AppColors.sunsetOrange.withValues(alpha: sunAlpha * 1.5),
-            AppColors.sunsetMagenta.withValues(alpha: sunAlpha * 0.9),
-            Colors.transparent,
-          ],
+          colors: isDark
+              ? [
+                  AppColors.sunsetOrange.withValues(alpha: sunAlpha * 1.5),
+                  AppColors.sunsetMagenta.withValues(alpha: sunAlpha * 0.9),
+                  Colors.transparent,
+                ]
+              : [
+                  AppColors.goldenYellow.withValues(alpha: sunAlpha * 1.8),
+                  Colors.white.withValues(alpha: sunAlpha * 1.1),
+                  Colors.transparent,
+                ],
           stops: const [0.0, 0.30, 1.0],
         ).createShader(Rect.fromLTWH(0, 0, w, h));
 
@@ -225,12 +239,16 @@ class EnchantedGlasshouseBackgroundPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
+    final palmColor = isDark
+        ? const Color(0xFF04081E).withValues(alpha: 0.65)
+        : const Color(0xFF041A42).withValues(alpha: 0.55);
+
     final palmPaint = Paint()
-      ..color = const Color(0xFF04081E).withValues(alpha: 0.65)
+      ..color = palmColor
       ..style = PaintingStyle.fill;
 
     final trunkPaint = Paint()
-      ..color = const Color(0xFF04081E).withValues(alpha: 0.65)
+      ..color = palmColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.4
       ..strokeCap = StrokeCap.round;
@@ -430,19 +448,22 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
+    final navColor =
+        colors.isDark ? AppColors.midnightNavy : const Color(0xFF082E6E);
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: AppColors.midnightNavy,
+        systemNavigationBarColor: navColor,
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: AppColors.midnightNavy,
+        backgroundColor: navColor,
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // 1. Lapisan Latar Belakang Vice City Sunset
+            // 1. Lapisan Latar Belakang Vice City Sunset / Daylight
             Positioned.fill(
               child: ExcludeSemantics(
                 child: RepaintBoundary(
@@ -450,6 +471,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                     painter: EnchantedGlasshouseBackgroundPainter(
                       sunbeamAnimation: _ambientController,
                       particleAnimation: _ambientController,
+                      isDark: colors.isDark,
                     ),
                   ),
                 ),
@@ -505,7 +527,9 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                               fontSize: 14,
                               fontWeight: FontWeight.w400, // DM Sans Regular
                               letterSpacing: 0.25,
-                              color: AppColors.mutedBlueGray,
+                              color: colors.isDark
+                                  ? AppColors.mutedBlueGray
+                                  : Colors.white.withValues(alpha: 0.85),
                             ),
                           ),
                           const SizedBox(height: 18),

@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
 import '../../core/format.dart';
 import '../../core/icons.dart';
@@ -42,7 +43,8 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.6);
+    final colors = context.themeColors;
+    final muted = colors.textMuted;
     final ready = ref.watch(firebaseReadyProvider);
     final user = ref.watch(currentUserProvider);
     final backup = ref.watch(cloudBackupProvider);
@@ -57,19 +59,17 @@ class SettingsPage extends ConsumerWidget {
     final username = ref.watch(usernameProvider);
     final canUseCloud = ready && user != null && !isSyncing;
     final updateInfo = ref.watch(availableUpdateProvider);
-    final colors = context.themeColors;
 
     final lastSyncTime = sync.lastSynced ?? backup.lastBackup;
     final lastText = lastSyncTime == null
         ? context.tr('No cloud backup yet.')
         : context.tr('Last backup {date}', {'date': dateTimeLabel(lastSyncTime)});
 
-    Widget iconBadge(IconData icon, Color color, {String? customAsset}) {
-      final asset = customAsset ?? viceCityAssetForIcon(icon);
+    Widget iconBadge(IconData icon, Color color, {PhosphorDuotoneIconData? duotoneIcon}) {
+      final resolved = duotoneIcon ?? phosphorForIcon(icon);
       return Container(
         width: 40,
         height: 40,
-        padding: asset != null ? const EdgeInsets.all(8) : null,
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.16),
           borderRadius: BorderRadius.circular(12),
@@ -78,9 +78,11 @@ class SettingsPage extends ConsumerWidget {
             width: 0.8,
           ),
         ),
-        child: asset != null
-            ? Image.asset(asset, fit: BoxFit.contain)
-            : Icon(icon, color: color, size: 20),
+        child: Center(
+          child: resolved != null
+              ? AppDuotoneIcon(resolved, color: color, size: 21)
+              : Icon(icon, color: color, size: 20),
+        ),
       );
     }
 
@@ -191,6 +193,38 @@ class SettingsPage extends ConsumerWidget {
                   ),
                 ],
                 const SizedBox(height: 20),
+                Text(context.tr('Appearance'), style: theme.textTheme.labelLarge),
+                const SizedBox(height: 4),
+                Text(
+                  context.tr('Choose between Vice City Sunset (Dark) and Vice City Daylight (Light).'),
+                  style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  child: SegmentedButton<ThemeMode>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                        value: ThemeMode.dark,
+                        icon: const Icon(Icons.nights_stay_outlined, size: 18),
+                        label: Text(context.tr('Sunset')),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.light,
+                        icon: const Icon(Icons.wb_sunny_outlined, size: 18),
+                        label: Text(context.tr('Daylight')),
+                      ),
+                    ],
+                    selected: {
+                      prefs.themeMode == ThemeMode.light
+                          ? ThemeMode.light
+                          : ThemeMode.dark,
+                    },
+                    onSelectionChanged: (s) => prefsCtl.setThemeMode(s.first),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 Text(context.tr('Language'), style: theme.textTheme.labelLarge),
                 const SizedBox(height: 10),
                 SizedBox(
@@ -235,7 +269,7 @@ class SettingsPage extends ConsumerWidget {
                 const Divider(height: 1),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: iconBadge(Icons.tune_rounded, AppColors.dewMint),
+                  leading: iconBadge(Icons.tune_rounded, colors.accentSecondary),
                   title: Text(
                     context.tr('Active Modules & Features'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -298,7 +332,10 @@ class SettingsPage extends ConsumerWidget {
                 ),
                 const Divider(height: 1, indent: 68),
                 SwitchListTile(
-                  secondary: iconBadge(Icons.alarm_rounded, const Color(0xFF60A5FA)),
+                  secondary: iconBadge(
+                    Icons.alarm_rounded,
+                    colors.isDark ? const Color(0xFF60A5FA) : const Color(0xFF1D4ED8),
+                  ),
                   title: Text(
                     context.tr('Daily reminder'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -327,7 +364,7 @@ class SettingsPage extends ConsumerWidget {
                 if (features.dailyReminder) ...[
                   const Divider(height: 1, indent: 68),
                   ListTile(
-                    leading: iconBadge(Icons.schedule_rounded, AppColors.sage),
+                    leading: iconBadge(Icons.schedule_rounded, colors.primary),
                     title: Text(
                       context.tr('Reminder time'),
                       style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -336,7 +373,7 @@ class SettingsPage extends ConsumerWidget {
                       features.reminderTime.format(context),
                       style: theme.textTheme.labelLarge?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.sage,
+                        color: colors.primary,
                       ),
                     ),
                     onTap: () async {
@@ -356,7 +393,7 @@ class SettingsPage extends ConsumerWidget {
                 ],
                 const Divider(height: 1, indent: 68),
                 SwitchListTile(
-                  secondary: iconBadge(Icons.auto_stories_outlined, AppColors.dewMint),
+                  secondary: iconBadge(Icons.auto_stories_outlined, colors.highlightGold),
                   title: Text(
                     context.tr('Financial recap notifications'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -435,10 +472,10 @@ class SettingsPage extends ConsumerWidget {
                 if (!ready)
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: Image.asset(
-                      'assets/icon-compress/155_cloud_sync-kompres.png',
-                      width: 24,
-                      height: 24,
+                    leading: AppDuotoneIcon(
+                      PhosphorIconsDuotone.arrowsClockwise,
+                      size: 24,
+                      color: muted,
                     ),
                     title: Text(context.tr('Firebase is not connected')),
                     subtitle: Text(context.tr(
@@ -452,15 +489,15 @@ class SettingsPage extends ConsumerWidget {
                         width: 56,
                         height: 56,
                         decoration: BoxDecoration(
-                          color: AppColors.sage.withValues(alpha: 0.16),
+                          color: colors.primary.withValues(alpha: 0.16),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: AppColors.dewMint.withValues(alpha: 0.35),
+                            color: colors.accentSecondary.withValues(alpha: 0.35),
                             width: 1.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.dewMint.withValues(alpha: 0.15),
+                              color: colors.accentSecondary.withValues(alpha: 0.15),
                               blurRadius: 10,
                             ),
                           ],
@@ -505,10 +542,10 @@ class SettingsPage extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      icon: Image.asset(
-                        'assets/icon-compress/104_user_add-kompres.png',
-                        width: 18,
-                        height: 18,
+                      icon: AppDuotoneIcon(
+                        PhosphorIconsDuotone.userPlus,
+                        size: 18,
+                        color: colors.onPrimary,
                       ),
                       label: Text(context.tr('Sign In / Create Account')),
                       onPressed: () => Navigator.push(
@@ -523,9 +560,10 @@ class SettingsPage extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: sync.status == SyncStatus.error
-                              ? const Color(0x1BFF5722)
-                              : const Color(0x1B4CAF50),
+                          color: (sync.status == SyncStatus.error
+                                  ? colors.expense
+                                  : colors.income)
+                              .withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -535,8 +573,8 @@ class SettingsPage extends ConsumerWidget {
                                   ? Icons.sync_problem_rounded
                                   : Icons.cloud_done_rounded),
                           color: sync.status == SyncStatus.error
-                              ? Colors.deepOrange
-                              : Colors.green,
+                              ? colors.expense
+                              : colors.income,
                           size: 24,
                         ),
                       ),
@@ -557,9 +595,10 @@ class SettingsPage extends ConsumerWidget {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: sync.status == SyncStatus.error
-                                        ? const Color(0x1BFF5722)
-                                        : const Color(0x1B4CAF50),
+                                    color: (sync.status == SyncStatus.error
+                                            ? colors.expense
+                                            : colors.income)
+                                        .withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
@@ -572,8 +611,8 @@ class SettingsPage extends ConsumerWidget {
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                       color: sync.status == SyncStatus.error
-                                          ? Colors.deepOrange
-                                          : Colors.green,
+                                          ? colors.expense
+                                          : colors.income,
                                     ),
                                   ),
                                 ),
@@ -608,10 +647,10 @@ class SettingsPage extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          icon: Image.asset(
-                            'assets/icon-compress/41_cloud_upload-kompres.png',
-                            width: 16,
-                            height: 16,
+                          icon: AppDuotoneIcon(
+                            PhosphorIconsDuotone.cloudArrowUp,
+                            size: 17,
+                            color: canUseCloud ? colors.primary : muted,
                           ),
                           label: Text(context.tr('Send to Cloud')),
                           onPressed: canUseCloud ? () => SettingsActions.handleManualUpload(context, ref) : null,
@@ -627,10 +666,10 @@ class SettingsPage extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          icon: Image.asset(
-                            'assets/icon-compress/42_cloud_download-kompres.png',
-                            width: 16,
-                            height: 16,
+                          icon: AppDuotoneIcon(
+                            PhosphorIconsDuotone.cloudArrowDown,
+                            size: 17,
+                            color: canUseCloud ? colors.primary : muted,
                           ),
                           label: Text(context.tr('Fetch from Cloud')),
                           onPressed: canUseCloud ? () => SettingsActions.handleManualRestore(context, ref) : null,
@@ -649,10 +688,10 @@ class SettingsPage extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      icon: Image.asset(
-                        'assets/icon-compress/155_cloud_sync-kompres.png',
-                        width: 16,
-                        height: 16,
+                      icon: AppDuotoneIcon(
+                        PhosphorIconsDuotone.arrowsClockwise,
+                        size: 17,
+                        color: canUseCloud ? colors.onPrimary : muted,
                       ),
                       label: Text(context.tr('Sync Now (Two-Way)')),
                       onPressed: canUseCloud ? () => SettingsActions.handleTwoWaySync(context, ref) : null,
@@ -700,7 +739,10 @@ class SettingsPage extends ConsumerWidget {
                 const Divider(height: 1, indent: 68),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  leading: iconBadge(Icons.file_download_outlined, const Color(0xFF60A5FA)),
+                  leading: iconBadge(
+                    Icons.file_download_outlined,
+                    colors.isDark ? const Color(0xFF60A5FA) : const Color(0xFF1D4ED8),
+                  ),
                   title: Text(
                     context.tr('Import backup file (JSON)'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -742,7 +784,10 @@ class SettingsPage extends ConsumerWidget {
               children: [
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  leading: iconBadge(Icons.category_outlined, const Color(0xFFA78BFA)),
+                  leading: iconBadge(
+                    Icons.category_outlined,
+                    colors.isDark ? const Color(0xFFA78BFA) : const Color(0xFF6D28D9),
+                  ),
                   title: Text(
                     context.tr('Manage categories'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -756,7 +801,7 @@ class SettingsPage extends ConsumerWidget {
                 const Divider(height: 1, indent: 68),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  leading: iconBadge(Icons.table_view_outlined, AppColors.sage),
+                  leading: iconBadge(Icons.table_view_outlined, colors.primary),
                   title: Text(
                     context.tr('Export transactions (CSV)'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -857,7 +902,7 @@ class SettingsPage extends ConsumerWidget {
               children: [
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  leading: iconBadge(Icons.info_outline_rounded, AppColors.sage),
+                  leading: iconBadge(Icons.info_outline_rounded, colors.primary),
                   title: Text(
                     context.tr('About Wall o\' Pay'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -878,7 +923,10 @@ class SettingsPage extends ConsumerWidget {
                 const Divider(height: 1, indent: 68),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  leading: iconBadge(Icons.history_edu_rounded, const Color(0xFF60A5FA)),
+                  leading: iconBadge(
+                    Icons.history_edu_rounded,
+                    colors.isDark ? const Color(0xFF60A5FA) : const Color(0xFF1D4ED8),
+                  ),
                   title: Text(
                     context.tr('Version Changelog'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -896,7 +944,10 @@ class SettingsPage extends ConsumerWidget {
                 const Divider(height: 1, indent: 68),
                 ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  leading: iconBadge(Icons.feedback_outlined, const Color(0xFFA78BFA)),
+                  leading: iconBadge(
+                    Icons.feedback_outlined,
+                    colors.isDark ? const Color(0xFFA78BFA) : const Color(0xFF6D28D9),
+                  ),
                   title: Text(
                     context.tr('Send Feedback'),
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
@@ -999,8 +1050,8 @@ class _UpdateTile extends StatelessWidget {
                   ),
                   child: Text(
                     context.tr('NEW'),
-                    style: const TextStyle(
-                      color: AppColors.mossShadow,
+                    style: TextStyle(
+                      color: colors.isDark ? AppColors.mossShadow : Colors.white,
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
                     ),
@@ -1045,37 +1096,51 @@ class _GlasshouseProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     return Semantics(
       button: true,
       label: '${name ?? (isGuest ? context.tr('Guest') : context.tr('Profile'))}, ${context.tr('Profile')}',
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.sunsetMagenta,
-              AppColors.neonCyan,
-            ],
+            colors: colors.isDark
+                ? const [
+                    AppColors.sunsetMagenta,
+                    AppColors.neonCyan,
+                  ]
+                : const [
+                    Color(0xFF00A6FF),
+                    Color(0xFFFF4D8D),
+                  ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.42),
-              blurRadius: 18,
-              offset: const Offset(0, 6),
-            ),
-            BoxShadow(
-              color: AppColors.sunsetMagenta.withValues(alpha: 0.18),
-              blurRadius: 16,
-            ),
-          ],
+          boxShadow: colors.isDark
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.42),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
+                  ),
+                  BoxShadow(
+                    color: AppColors.sunsetMagenta.withValues(alpha: 0.18),
+                    blurRadius: 16,
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: const Color(0xFF0A4DA6).withValues(alpha: 0.22),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
         ),
         padding: const EdgeInsets.all(1.5),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(22.5),
           child: Material(
-            color: AppColors.deepNavy,
+            color: colors.isDark ? AppColors.deepNavy : colors.heroBackground,
             child: InkWell(
               onTap: onTap,
               splashColor: AppColors.sunsetMagenta.withValues(alpha: 0.12),
@@ -1085,7 +1150,7 @@ class _GlasshouseProfileCard extends StatelessWidget {
                   Positioned.fill(
                     child: ExcludeSemantics(
                       child: Image.asset(
-                        'assets/images/coastal_sunset_bg.jpg',
+                        colors.coastalBgAsset,
                         fit: BoxFit.cover,
                         alignment: const Alignment(0, -0.25),
                       ),
@@ -1098,11 +1163,17 @@ class _GlasshouseProfileCard extends StatelessWidget {
                           gradient: LinearGradient(
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight,
-                            colors: [
-                              AppColors.midnightNavy.withValues(alpha: 0.90),
-                              AppColors.midnightNavy.withValues(alpha: 0.72),
-                              AppColors.midnightNavy.withValues(alpha: 0.62),
-                            ],
+                            colors: colors.isDark
+                                ? [
+                                    AppColors.midnightNavy.withValues(alpha: 0.90),
+                                    AppColors.midnightNavy.withValues(alpha: 0.72),
+                                    AppColors.midnightNavy.withValues(alpha: 0.62),
+                                  ]
+                                : [
+                                    const Color(0xFF0B3568).withValues(alpha: 0.86),
+                                    const Color(0xFF0B3568).withValues(alpha: 0.70),
+                                    const Color(0xFF0B3568).withValues(alpha: 0.56),
+                                  ],
                           ),
                         ),
                       ),
@@ -1326,7 +1397,8 @@ class _ModulePrefsSheet extends ConsumerWidget {
     final modules = ref.watch(modulePrefsProvider);
     final ctl = ref.read(modulePrefsProvider.notifier);
     final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.65);
+    final colors = context.themeColors;
+    final muted = colors.textMuted;
 
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -1388,12 +1460,17 @@ class _ModulePrefsSheet extends ConsumerWidget {
                 secondary: Container(
                   width: 32,
                   height: 32,
-                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.sage.withValues(alpha: 0.16),
+                    color: colors.primary.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Image.asset('assets/icons/vice_city/goals.png', fit: BoxFit.contain),
+                  child: Center(
+                    child: AppDuotoneIcon(
+                      PhosphorIconsDuotone.target,
+                      size: 18,
+                      color: colors.primary,
+                    ),
+                  ),
                 ),
                 title: Text(context.tr('Savings Goals')),
                 subtitle: Text(
@@ -1409,12 +1486,17 @@ class _ModulePrefsSheet extends ConsumerWidget {
                 secondary: Container(
                   width: 32,
                   height: 32,
-                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withValues(alpha: 0.16),
+                    color: colors.warning.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Image.asset('assets/icons/vice_city/debts.png', fit: BoxFit.contain),
+                  child: Center(
+                    child: AppDuotoneIcon(
+                      PhosphorIconsDuotone.handshake,
+                      size: 18,
+                      color: colors.warning,
+                    ),
+                  ),
                 ),
                 title: Text(context.tr('Debts & Split Bills')),
                 subtitle: Text(
@@ -1430,12 +1512,22 @@ class _ModulePrefsSheet extends ConsumerWidget {
                 secondary: Container(
                   width: 32,
                   height: 32,
-                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF60A5FA).withValues(alpha: 0.16),
+                    color: (colors.isDark
+                            ? const Color(0xFF60A5FA)
+                            : const Color(0xFF1D4ED8))
+                        .withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Image.asset('assets/icons/vice_city/recurring.png', fit: BoxFit.contain),
+                  child: Center(
+                    child: AppDuotoneIcon(
+                      PhosphorIconsDuotone.repeat,
+                      size: 18,
+                      color: colors.isDark
+                          ? const Color(0xFF60A5FA)
+                          : const Color(0xFF1D4ED8),
+                    ),
+                  ),
                 ),
                 title: Text(context.tr('Recurring Schedules')),
                 subtitle: Text(
@@ -1451,12 +1543,17 @@ class _ModulePrefsSheet extends ConsumerWidget {
                 secondary: Container(
                   width: 32,
                   height: 32,
-                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.incomeOnDark.withValues(alpha: 0.16),
+                    color: colors.income.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Image.asset('assets/icons/vice_city/transfer.png', fit: BoxFit.contain),
+                  child: Center(
+                    child: AppDuotoneIcon(
+                      PhosphorIconsDuotone.arrowsLeftRight,
+                      size: 18,
+                      color: colors.income,
+                    ),
+                  ),
                 ),
                 title: Text(context.tr('Account Transfers')),
                 subtitle: Text(
@@ -1472,12 +1569,17 @@ class _ModulePrefsSheet extends ConsumerWidget {
                 secondary: Container(
                   width: 32,
                   height: 32,
-                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.dewMint.withValues(alpha: 0.16),
+                    color: colors.highlightGold.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Image.asset('assets/icons/vice_city/pie_chart.png', fit: BoxFit.contain),
+                  child: Center(
+                    child: AppDuotoneIcon(
+                      PhosphorIconsDuotone.chartPieSlice,
+                      size: 18,
+                      color: colors.highlightGold,
+                    ),
+                  ),
                 ),
                 title: Text(context.tr('Category Budgets')),
                 subtitle: Text(

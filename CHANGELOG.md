@@ -4,6 +4,48 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.1] - 2026-11-25
+
+### Changed
+- **Appearance Selector**: Simplified the Appearance selector in `SettingsPage` to display only **Sunset** (`ThemeMode.dark`) and **Daylight** (`ThemeMode.light`), removing the `System` option.
+
+## [3.4.0] - 2026-11-25
+
+### Changed
+- **Unified Phosphor Duotone Iconography**: Migrated all functional, category, wallet, filter, chart, security, and action custom PNG icons (`assets/icons/vice_city/*`, `assets/icon-compress/*`, and small UI `assets/new_asset/props/*`) across the entire app to theme-adaptive **Phosphor Duotone** (`PhosphorDuotoneIcon` + `AppDuotoneIcon`), giving crisp dual-layer visual consistency across both **Vice City Sunset** and **Vice City Daylight** while preserving custom Wendy mascot illustrations, avatars, profile frames, backgrounds, and empty/celebration artwork.
+
+## [3.3.3] - 2026-11-25
+
+### Changed
+- **Phosphor Duotone Navigation**: Replaced the bottom navigation bar (`BottomAppBar`), wide-screen `NavigationRail`, center FAB plus icon, and exit dialog icon in `HomeShell` with `phosphor_glyphs` (`PhosphorDuotoneIcon` + `PhosphorIconsDuotone`) icons that dynamically follow active/inactive colors across both **Vice City Sunset** and **Vice City Daylight**.
+
+## [3.3.2] - 2026-11-25
+
+### Changed
+- **Vice City Daylight (Phase 3 — Secondary & Standalone Screens)**: Migrated `AccountsPage`, `CategoriesPage`, `DebtsPage`, `GoalsPage`, `RecurringPage`, `MorePage`, `ProfilePage`, `OnboardingPage`, `AuthPage`, `LockScreen`, `SecurityPage`, `SplashPage`, `AboutWallOPaySheet`, `AppChangelogSheet`, `ReportDialog`, `SettingsActions`, and `UpdateCheckerService` update dialog to adaptive semantic `AppThemeColors` roles with Ocean Sapphire signature anchors on illustrated hero banners, Splash, and Lock surfaces.
+
+### Added
+- Expanded `test/theme_contrast_test.dart` with Phase 3 Light Mode widget smoke tests for `AboutWallOPaySheet`, `SplashPage`, `MorePage`, and `OnboardingPage`.
+
+## [3.3.1] - 2026-11-25
+
+### Changed
+- **Vice City Daylight (Phase 2 — Core Tabs & Forms)**: Migrated Home (`HomePage`, `DailyFinancialPulseCard`), Transactions (`TransactionsPage`, `TransactionTile`, `TransactionForm`, `CalculatorSheet`), Budget (`BudgetPage`, `BudgetPillarCard`, `CategoryBudgetSheet`, `TotalBudgetDialog`, `BudgetRule`), and Insights (`InsightsPage`, `ExpensePieChart`, `TrendBarChart`, `PeriodExpenseBarChart`) to semantic `AppThemeColors` roles (`Warm Pearl` surface cards with Ocean Sapphire signature hero anchors and crisp Daylight typography/status tokens).
+- Extended `AppThemeColors` with `transfer`, `onHeroIncome`, `onHeroExpense`, and `resolveAccent(...)` to keep semantic badges WCAG AA legible across both light card surfaces and sapphire hero anchors.
+
+### Added
+- Expanded `test/theme_contrast_test.dart` with WCAG AA checks for `onHeroIncome`, `onHeroExpense`, `transfer`, `resolveAccent`, and Light Mode widget smoke tests for `TransactionTile`, `CalculatorSheet`, and `BudgetPillarCard`.
+
+## [3.3.0] - 2026-11-25
+
+### Added
+- **Vice City Daylight Light Theme (Phase 1 — Foundation, Assets, Core Widgets & Settings):**
+  - Expanded `AppThemeColors` (`lib/core/theme.dart`) with dual-brightness tokens (`viceCitySunset` for dark mode and WCAG AA-calibrated `viceCityDaylight` for light mode), `buildLightTheme()`, `buildDarkTheme()`, and adaptive semantic/surface/background-asset roles.
+  - Added and optimized three Vice City Daylight background assets (`vice_city_daylight_bg.jpg`, `vice_city_daylight_vertical_bg.jpg`, `coastal_daylight_bg.jpg`) in `assets/images/`.
+  - Wired `WallOPayApp` (`lib/app.dart`) to `prefs.themeMode` while keeping `ThemeMode.dark` (Vice City Sunset) as the default for new/unset users in `AppPrefsController` (`lib/data/prefs.dart`).
+  - Adapted core shared widgets (`pageAppBar`, `secondaryAppBar`, `appInput`, `AppCard`, `HeroCard`, `CategoryBadge`, `AppChip`, `SectionHeader`, `PeriodSwitcher`, `PeriodTypeToggle`, `EmptyStateCard`, `BotanicalBackgroundSheet`), decorative painters, `HomeShell`, `GuestBackupNudgeBanner`, and `SettingsPage` to support Light Mode.
+  - Added an **Appearance** selector (`Sunset` / `Daylight` / `System`) in `SettingsPage` with bilingual (`EN`/`ID`) labels and automated WCAG AA contrast + theme preference tests (`test/theme_contrast_test.dart`).
+
 ## [3.2.1] - 2026-11-25
 
 ### Fixed

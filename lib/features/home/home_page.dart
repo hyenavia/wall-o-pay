@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart' show SemanticsService;
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
 import '../../core/format.dart';
 import '../../core/icons.dart';
@@ -56,6 +57,7 @@ class HomePage extends ConsumerWidget {
     final isGuest = ref.watch(currentUserProvider) == null;
     final updateInfo = ref.watch(availableUpdateProvider);
     final modules = ref.watch(modulePrefsProvider);
+    final colors = context.themeColors;
     final pendingList = modules.recurring
         ? (ref.watch(pendingTransactionsProvider).value ??
             const <PendingTransaction>[])
@@ -75,12 +77,12 @@ class HomePage extends ConsumerWidget {
         );
 
     return Scaffold(
-      backgroundColor: AppColors.headerCanopyTop,
+      backgroundColor: colors.headerCanopyTop,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
         child: Stack(
           children: [
-            // Atmospheric Vice City Sunset Vertical Canopy Backdrop
+            // Atmospheric Vice City Sunset / Daylight Vertical Canopy Backdrop
             Positioned(
               top: 0,
               left: 0,
@@ -91,7 +93,7 @@ class HomePage extends ConsumerWidget {
                   fit: StackFit.expand,
                   children: [
                     Image.asset(
-                      'assets/images/vice_city_vertical_bg.jpg',
+                      colors.verticalBgAsset,
                       fit: BoxFit.cover,
                       alignment: Alignment.topCenter,
                     ),
@@ -100,10 +102,15 @@ class HomePage extends ConsumerWidget {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [
-                            AppColors.headerCanopyTop.withValues(alpha: 0.15),
-                            AppColors.headerCanopyBottom.withValues(alpha: 0.55),
-                          ],
+                          colors: colors.isDark
+                              ? [
+                                  colors.headerCanopyTop.withValues(alpha: 0.15),
+                                  colors.headerCanopyBottom.withValues(alpha: 0.55),
+                                ]
+                              : [
+                                  colors.headerCanopyTop.withValues(alpha: 0.52),
+                                  colors.headerCanopyBottom.withValues(alpha: 0.68),
+                                ],
                         ),
                       ),
                     ),
@@ -111,7 +118,7 @@ class HomePage extends ConsumerWidget {
                 ),
               ),
             ),
-            const Positioned(
+            Positioned(
               top: 0,
               left: 0,
               right: 0,
@@ -121,7 +128,10 @@ class HomePage extends ConsumerWidget {
                   child: RepaintBoundary(
                     child: CustomPaint(
                       isComplex: true,
-                      painter: BotanicalCanopyPainter(opacity: 0.12),
+                      painter: BotanicalCanopyPainter(
+                        opacity: 0.12,
+                        isDark: colors.isDark,
+                      ),
                     ),
                   ),
                 ),
@@ -153,8 +163,8 @@ class HomePage extends ConsumerWidget {
                           const SizedBox(height: 12),
                           Text(
                             context.tr('Loading...'),
-                            style: const TextStyle(
-                              color: AppColors.mutedBlueGray,
+                            style: TextStyle(
+                              color: colors.textMuted,
                               fontSize: 13,
                             ),
                           ),
@@ -426,6 +436,7 @@ class _HomeHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
     final sync = ref.watch(syncStateProvider);
 
     return Padding(
@@ -449,19 +460,21 @@ class _HomeHeader extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.freshSage,
+                          color: colors.isDark
+                              ? AppColors.freshSage
+                              : Colors.white.withValues(alpha: 0.85),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
                     if (sync.status == SyncStatus.syncing) ...[
                       const SizedBox(width: 6),
-                      const SizedBox(
+                      SizedBox(
                         width: 10,
                         height: 10,
                         child: CircularProgressIndicator(
                           strokeWidth: 1.8,
-                          color: AppColors.dewMint,
+                          color: colors.isDark ? AppColors.dewMint : Colors.white,
                         ),
                       ),
                     ],
@@ -477,7 +490,7 @@ class _HomeHeader extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
-                    color: AppColors.softIvory,
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -492,17 +505,19 @@ class _HomeHeader extends ConsumerWidget {
               height: 38,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.12),
+                color: Colors.white.withValues(alpha: colors.isDark ? 0.12 : 0.18),
                 border: Border.all(
-                  color: AppColors.dewMint.withValues(alpha: 0.22),
+                  color: colors.isDark
+                      ? AppColors.dewMint.withValues(alpha: 0.22)
+                      : Colors.white.withValues(alpha: 0.28),
                   width: 1.0,
                 ),
               ),
               alignment: Alignment.center,
-              child: Image.asset(
-                'assets/icons/vice_city/diamond.png',
-                width: 20,
-                height: 20,
+              child: AppDuotoneIcon(
+                PhosphorIconsDuotone.squaresFour,
+                size: 20,
+                color: colors.isDark ? AppColors.dewMint : Colors.white,
               ),
             ),
             onPressed: onMore,
@@ -517,17 +532,19 @@ class _HomeHeader extends ConsumerWidget {
               height: 38,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.12),
+                color: Colors.white.withValues(alpha: colors.isDark ? 0.12 : 0.18),
                 border: Border.all(
-                  color: AppColors.dewMint.withValues(alpha: 0.22),
+                  color: colors.isDark
+                      ? AppColors.dewMint.withValues(alpha: 0.22)
+                      : Colors.white.withValues(alpha: 0.28),
                   width: 1.0,
                 ),
               ),
               alignment: Alignment.center,
-              child: Image.asset(
-                'assets/icons/vice_city/settings.png',
-                width: 20,
-                height: 20,
+              child: AppDuotoneIcon(
+                PhosphorIconsDuotone.gearSix,
+                size: 20,
+                color: colors.isDark ? AppColors.dewMint : Colors.white,
               ),
             ),
             onPressed: onSettings,
@@ -546,34 +563,41 @@ class _Sheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     return Container(
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         border: Border(
           top: BorderSide(
-            color: AppColors.borderOutline.withValues(alpha: 0.85),
+            color: colors.borderOutline.withValues(alpha: colors.isDark ? 0.85 : 1.0),
             width: 1.2,
           ),
         ),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF1C0B3B), // Twilight Purple canopy
-            Color(0xFF14092B), // Deep Twilight Purple
-            Color(0xFF0E0521), // Deep Midnight Plum
-          ],
-          stops: [0.0, 0.40, 1.0],
+          colors: colors.isDark
+              ? const [
+                  Color(0xFF1C0B3B), // Twilight Purple canopy
+                  Color(0xFF14092B), // Deep Twilight Purple
+                  Color(0xFF0E0521), // Deep Midnight Plum
+                ]
+              : [
+                  colors.bg,
+                  const Color(0xFFF3EEFA),
+                  colors.bg,
+                ],
+          stops: const [0.0, 0.40, 1.0],
         ),
       ),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Suasana Sunset Vertikal Vice City
+          // Suasana Sunset / Daylight Vertikal Vice City
           Positioned.fill(
             child: Image.asset(
-              'assets/images/vice_city_vertical_bg.jpg',
+              colors.verticalBgAsset,
               fit: BoxFit.cover,
               alignment: Alignment.center,
             ),
@@ -584,22 +608,28 @@ class _Sheet extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    const Color(0xFF0E1738).withValues(alpha: 0.78),
-                    const Color(0xFF070D2B).withValues(alpha: 0.85),
-                    const Color(0xFF070D2B).withValues(alpha: 0.92),
-                  ],
+                  colors: colors.isDark
+                      ? [
+                          const Color(0xFF0E1738).withValues(alpha: 0.78),
+                          const Color(0xFF070D2B).withValues(alpha: 0.85),
+                          const Color(0xFF070D2B).withValues(alpha: 0.92),
+                        ]
+                      : [
+                          colors.bg.withValues(alpha: 0.86),
+                          colors.bg.withValues(alpha: 0.94),
+                          colors.bg.withValues(alpha: 0.97),
+                        ],
                   stops: const [0.0, 0.40, 1.0],
                 ),
               ),
             ),
           ),
-          const Positioned.fill(
+          Positioned.fill(
             child: IgnorePointer(
               child: RepaintBoundary(
                 child: CustomPaint(
                   isComplex: true,
-                  painter: BotanicalBackgroundPainter(),
+                  painter: BotanicalBackgroundPainter(isDark: colors.isDark),
                 ),
               ),
             ),
@@ -617,8 +647,10 @@ class _Sheet extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      AppColors.cardSurface.withValues(alpha: 0.85),
-                      AppColors.cardSurface.withValues(alpha: 0.0),
+                      (colors.isDark ? colors.cardSurface : colors.bg)
+                          .withValues(alpha: 0.85),
+                      (colors.isDark ? colors.cardSurface : colors.bg)
+                          .withValues(alpha: 0.0),
                     ],
                   ),
                 ),
@@ -721,12 +753,10 @@ class _BalanceCard extends ConsumerWidget {
               IconButton(
                 tooltip: context.tr(hidden ? 'Show amounts' : 'Hide amounts'),
                 visualDensity: VisualDensity.compact,
-                icon: Image.asset(
-                  hidden
-                      ? 'assets/icon-compress/33_eye_off-kompres.png'
-                      : 'assets/icon-compress/32_eye-kompres.png',
-                  width: 20,
-                  height: 20,
+                icon: AppDuotoneIcon(
+                  hidden ? PhosphorIconsDuotone.eyeSlash : PhosphorIconsDuotone.eye,
+                  size: 20,
+                  color: Colors.white,
                 ),
                 onPressed: () => ref.read(hideBalanceProvider.notifier).toggle(),
               ),
@@ -747,7 +777,7 @@ class _BalanceCard extends ConsumerWidget {
           Builder(
             builder: (ctx) {
               final c = ctx.themeColors;
-              final flowColor = isSurplus ? c.income : c.expense;
+              final flowColor = isSurplus ? c.onHeroIncome : c.onHeroExpense;
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(
@@ -827,6 +857,7 @@ class _AccountsQuickBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -840,7 +871,9 @@ class _AccountsQuickBar extends StatelessWidget {
             color: Colors.black.withValues(alpha: 0.22),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: AppColors.dewMint.withValues(alpha: 0.18),
+              color: colors.isDark
+                  ? AppColors.dewMint.withValues(alpha: 0.18)
+                  : Colors.white.withValues(alpha: 0.22),
               width: 1,
             ),
           ),
@@ -864,9 +897,11 @@ class _AccountsQuickBar extends StatelessWidget {
                 Expanded(
                   child: Text(
                     context.tr('Add accounts & wallets'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.freshSage,
+                      color: colors.isDark
+                          ? AppColors.freshSage
+                          : Colors.white.withValues(alpha: 0.88),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -887,10 +922,12 @@ class _AccountsQuickBar extends StatelessWidget {
                   ),
                 ),
               ],
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
                 size: 16,
-                color: AppColors.dewMint,
+                color: colors.isDark
+                    ? AppColors.dewMint
+                    : Colors.white.withValues(alpha: 0.88),
               ),
             ],
           ),
@@ -925,17 +962,12 @@ class _AccountsQuickBar extends StatelessWidget {
                   border: Border.all(color: context.themeColors.heroBackground, width: 1.5),
                 ),
                 child: Center(
-                  child: viceCityAssetForIcon(accountIcon(displayed[i].type)) != null
-                      ? Image.asset(
-                          viceCityAssetForIcon(accountIcon(displayed[i].type))!,
-                          width: 12,
-                          height: 12,
-                        )
-                      : Icon(
-                          accountIcon(displayed[i].type),
-                          size: 11,
-                          color: Colors.white,
-                        ),
+                  child: AppDuotoneIcon(
+                    phosphorForIcon(accountIcon(displayed[i].type)) ??
+                        PhosphorIconsDuotone.wallet,
+                    size: 12,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -988,6 +1020,7 @@ class _FlowTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context.themeColors;
     final valueWidget = Text(
       value,
       maxLines: 1,
@@ -999,12 +1032,9 @@ class _FlowTile extends StatelessWidget {
       ),
     );
     final isIncome = icon == Icons.arrow_downward;
-    final bgTint = isIncome
-        ? AppColors.income.withValues(alpha: 0.20)
-        : AppColors.expense.withValues(alpha: 0.20);
-    final borderTint = isIncome
-        ? AppColors.income.withValues(alpha: 0.35)
-        : AppColors.expense.withValues(alpha: 0.35);
+    final tintBase = isIncome ? colors.onHeroIncome : colors.onHeroExpense;
+    final bgTint = tintBase.withValues(alpha: 0.20);
+    final borderTint = tintBase.withValues(alpha: 0.40);
 
     return Row(
       children: [
@@ -1017,12 +1047,12 @@ class _FlowTile extends StatelessWidget {
             border: Border.all(color: borderTint, width: 1.0),
           ),
           child: Center(
-            child: Image.asset(
+            child: AppDuotoneIcon(
               isIncome
-                  ? 'assets/icons/vice_city/growth.png'
-                  : 'assets/icons/vice_city/minus.png',
-              width: 18,
-              height: 18,
+                  ? PhosphorIconsDuotone.trendUp
+                  : PhosphorIconsDuotone.trendDown,
+              size: 18,
+              color: tintBase,
             ),
           ),
         ),
@@ -1036,7 +1066,9 @@ class _FlowTile extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.freshSage,
+                  color: colors.isDark
+                      ? AppColors.freshSage
+                      : Colors.white.withValues(alpha: 0.85),
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1072,28 +1104,38 @@ class _UpdateBannerCard extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             colors.heroBackground,
-            const Color(0xFF1B2B63),
+            colors.isDark ? const Color(0xFF1B2B63) : const Color(0xFF082E6E),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.borderOutline.withValues(alpha: 0.85),
+          color: colors.isDark
+              ? AppColors.borderOutline.withValues(alpha: 0.85)
+              : Colors.white.withValues(alpha: 0.25),
           width: 1.0,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.30),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-          BoxShadow(
-            color: AppColors.sunsetMagenta.withValues(alpha: 0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: colors.isDark
+            ? [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.30),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+                BoxShadow(
+                  color: AppColors.sunsetMagenta.withValues(alpha: 0.15),
+                  blurRadius: 12,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: const Color(0xFF0A4DA6).withValues(alpha: 0.20),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -1169,7 +1211,7 @@ class _UpdateBannerCard extends StatelessWidget {
                           Text(
                             'v${info.currentVersion} ➔ v${info.latestVersion}',
                             style: TextStyle(
-                              color: context.themeColors.income,
+                              color: colors.onHeroIncome,
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                             ),
@@ -1230,13 +1272,14 @@ class _PendingConfirmationBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
     final first = items.first;
     final isTransfer = first.type == TxType.transfer;
     final isIncome = first.type == TxType.income;
     final sign = isTransfer ? '' : (isIncome ? '+' : '-');
     final amountColor = isTransfer
-        ? AppColors.dewMint
-        : (isIncome ? AppColors.incomeOnDark : AppColors.expenseOnDark);
+        ? colors.transfer
+        : (isIncome ? colors.income : colors.expense);
 
     return AppCard(
       padding: const EdgeInsets.all(14),
@@ -1245,10 +1288,10 @@ class _PendingConfirmationBanner extends StatelessWidget {
         children: [
           Row(
             children: [
-              Image.asset(
-                'assets/icon-compress/098_alarm_clock-kompres.png',
-                width: 18,
-                height: 18,
+              AppDuotoneIcon(
+                PhosphorIconsDuotone.alarm,
+                size: 18,
+                color: colors.highlightGold,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -1258,10 +1301,10 @@ class _PendingConfirmationBanner extends StatelessWidget {
                       : context.tr('{count} recurring items ready to confirm', {
                           'count': items.length,
                         }),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 13,
-                    color: AppColors.dewMint,
+                    color: colors.highlightGold,
                   ),
                 ),
               ),
@@ -1269,10 +1312,10 @@ class _PendingConfirmationBanner extends StatelessWidget {
                 onTap: onReviewAll,
                 child: Text(
                   context.tr('Review'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.freshSage,
+                    color: colors.accentSecondary,
                   ),
                 ),
               ),
@@ -1289,17 +1332,17 @@ class _PendingConfirmationBanner extends StatelessWidget {
                       first.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
-                        color: AppColors.softIvory,
+                        color: colors.textPrimary,
                       ),
                     ),
                     Text(
                       context.tr('Due {date}', {'date': shortDate(first.dueDate)}),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11.5,
-                        color: AppColors.freshSage,
+                        color: colors.textMuted,
                       ),
                     ),
                   ],
@@ -1322,8 +1365,8 @@ class _PendingConfirmationBanner extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: onSkipFirst,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.freshSage,
-                    side: BorderSide(color: AppColors.dewMint.withValues(alpha: 0.2)),
+                    foregroundColor: colors.textMuted,
+                    side: BorderSide(color: colors.inputBorder),
                     padding: const EdgeInsets.symmetric(vertical: 6),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
@@ -1341,8 +1384,8 @@ class _PendingConfirmationBanner extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.dewMint,
-                    foregroundColor: AppColors.deepForest,
+                    backgroundColor: colors.primary,
+                    foregroundColor: colors.onPrimary,
                     padding: const EdgeInsets.symmetric(vertical: 6),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),

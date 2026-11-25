@@ -4,7 +4,9 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:phosphor_glyphs/phosphor_glyphs.dart';
 
+import '../../core/icons.dart';
 import '../../core/l10n.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
@@ -90,6 +92,8 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.themeColors;
+    final secAccent = colors.isDark ? AppColors.dewMint : colors.primary;
     return Scaffold(
       appBar: secondaryAppBar(context, title: Text(context.tr('Security'))),
       body: ValueListenableBuilder<AppLockState>(
@@ -119,76 +123,77 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       secondary: Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
                           color: st.enabled
-                              ? AppColors.dewMint.withValues(alpha: 0.16)
-                              : Colors.white.withValues(alpha: 0.06),
+                              ? secAccent.withValues(alpha: 0.16)
+                              : colors.surfaceContainer,
                           shape: BoxShape.circle,
                         ),
-                        child: Image.asset(
-                          'assets/new_asset/props/prop_13.png',
-                          width: 24,
-                          height: 24,
-                          fit: BoxFit.contain,
+                        child: AppDuotoneIcon(
+                          PhosphorIconsDuotone.lockKey,
+                          size: 20,
+                          color: st.enabled ? secAccent : colors.textMuted,
                         ),
                       ),
                       title: Text(
                         context.tr('App PIN Lock'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
-                          color: AppColors.softIvory,
+                          color: colors.textPrimary,
                         ),
                       ),
                       subtitle: Text(
                         context.tr('PIN protects your financial data and automatically syncs across your devices.'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.freshSage,
+                          color: colors.textMuted,
                         ),
                       ),
                       value: st.enabled,
                       onChanged: (v) => _toggle(context, v),
                     ),
                     if (st.enabled) ...[
-                      Divider(height: 28, color: AppColors.dewMint.withValues(alpha: 0.12)),
+                      Divider(
+                        height: 28,
+                        color: colors.borderOutline.withValues(alpha: 0.45),
+                      ),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         secondary: Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: st.biometricEnabled
-                                ? AppColors.dewMint.withValues(alpha: 0.16)
-                                : Colors.white.withValues(alpha: 0.06),
+                                ? secAccent.withValues(alpha: 0.16)
+                                : colors.surfaceContainer,
                             shape: BoxShape.circle,
                             border: Border.all(
                               color: st.biometricEnabled
-                                  ? AppColors.dewMint.withValues(alpha: 0.35)
-                                  : Colors.white.withValues(alpha: 0.15),
+                                  ? secAccent.withValues(alpha: 0.35)
+                                  : colors.borderOutline,
                               width: 0.8,
                             ),
                           ),
-                          child: Image.asset(
-                            'assets/new_asset/props/prop_14.png',
-                            width: 24,
-                            height: 24,
-                            fit: BoxFit.contain,
+                          child: AppDuotoneIcon(
+                            PhosphorIconsDuotone.fingerprint,
+                            size: 20,
+                            color: st.biometricEnabled ? secAccent : colors.textMuted,
                           ),
                         ),
                         title: Text(
                           bioTitle,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 14.5,
-                            color: AppColors.softIvory,
+                            color: colors.textPrimary,
                           ),
                         ),
                         subtitle: Text(
                           bioSubtitle,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: AppColors.freshSage,
+                            color: colors.textMuted,
                           ),
                         ),
                         value: st.biometricEnabled,
@@ -196,21 +201,24 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                             ? (v) => _toggleBiometric(context, v)
                             : null,
                       ),
-                      Divider(height: 28, color: AppColors.dewMint.withValues(alpha: 0.12)),
+                      Divider(
+                        height: 28,
+                        color: colors.borderOutline.withValues(alpha: 0.45),
+                      ),
                       Text(
                         context.tr('Auto-lock timeout'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
-                          color: AppColors.dewMint,
+                          color: secAccent,
                         ),
                       ),
                       const SizedBox(height: 6),
                       Text(
                         context.tr('Require PIN after leaving the app for:'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.freshSage,
+                          color: colors.textMuted,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -230,9 +238,9 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                       const SizedBox(height: 20),
                       OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.dewMint,
+                          foregroundColor: secAccent,
                           side: BorderSide(
-                            color: AppColors.dewMint.withValues(alpha: 0.4),
+                            color: secAccent.withValues(alpha: 0.45),
                           ),
                           minimumSize: const Size.fromHeight(48),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -249,10 +257,10 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                             }
                           }
                         },
-                        icon: Image.asset(
-                          'assets/icon-compress/109_password-kompres.png',
-                          width: 20,
-                          height: 20,
+                        icon: AppDuotoneIcon(
+                          PhosphorIconsDuotone.key,
+                          size: 20,
+                          color: secAccent,
                         ),
                         label: Text(context.tr('Change PIN')),
                       ),
@@ -266,17 +274,17 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                   contentPadding: EdgeInsets.zero,
                   title: Text(
                     context.tr('Privacy Shield'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
-                      color: AppColors.softIvory,
+                      color: colors.textPrimary,
                     ),
                   ),
                   subtitle: Text(
                     context.tr('Hide app preview in Recent Apps switcher and block screenshots.'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: AppColors.freshSage,
+                      color: colors.textMuted,
                     ),
                   ),
                   value: st.privacyShield,
