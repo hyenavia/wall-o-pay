@@ -51,6 +51,7 @@ class RecurringPage extends ConsumerWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: EmptyStateCard(
+                  illustrationAsset: 'assets/new_asset/poses/pose_02.png',
                   icon: Icons.repeat_rounded,
                   title: context.tr('No recurring schedules yet.'),
                   subtitle: context.tr(

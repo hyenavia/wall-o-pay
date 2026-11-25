@@ -195,9 +195,9 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
             Row(
               children: [
                 Image.asset(
-                  'assets/icons/vice_city/pie_chart.png',
-                  width: 24,
-                  height: 24,
+                  'assets/new_asset/props/prop_09.png',
+                  width: 28,
+                  height: 28,
                   fit: BoxFit.contain,
                 ),
                 const SizedBox(width: 10),
@@ -239,30 +239,42 @@ class _CalculatorSheetState extends State<CalculatorSheet> {
                   ),
                 ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              child: Row(
                 children: [
-                  Text(
-                    _formulaText.isEmpty ? '0' : _formulaText,
-                    style: context.moneyStyle(
-                      fontSize: 14,
-                      color: AppColors.freshSage.withValues(alpha: 0.85),
-                      letterSpacing: 0.5,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  Image.asset(
+                    'assets/new_asset/poses/pose_07.png',
+                    height: 54,
+                    fit: BoxFit.contain,
                   ),
-                  const SizedBox(height: 4),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      rupiah(_displayResult),
-                      style: context.moneyStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.incomeOnDark,
-                      ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          _formulaText.isEmpty ? '0' : _formulaText,
+                          style: context.moneyStyle(
+                            fontSize: 14,
+                            color: AppColors.freshSage.withValues(alpha: 0.85),
+                            letterSpacing: 0.5,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            rupiah(_displayResult),
+                            style: context.moneyStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.incomeOnDark,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

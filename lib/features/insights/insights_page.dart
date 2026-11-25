@@ -2339,6 +2339,13 @@ class _NetWorthVitalityCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              Image.asset(
+                'assets/new_asset/props/prop_11.png',
+                width: 32,
+                height: 32,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -2523,12 +2530,23 @@ class _VitalityDetailsSheet extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  context.tr('Net Worth & Vitality Score'),
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.softIvory,
-                      ),
+                Row(
+                  children: [
+                    Image.asset(
+                      'assets/new_asset/props/prop_11.png',
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      context.tr('Net Worth & Vitality Score'),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.softIvory,
+                          ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 HeroCard(

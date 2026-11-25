@@ -1077,7 +1077,18 @@ class _TransactionFormState extends ConsumerState<TransactionForm> {
               ],
               const SizedBox(height: 16),
               // Lampiran Struk / Receipt Attachment
-              Text(context.tr('Receipt / Struk (Optional)'), style: theme.textTheme.labelLarge),
+              Row(
+                children: [
+                  Image.asset(
+                    'assets/new_asset/props/prop_05.png',
+                    width: 18,
+                    height: 18,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(context.tr('Receipt / Struk (Optional)'), style: theme.textTheme.labelLarge),
+                ],
+              ),
               const SizedBox(height: 8),
               if (_receiptPath != null && File(_receiptPath!).existsSync()) ...[
                 Container(

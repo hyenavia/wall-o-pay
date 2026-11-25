@@ -265,14 +265,14 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
     Widget item(int i, IconData icon, IconData activeIcon, String label, {String? glassIcon}) {
       final selected = index == i;
       const activeColor = AppColors.goldenYellow;
-      final inactiveColor = AppColors.mutedBlueGray.withValues(alpha: 0.60);
+      final inactiveColor = AppColors.mutedBlueGray.withValues(alpha: 0.82);
 
       final Widget iconWidget;
       if (glassIcon != null) {
         iconWidget = AnimatedOpacity(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeOutCubic,
-          opacity: selected ? 1.0 : 0.45,
+          opacity: selected ? 1.0 : 0.65,
           child: Image.asset(
             glassIcon,
             width: 26,
@@ -289,26 +289,38 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
       }
 
       return Expanded(
-        child: InkWell(
-          onTap: () => notifier.set(i),
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              iconWidget,
-              const SizedBox(height: 3),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected ? activeColor : inactiveColor,
-                ),
+        child: Semantics(
+          button: true,
+          selected: selected,
+          label: label,
+          child: ExcludeSemantics(
+            child: InkWell(
+              onTap: () => notifier.set(i),
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  iconWidget,
+                  const SizedBox(height: 3),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                          color: selected ? activeColor : inactiveColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       );
@@ -432,7 +444,7 @@ class _HomeShellState extends ConsumerState<HomeShell> with WidgetsBindingObserv
         bottomNavigationBar: BottomAppBar(
           shape: const CircularNotchedRectangle(),
           notchMargin: 8,
-          height: 66,
+          height: 68,
           padding: EdgeInsets.zero,
           color: AppColors.deepNavy,
           surfaceTintColor: Colors.transparent,

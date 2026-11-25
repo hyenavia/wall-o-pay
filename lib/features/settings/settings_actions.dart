@@ -468,9 +468,20 @@ class SettingsActions {
             fontWeight: FontWeight.bold,
           ),
         ),
-        content: Text(ctx.tr(
-          'Warning: All local transactions, budgets, wallets, and settings recorded in Guest mode on this device will be permanently erased.',
-        )),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/new_asset/poses/pose_09.png',
+              height: 72,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 12),
+            Text(ctx.tr(
+              'Warning: All local transactions, budgets, wallets, and settings recorded in Guest mode on this device will be permanently erased.',
+            )),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

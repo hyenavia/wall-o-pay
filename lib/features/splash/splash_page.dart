@@ -39,13 +39,16 @@ class GlasshouseCombinationLogo extends StatelessWidget {
       );
     }
 
-    final imageWidget = Image.asset(
-      'assets/images/logo_glasshouse.png',
-      width: size,
-      height: size,
-      fit: BoxFit.contain,
-      filterQuality: FilterQuality.high,
-      semanticLabel: "Wall o' Pay",
+    final imageWidget = ClipRRect(
+      borderRadius: BorderRadius.circular(size * 0.22),
+      child: Image.asset(
+        'assets/images/logo.png',
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.high,
+        semanticLabel: "Wall o' Pay",
+      ),
     );
 
     if (!showGlow) return imageWidget;
@@ -187,15 +190,18 @@ class EnchantedGlasshouseBackgroundPainter extends CustomPainter {
     for (int i = 0; i < _motes.length; i++) {
       final mote = _motes[i];
       final dyOffset = ((mote.y - pTime * 0.12 * mote.speed) % 1.0) * h;
-      final dxOffset = mote.x * w + math.sin((pTime + mote.x) * math.pi * 2) * 6.0;
-      final alphaPulse = (mote.baseAlpha * (0.7 + 0.3 * math.sin((pTime + mote.y) * math.pi * 4)))
-          .clamp(0.0, 1.0);
+      final dxOffset =
+          mote.x * w + math.sin((pTime + mote.x) * math.pi * 2) * 6.0;
+      final alphaPulse =
+          (mote.baseAlpha *
+                  (0.7 + 0.3 * math.sin((pTime + mote.y) * math.pi * 4)))
+              .clamp(0.0, 1.0);
 
       final moteColor = (i % 3 == 0)
           ? AppColors.sunsetMagenta
           : (i % 3 == 1)
-              ? AppColors.goldenYellow
-              : AppColors.neonCyan;
+          ? AppColors.goldenYellow
+          : AppColors.neonCyan;
 
       final motePaint = Paint()
         ..color = moteColor.withValues(alpha: alphaPulse * 0.75)
@@ -206,7 +212,11 @@ class EnchantedGlasshouseBackgroundPainter extends CustomPainter {
       final haloPaint = Paint()
         ..color = Colors.white.withValues(alpha: alphaPulse * 0.35)
         ..style = PaintingStyle.fill;
-      canvas.drawCircle(Offset(dxOffset, dyOffset), mote.radius * 2.2, haloPaint);
+      canvas.drawCircle(
+        Offset(dxOffset, dyOffset),
+        mote.radius * 2.2,
+        haloPaint,
+      );
     }
   }
 
@@ -232,8 +242,22 @@ class EnchantedGlasshouseBackgroundPainter extends CustomPainter {
       canvas.rotate(angle);
       final p = Path()
         ..moveTo(0, 0)
-        ..cubicTo(-width * 0.45, length * 0.35, -width * 0.45, length * 0.75, 0, length)
-        ..cubicTo(width * 0.45, length * 0.75, width * 0.45, length * 0.35, 0, 0)
+        ..cubicTo(
+          -width * 0.45,
+          length * 0.35,
+          -width * 0.45,
+          length * 0.75,
+          0,
+          length,
+        )
+        ..cubicTo(
+          width * 0.45,
+          length * 0.75,
+          width * 0.45,
+          length * 0.35,
+          0,
+          0,
+        )
         ..close();
       canvas.drawPath(p, palmPaint);
       canvas.restore();
@@ -254,8 +278,9 @@ class EnchantedGlasshouseBackgroundPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant EnchantedGlasshouseBackgroundPainter oldDelegate) =>
-      true;
+  bool shouldRepaint(
+    covariant EnchantedGlasshouseBackgroundPainter oldDelegate,
+  ) => true;
 }
 
 class _MoteData {
@@ -308,8 +333,9 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    final isTestEnvironment =
-        WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTestEnvironment = WidgetsBinding.instance.runtimeType
+        .toString()
+        .contains('Test');
 
     _introController = AnimationController(
       vsync: this,
@@ -338,30 +364,26 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       curve: const Interval(0.35, 0.78, curve: Curves.easeOut),
     );
 
-    _titleSlide = Tween<Offset>(
-      begin: const Offset(0, 0.16),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _introController,
-        curve: const Interval(0.35, 0.78, curve: Curves.easeOutCubic),
-      ),
-    );
+    _titleSlide = Tween<Offset>(begin: const Offset(0, 0.16), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _introController,
+            curve: const Interval(0.35, 0.78, curve: Curves.easeOutCubic),
+          ),
+        );
 
     _taglineFade = CurvedAnimation(
       parent: _introController,
       curve: const Interval(0.55, 0.95, curve: Curves.easeOut),
     );
 
-    _taglineSlide = Tween<Offset>(
-      begin: const Offset(0, 0.16),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _introController,
-        curve: const Interval(0.55, 0.95, curve: Curves.easeOutCubic),
-      ),
-    );
+    _taglineSlide =
+        Tween<Offset>(begin: const Offset(0, 0.16), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _introController,
+            curve: const Interval(0.55, 0.95, curve: Curves.easeOutCubic),
+          ),
+        );
 
     _loadingFade = CurvedAnimation(
       parent: _introController,
@@ -391,6 +413,15 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _ambientController.stop();
+      _ambientController.value = 0.5;
+    }
+  }
+
+  @override
   void dispose() {
     _introController.dispose();
     _ambientController.dispose();
@@ -413,11 +444,13 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
           children: [
             // 1. Lapisan Latar Belakang Vice City Sunset
             Positioned.fill(
-              child: RepaintBoundary(
-                child: CustomPaint(
-                  painter: EnchantedGlasshouseBackgroundPainter(
-                    sunbeamAnimation: _ambientController,
-                    particleAnimation: _ambientController,
+              child: ExcludeSemantics(
+                child: RepaintBoundary(
+                  child: CustomPaint(
+                    painter: EnchantedGlasshouseBackgroundPainter(
+                      sunbeamAnimation: _ambientController,
+                      particleAnimation: _ambientController,
+                    ),
                   ),
                 ),
               ),
@@ -445,15 +478,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                     opacity: _titleFade,
                     child: SlideTransition(
                       position: _titleSlide,
-                      child: Text(
-                        "Wall o' Pay",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.outfit(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w600, // Outfit SemiBold
-                          letterSpacing: -0.4,
-                          color: AppColors.softWhite,
-                        ),
+                      child: Image.asset(
+                        'assets/new_asset/custom_text/logo_wordmark_glossy_neon.png',
+                        height: 48,
+                        fit: BoxFit.contain,
+                        filterQuality: FilterQuality.high,
+                        semanticLabel: "Wall o' Pay",
                       ),
                     ),
                   ),
@@ -503,7 +533,8 @@ class _MinimalLoadingIndicator extends StatefulWidget {
   const _MinimalLoadingIndicator();
 
   @override
-  State<_MinimalLoadingIndicator> createState() => _MinimalLoadingIndicatorState();
+  State<_MinimalLoadingIndicator> createState() =>
+      _MinimalLoadingIndicatorState();
 }
 
 class _MinimalLoadingIndicatorState extends State<_MinimalLoadingIndicator>
@@ -513,8 +544,9 @@ class _MinimalLoadingIndicatorState extends State<_MinimalLoadingIndicator>
   @override
   void initState() {
     super.initState();
-    final isTest =
-        WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTest = WidgetsBinding.instance.runtimeType.toString().contains(
+      'Test',
+    );
 
     _pulseController = AnimationController(
       vsync: this,
@@ -524,6 +556,15 @@ class _MinimalLoadingIndicatorState extends State<_MinimalLoadingIndicator>
     if (!isTest) {
       _pulseController.repeat(reverse: true);
     } else {
+      _pulseController.value = 0.5;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _pulseController.stop();
       _pulseController.value = 0.5;
     }
   }
@@ -562,7 +603,9 @@ class _MinimalLoadingIndicatorState extends State<_MinimalLoadingIndicator>
               borderRadius: BorderRadius.circular(2),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.sunsetMagenta.withValues(alpha: 0.35 * glowProgress),
+                  color: AppColors.sunsetMagenta.withValues(
+                    alpha: 0.35 * glowProgress,
+                  ),
                   blurRadius: 6,
                   spreadRadius: 0.5,
                 ),
@@ -574,4 +617,3 @@ class _MinimalLoadingIndicatorState extends State<_MinimalLoadingIndicator>
     );
   }
 }
-

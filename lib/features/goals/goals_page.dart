@@ -163,9 +163,9 @@ class GoalsPage extends ConsumerWidget {
                         shape: BoxShape.circle,
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(8),
                         child: Image.asset(
-                          'assets/icon-compress/077_savings_goal-kompres.png',
+                          'assets/new_asset/props/prop_08.png',
                           fit: BoxFit.contain,
                         ),
                       ),
@@ -324,7 +324,23 @@ class _GoalCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              CategoryBadge(icon: Icons.flag_outlined, color: _goalColor(goal), size: 42),
+              Container(
+                width: 42,
+                height: 42,
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: _goalColor(goal).withValues(alpha: 0.16),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: _goalColor(goal).withValues(alpha: 0.40),
+                    width: 1.2,
+                  ),
+                ),
+                child: Image.asset(
+                  'assets/new_asset/props/prop_08.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -463,19 +479,14 @@ class _CompletedGoalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppCard(
+      onTap: () => _showGoalCelebrationSheet(context, goal),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.incomeOnDark.withValues(alpha: 0.18),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.incomeOnDark.withValues(alpha: 0.35),
-                width: 1,
-              ),
-            ),
-            child: const Icon(Icons.check, color: AppColors.incomeOnDark, size: 20),
+          Image.asset(
+            'assets/new_asset/ui/savings_achieved.png',
+            width: 44,
+            height: 44,
+            fit: BoxFit.contain,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -512,6 +523,112 @@ class _CompletedGoalCard extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showGoalCelebrationSheet(BuildContext context, SavingsGoal goal) {
+  final theme = Theme.of(context);
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (ctx) => SafeArea(
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 28),
+        decoration: BoxDecoration(
+          color: AppColors.midnightNavy,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppColors.sunsetMagenta.withValues(alpha: 0.35)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.45),
+              blurRadius: 28,
+              offset: const Offset(0, -6),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.sunsetMagenta.withValues(alpha: 0.15),
+                  border: Border.all(color: AppColors.sunsetMagenta.withValues(alpha: 0.35)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.sunsetMagenta.withValues(alpha: 0.25),
+                      blurRadius: 20,
+                    ),
+                  ],
+                ),
+                child: Image.asset(
+                  'assets/new_asset/props/prop_10.png',
+                  width: 84,
+                  height: 84,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              context.tr('Goal Achieved!'),
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: AppColors.softWhite,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.tr(
+                'Congratulations! You reached your savings goal for {name} with total accumulated savings of {amount}!',
+                {
+                  'name': goal.name,
+                  'amount': rupiah(goal.targetAmount),
+                },
+              ),
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: AppColors.freshSage,
+                height: 1.45,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.tr('Reached on {date}', {'date': shortDate(goal.updatedAt)}),
+              style: const TextStyle(fontSize: 12, color: AppColors.mutedBlueGray),
+            ),
+            const SizedBox(height: 22),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.sunsetMagenta,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(context.tr('Celebrate!'), style: const TextStyle(fontWeight: FontWeight.w700)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _GoalDialog extends StatefulWidget {
@@ -564,7 +681,18 @@ class _GoalDialogState extends State<_GoalDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(context.tr(widget.editingGoal != null ? 'Edit goal' : 'New goal')),
+      title: Row(
+        children: [
+          Image.asset(
+            'assets/new_asset/props/prop_03.png',
+            width: 24,
+            height: 24,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(width: 8),
+          Text(context.tr(widget.editingGoal != null ? 'Edit goal' : 'New goal')),
+        ],
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -33,7 +33,7 @@ void main() {
       await tester.pumpWidget(createTestApp());
       await tester.pumpAndSettle();
 
-      expect(find.text("Wall o' Pay"), findsOneWidget);
+      expect(find.text("About Wall o' Pay"), findsOneWidget);
       expect(
         find.text('v${UpdateCheckerService.currentVersion} • Release'),
         findsOneWidget,
@@ -57,7 +57,7 @@ void main() {
       await tester.pumpWidget(createTestApp(locale: const Locale('id')));
       await tester.pumpAndSettle();
 
-      expect(find.text("Wall o' Pay"), findsOneWidget);
+      expect(find.text("Tentang Wall o' Pay"), findsOneWidget);
       expect(find.text('Uangmu, di bawah kendalimu.'), findsOneWidget);
 
       await tester.scrollUntilVisible(

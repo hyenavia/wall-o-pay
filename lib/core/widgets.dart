@@ -59,12 +59,14 @@ PreferredSizeWidget pageAppBar(
             ),
           ),
         ),
-        const IgnorePointer(
-          child: RepaintBoundary(
-            child: CustomPaint(
-              size: Size.infinite,
-              isComplex: true,
-              painter: BotanicalCanopyPainter(opacity: 0.12),
+        const ExcludeSemantics(
+          child: IgnorePointer(
+            child: RepaintBoundary(
+              child: CustomPaint(
+                size: Size.infinite,
+                isComplex: true,
+                painter: BotanicalCanopyPainter(opacity: 0.12),
+              ),
             ),
           ),
         ),
@@ -158,7 +160,7 @@ InputDecoration appInput(
       fontWeight: FontWeight.w600,
     ),
     hintText: hint,
-    hintStyle: TextStyle(color: scheme.onSurface.withValues(alpha: 0.45)),
+    hintStyle: TextStyle(color: scheme.onSurface.withValues(alpha: 0.65)),
     prefixIcon: prefixIcon,
     prefixText: prefixText,
     prefixStyle: const TextStyle(
@@ -166,7 +168,7 @@ InputDecoration appInput(
       fontWeight: FontWeight.w700,
     ),
     helperText: helper,
-    helperStyle: TextStyle(color: scheme.onSurface.withValues(alpha: 0.6)),
+    helperStyle: TextStyle(color: scheme.onSurface.withValues(alpha: 0.72)),
     suffixIcon: suffixIcon,
     filled: true,
     fillColor: AppColors.surfaceContainer.withValues(alpha: 0.70),
@@ -274,8 +276,8 @@ class HeroCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF1E293B), // Slate 800
-            Color(0xFF0F172A), // Slate 900
+            Color(0xFF2B1554), // Midnight Purple (calibrated)
+            Color(0xFF14092B), // Deep Twilight Purple
           ],
         ),
         shadows: [
@@ -296,11 +298,13 @@ class HeroCard extends StatelessWidget {
         children: [
           // Background neon arcs samar di dalam kartu
           Positioned.fill(
-            child: Opacity(
-              opacity: 0.18,
-              child: Image.asset(
-                'assets/images/vice_city_bg.jpg',
-                fit: BoxFit.cover,
+            child: ExcludeSemantics(
+              child: Opacity(
+                opacity: 0.18,
+                child: Image.asset(
+                  'assets/images/vice_city_bg.jpg',
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
           ),
@@ -713,6 +717,8 @@ class UserAvatar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final photoImage = ref.watch(profileProvider.select((s) => s.photoImage));
+    final frameId = ref.watch(profileProvider.select((s) => s.frameId));
+    final frameAsset = profileFrameAssetPath(frameId);
     final name = ref.watch(displayNameProvider) ?? '?';
 
     final initialText = Text(
@@ -741,7 +747,7 @@ class UserAvatar extends ConsumerWidget {
             ),
     );
 
-    final avatarDisplay = !withGlassFrame
+    final avatarDisplay = frameAsset == null
         ? avatarCore
         : SizedBox(
             width: size,
@@ -752,13 +758,18 @@ class UserAvatar extends ConsumerWidget {
               children: [
                 avatarCore,
                 Positioned.fill(
-                  child: IgnorePointer(
-                    child: Transform.scale(
-                      scale: 1.38,
-                      child: Image.asset(
-                        'assets/images/frame_vice_city.png',
-                        fit: BoxFit.contain,
-                        filterQuality: FilterQuality.medium,
+                  child: ExcludeSemantics(
+                    child: IgnorePointer(
+                      child: Transform.scale(
+                        scale: profileFrameScale(frameId),
+                        child: FractionalTranslation(
+                          translation: profileFrameOffset(frameId),
+                          child: Image.asset(
+                            frameAsset,
+                            fit: BoxFit.contain,
+                            filterQuality: FilterQuality.medium,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -792,13 +803,13 @@ String resolveEmptyIllustration(IconData icon) {
       icon == Icons.payments ||
       icon == Icons.payment ||
       icon == Icons.swap_horiz) {
-    return 'assets/illustrations/empty_transactions.png';
+    return 'assets/new_asset/ui/empty_wallet.png';
   }
   if (icon == Icons.pie_chart ||
       icon == Icons.pie_chart_outline ||
       icon == Icons.pie_chart_rounded ||
       icon == Icons.donut_large) {
-    return 'assets/illustrations/empty_budget.png';
+    return 'assets/new_asset/ui/empty_budget.png';
   }
   if (icon == Icons.savings ||
       icon == Icons.savings_outlined ||
@@ -814,14 +825,14 @@ String resolveEmptyIllustration(IconData icon) {
       icon == Icons.bar_chart ||
       icon == Icons.show_chart ||
       icon == Icons.trending_up) {
-    return 'assets/illustrations/empty_analytics.png';
+    return 'assets/new_asset/ui/weekly_monthly_summary.png';
   }
   if (icon == Icons.search ||
       icon == Icons.search_rounded ||
       icon == Icons.search_off ||
       icon == Icons.search_off_rounded ||
       icon == Icons.filter_list) {
-    return 'assets/illustrations/empty_search.png';
+    return 'assets/new_asset/ui/no_data_state.png';
   }
   if (icon == Icons.notifications ||
       icon == Icons.notifications_outlined ||
@@ -832,7 +843,7 @@ String resolveEmptyIllustration(IconData icon) {
       icon == Icons.alarm) {
     return 'assets/illustrations/empty_notifications.png';
   }
-  return 'assets/illustrations/empty_transactions.png';
+  return 'assets/new_asset/ui/empty_wallet.png';
 }
 
 /// Tampilan informasi saat daftar masih kosong dengan ilustrasi Tropical Neon Finance.

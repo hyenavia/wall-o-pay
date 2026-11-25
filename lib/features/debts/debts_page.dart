@@ -486,6 +486,47 @@ class _DebtDetail extends ConsumerWidget {
                   },
                   child: Text(context.tr('Mark as fully paid')),
                 ),
+              ] else ...[
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.incomeOnDark.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.incomeOnDark.withValues(alpha: 0.35),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        'assets/new_asset/poses/pose_05.png',
+                        height: 52,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.tr('Debt Settled!'),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                                color: AppColors.incomeOnDark,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              context.tr('All obligations for this debt have been completed.'),
+                              style: theme.textTheme.bodySmall?.copyWith(color: muted),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
               if (payments.isNotEmpty) ...[
                 const SizedBox(height: 18),

@@ -145,20 +145,19 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
           ),
           IconButton(
             tooltip: context.tr('Filter by date range'),
-            icon: Image.asset(
-              'assets/icons/vice_city/calendar.png',
-              width: 22,
-              height: 22,
-              color: _range == null ? null : AppColors.goldenYellow,
+            icon: Icon(
+              Icons.date_range_rounded,
+              color: _range == null ? Colors.white : AppColors.goldenYellow,
             ),
             onPressed: _pickRange,
           ),
           PopupMenuButton<String>(
             tooltip: context.tr('Export'),
             icon: Image.asset(
-              'assets/icons/vice_city/card.png',
+              'assets/new_asset/props/prop_12.png',
               width: 22,
               height: 22,
+              fit: BoxFit.contain,
             ),
             onSelected: (choice) {
               if (choice == 'pdf') {
@@ -192,9 +191,10 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                 child: Row(
                   children: [
                     Image.asset(
-                      'assets/icon-compress/38_analytics_bars-kompres.png',
+                      'assets/new_asset/props/prop_12.png',
                       width: 18,
                       height: 18,
+                      fit: BoxFit.contain,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -746,6 +746,7 @@ class _TransactionsPageState extends ConsumerState<TransactionsPage> {
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 96),
                     sliver: SliverToBoxAdapter(
                       child: EmptyStateCard(
+                        illustrationAsset: 'assets/new_asset/poses/pose_08.png',
                         icon: Icons.search_off_rounded,
                         title: context.tr('No matching transactions.'),
                         subtitle: context.tr(

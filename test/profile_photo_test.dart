@@ -51,19 +51,19 @@ void main() {
       prefs = await SharedPreferences.getInstance();
     });
 
-    testWidgets('Tapping camera badge opens photo bottom sheet', (tester) async {
+    testWidgets('Tapping customize avatar button opens photo bottom sheet', (tester) async {
       await tester.pumpWidget(createTestWidget(prefs: prefs));
       await tester.pumpAndSettle();
 
-      // Camera badge icon button is present
-      final cameraBadge = find.byIcon(Icons.photo_camera_outlined);
-      expect(cameraBadge, findsWidgets);
+      // Customize button is present
+      final customizeBtn = find.widgetWithText(OutlinedButton, 'Customize Avatar & Frame');
+      expect(customizeBtn, findsOneWidget);
 
-      await tester.tap(cameraBadge.first);
+      await tester.tap(customizeBtn);
       await tester.pumpAndSettle();
 
       // Bottom sheet should display options
-      expect(find.text('Profile Photo'), findsOneWidget);
+      expect(find.text('Customize Avatar & Frame'), findsWidgets);
       expect(find.text('Camera'), findsOneWidget);
       expect(find.text('Gallery'), findsOneWidget);
     });
@@ -82,9 +82,15 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Tap on avatar
-      final avatarFinder = find.byType(InkWell).first;
-      await tester.tap(avatarFinder);
+      // Open customize sheet
+      final customizeBtn = find.widgetWithText(OutlinedButton, 'Customize Avatar & Frame');
+      await tester.tap(customizeBtn);
+      await tester.pumpAndSettle();
+
+      // Tap View Photo button
+      final viewPhotoBtn = find.byIcon(Icons.visibility_outlined);
+      expect(viewPhotoBtn, findsOneWidget);
+      await tester.tap(viewPhotoBtn);
       await tester.pumpAndSettle();
 
       // We should be on ProfilePhotoViewPage

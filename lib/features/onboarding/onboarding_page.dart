@@ -137,6 +137,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Image.asset(
+                  'assets/new_asset/ui/onboarding_welcome.png',
+                  height: 120,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
             heading(
               context.tr('How do you receive your money?'),
               context.tr('Pick how you plan your spending. You can change it later in Settings.'),

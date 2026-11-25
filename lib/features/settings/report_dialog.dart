@@ -42,11 +42,23 @@ Future<void> showReportDialog(BuildContext context) async {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  ctx.tr('PDF report'),
-                  style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
+                Row(
+                  children: [
+                    Image.asset(
+                      'assets/new_asset/poses/pose_03.png',
+                      height: 52,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        ctx.tr('PDF report'),
+                        style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
                       ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 RadioGroup<String>(

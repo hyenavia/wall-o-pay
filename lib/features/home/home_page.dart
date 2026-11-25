@@ -5,6 +5,7 @@ library;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart' show SemanticsService;
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -85,27 +86,29 @@ class HomePage extends ConsumerWidget {
               left: 0,
               right: 0,
               height: 240,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.asset(
-                    'assets/images/vice_city_vertical_bg.jpg',
-                    fit: BoxFit.cover,
-                    alignment: Alignment.topCenter,
-                  ),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          AppColors.headerCanopyTop.withValues(alpha: 0.15),
-                          AppColors.headerCanopyBottom.withValues(alpha: 0.55),
-                        ],
+              child: ExcludeSemantics(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(
+                      'assets/images/vice_city_vertical_bg.jpg',
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                    ),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            AppColors.headerCanopyTop.withValues(alpha: 0.15),
+                            AppColors.headerCanopyBottom.withValues(alpha: 0.55),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             const Positioned(
@@ -113,11 +116,13 @@ class HomePage extends ConsumerWidget {
               left: 0,
               right: 0,
               height: 140,
-              child: IgnorePointer(
-                child: RepaintBoundary(
-                  child: CustomPaint(
-                    isComplex: true,
-                    painter: BotanicalCanopyPainter(opacity: 0.12),
+              child: ExcludeSemantics(
+                child: IgnorePointer(
+                  child: RepaintBoundary(
+                    child: CustomPaint(
+                      isComplex: true,
+                      painter: BotanicalCanopyPainter(opacity: 0.12),
+                    ),
                   ),
                 ),
               ),
@@ -135,7 +140,27 @@ class HomePage extends ConsumerWidget {
                   Expanded(
                     child: _Sheet(
                       child: txAsync.when(
-                    loading: () => const Center(child: CircularProgressIndicator()),
+                    loading: () => Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            'assets/new_asset/ui/loading_state.png',
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.contain,
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            context.tr('Loading...'),
+                            style: const TextStyle(
+                              color: AppColors.mutedBlueGray,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     error: (e, _) => Center(
                       child: Text(context.tr('Could not load data: {error}', {'error': e})),
                     ),
@@ -267,9 +292,28 @@ class HomePage extends ConsumerWidget {
                                     }
                                   }
                                   if (context.mounted && created != null) {
+                                    final msg = context.tr('Transaction recorded');
+                                    SemanticsService.sendAnnouncement(
+                                      View.of(context),
+                                      msg,
+                                      Directionality.of(context),
+                                    );
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(context.tr('Transaction recorded')),
+                                        content: Row(
+                                          children: [
+                                            Image.asset(
+                                              'assets/new_asset/ui/transaction_success.png',
+                                              width: 22,
+                                              height: 22,
+                                              fit: BoxFit.contain,
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Text(msg),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     );
                                   }
@@ -278,8 +322,16 @@ class HomePage extends ConsumerWidget {
                                   final first = pendingList.first;
                                   final db = ref.read(databaseProvider);
                                   await db.dismissPendingTransaction(first.id);
+                                  final msg = trG('Pending item skipped');
+                                  if (context.mounted) {
+                                    SemanticsService.sendAnnouncement(
+                                      View.of(context),
+                                      msg,
+                                      Directionality.of(context),
+                                    );
+                                  }
                                   showUndoSnackBar(
-                                    message: trG('Pending item skipped'),
+                                    message: msg,
                                     onUndo: () => db.restorePendingTransaction(first.id),
                                   );
                                 },
@@ -377,11 +429,11 @@ class _HomeHeader extends ConsumerWidget {
     final sync = ref.watch(syncStateProvider);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 10, 12, 18),
+      padding: const EdgeInsets.fromLTRB(24, 14, 12, 22),
       child: Row(
         children: [
-          UserAvatar(size: 48, withGlassFrame: true, onTap: onProfile),
-          const SizedBox(width: 12),
+          UserAvatar(size: 44, withGlassFrame: true, onTap: onProfile),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -431,50 +483,54 @@ class _HomeHeader extends ConsumerWidget {
               ],
             ),
           ),
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.12),
-              border: Border.all(
-                color: AppColors.dewMint.withValues(alpha: 0.22),
-                width: 1.0,
+          IconButton(
+            tooltip: context.tr('More Features'),
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            padding: EdgeInsets.zero,
+            icon: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.12),
+                border: Border.all(
+                  color: AppColors.dewMint.withValues(alpha: 0.22),
+                  width: 1.0,
+                ),
               ),
-            ),
-            child: IconButton(
-              tooltip: context.tr('More Features'),
-              padding: EdgeInsets.zero,
-              icon: Image.asset(
+              alignment: Alignment.center,
+              child: Image.asset(
                 'assets/icons/vice_city/diamond.png',
                 width: 20,
                 height: 20,
               ),
-              onPressed: onMore,
             ),
+            onPressed: onMore,
           ),
-          const SizedBox(width: 8),
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.12),
-              border: Border.all(
-                color: AppColors.dewMint.withValues(alpha: 0.22),
-                width: 1.0,
+          const SizedBox(width: 2),
+          IconButton(
+            tooltip: context.tr('Settings'),
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            padding: EdgeInsets.zero,
+            icon: Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.12),
+                border: Border.all(
+                  color: AppColors.dewMint.withValues(alpha: 0.22),
+                  width: 1.0,
+                ),
               ),
-            ),
-            child: IconButton(
-              tooltip: context.tr('Settings'),
-              padding: EdgeInsets.zero,
-              icon: Image.asset(
+              alignment: Alignment.center,
+              child: Image.asset(
                 'assets/icons/vice_city/settings.png',
                 width: 20,
                 height: 20,
               ),
-              onPressed: onSettings,
             ),
+            onPressed: onSettings,
           ),
         ],
       ),
@@ -504,9 +560,9 @@ class _Sheet extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF0E1738), // Deep Navy canopy at the top
-            Color(0xFF090F2C), // Subtle Midnight Navy
-            Color(0xFF070D2B), // Deep Midnight Navy Canvas
+            Color(0xFF1C0B3B), // Twilight Purple canopy
+            Color(0xFF14092B), // Deep Twilight Purple
+            Color(0xFF0E0521), // Deep Midnight Plum
           ],
           stops: [0.0, 0.40, 1.0],
         ),

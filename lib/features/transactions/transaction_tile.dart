@@ -60,9 +60,12 @@ class TransactionTile extends StatelessWidget {
 
     final muted = AppColors.freshSage.withValues(alpha: 0.75);
 
-    return InkWell(
-      onTap: onTap,
-      onLongPress: onLongPress,
+    return MergeSemantics(
+      child: Semantics(
+        button: onTap != null,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
@@ -130,6 +133,8 @@ class TransactionTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    ),
       ),
     );
   }

@@ -4,7 +4,8 @@ library;
 
 /// Terjemahan Indonesia untuk fitur tambahan (akun, berulang, utang, kunci PIN, dll.).
 const Map<String, String> idExtra = {
-  'A gentle nudge to log your spending.': 'Pengingat lembut untuk mencatat pengeluaranmu.',
+  'A gentle nudge to log your spending.':
+      'Pengingat lembut untuk mencatat pengeluaranmu.',
   'Account name': 'Nama akun',
   'Account name cannot be empty.': 'Nama akun tidak boleh kosong.',
   'Accounts': 'Akun',
@@ -15,7 +16,8 @@ const Map<String, String> idExtra = {
   'Add recurring item': 'Tambah transaksi berulang',
   'Allowance': 'Uang saku',
   'Allowance amount': 'Nominal uang saku',
-  'Allowance, rent, and other repeating items': 'Uang saku, sewa, dan transaksi berulang lainnya',
+  'Allowance, rent, and other repeating items':
+      'Uang saku, sewa, dan transaksi berulang lainnya',
   'Also add as expense': 'Catat juga sebagai pengeluaran',
   'Also add as income': 'Catat juga sebagai pemasukan',
   'App lock (PIN)': 'Kunci aplikasi (PIN)',
@@ -23,7 +25,8 @@ const Map<String, String> idExtra = {
   'Archive account': 'Arsipkan akun',
   'Archive this account?': 'Arsipkan akun ini?',
   'Ask for a PIN when you open the app.': 'Minta PIN saat aplikasi dibuka.',
-  'At this pace your money lasts until the end of the period.': 'Dengan laju ini, uangmu cukup sampai akhir periode.',
+  'At this pace your money lasts until the end of the period.':
+      'Dengan laju ini, uangmu cukup sampai akhir periode.',
   'At this pace your money runs out in about {n} days ({date}), before the period ends.': 'Dengan laju ini, uangmu habis dalam sekitar {n} hari ({date}), sebelum periode berakhir.',
   'Back': 'Kembali',
   'Balance': 'Saldo',
@@ -37,7 +40,8 @@ const Map<String, String> idExtra = {
   'Cash on hand': 'Uang tunai saat ini',
   'Cash, bank, and e-wallet balances': 'Saldo tunai, bank, dan e-wallet',
   'Change PIN': 'Ganti PIN',
-  'Charts, needs vs wants, and trends': 'Grafik, kebutuhan vs keinginan, dan tren',
+  'Charts, needs vs wants, and trends':
+      'Grafik, kebutuhan vs keinginan, dan tren',
   'Choose both accounts.': 'Pilih kedua akun.',
   'Choose two different accounts.': 'Pilih dua akun yang berbeda.',
   'Confirm your PIN': 'Konfirmasi PIN-mu',
@@ -48,7 +52,8 @@ const Map<String, String> idExtra = {
   'Date': 'Tanggal',
   'Day of the month': 'Tanggal tiap bulan',
   'Debts & splits': 'Utang & patungan',
-  'Debts are a separate ledger and do not change your account balances.': 'Utang dicatat terpisah dan tidak mengubah saldo akunmu.',
+  'Debts are a separate ledger and do not change your account balances.':
+      'Utang dicatat terpisah dan tidak mengubah saldo akunmu.',
   'Delete recurring item': 'Hapus transaksi berulang',
   'Delete template "{name}"?': 'Hapus template "{name}"?',
   'Delete this recurring item?': 'Hapus transaksi berulang ini?',
@@ -59,7 +64,8 @@ const Map<String, String> idExtra = {
   'Edit account': 'Ubah akun',
   'Edit recurring item': 'Ubah transaksi berulang',
   'Enter a name and an amount.': 'Isi nama dan nominal.',
-  'Enter the total and at least one friend.': 'Isi total dan minimal satu teman.',
+  'Enter the total and at least one friend.':
+      'Isi total dan minimal satu teman.',
   'Enter your PIN': 'Masukkan PIN',
   'Enter your current PIN': 'Masukkan PIN saat ini',
   'Enter your current cash. You can add bank and e-wallet accounts later in More > Accounts.': 'Isi uang tunai yang kamu punya sekarang. Akun bank dan e-wallet bisa ditambah nanti di Lainnya > Akun.',
@@ -74,8 +80,10 @@ const Map<String, String> idExtra = {
   'Forgot your PIN?': 'Lupa PIN-mu?',
   'Friends\' names': 'Nama teman',
   'From': 'Dari',
-  'Get notified when a category reaches 80% and 100% of its budget.': 'Dapatkan notifikasi saat kategori mencapai 80% dan 100% anggarannya.',
-  'Have you recorded today\'s expenses?': 'Sudah mencatat pengeluaran hari ini?',
+  'Get notified when a category reaches 80% and 100% of its budget.':
+      'Dapatkan notifikasi saat kategori mencapai 80% dan 100% anggarannya.',
+  'Have you recorded today\'s expenses?':
+      'Sudah mencatat pengeluaran hari ini?',
   'How do you receive your money?': 'Bagaimana kamu menerima uang?',
   'I owe': 'Utangku',
   'I receive a regular allowance': 'Aku menerima uang saku rutin',
@@ -83,7 +91,8 @@ const Map<String, String> idExtra = {
   'Incorrect PIN. Try again.': 'PIN salah. Coba lagi.',
   'Its past transactions are kept, but the account will no longer count toward your total balance.': 'Transaksi lamanya tetap tersimpan, tetapi akun tidak dihitung lagi dalam total saldo.',
   'Last day': 'Hari terakhir',
-  'Leftover budget from the previous period is added to the next one.': 'Sisa anggaran periode lalu ditambahkan ke periode berikutnya.',
+  'Leftover budget from the previous period is added to the next one.':
+      'Sisa anggaran periode lalu ditambahkan ke periode berikutnya.',
   'Mark as fully paid': 'Tandai lunas',
   'Money you have now': 'Uang yang kamu punya sekarang',
   'Monthly, on day {n}': 'Bulanan, tanggal {n}',
@@ -95,30 +104,36 @@ const Map<String, String> idExtra = {
   'Next': 'Lanjut',
   'Next: {date}': 'Berikutnya: {date}',
   'No recurring items yet.\nAdd your allowance or rent so it is recorded automatically.': 'Belum ada transaksi berulang.\nTambahkan uang saku atau sewa agar tercatat otomatis.',
-  'No spending in the previous period to compare with.': 'Tidak ada pengeluaran di periode sebelumnya untuk dibandingkan.',
+  'No spending in the previous period to compare with.':
+      'Tidak ada pengeluaran di periode sebelumnya untuk dibandingkan.',
   'No transactions in this period.': 'Belum ada transaksi di periode ini.',
   'Note': 'Catatan',
   'Nothing here yet.': 'Belum ada apa-apa di sini.',
-  'Notification permission was not granted.': 'Izin notifikasi tidak diberikan.',
+  'Notification permission was not granted.':
+      'Izin notifikasi tidak diberikan.',
   'Owed to me': 'Piutangku',
   'PDF report': 'Laporan PDF',
   'PINs do not match. Start again.': 'PIN tidak cocok. Ulangi dari awal.',
   'Payment to {person}': 'Pembayaran ke {person}',
   'Person': 'Nama orang',
   'Pick how you plan your spending. You can change it later in Settings.': 'Pilih cara kamu merencanakan pengeluaran. Bisa diubah nanti di Pengaturan.',
-  'Profile, language, security, and backup': 'Profil, bahasa, keamanan, dan cadangan',
+  'Profile, language, security, and backup':
+      'Profil, bahasa, keamanan, dan cadangan',
   'Recent transfers': 'Transfer terbaru',
   'Record my share as an expense': 'Catat bagianku sebagai pengeluaran',
   'Record payment': 'Catat pembayaran',
-  'Record some expenses to see a spending forecast.': 'Catat beberapa pengeluaran untuk melihat perkiraan belanja.',
+  'Record some expenses to see a spending forecast.':
+      'Catat beberapa pengeluaran untuk melihat perkiraan belanja.',
   'Recurring': 'Berulang',
-  'Recurring items are added automatically when their date arrives.': 'Transaksi berulang ditambahkan otomatis saat tanggalnya tiba.',
+  'Recurring items are added automatically when their date arrives.':
+      'Transaksi berulang ditambahkan otomatis saat tanggalnya tiba.',
   'Reminder time': 'Jam pengingat',
   'Repayment from {person}': 'Pelunasan dari {person}',
   'Save as template': 'Simpan sebagai template',
   'Security': 'Keamanan',
   'Selected period': 'Periode terpilih',
-  'Separate names with commas, e.g. Ayu, Budi, Citra': 'Pisahkan nama dengan koma, mis. Ayu, Budi, Citra',
+  'Separate names with commas, e.g. Ayu, Budi, Citra':
+      'Pisahkan nama dengan koma, mis. Ayu, Budi, Citra',
   'Set limits for the categories you spend on most. All optional.': 'Atur batas untuk kategori yang paling sering kamu belanjakan. Semuanya opsional.',
   'Settled': 'Lunas',
   'Skip': 'Lewati',
@@ -137,29 +152,40 @@ const Map<String, String> idExtra = {
   'To protect your data, you will be logged out and the data on this device will be erased. Data backed up in the cloud comes back when you log in again.': 'Untuk melindungi datamu, kamu akan dikeluarkan dari akun dan data di perangkat ini dihapus. Data yang sudah tercadangkan di cloud kembali saat kamu masuk lagi.',
   'Total balance': 'Total saldo',
   'Total bill': 'Total tagihan',
-  'Transactions already created are kept.': 'Transaksi yang sudah dibuat tetap tersimpan.',
+  'Transactions already created are kept.':
+      'Transaksi yang sudah dibuat tetap tersimpan.',
   'Transfer': 'Transfer',
   'Transfer between accounts': 'Transfer antar akun',
   'Want': 'Keinginan',
   'Wants': 'Keinginan',
-  'We will record it automatically so you do not have to.': 'Kami catat otomatis supaya kamu tidak perlu repot.',
+  'We will record it automatically so you do not have to.':
+      'Kami catat otomatis supaya kamu tidak perlu repot.',
   'Which day of the month?': 'Tanggal berapa tiap bulan?',
   'Which day of the week?': 'Hari apa dalam seminggu?',
-  'Who owes whom, and splitting bills': 'Siapa berutang ke siapa, dan patungan tagihan',
-  'You have used all of your {category} budget for this period.': 'Anggaran {category} periode ini sudah habis terpakai.',
-  'You have used {pct}% of your {category} budget.': 'Kamu sudah memakai {pct}% anggaran {category}.',
+  'Who owes whom, and splitting bills':
+      'Siapa berutang ke siapa, dan patungan tagihan',
+  'You have used all of your {category} budget for this period.':
+      'Anggaran {category} periode ini sudah habis terpakai.',
+  'You have used {pct}% of your {category} budget.':
+      'Kamu sudah memakai {pct}% anggaran {category}.',
   'You owe them': 'Kamu berutang pada mereka',
-  'You paid the whole bill. Each friend owes an equal share.': 'Kamu membayar seluruh tagihan. Tiap teman berutang bagian yang sama.',
-  'You spent {pct}% less than the previous period.': 'Pengeluaranmu {pct}% lebih sedikit dari periode sebelumnya.',
-  'You spent {pct}% more than the previous period.': 'Pengeluaranmu {pct}% lebih banyak dari periode sebelumnya.',
+  'You paid the whole bill. Each friend owes an equal share.':
+      'Kamu membayar seluruh tagihan. Tiap teman berutang bagian yang sama.',
+  'You spent {pct}% less than the previous period.':
+      'Pengeluaranmu {pct}% lebih sedikit dari periode sebelumnya.',
+  'You spent {pct}% more than the previous period.':
+      'Pengeluaranmu {pct}% lebih banyak dari periode sebelumnya.',
   'Your accounts': 'Akunmu',
   'Your allowance': 'Uang sakumu',
-  'Your balance for this period is already used up.': 'Saldo periode ini sudah habis.',
+  'Your balance for this period is already used up.':
+      'Saldo periode ini sudah habis.',
   'Your first monthly budget': 'Anggaran bulanan pertamamu',
   'Your first weekly budget': 'Anggaran mingguan pertamamu',
-  'Your spending is the same as the previous period.': 'Pengeluaranmu sama dengan periode sebelumnya.',
+  'Your spending is the same as the previous period.':
+      'Pengeluaranmu sama dengan periode sebelumnya.',
   'e.g. Weekly allowance': 'mis. Uang saku mingguan',
-  '{amount} of expenses are not tagged yet.': '{amount} pengeluaran belum diberi penanda.',
+  '{amount} of expenses are not tagged yet.':
+      '{amount} pengeluaran belum diberi penanda.',
   '{now} now vs {before} before': '{now} sekarang vs {before} sebelumnya',
   '{n} digits': '{n} digit',
   '{n} people, {amount} each': '{n} orang, masing-masing {amount}',
@@ -172,16 +198,24 @@ const Map<String, String> idExtra = {
   'month': 'bulan',
   'Deficit': 'Defisit',
   'Surplus': 'Surplus',
-  '{pct}% of income left for savings': '{pct}% dari pemasukan tersisa untuk ditabung',
-  'Spending exceeded income this period': 'Pengeluaran melampaui pemasukan periode ini',
-  'Net difference between income and expenses': 'Selisih bersih antara pemasukan dan pengeluaran',
-  'No expense data in {prev} for trend comparison.': 'Belum ada data pengeluaran di {prev} untuk perbandingan tren.',
+  '{pct}% of income left for savings':
+      '{pct}% dari pemasukan tersisa untuk ditabung',
+  'Spending exceeded income this period':
+      'Pengeluaran melampaui pemasukan periode ini',
+  'Net difference between income and expenses':
+      'Selisih bersih antara pemasukan dan pengeluaran',
+  'No expense data in {prev} for trend comparison.':
+      'Belum ada data pengeluaran di {prev} untuk perbandingan tren.',
   'Spending exactly matches {prev}.': 'Pengeluaran sama persis dengan {prev}.',
-  'Spending down {pct}% ({diff} saved)': 'Pengeluaran turun {pct}% ({diff} lebih hemat)',
+  'Spending down {pct}% ({diff} saved)':
+      'Pengeluaran turun {pct}% ({diff} lebih hemat)',
   'Spending up {pct}% (+{diff})': 'Pengeluaran naik {pct}% (+{diff})',
-  'Total spending equals previous period ({amount}).': 'Total belanja sama dengan periode sebelumnya ({amount}).',
-  'Great! Your spending is more controlled than in {prev} ({amount}).': 'Bagus! Pengeluaranmu lebih terkendali dibandingkan {prev} ({amount}).',
-  'Spending increased compared to {prev} ({amount}).': 'Pengeluaran meningkat dibandingkan {prev} ({amount}).',
+  'Total spending equals previous period ({amount}).':
+      'Total belanja sama dengan periode sebelumnya ({amount}).',
+  'Great! Your spending is more controlled than in {prev} ({amount}).':
+      'Bagus! Pengeluaranmu lebih terkendali dibandingkan {prev} ({amount}).',
+  'Spending increased compared to {prev} ({amount}).':
+      'Pengeluaran meningkat dibandingkan {prev} ({amount}).',
   'Record a few more transactions': 'Catat beberapa transaksi lagi',
   'Record a few more transactions to see your financial insights, spending charts, and top categories.': 'Catat beberapa transaksi lagi untuk melihat insight keuanganmu, grafik perbandingan pengeluaran, dan kategori teratas.',
   'Daily Expense Chart': 'Grafik Pengeluaran Harian',
@@ -202,7 +236,8 @@ const Map<String, String> idExtra = {
   'Spending Exceeded Income': 'Pengeluaran Melebihi Pemasukan',
   'Total spending exceeded income by {amount}. Review your secondary expenses to keep your cashflow healthy.': 'Total belanja melebihi pemasukan sebesar {amount}. Periksa kembali pos pengeluaran sekunder agar arus kas tetap sehat.',
   'Category Surge: {category}': 'Lonjakan Kategori: {category}',
-  '{category} spending increased by {pct}% (+{diff}) compared to {prev}.': 'Pengeluaran {category} meningkat {pct}% (+{diff}) dibandingkan {prev}.',
+  '{category} spending increased by {pct}% (+{diff}) compared to {prev}.':
+      'Pengeluaran {category} meningkat {pct}% (+{diff}) dibandingkan {prev}.',
   'Savings: {category}': 'Penghematan: {category}',
   'Great job! {category} spending was cut by {pct}% (saved {saved}) compared to {prev}.': 'Hebat! Pengeluaran {category} berhasil ditekan turun {pct}% (hemat {saved}) dibanding {prev}.',
   'Spending Hub: {category}': 'Pusat Pengeluaran: {category}',
@@ -218,4 +253,45 @@ const Map<String, String> idExtra = {
   'Balanced Needs Allocation': 'Alokasi Kebutuhan Seimbang',
   '{pct}% of spending was allocated to essential needs ({amount}). Your core spending habits are well on track!': '{pct}% pengeluaran dialokasikan untuk kebutuhan pokok ({amount}). Pola belanja esensialmu terjaga dengan baik!',
   '{pct}% Needs': '{pct}% Kebutuhan',
+  'Tap for financial advice from Wendy':
+      'Ketuk untuk saran finansial dari Wendy',
+  "Wendy's Advice: Safe & Steady": 'Saran Wendy: Aman & Terkendali',
+  'Your spending velocity is in great shape! Stick to the safe daily quota and your cashflow will remain resilient.': 'Kecepatan belanjamu sangat terkendali! Tetap ikuti kuota aman harian dan arus kasmu akan tetap tangguh.',
+  "Wendy's Advice: Surplus Trajectory": 'Saran Wendy: Surplus Terjaga',
+  'Consistent pacing builds surplus reserves. Consider sweeping extra surplus into your savings goals!': 'Kecepatan belanja yang konsisten menghasilkan surplus. Pertimbangkan memindahkan surplus ke target tabunganmu!',
+  "Wendy's Advice: Caution Ahead": 'Saran Wendy: Perlu Waspada',
+  "You've exceeded today's safe allowance or your budget capacity is getting tight. Pace your spending tomorrow to stay on track.": 'Kamu telah melewati kuota aman hari ini atau anggaran mulai menipis. Tahan belanja esok hari agar tetap seimbang.',
+  "Wendy's Advice: Balanced Discipline": 'Saran Wendy: Alokasi Seimbang',
+  'Your Needs, Wants, and Savings pools are harmoniously balanced. Keep this steady momentum going!': 'Alokasi Kebutuhan, Keinginan, dan Tabunganmu sangat harmonis. Pertahankan momentum positif ini!',
+  "Wendy's Advice: Savings Streak": 'Saran Wendy: Disiplin Menabung',
+  'Great financial habits pay off over time. Your commitment to saving regularly is building real freedom.': 'Kebiasaan finansial yang hebat akan membuahkan hasil. Komitmenmu menabung secara konsisten menciptakan kebebasan finansial.',
+  "Wendy's Advice: Budget Limit": 'Saran Wendy: Batas Anggaran Tercapai',
+  'Your period budget is exhausted! Focus strictly on primary essentials until your next income or period reset.': 'Anggaran periodemu telah habis! Fokuslah hanya pada kebutuhan pokok hingga periode anggaran berikutnya.',
+  "Wendy's Advice: Debt Due Reminder": 'Saran Wendy: Waspada Jatuh Tempo',
+  'Check your upcoming debt and split bill schedules so you never get caught off guard by due dates.': 'Periksa jadwal utang dan patungan terdekat agar kamu tidak terkejut saat tanggal jatuh tempo tiba.',
+  "Wendy's Advice: Mindful Wants": 'Saran Wendy: Sadar Belanja Keinginan',
+  'Notice if spontaneous wants are outpacing your essentials. A quick pause before purchasing works wonders.': 'Cermati jika belanja spontan mulai melebihi kebutuhan pokok. Mengambil jeda sebelum membeli sangat membantu.',
+  "Wendy's Advice: Emergency Shield": 'Saran Wendy: Perisai Dana Darurat',
+  'Building an untouchable 3-month emergency reserve ensures peace of mind through any unexpected storm.': 'Membangun dana darurat 3 bulan yang utuh memberikan ketenangan pikiran menghadapi situasi tak terduga.',
+  "Wendy's Advice: Month-End Victory": 'Saran Wendy: Evaluasi Akhir Bulan',
+  'Celebrate your monthly financial progress. Every conscious decision sharpens your mastery over money!': 'Rayakan kemajuan finansial bulananmu. Setiap keputusan sadar mengasah kendalimu atas uang!',
+  'Wendy Chibi': 'Wendy Chibi',
+  'Choose Wendy Avatar': 'Pilih Avatar Wendy',
+  'Personalize your profile with an official Wendy Chibi sticker.':
+      'Personalisasikan profilmu dengan stiker resmi Wendy Chibi.',
+  'Wendy avatar selected!': 'Avatar Wendy berhasil dipilih!',
+  'Failed to set avatar.': 'Gagal memasang avatar.',
+  'Goal Achieved!': 'Target Tercapai!',
+  'Congratulations! You reached your savings goal for {name} with total accumulated savings of {amount}!': 'Selamat! Kamu berhasil mencapai target tabungan {name} dengan total tabungan {amount}!',
+  'Celebrate!': 'Rayakan!',
+  'Got it!': 'Mengerti!',
+  'Profile Frame': 'Bingkai Profil',
+  'None': 'Tanpa Bingkai',
+  'Frame {n}': 'Bingkai {n}',
+  'Profile frame updated.': 'Bingkai profil diperbarui.',
+  'Customize Avatar & Frame': 'Ubah Foto & Bingkai',
+  'Avatar': 'Avatar',
+  'Apply': 'Terapkan',
+  'In Use': 'Sedang Dipakai',
+  'Ready to apply': 'Siap diterapkan',
 };

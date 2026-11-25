@@ -27,8 +27,18 @@ void main() {
       // Verify the combination logo is rendered
       expect(find.byType(GlasshouseCombinationLogo), findsOneWidget);
 
-      // Verify the application title is displayed
-      expect(find.text("Wall o' Pay"), findsOneWidget);
+      // Verify the application wordmark is displayed
+      expect(
+        find.byWidgetPredicate(
+          (w) =>
+              w is Image &&
+              w.image is AssetImage &&
+              (w.image as AssetImage)
+                  .assetName
+                  .contains('logo_wordmark_glossy_neon'),
+        ),
+        findsOneWidget,
+      );
 
       // Verify the tagline is displayed in English
       expect(find.text('Grow Your Financial Habits.'), findsOneWidget);

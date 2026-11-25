@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -41,7 +42,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   void _toast(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _pickPhoto(ImageSource source) async {
@@ -72,11 +74,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   void _viewPhoto() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const ProfilePhotoViewPage(),
-      ),
-    );
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const ProfilePhotoViewPage()));
   }
 
   Future<void> _confirmRemovePhoto() async {
@@ -84,7 +83,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       context: context,
       builder: (dialogCtx) => AlertDialog(
         title: Text(dialogCtx.tr('Remove photo?')),
-        content: Text(dialogCtx.tr('Are you sure you want to remove your profile photo?')),
+        content: Text(
+          dialogCtx.tr('Are you sure you want to remove your profile photo?'),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(false),
@@ -108,95 +109,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   void _showPhotoBottomSheet(BuildContext context) {
-    final hasPhoto = ref.read(profileProvider).photo != null;
-
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: AppColors.mossShadow,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        side: BorderSide(color: AppColors.borderOutline, width: 1),
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetCtx) => _ProfileCustomizeSheet(
+        onPickCamera: () => _pickPhoto(ImageSource.camera),
+        onPickGallery: () => _pickPhoto(ImageSource.gallery),
+        onViewPhoto: _viewPhoto,
+        onRemovePhoto: _confirmRemovePhoto,
+        onApplied: (msg) {
+          if (mounted) _toast(msg);
+        },
       ),
-      builder: (sheetCtx) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              Container(
-                width: 44,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.dewMint.withValues(alpha: 0.35),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Padding(
-                 padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
-                 child: Row(
-                   children: [
-                     Expanded(
-                       child: Text(
-                         sheetCtx.tr('Profile Photo'),
-                         style: const TextStyle(
-                           fontWeight: FontWeight.w700,
-                           fontSize: 18,
-                           color: AppColors.softIvory,
-                         ),
-                       ),
-                     ),
-                     if (hasPhoto)
-                       IconButton(
-                         icon: const Icon(
-                           Icons.delete_outline_rounded,
-                           color: AppColors.expenseOnDark,
-                         ),
-                         tooltip: sheetCtx.tr('Remove photo'),
-                         onPressed: () {
-                           Navigator.of(sheetCtx).pop();
-                           _confirmRemovePhoto();
-                         },
-                       ),
-                   ],
-                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _PhotoActionItem(
-                      icon: Icons.photo_camera_rounded,
-                      label: sheetCtx.tr('Camera'),
-                      onTap: () {
-                        Navigator.of(sheetCtx).pop();
-                        _pickPhoto(ImageSource.camera);
-                      },
-                    ),
-                    _PhotoActionItem(
-                      icon: Icons.photo_library_rounded,
-                      label: sheetCtx.tr('Gallery'),
-                      onTap: () {
-                        Navigator.of(sheetCtx).pop();
-                        _pickPhoto(ImageSource.gallery);
-                      },
-                    ),
-                    if (hasPhoto)
-                      _PhotoActionItem(
-                        icon: Icons.visibility_rounded,
-                        label: sheetCtx.tr('View Photo'),
-                        onTap: () {
-                          Navigator.of(sheetCtx).pop();
-                          _viewPhoto();
-                        },
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 
@@ -209,78 +134,48 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
     final username = ref.watch(usernameProvider);
-    final hasPhoto = ref.watch(profileProvider.select((s) => s.photo != null));
 
     return Scaffold(
       appBar: secondaryAppBar(context, title: Text(context.tr('Profile'))),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         children: [
-          Center(
-            child: Stack(
+          Padding(
+            padding: const EdgeInsets.only(top: 20),
+            child: Column(
               children: [
                 UserAvatar(
-                  size: 112,
-                  withGlassFrame: true,
+                  size: 104,
+                  withGlassFrame: false,
                   heroTag: 'profile_photo_hero',
-                  onTap: () {
-                    if (hasPhoto) {
-                      _viewPhoto();
-                    } else {
-                      _showPhotoBottomSheet(context);
-                    }
-                  },
+                  onTap: () => _showPhotoBottomSheet(context),
                 ),
-                Positioned(
-                  right: 0,
-                  bottom: 0,
-                  child: Material(
-                    color: AppColors.glasshouseGreen,
-                    shape: const CircleBorder(),
-                    child: InkWell(
-                      customBorder: const CircleBorder(),
-                      onTap: () => _showPhotoBottomSheet(context),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.dewMint.withValues(alpha: 0.6),
-                            width: 1.5,
-                          ),
-                        ),
-                        padding: const EdgeInsets.all(9),
-                        child: const Icon(
-                          Icons.photo_camera_outlined,
-                          size: 20,
-                          color: AppColors.softIvory,
-                        ),
-                      ),
+                const SizedBox(height: 36),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(48, 44),
+                    foregroundColor: AppColors.softWhite,
+                    side: BorderSide(
+                      color: AppColors.neonCyan.withValues(alpha: 0.45),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 10,
                     ),
                   ),
+                  icon: const Icon(
+                    Icons.auto_fix_high_rounded,
+                    size: 18,
+                    color: AppColors.neonCyan,
+                  ),
+                  onPressed: () => _showPhotoBottomSheet(context),
+                  label: Text(context.tr('Customize Avatar & Frame')),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton.icon(
-                style: TextButton.styleFrom(foregroundColor: AppColors.dewMint),
-                icon: const Icon(Icons.photo_camera_outlined, size: 18),
-                onPressed: () => _showPhotoBottomSheet(context),
-                label: Text(context.tr('Change photo')),
-              ),
-              if (hasPhoto) ...[
-                const SizedBox(width: 8),
-                TextButton.icon(
-                  style: TextButton.styleFrom(foregroundColor: AppColors.dewMint),
-                  icon: const Icon(Icons.visibility_outlined, size: 18),
-                  onPressed: _viewPhoto,
-                  label: Text(context.tr('View Photo')),
-                ),
-              ],
-            ],
           ),
           const SizedBox(height: 16),
           AppCard(
@@ -294,25 +189,51 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   decoration: appInput(
                     context,
                     label: context.tr('Nickname'),
-                    helper: context.tr('Shown in your greeting on the Home screen.'),
+                    helper: context.tr(
+                      'Shown in your greeting on the Home screen.',
+                    ),
                   ),
                 ),
                 if (username != null) ...[
                   const SizedBox(height: 8),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.alternate_email, color: AppColors.freshSage),
-                    title: Text(username, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.softIvory)),
-                    subtitle: Text(context.tr('Username'), style: const TextStyle(color: AppColors.freshSage)),
+                    leading: const Icon(
+                      Icons.alternate_email,
+                      color: AppColors.freshSage,
+                    ),
+                    title: Text(
+                      username,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.softIvory,
+                      ),
+                    ),
+                    subtitle: Text(
+                      context.tr('Username'),
+                      style: const TextStyle(color: AppColors.freshSage),
+                    ),
                   ),
                 ],
                 if (user?.email != null) ...[
                   const SizedBox(height: 4),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.mail_outline, color: AppColors.freshSage),
-                    title: Text(user!.email!, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.softIvory)),
-                    subtitle: Text(context.tr('Email'), style: const TextStyle(color: AppColors.freshSage)),
+                    leading: const Icon(
+                      Icons.mail_outline,
+                      color: AppColors.freshSage,
+                    ),
+                    title: Text(
+                      user!.email!,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.softIvory,
+                      ),
+                    ),
+                    subtitle: Text(
+                      context.tr('Email'),
+                      style: const TextStyle(color: AppColors.freshSage),
+                    ),
                   ),
                 ],
                 const SizedBox(height: 8),
@@ -322,7 +243,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         ? 'You are in Guest mode. Your profile is saved locally on this device.'
                         : 'Your username is used to log in and cannot be changed.',
                   ),
-                  style: const TextStyle(fontSize: 12, color: AppColors.freshSage),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.freshSage,
+                  ),
                 ),
                 const SizedBox(height: 18),
                 ElevatedButton(
@@ -341,7 +265,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   onPressed: _save,
                   child: Text(
                     context.tr('Save'),
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
                   ),
                 ),
               ],
@@ -354,6 +281,507 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 }
 
 /// Item aksi foto bergaya bundar seperti WhatsApp.
+class _ProfileCustomizeSheet extends ConsumerStatefulWidget {
+  const _ProfileCustomizeSheet({
+    required this.onPickCamera,
+    required this.onPickGallery,
+    required this.onViewPhoto,
+    required this.onRemovePhoto,
+    required this.onApplied,
+  });
+
+  final VoidCallback onPickCamera;
+  final VoidCallback onPickGallery;
+  final VoidCallback onViewPhoto;
+  final VoidCallback onRemovePhoto;
+  final void Function(String message) onApplied;
+
+  @override
+  ConsumerState<_ProfileCustomizeSheet> createState() =>
+      _ProfileCustomizeSheetState();
+}
+
+class _ProfileCustomizeSheetState
+    extends ConsumerState<_ProfileCustomizeSheet> {
+  int _tab = 0; // 0 = Avatar, 1 = Profile Frame
+  String? _pendingChibiAsset;
+  late String? _pendingFrameId = ref.read(profileProvider).frameId;
+  bool _saving = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final profile = ref.watch(profileProvider);
+    final hasPhoto = profile.photo != null;
+    final currentFrameId = profile.frameId;
+    final frameChanged = _pendingFrameId != currentFrameId;
+    final avatarChanged = _pendingChibiAsset != null;
+    final hasPendingChanges = avatarChanged || frameChanged;
+    final maxH = MediaQuery.of(context).size.height * 0.78;
+
+    final previewFrameAsset = profileFrameAssetPath(_pendingFrameId);
+    final Widget previewAvatarCore = CircleAvatar(
+      radius: 34,
+      backgroundColor: AppColors.surfaceContainer,
+      child: _pendingChibiAsset != null
+          ? ClipOval(
+              child: Image.asset(
+                _pendingChibiAsset!,
+                width: 68,
+                height: 68,
+                fit: BoxFit.cover,
+              ),
+            )
+          : (profile.photoImage != null
+              ? ClipOval(
+                  child: Image(
+                    image: profile.photoImage!,
+                    width: 68,
+                    height: 68,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : const UserAvatar(size: 68)),
+    );
+
+    final Widget previewWithFrame = previewFrameAsset == null
+        ? previewAvatarCore
+        : SizedBox(
+            width: 68,
+            height: 68,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                previewAvatarCore,
+                Positioned.fill(
+                  child: ExcludeSemantics(
+                    child: IgnorePointer(
+                      child: Transform.scale(
+                        scale: profileFrameScale(_pendingFrameId),
+                        child: FractionalTranslation(
+                          translation: profileFrameOffset(_pendingFrameId),
+                          child: Image.asset(
+                            previewFrameAsset,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxH),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.midnightNavy,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            border: Border(
+              top: BorderSide(
+                color: AppColors.borderOutline.withValues(alpha: 0.9),
+                width: 1.2,
+              ),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.mutedBlueGray.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 8, 8),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        context.tr('Customize Avatar & Frame'),
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.softWhite,
+                        ),
+                      ),
+                    ),
+                    if (hasPhoto)
+                      IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline_rounded,
+                          color: AppColors.expenseOnDark,
+                        ),
+                        tooltip: context.tr('Remove photo'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          widget.onRemovePhoto();
+                        },
+                      ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: AppColors.softWhite,
+                      ),
+                      tooltip: context.tr('Close'),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SegmentedButton<int>(
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment<int>(
+                      value: 0,
+                      label: Text(context.tr('Avatar')),
+                      icon: const Icon(Icons.face_retouching_natural_rounded, size: 18),
+                    ),
+                    ButtonSegment<int>(
+                      value: 1,
+                      label: Text(context.tr('Profile Frame')),
+                      icon: const Icon(Icons.filter_frames_rounded, size: 18),
+                    ),
+                  ],
+                  selected: {_tab},
+                  onSelectionChanged: (s) => setState(() => _tab = s.first),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Expanded(
+                child: _tab == 0
+                    ? GridView.builder(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: 1.0,
+                        ),
+                        itemCount: 12,
+                        itemBuilder: (ctx, index) {
+                          if (index == 0) {
+                            return _CustomizeActionTile(
+                              icon: Icons.photo_camera_rounded,
+                              label: context.tr('Camera'),
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                widget.onPickCamera();
+                              },
+                            );
+                          }
+                          if (index == 1) {
+                            return _CustomizeActionTile(
+                              icon: Icons.photo_library_rounded,
+                              label: context.tr('Gallery'),
+                              onTap: () {
+                                Navigator.of(context).pop();
+                                widget.onPickGallery();
+                              },
+                            );
+                          }
+                          final avatarNum =
+                              (index - 1).toString().padLeft(2, '0');
+                          final assetPath =
+                              'assets/new_asset/profile_avatar/avatar_$avatarNum.png';
+                          final isSelected = _pendingChibiAsset == assetPath;
+                          return Semantics(
+                            button: true,
+                            selected: isSelected,
+                            label: 'Avatar ${index - 1}',
+                            child: ExcludeSemantics(
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () => setState(
+                                  () => _pendingChibiAsset = assetPath,
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? AppColors.sunsetMagenta
+                                            .withValues(alpha: 0.16)
+                                        : AppColors.deepNavy,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? AppColors.goldenYellow
+                                          : AppColors.neonCyan
+                                              .withValues(alpha: 0.30),
+                                      width: isSelected ? 2.0 : 1.0,
+                                    ),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.asset(
+                                      assetPath,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : GridView.builder(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.92,
+                        ),
+                        itemCount: profileFrameIds.length + 1,
+                        itemBuilder: (ctx, i) {
+                          final isNone = i == 0;
+                          final id = isNone ? null : profileFrameIds[i - 1];
+                          final isSelected = _pendingFrameId == id;
+                          final label = isNone
+                              ? context.tr('None')
+                              : context.tr('Frame {n}', {'n': '$i'});
+                          return Semantics(
+                            button: true,
+                            selected: isSelected,
+                            label: label,
+                            child: ExcludeSemantics(
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(16),
+                                onTap: () =>
+                                    setState(() => _pendingFrameId = id),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? AppColors.sunsetMagenta
+                                            .withValues(alpha: 0.16)
+                                        : AppColors.deepNavy,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? AppColors.goldenYellow
+                                          : AppColors.borderOutline,
+                                      width: isSelected ? 2.0 : 1.0,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: isNone
+                                            ? Icon(
+                                                Icons.block_rounded,
+                                                size: 32,
+                                                color: isSelected
+                                                    ? AppColors.goldenYellow
+                                                    : AppColors.mutedBlueGray,
+                                              )
+                                            : Image.asset(
+                                                profileFrameAssetPath(id)!,
+                                                fit: BoxFit.contain,
+                                              ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        label,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: isSelected
+                                              ? FontWeight.w700
+                                              : FontWeight.w500,
+                                          color: isSelected
+                                              ? AppColors.softWhite
+                                              : AppColors.mutedBlueGray,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+              Container(
+                padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
+                decoration: BoxDecoration(
+                  color: AppColors.deepNavy,
+                  border: Border(
+                    top: BorderSide(
+                      color: AppColors.borderOutline.withValues(alpha: 0.8),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    previewWithFrame,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _pendingFrameId == null
+                                ? context.tr('None')
+                                : context.tr('Frame {n}', {
+                                    'n':
+                                        '${profileFrameIds.indexOf(_pendingFrameId!) + 1}',
+                                  }),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.softWhite,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            hasPendingChanges
+                                ? context.tr('Ready to apply')
+                                : context.tr('In Use'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: hasPendingChanges
+                                  ? AppColors.neonCyan
+                                  : AppColors.mutedBlueGray,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (hasPhoto && !hasPendingChanges) ...[
+                      IconButton(
+                        tooltip: context.tr('View Photo'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          widget.onViewPhoto();
+                        },
+                        icon: const Icon(
+                          Icons.visibility_outlined,
+                          color: AppColors.neonCyan,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                    ],
+                    FilledButton(
+                      onPressed: !hasPendingChanges || _saving
+                          ? null
+                          : () async {
+                              setState(() => _saving = true);
+                              try {
+                                final notifier =
+                                    ref.read(profileProvider.notifier);
+                                if (_pendingChibiAsset != null) {
+                                  final data =
+                                      await rootBundle.load(_pendingChibiAsset!);
+                                  await notifier
+                                      .setPhoto(data.buffer.asUint8List());
+                                }
+                                if (frameChanged) {
+                                  await notifier.setFrame(_pendingFrameId);
+                                }
+                                if (context.mounted) {
+                                  final msg = context.tr(
+                                    _pendingChibiAsset != null
+                                        ? 'Wendy avatar selected!'
+                                        : 'Profile frame updated.',
+                                  );
+                                  Navigator.of(context).pop();
+                                  widget.onApplied(msg);
+                                }
+                              } finally {
+                                if (mounted) setState(() => _saving = false);
+                              }
+                            },
+                      child: _saving
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.midnightNavy,
+                              ),
+                            )
+                          : Text(
+                              hasPendingChanges
+                                  ? context.tr('Apply')
+                                  : context.tr('In Use'),
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomizeActionTile extends StatelessWidget {
+  const _CustomizeActionTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceContainer.withValues(alpha: 0.75),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.borderOutline),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 24, color: AppColors.neonCyan),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: AppColors.softWhite,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _PhotoActionItem extends StatelessWidget {
   const _PhotoActionItem({
     required this.icon,
@@ -416,7 +844,8 @@ class ProfilePhotoCropPage extends StatefulWidget {
 }
 
 class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
-  final TransformationController _transformController = TransformationController();
+  final TransformationController _transformController =
+      TransformationController();
   ui.Image? _rawImage;
   bool _isLoading = true;
   bool _isSaving = false;
@@ -470,7 +899,10 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
     try {
       const targetSize = 512.0;
       final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder, const Rect.fromLTWH(0, 0, targetSize, targetSize));
+      final canvas = Canvas(
+        recorder,
+        const Rect.fromLTWH(0, 0, targetSize, targetSize),
+      );
 
       final scaleFactor = targetSize / cropSize;
       canvas.scale(scaleFactor, scaleFactor);
@@ -501,8 +933,13 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
       canvas.restore();
 
       final picture = recorder.endRecording();
-      final croppedImg = await picture.toImage(targetSize.toInt(), targetSize.toInt());
-      final byteData = await croppedImg.toByteData(format: ui.ImageByteFormat.png);
+      final croppedImg = await picture.toImage(
+        targetSize.toInt(),
+        targetSize.toInt(),
+      );
+      final byteData = await croppedImg.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
 
       if (byteData != null && mounted) {
         Navigator.of(context).pop(byteData.buffer.asUint8List());
@@ -510,7 +947,11 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.tr('Could not pick a photo: {error}', {'error': e}))),
+          SnackBar(
+            content: Text(
+              context.tr('Could not pick a photo: {error}', {'error': e}),
+            ),
+          ),
         );
       }
     } finally {
@@ -534,7 +975,10 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
         ),
         title: Text(
           context.tr('Crop Photo'),
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           IconButton(
@@ -543,7 +987,10 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
             onPressed: _reset,
           ),
           IconButton(
-            icon: const Icon(Icons.rotate_90_degrees_cw_outlined, color: Colors.white),
+            icon: const Icon(
+              Icons.rotate_90_degrees_cw_outlined,
+              color: Colors.white,
+            ),
             tooltip: context.tr('Rotate'),
             onPressed: _rotate,
           ),
@@ -553,7 +1000,10 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
           : LayoutBuilder(
               builder: (context, constraints) {
-                final maxDim = min(constraints.maxWidth - 32, constraints.maxHeight - 120);
+                final maxDim = min(
+                  constraints.maxWidth - 32,
+                  constraints.maxHeight - 120,
+                );
                 final cropSize = maxDim.clamp(240.0, 360.0);
 
                 final rawW = _rawImage!.width.toDouble();
@@ -578,10 +1028,13 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
                             children: [
                               ClipRect(
                                 child: InteractiveViewer(
-                                  transformationController: _transformController,
+                                  transformationController:
+                                      _transformController,
                                   minScale: 0.8,
                                   maxScale: 4.0,
-                                  boundaryMargin: EdgeInsets.all(cropSize * 0.8),
+                                  boundaryMargin: EdgeInsets.all(
+                                    cropSize * 0.8,
+                                  ),
                                   child: SizedBox(
                                     width: cropSize,
                                     height: cropSize,
@@ -623,7 +1076,10 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.white70,
                                   side: const BorderSide(color: Colors.white24),
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 12,
+                                  ),
                                 ),
                                 onPressed: () => Navigator.of(context).pop(),
                                 child: Text(
@@ -637,7 +1093,10 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
                             ),
                             const SizedBox(width: 8),
                             IconButton(
-                              icon: const Icon(Icons.rotate_90_degrees_cw_outlined, color: Colors.white),
+                              icon: const Icon(
+                                Icons.rotate_90_degrees_cw_outlined,
+                                color: Colors.white,
+                              ),
                               tooltip: context.tr('Rotate'),
                               onPressed: _rotate,
                             ),
@@ -647,21 +1106,32 @@ class _ProfilePhotoCropPageState extends State<ProfilePhotoCropPage> {
                                 style: FilledButton.styleFrom(
                                   backgroundColor: theme.colorScheme.primary,
                                   foregroundColor: theme.colorScheme.onPrimary,
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 12,
+                                  ),
                                 ),
-                                onPressed: _isSaving ? null : () => _cropAndSave(cropSize),
+                                onPressed: _isSaving
+                                    ? null
+                                    : () => _cropAndSave(cropSize),
                                 icon: _isSaving
                                     ? const SizedBox(
                                         width: 16,
                                         height: 16,
-                                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
                                       )
                                     : const Icon(Icons.check, size: 18),
                                 label: Text(
                                   context.tr('Done'),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                             ),
@@ -709,16 +1179,26 @@ class _WhatsAppCropOverlayPainter extends CustomPainter {
 
     // 3. Garis pandu grid rule-of-thirds di dalam lingkaran
     canvas.save();
-    canvas.clipPath(Path()..addOval(Rect.fromCircle(center: center, radius: radius)));
+    canvas.clipPath(
+      Path()..addOval(Rect.fromCircle(center: center, radius: radius)),
+    );
     final gridPaint = Paint()
       ..color = Colors.white.withValues(alpha: 0.22)
       ..strokeWidth = 0.8
       ..style = PaintingStyle.stroke;
     final step = size.width / 3;
     canvas.drawLine(Offset(step, 0), Offset(step, size.height), gridPaint);
-    canvas.drawLine(Offset(step * 2, 0), Offset(step * 2, size.height), gridPaint);
+    canvas.drawLine(
+      Offset(step * 2, 0),
+      Offset(step * 2, size.height),
+      gridPaint,
+    );
     canvas.drawLine(Offset(0, step), Offset(size.width, step), gridPaint);
-    canvas.drawLine(Offset(0, step * 2), Offset(size.width, step * 2), gridPaint);
+    canvas.drawLine(
+      Offset(0, step * 2),
+      Offset(size.width, step * 2),
+      gridPaint,
+    );
     canvas.restore();
 
     // 4. Bracket sudut bingkai foto (gaya WhatsApp)
@@ -798,7 +1278,10 @@ class ProfilePhotoViewPage extends ConsumerWidget {
         ),
         title: Text(
           name,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           IconButton(
@@ -820,10 +1303,7 @@ class ProfilePhotoViewPage extends ConsumerWidget {
           clipBehavior: Clip.none,
           child: Hero(
             tag: 'profile_photo_hero',
-            child: Image.memory(
-              photo,
-              fit: BoxFit.contain,
-            ),
+            child: Image.memory(photo, fit: BoxFit.contain),
           ),
         ),
       ),
@@ -845,7 +1325,8 @@ class ProfilePhotoViewPage extends ConsumerWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Theme.of(sheetCtx).colorScheme.onSurface.withValues(alpha: 0.2),
+                color: Theme.of(sheetCtx).colorScheme.onSurface
+                    .withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -856,9 +1337,8 @@ class ProfilePhotoViewPage extends ConsumerWidget {
                   Expanded(
                     child: Text(
                       sheetCtx.tr('Change photo'),
-                      style: Theme.of(sheetCtx).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(sheetCtx).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -877,7 +1357,8 @@ class ProfilePhotoViewPage extends ConsumerWidget {
                   _PhotoActionItem(
                     icon: Icons.photo_library_rounded,
                     label: sheetCtx.tr('Gallery'),
-                    onTap: () => Navigator.of(sheetCtx).pop(ImageSource.gallery),
+                    onTap: () =>
+                        Navigator.of(sheetCtx).pop(ImageSource.gallery),
                   ),
                 ],
               ),
@@ -914,7 +1395,11 @@ class ProfilePhotoViewPage extends ConsumerWidget {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.tr('Could not pick a photo: {error}', {'error': e}))),
+            SnackBar(
+              content: Text(
+                context.tr('Could not pick a photo: {error}', {'error': e}),
+              ),
+            ),
           );
         }
       }
@@ -926,7 +1411,9 @@ class ProfilePhotoViewPage extends ConsumerWidget {
       context: context,
       builder: (dialogCtx) => AlertDialog(
         title: Text(dialogCtx.tr('Remove photo?')),
-        content: Text(dialogCtx.tr('Are you sure you want to remove your profile photo?')),
+        content: Text(
+          dialogCtx.tr('Are you sure you want to remove your profile photo?'),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(false),

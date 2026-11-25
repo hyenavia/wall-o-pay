@@ -63,7 +63,8 @@ Future<void> showTotalBudgetDialog(
             title: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     color: AppColors.dewMint.withValues(alpha: 0.16),
                     shape: BoxShape.circle,
@@ -72,10 +73,11 @@ Future<void> showTotalBudgetDialog(
                       width: 1,
                     ),
                   ),
+                  clipBehavior: Clip.antiAlias,
                   child: Image.asset(
-                    'assets/icon-compress/073_calculator-kompres.png',
-                    width: 24,
-                    height: 24,
+                    'assets/new_asset/poses/pose_06.png',
+                    fit: BoxFit.cover,
+                    alignment: Alignment.topCenter,
                   ),
                 ),
                 const SizedBox(width: 12),

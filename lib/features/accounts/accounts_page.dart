@@ -174,7 +174,7 @@ class _AccountCategoryHeader extends StatelessWidget {
           Container(
             width: 32,
             height: 32,
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: AppColors.dewMint.withValues(alpha: 0.16),
               shape: BoxShape.circle,
@@ -183,9 +183,13 @@ class _AccountCategoryHeader extends StatelessWidget {
                 width: 1,
               ),
             ),
-            child: viceCityAssetForIcon(icon) != null
-                ? Image.asset(viceCityAssetForIcon(icon)!, fit: BoxFit.contain)
-                : Icon(icon, size: 16, color: AppColors.dewMint),
+            child: (icon == Icons.account_balance_outlined || icon == Icons.credit_card_outlined)
+                ? Image.asset('assets/new_asset/props/prop_06.png', fit: BoxFit.contain)
+                : (icon == Icons.payments_outlined)
+                    ? Image.asset('assets/new_asset/props/prop_07.png', fit: BoxFit.contain)
+                    : (viceCityAssetForIcon(icon) != null
+                        ? Image.asset(viceCityAssetForIcon(icon)!, fit: BoxFit.contain)
+                        : Icon(icon, size: 16, color: AppColors.dewMint)),
           ),
           const SizedBox(width: 10),
           Text(
@@ -343,6 +347,7 @@ class AccountsPage extends ConsumerWidget {
               if (activeCategories.isEmpty) ...[
                 const SizedBox(height: 24),
                 EmptyStateCard(
+                  illustrationAsset: 'assets/new_asset/poses/pose_01.png',
                   icon: Icons.account_balance_wallet_outlined,
                   title: context.tr('No accounts yet'),
                   subtitle: context.tr('Cash, bank, and e-wallet balances'),

@@ -118,6 +118,21 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                   children: [
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
+                      secondary: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: st.enabled
+                              ? AppColors.dewMint.withValues(alpha: 0.16)
+                              : Colors.white.withValues(alpha: 0.06),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Image.asset(
+                          'assets/new_asset/props/prop_13.png',
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                       title: Text(
                         context.tr('App PIN Lock'),
                         style: const TextStyle(
@@ -141,7 +156,7 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
                         secondary: Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
                             color: st.biometricEnabled
                                 ? AppColors.dewMint.withValues(alpha: 0.16)
@@ -154,19 +169,12 @@ class _SecurityPageState extends State<SecurityPage> with WidgetsBindingObserver
                               width: 0.8,
                             ),
                           ),
-                          child: st.isFaceOnly
-                              ? Icon(
-                                  Icons.face_rounded,
-                                  color: st.biometricEnabled
-                                      ? AppColors.dewMint
-                                      : AppColors.freshSage,
-                                  size: 22,
-                                )
-                              : Image.asset(
-                                  'assets/icon-compress/107_fingerprint-kompres.png',
-                                  width: 22,
-                                  height: 22,
-                                ),
+                          child: Image.asset(
+                            'assets/new_asset/props/prop_14.png',
+                            width: 24,
+                            height: 24,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                         title: Text(
                           bioTitle,

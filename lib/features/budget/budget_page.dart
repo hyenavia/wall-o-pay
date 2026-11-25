@@ -190,6 +190,38 @@ class BudgetPage extends ConsumerWidget {
                             ),
                           ],
                         ),
+                        if (breakdown.overallRatio > 1) ...[
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: AppColors.expenseOnDark.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppColors.expenseOnDark.withValues(alpha: 0.35)),
+                            ),
+                            child: Row(
+                              children: [
+                                Image.asset(
+                                  'assets/new_asset/ui/budget_warning.png',
+                                  width: 28,
+                                  height: 28,
+                                  fit: BoxFit.contain,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    context.tr('Budget capacity exceeded! Pace remaining expenses carefully.'),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.expenseOnDark,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 16),
 
                         // 3-Color Ratio Bar Preview (50 / 30 / 20)

@@ -2,6 +2,10 @@
 
 <div align="center">
 
+<p align="center">
+  <img src="docs/images/banner.png" alt="Wall o' Pay — Vice City Sunset Key Art Banner" width="100%" style="border-radius: 14px; max-width: 960px;">
+</p>
+
 ### _Your Money, Under Your Control_
 
 **Modern, Lightning-Fast & Offline-First Personal Finance Tracker**
@@ -12,7 +16,7 @@
 [![Security](https://img.shields.io/badge/Security-Keystore%20%7C%20Biometrics-38B271?logo=android&logoColor=white)](https://github.com/hyenavia/wall-o-pay)
 [![Cloud](https://img.shields.io/badge/Cloud-Firebase%20Auth%20%26%20Firestore-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![License](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-3.0.0-FB7185.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-3.1.0-FB7185.svg)](CHANGELOG.md)
 
 [🌐 Visit Landing Page](https://hyenavia.github.io/wall-o-pay/) • [📥 Download Latest APK](https://github.com/hyenavia/wall-o-pay/releases/latest) • [📐 Architecture Guide](ARCHITECTURE.md) • [📋 Changelog](CHANGELOG.md)
 
@@ -103,19 +107,19 @@ Wall o' Pay v3.0.0 introduces the complete **Vice City Sunset** visual rebrandin
 
 ## 🛠️ Technology Stack
 
-| Layer                   | Technology                                 | Details                                                       |
-| :---------------------- | :----------------------------------------- | :------------------------------------------------------------ |
-| **Framework**           | Flutter 3.47+ (Stable Channel)             | High-performance cross-platform UI                            |
-| **Language**            | Dart 3.13+                                 | Null-safe, modern reactive language                           |
-| **State Management**    | Flutter Riverpod (`flutter_riverpod` 3.x)  | Predictable, reactive dependency injection                    |
-| **Local Database**      | Drift SQLite (`drift`, `drift_flutter`)    | Type-safe SQL engine with reactive streams                    |
-| **Hardware Security**   | `flutter_secure_storage` & `local_auth`    | Android Keystore / iOS Keychain & Biometrics                  |
-| **Cloud & Auth**        | Firebase Core, Firebase Auth, Firestore    | Optional real-time cloud backup & cross-device sync           |
-| **Charts & Analytics**  | `fl_chart`                                 | Interactive, animated vector charts                           |
-| **Reporting & Export**  | `pdf` & `printing`                         | Custom PDF generation & print-ready statements                |
-| **Local Notifications** | `flutter_local_notifications` & `timezone` | Offline scheduled notifications & threshold alerts            |
+| Layer                   | Technology                                            | Details                                                       |
+| :---------------------- | :---------------------------------------------------- | :------------------------------------------------------------ |
+| **Framework**           | Flutter 3.47+ (Stable Channel)                        | High-performance cross-platform UI                            |
+| **Language**            | Dart 3.13+                                            | Null-safe, modern reactive language                           |
+| **State Management**    | Flutter Riverpod (`flutter_riverpod` 3.x)             | Predictable, reactive dependency injection                    |
+| **Local Database**      | Drift SQLite (`drift`, `drift_flutter`)               | Type-safe SQL engine with reactive streams                    |
+| **Hardware Security**   | `flutter_secure_storage` & `local_auth`               | Android Keystore / iOS Keychain & Biometrics                  |
+| **Cloud & Auth**        | Firebase Core, Firebase Auth, Firestore               | Optional real-time cloud backup & cross-device sync           |
+| **Charts & Analytics**  | `fl_chart`                                            | Interactive, animated vector charts                           |
+| **Reporting & Export**  | `pdf` & `printing`                                    | Custom PDF generation & print-ready statements                |
+| **Local Notifications** | `flutter_local_notifications` & `timezone`            | Offline scheduled notifications & threshold alerts            |
 | **Typography & Icons**  | Space Grotesk, Inter & IBM Plex Mono (`google_fonts`) | Material 3 & tabular figures for number alignment             |
-| **CI / CD Pipeline**    | GitHub Actions                             | Automated `flutter analyze` & `flutter test` gate + APK build |
+| **CI / CD Pipeline**    | GitHub Actions                                        | Automated `flutter analyze` & `flutter test` gate + APK build |
 
 ---
 

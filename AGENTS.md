@@ -24,7 +24,7 @@ Setiap kali melakukan modifikasi kode, penambahan fitur, pembaruan UI, atau perb
 ### Aturan Penomoran Versi (Semantic Versioning)
 
 > [!IMPORTANT]
-> **Rilis Mayor v3.0.x**: Versi aplikasi kini berada pada lini `v3.0.x` (dimulai dari `3.0.0+151`).
+> **Rilis v3.x**: Versi aplikasi kini berada pada lini `v3.x` (dimulai dari `3.0.0+151`, kini `3.1.0+172`).
 
 - **Major Release (`(+1).0.0+B`)**: Perombakan arsitektur besar, perubahan skema database tanpa backward-compatibility, atau perubahan fundamental pada alur aplikasi.
 - **Minor Feature (`X.(+1).0+B`)**: Penambahan modul atau fitur baru.

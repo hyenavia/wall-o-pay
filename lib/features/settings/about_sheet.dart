@@ -124,17 +124,16 @@ class AboutWallOPaySheet extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                           ),
-                          const SizedBox(height: 14),
-                          const Text(
-                            "Wall o' Pay",
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.3,
-                              color: AppColors.softWhite,
+                          const SizedBox(height: 12),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Image.asset(
+                              'assets/new_asset/custom_text/logo_wordmark_tropical_neon.png',
+                              height: 36,
+                              fit: BoxFit.contain,
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                             decoration: BoxDecoration(
@@ -180,10 +179,11 @@ class AboutWallOPaySheet extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.format_quote_rounded,
-                            color: AppColors.goldenYellow,
-                            size: 28,
+                          Image.asset(
+                            'assets/new_asset/ui/dashboard_greeting.png',
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.contain,
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -223,6 +223,104 @@ class AboutWallOPaySheet extends StatelessWidget {
                         fontSize: 12.5,
                         color: mutedColor,
                         height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Official Wendy Mascot Card
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppColors.sunsetMagenta.withValues(alpha: 0.45),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.sunsetMagenta.withValues(alpha: 0.15),
+                            blurRadius: 18,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(
+                            child: Image.asset(
+                              'assets/new_asset/background/vice_city_background.png',
+                              fit: BoxFit.cover,
+                              opacity: const AlwaysStoppedAnimation(0.28),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                Image.asset(
+                                  'assets/new_asset/poses/pose_10.png',
+                                  width: 72,
+                                  height: 90,
+                                  fit: BoxFit.contain,
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Image.asset(
+                                            'assets/new_asset/custom_text/logo_wordmark_glossy_neon.png',
+                                            height: 18,
+                                            fit: BoxFit.contain,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.neonCyan.withValues(alpha: 0.20),
+                                              borderRadius: BorderRadius.circular(6),
+                                              border: Border.all(color: AppColors.neonCyan.withValues(alpha: 0.40)),
+                                            ),
+                                            child: const Text(
+                                              'Mascot',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColors.neonCyan,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        context.tr('Wendy · Official Mascot Companion'),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.softWhite,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        context.tr(
+                                          'Meet Wendy, your trusted companion navigating cashflow with Vice City Sunset style and confidence.',
+                                        ),
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.mutedBlueGray,
+                                          height: 1.35,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 14),

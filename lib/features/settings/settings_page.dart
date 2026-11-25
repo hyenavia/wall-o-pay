@@ -423,15 +423,27 @@ class SettingsPage extends ConsumerWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(10),
+                        width: 56,
+                        height: 56,
                         decoration: BoxDecoration(
                           color: AppColors.sage.withValues(alpha: 0.16),
                           shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.dewMint.withValues(alpha: 0.35),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.dewMint.withValues(alpha: 0.15),
+                              blurRadius: 10,
+                            ),
+                          ],
                         ),
+                        clipBehavior: Clip.antiAlias,
                         child: Image.asset(
-                          'assets/icon-compress/155_cloud_sync-kompres.png',
-                          width: 24,
-                          height: 24,
+                          'assets/new_asset/poses/pose_04.png',
+                          fit: BoxFit.cover,
+                          alignment: Alignment.topCenter,
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -1007,176 +1019,271 @@ class _GlasshouseProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.deepNavy,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: AppColors.sunsetMagenta.withValues(alpha: 0.38),
-          width: 1.2,
+    return Semantics(
+      button: true,
+      label: '${name ?? (isGuest ? context.tr('Guest') : context.tr('Profile'))}, ${context.tr('Profile')}',
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.sunsetMagenta,
+              AppColors.neonCyan,
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.42),
+              blurRadius: 18,
+              offset: const Offset(0, 6),
+            ),
+            BoxShadow(
+              color: AppColors.sunsetMagenta.withValues(alpha: 0.18),
+              blurRadius: 16,
+            ),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.40),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-          BoxShadow(
-            color: AppColors.sunsetMagenta.withValues(alpha: 0.12),
-            blurRadius: 14,
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            splashColor: AppColors.sunsetMagenta.withValues(alpha: 0.10),
-            highlightColor: AppColors.neonCyan.withValues(alpha: 0.05),
-            child: Stack(
-              children: [
-                // Coastal Sunset landscape background
-                Positioned.fill(
-                  child: Image.asset(
-                    'assets/images/coastal_sunset_bg.jpg',
-                    fit: BoxFit.cover,
-                    alignment: const Alignment(0, -0.25),
-                  ),
-                ),
-                // Dark cinematic gradient overlay for high contrast
-                Positioned.fill(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          AppColors.midnightNavy.withValues(alpha: 0.88),
-                          AppColors.midnightNavy.withValues(alpha: 0.70),
-                          AppColors.midnightNavy.withValues(alpha: 0.82),
-                        ],
+        padding: const EdgeInsets.all(1.5),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22.5),
+          child: Material(
+            color: AppColors.deepNavy,
+            child: InkWell(
+              onTap: onTap,
+              splashColor: AppColors.sunsetMagenta.withValues(alpha: 0.12),
+              highlightColor: AppColors.neonCyan.withValues(alpha: 0.06),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: ExcludeSemantics(
+                      child: Image.asset(
+                        'assets/images/coastal_sunset_bg.jpg',
+                        fit: BoxFit.cover,
+                        alignment: const Alignment(0, -0.25),
                       ),
                     ),
                   ),
-                ),
-                // Foreground content
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
-                  child: Row(
-                    children: [
-                      // Circular Profile Avatar with Vice City Sunset Frame
-                      const UserAvatar(size: 60, withGlassFrame: true),
-                      const SizedBox(width: 14),
-                      // Information Hierarchy
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                  Positioned.fill(
+                    child: ExcludeSemantics(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [
+                              AppColors.midnightNavy.withValues(alpha: 0.90),
+                              AppColors.midnightNavy.withValues(alpha: 0.72),
+                              AppColors.midnightNavy.withValues(alpha: 0.62),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 18,
+                    ),
+                    child: Row(
+                      children: [
+                        const UserAvatar(size: 56, withGlassFrame: true),
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                name ??
+                                    (isGuest
+                                        ? context.tr('Guest')
+                                        : context.tr('Profile')),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.outfit(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18,
+                                  color: AppColors.softWhite,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                              const SizedBox(height: 1),
+                              Text(
+                                username != null
+                                    ? '@$username'
+                                    : (email ??
+                                        (isGuest
+                                            ? context.tr('Offline local storage')
+                                            : 'user@wallopay.local')),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.neonCyan
+                                      .withValues(alpha: 0.90),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              ExcludeSemantics(
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        height: 1,
+                                        color: AppColors.softWhite
+                                            .withValues(alpha: 0.16),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                      ),
+                                      child: Icon(
+                                        Icons.wb_twilight_rounded,
+                                        size: 13,
+                                        color: AppColors.sunsetMagenta
+                                            .withValues(alpha: 0.9),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        height: 1,
+                                        color: AppColors.softWhite
+                                            .withValues(alpha: 0.16),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                context.tr('Your money, under your control.'),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(
+                                  fontSize: 10.5,
+                                  fontStyle: FontStyle.italic,
+                                  color: AppColors.softWhite
+                                      .withValues(alpha: 0.85),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    isGuest
+                                        ? Icons.smartphone_rounded
+                                        : Icons.verified_user_outlined,
+                                    size: 12,
+                                    color: AppColors.mutedBlueGray,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Flexible(
+                                    child: Text(
+                                      isGuest
+                                          ? context.tr('Guest Mode')
+                                          : context.tr('Personal Account'),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        color: AppColors.mutedBlueGray,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        ExcludeSemantics(
+                          child: Container(
+                            width: 1,
+                            height: 64,
+                            color: AppColors.softWhite.withValues(alpha: 0.16),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Minimalist Badge
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.asset(
+                                'assets/images/logo.png',
+                                width: 34,
+                                height: 34,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              "WALL O' PAY",
+                              style: GoogleFonts.outfit(
+                                fontSize: 8.5,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.1,
+                                color: AppColors.softWhite
+                                    .withValues(alpha: 0.90),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
-                                color: AppColors.surfaceContainer.withValues(alpha: 0.85),
-                                borderRadius: BorderRadius.circular(6),
+                                color: AppColors.midnightNavy
+                                    .withValues(alpha: 0.85),
+                                borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: AppColors.goldenYellow.withValues(alpha: 0.40),
-                                  width: 0.8,
+                                  color: (isGuest
+                                          ? AppColors.goldenYellow
+                                          : AppColors.incomeOnDark)
+                                      .withValues(alpha: 0.55),
+                                  width: 1,
                                 ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Container(
-                                    width: 5,
-                                    height: 5,
-                                    decoration: const BoxDecoration(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: AppColors.goldenYellow,
+                                      color: isGuest
+                                          ? AppColors.goldenYellow
+                                          : AppColors.incomeOnDark,
                                     ),
                                   ),
-                                  const SizedBox(width: 5),
+                                  const SizedBox(width: 4),
                                   Text(
                                     isGuest
-                                        ? context.tr('Guest Mode')
-                                        : context.tr('Personal Account'),
+                                        ? context.tr('Guest')
+                                        : context.tr('Active'),
                                     style: GoogleFonts.inter(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.3,
-                                      color: AppColors.goldenYellow,
+                                      fontSize: 9.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.softWhite,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 5),
-                            // User Name in Space Grotesk Bold
-                            Text(
-                              name ??
-                                  (isGuest
-                                      ? context.tr('Guest')
-                                      : context.tr('Profile')),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.spaceGrotesk(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 18,
-                                color: AppColors.softWhite,
-                                letterSpacing: -0.2,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            // Email or username in Inter
-                            Text(
-                              email ??
-                                  (username != null
-                                      ? '@$username'
-                                      : (isGuest
-                                          ? context.tr('Offline local storage')
-                                          : 'user@wallopay.local')),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w400,
-                                color: AppColors.mutedBlueGray,
-                              ),
-                            ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Edit Profile Button at the Top-Right
-                      Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceContainer.withValues(alpha: 0.85),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.neonCyan.withValues(alpha: 0.45),
-                            width: 1.0,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.neonCyan.withValues(alpha: 0.15),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.edit_outlined,
-                          color: AppColors.neonCyan,
-                          size: 18,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

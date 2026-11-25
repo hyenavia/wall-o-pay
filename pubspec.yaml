@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 3.0.0+151
+version: 3.1.0+172
 
 environment:
   sdk: ^3.13.7
@@ -77,15 +77,15 @@ flutter_launcher_icons:
   android: true
   ios: true
   remove_alpha_ios: true
-  image_path: "assets/images/logo.png"
+  image_path: "assets/images/app_launcher_icon.png"
   web:
     generate: true
-    image_path: "assets/images/logo.png"
+    image_path: "assets/images/app_launcher_icon.png"
     background_color: "#0F172A"
     theme_color: "#0F172A"
   windows:
     generate: true
-    image_path: "assets/images/logo.png"
+    image_path: "assets/images/app_launcher_icon.png"
     icon_size: 48
 
 # For information on the generic Dart part of this file, see the
@@ -113,6 +113,15 @@ flutter:
     - assets/icons/vice_city/
     - assets/icon-compress/
     - assets/illustrations/
+    - assets/new_asset/ui/
+    - assets/new_asset/sticker/
+    - assets/new_asset/poses/
+    - assets/new_asset/expression/
+    - assets/new_asset/props/
+    - assets/new_asset/background/
+    - assets/new_asset/borders/
+    - assets/new_asset/profile_avatar/
+    - assets/new_asset/custom_text/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

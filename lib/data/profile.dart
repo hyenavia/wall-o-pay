@@ -6,20 +6,84 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart' show MemoryImage;
+import 'package:flutter/painting.dart' show MemoryImage, Offset;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'cloud.dart';
 import 'cloud_sync.dart';
 import 'prefs.dart';
 
+/// Daftar ID bingkai profil yang tersedia di `assets/new_asset/borders/`.
+const List<String> profileFrameIds = [
+  'border_02',
+  'border_03',
+  'border_04',
+  'border_05',
+  'border_06',
+  'border_07',
+  'border_08',
+  'border_09',
+  'border_10',
+  'border_11',
+  'border_12',
+  'border_13',
+  'border_14',
+];
+
+/// Mengembalikan path aset bingkai profil yang valid, atau `null` jika tidak dikenal.
+String? profileFrameAssetPath(String? frameId) {
+  if (frameId == null || !profileFrameIds.contains(frameId)) return null;
+  return 'assets/new_asset/borders/$frameId.png';
+}
+
+/// Mengembalikan faktor skala agar lubang tengah bingkai pas mengelilingi avatar.
+double profileFrameScale(String? frameId) {
+  return switch (frameId) {
+    'border_02' => 1.26,
+    'border_03' => 1.29,
+    'border_04' => 1.28,
+    'border_05' => 1.36,
+    'border_06' => 1.33,
+    'border_07' => 1.49,
+    'border_08' => 1.32,
+    'border_09' => 1.33,
+    'border_10' => 1.50,
+    'border_11' => 1.26,
+    'border_12' => 1.33,
+    'border_13' => 1.25,
+    'border_14' => 1.29,
+    _ => 1.26,
+  };
+}
+
+/// Mengembalikan offset fraksional agar pusat lubang bingkai tepat di tengah avatar.
+Offset profileFrameOffset(String? frameId) {
+  return switch (frameId) {
+    'border_02' => const Offset(0.032, -0.004),
+    'border_03' => const Offset(0.067, -0.004),
+    'border_04' => const Offset(-0.022, 0.009),
+    'border_05' => const Offset(0.055, 0.015),
+    'border_06' => const Offset(0.043, -0.005),
+    'border_07' => const Offset(-0.019, 0.063),
+    'border_08' => const Offset(0.042, 0.033),
+    'border_09' => const Offset(-0.043, 0.032),
+    'border_10' => const Offset(-0.007, 0.018),
+    'border_11' => const Offset(0.017, 0.020),
+    'border_12' => const Offset(-0.031, 0.0),
+    'border_13' => const Offset(0.015, 0.003),
+    'border_14' => const Offset(0.027, 0.003),
+    _ => Offset.zero,
+  };
+}
+
 class ProfileState {
-  ProfileState({this.nickname, this.photo})
+  ProfileState({this.nickname, this.photo, this.frameId})
       : photoImage = photo == null ? null : MemoryImage(photo);
 
   final String? nickname;
   final Uint8List? photo;
   final MemoryImage? photoImage;
+  final String? frameId;
 }
 
 /// Nickname dan foto profil, disimpan per akun di perangkat.
@@ -30,6 +94,7 @@ class ProfileController extends Notifier<ProfileState> {
 
   String _nickKey(String uid) => 'nickname_$uid';
   String _photoKey(String uid) => 'photo_$uid';
+  String _frameKey(String uid) => 'profile_frame_$uid';
   String _updatedKey(String uid) => 'profile_updated_$uid';
 
   /// Batas maksimum panjang string Base64 foto profil (~600 KB binary) agar aman bagi memori & batas dokumen Firestore 1 MiB.
@@ -55,9 +120,11 @@ class ProfileController extends Notifier<ProfileState> {
     final uid = user?.uid ?? guestId;
     final p = ref.read(sharedPreferencesProvider);
     final b64 = p.getString(_photoKey(uid));
+    final rawFrame = p.getString(_frameKey(uid));
     return ProfileState(
       nickname: p.getString(_nickKey(uid)),
       photo: _safeDecodePhoto(b64),
+      frameId: profileFrameAssetPath(rawFrame) != null ? rawFrame : null,
     );
   }
 
@@ -74,7 +141,11 @@ class ProfileController extends Notifier<ProfileState> {
       await p.setString(_nickKey(uid), nick);
     }
     await p.setInt(_updatedKey(uid), DateTime.now().millisecondsSinceEpoch);
-    state = ProfileState(nickname: nick.isEmpty ? null : nick, photo: state.photo);
+    state = ProfileState(
+      nickname: nick.isEmpty ? null : nick,
+      photo: state.photo,
+      frameId: state.frameId,
+    );
     if (_uid != null) {
       ref.read(autoSyncServiceProvider).schedulePush();
     }
@@ -89,7 +160,31 @@ class ProfileController extends Notifier<ProfileState> {
       await p.setString(_photoKey(uid), base64Encode(bytes));
     }
     await p.setInt(_updatedKey(uid), DateTime.now().millisecondsSinceEpoch);
-    state = ProfileState(nickname: state.nickname, photo: bytes);
+    state = ProfileState(
+      nickname: state.nickname,
+      photo: bytes,
+      frameId: state.frameId,
+    );
+    if (_uid != null) {
+      ref.read(autoSyncServiceProvider).schedulePush();
+    }
+  }
+
+  Future<void> setFrame(String? frameId) async {
+    final normalized = profileFrameAssetPath(frameId) != null ? frameId : null;
+    final uid = _effectiveUid;
+    final p = ref.read(sharedPreferencesProvider);
+    if (normalized == null) {
+      await p.remove(_frameKey(uid));
+    } else {
+      await p.setString(_frameKey(uid), normalized);
+    }
+    await p.setInt(_updatedKey(uid), DateTime.now().millisecondsSinceEpoch);
+    state = ProfileState(
+      nickname: state.nickname,
+      photo: state.photo,
+      frameId: normalized,
+    );
     if (_uid != null) {
       ref.read(autoSyncServiceProvider).schedulePush();
     }
@@ -108,6 +203,7 @@ class ProfileController extends Notifier<ProfileState> {
     await _doc(uid).set({
       'nickname': p.getString(_nickKey(uid)),
       'photo': p.getString(_photoKey(uid)),
+      'frameId': p.getString(_frameKey(uid)),
       'updatedAt': p.getInt(_updatedKey(uid)) ?? 0,
     }).timeout(_timeout);
   }
@@ -123,15 +219,19 @@ class ProfileController extends Notifier<ProfileState> {
 
     final nick = data['nickname'] is String ? data['nickname'] as String : null;
     final rawPhoto = data['photo'] is String ? data['photo'] as String : null;
+    final rawFrame = data['frameId'] is String ? data['frameId'] as String : null;
+    final frameId = profileFrameAssetPath(rawFrame) != null ? rawFrame : null;
     final photo = (rawPhoto != null && rawPhoto.length <= maxPhotoBase64Length)
         ? rawPhoto
         : null;
     nick == null ? await p.remove(_nickKey(uid)) : await p.setString(_nickKey(uid), nick);
     photo == null ? await p.remove(_photoKey(uid)) : await p.setString(_photoKey(uid), photo);
+    frameId == null ? await p.remove(_frameKey(uid)) : await p.setString(_frameKey(uid), frameId);
     await p.setInt(_updatedKey(uid), remoteAt);
     state = ProfileState(
       nickname: nick,
       photo: _safeDecodePhoto(photo),
+      frameId: frameId,
     );
   }
 
@@ -140,6 +240,7 @@ class ProfileController extends Notifier<ProfileState> {
     final p = ref.read(sharedPreferencesProvider);
     final guestNick = p.getString(_nickKey(guestId));
     final guestPhoto = p.getString(_photoKey(guestId));
+    final guestFrame = p.getString(_frameKey(guestId));
     final guestUpdated = p.getInt(_updatedKey(guestId));
 
     if (guestNick != null && p.getString(_nickKey(uid)) == null) {
@@ -148,18 +249,24 @@ class ProfileController extends Notifier<ProfileState> {
     if (guestPhoto != null && p.getString(_photoKey(uid)) == null) {
       await p.setString(_photoKey(uid), guestPhoto);
     }
+    if (guestFrame != null && p.getString(_frameKey(uid)) == null) {
+      await p.setString(_frameKey(uid), guestFrame);
+    }
     if (guestUpdated != null && p.getInt(_updatedKey(uid)) == null) {
       await p.setInt(_updatedKey(uid), guestUpdated);
     }
 
     await p.remove(_nickKey(guestId));
     await p.remove(_photoKey(guestId));
+    await p.remove(_frameKey(guestId));
     await p.remove(_updatedKey(guestId));
 
     final b64 = p.getString(_photoKey(uid));
+    final rawFrame = p.getString(_frameKey(uid));
     state = ProfileState(
       nickname: p.getString(_nickKey(uid)),
       photo: _safeDecodePhoto(b64),
+      frameId: profileFrameAssetPath(rawFrame) != null ? rawFrame : null,
     );
   }
 
@@ -169,6 +276,7 @@ class ProfileController extends Notifier<ProfileState> {
     final p = ref.read(sharedPreferencesProvider);
     await p.remove(_nickKey(effectiveUid));
     await p.remove(_photoKey(effectiveUid));
+    await p.remove(_frameKey(effectiveUid));
     await p.remove(_updatedKey(effectiveUid));
     state = ProfileState();
   }

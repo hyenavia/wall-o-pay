@@ -369,19 +369,70 @@ class DailyFinancialPulseCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Text(
-            context.tr(titleKey),
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            context.tr(messageKey),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: muted,
-              height: 1.4,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.tr(titleKey),
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      context.tr(messageKey),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: muted,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Tooltip(
+                message: context.tr('Tap for financial advice from Wendy'),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => _showWendyAdviceSheet(context, currentTier),
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: statusColor.withValues(alpha: 0.16),
+                        border: Border.all(
+                          color: statusColor.withValues(alpha: 0.45),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: statusColor.withValues(alpha: 0.20),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Image.asset(
+                        currentTier == DailyHealthTier.safe
+                            ? 'assets/new_asset/expression/expression_01.png'
+                            : (currentTier == DailyHealthTier.caution
+                                ? 'assets/new_asset/expression/expression_03.png'
+                                : 'assets/new_asset/expression/expression_06.png'),
+                        fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 14),
           Row(
@@ -983,5 +1034,210 @@ class _PhaseDetailTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Modal saran finansial interaktif dari Wendy Companion berdasarkan status kesehatan harian.
+void _showWendyAdviceSheet(BuildContext context, DailyHealthTier tier) {
+  final colors = context.themeColors;
+
+  final adviceList = [
+    (
+      'assets/new_asset/expression/expression_01.png',
+      "Wendy's Advice: Safe & Steady",
+      'Your spending velocity is in great shape! Stick to the safe daily quota and your cashflow will remain resilient.',
+      colors.income,
+    ),
+    (
+      'assets/new_asset/expression/expression_02.png',
+      "Wendy's Advice: Surplus Trajectory",
+      'Consistent pacing builds surplus reserves. Consider sweeping extra surplus into your savings goals!',
+      AppColors.neonCyan,
+    ),
+    (
+      'assets/new_asset/expression/expression_03.png',
+      "Wendy's Advice: Caution Ahead",
+      "You've exceeded today's safe allowance or your budget capacity is getting tight. Pace your spending tomorrow to stay on track.",
+      colors.warning,
+    ),
+    (
+      'assets/new_asset/expression/expression_04.png',
+      "Wendy's Advice: Balanced Discipline",
+      'Your Needs, Wants, and Savings pools are harmoniously balanced. Keep this steady momentum going!',
+      AppColors.goldenYellow,
+    ),
+    (
+      'assets/new_asset/expression/expression_05.png',
+      "Wendy's Advice: Savings Streak",
+      'Great financial habits pay off over time. Your commitment to saving regularly is building real freedom.',
+      AppColors.sunsetMagenta,
+    ),
+    (
+      'assets/new_asset/expression/expression_06.png',
+      "Wendy's Advice: Budget Limit",
+      'Your period budget is exhausted! Focus strictly on primary essentials until your next income or period reset.',
+      colors.expense,
+    ),
+    (
+      'assets/new_asset/expression/expression_07.png',
+      "Wendy's Advice: Debt Due Reminder",
+      'Check your upcoming debt and split bill schedules so you never get caught off guard by due dates.',
+      AppColors.goldenYellow,
+    ),
+    (
+      'assets/new_asset/expression/expression_08.png',
+      "Wendy's Advice: Mindful Wants",
+      'Notice if spontaneous wants are outpacing your essentials. A quick pause before purchasing works wonders.',
+      AppColors.sunsetOrange,
+    ),
+    (
+      'assets/new_asset/expression/expression_09.png',
+      "Wendy's Advice: Emergency Shield",
+      'Building an untouchable 3-month emergency reserve ensures peace of mind through any unexpected storm.',
+      AppColors.neonCyan,
+    ),
+    (
+      'assets/new_asset/expression/expression_10.png',
+      "Wendy's Advice: Month-End Victory",
+      'Celebrate your monthly financial progress. Every conscious decision sharpens your mastery over money!',
+      AppColors.softWhite,
+    ),
+  ];
+
+  final initialIndex = switch (tier) {
+    DailyHealthTier.safe => 0,
+    DailyHealthTier.caution => 2,
+    DailyHealthTier.limit => 5,
+  };
+  var selectedIndex = initialIndex;
+
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (ctx) => StatefulBuilder(
+      builder: (sheetCtx, setModalState) {
+        final (asset, titleKey, adviceKey, adviceColor) = adviceList[selectedIndex];
+
+        return SafeArea(
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            decoration: BoxDecoration(
+              color: AppColors.midnightNavy,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: adviceColor.withValues(alpha: 0.35)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.45),
+                  blurRadius: 28,
+                  offset: const Offset(0, -6),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.20),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: adviceColor.withValues(alpha: 0.15),
+                      border: Border.all(color: adviceColor.withValues(alpha: 0.45)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: adviceColor.withValues(alpha: 0.25),
+                          blurRadius: 20,
+                        ),
+                      ],
+                    ),
+                    child: Image.asset(asset, width: 76, height: 76, fit: BoxFit.contain),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  context.tr(titleKey),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.softWhite,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  context.tr(adviceKey),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.mutedBlueGray,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 46,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: adviceList.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
+                    itemBuilder: (c, idx) {
+                      final item = adviceList[idx];
+                      final isSelected = idx == selectedIndex;
+                      return InkWell(
+                        onTap: () => setModalState(() => selectedIndex = idx),
+                        borderRadius: BorderRadius.circular(23),
+                        child: Container(
+                          width: 46,
+                          height: 46,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isSelected
+                                ? item.$4.withValues(alpha: 0.25)
+                                : AppColors.deepNavy,
+                            border: Border.all(
+                              color: isSelected
+                                  ? item.$4
+                                  : AppColors.borderOutline.withValues(alpha: 0.5),
+                              width: isSelected ? 2.0 : 1.0,
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(4),
+                          child: Image.asset(item.$1, fit: BoxFit.contain),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.sunsetMagenta,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    onPressed: () => Navigator.pop(sheetCtx),
+                    child: Text(context.tr('Got it!'), style: const TextStyle(fontWeight: FontWeight.w700)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
 }
 

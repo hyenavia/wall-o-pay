@@ -4,6 +4,207 @@ All notable changes to the **Wall o' Pay** modern & offline-first personal finan
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-11-25
+
+### Added
+- **Full Vice City Sunset Design Asset Suite (59 Production Assets):**
+  - **Wendy Financial Companion:** High-fidelity 3D mascot integration across Daily Financial Pulse card with 10 interactive expression states and localized velocity tips.
+  - **Wendy Chibi Avatar Picker:** 12-sticker chibi avatar picker in `ProfilePage` for app-wide user profile personalization.
+  - **3D Financial Props & Milestone Poses:** Deployed dedicated 3D props and companion poses across 50/30/20 Smart Pools, Bank & Cash accounts, Savings Target goals, Debt settlement celebrations, and Report Export workflows.
+  - **New 3D Wendy Companion Launcher Icons:** Multiplatform icon suite across Android, iOS, Web, and Windows with sunset city skyline and neon 3D glowing "Wall o' Pay" wordmark.
+- **Enhanced Mascot Showcase:** Dedicated companion card in About Wall o' Pay sheet with sunset panorama and official brand identity.
+
+### Changed
+- **Unified Typography System:** Upgraded typography to `Outfit` (editorial & tabular financial figures), `Inter` (product UI & body), and `JetBrains Mono` (status telemetry & tags) across both Flutter app and landing page.
+- **Web Landing Page Complete Polish (`docs/`):**
+  - Upright zero-tilt interactive phone mockups with realistic data, mini-stat strip, SVG trajectory chart, and GPU-accelerated progress bars.
+  - Vice City Sunset horizon atmosphere with OLED midnight gradient (`#070B14`), warm sunset magenta & cyan rim lighting, atmospheric vignettes, and streamlined wordmark header/footer.
+  - Multi-resolution downsampled favicons (16×16 to 192×192) for sharp cross-browser display.
+
+### Fixed
+- **UI/UX Contrast & Accessibility (WCAG AA):**
+  - Calibrated contrast for buttons, chips, segmented selectors, input helper text, and navigation bars.
+  - Expanded touch targets to 48×48dp, disambiguated icons, and added comprehensive `Semantics` and `prefers-reduced-motion` compliance.
+
+## [3.0.20] - 2026-11-25
+
+### Changed
+- **Landing Page Favicon Update (`docs/`):**
+  - Replaced `docs/favicon.ico`, `docs/favicon.png`, `docs/apple-touch-icon.png`, and `docs/images/icon.png` with `assets/new_asset/props/prop_11.png` using calibrated transparent margins and multi-resolution Lanczos downsampling (16×16, 32×32, 48×48, 180×180, 192×192).
+
+## [3.0.19] - 2026-11-25
+
+### Changed
+- **Key Art Tonal Blending & Edge Vignette (`docs/style.css`):**
+  - Added an atmospheric inset edge vignette overlay (`.key-art-media-wrap::after`), calibrated image saturation/brightness (`saturate(0.86) brightness(0.90) contrast(1.04)`), and softened the card border with a sunset halo so the banner blends naturally into the dark OLED canvas.
+
+## [3.0.18] - 2026-11-25
+
+### Changed
+- **Key Art Showcase Refinement (`docs/index.html`, `docs/style.css`):**
+  - Balanced headline line wrapping (`text-wrap: balance`, wider header container) to prevent orphan words, equalized vertical section padding, removed the redundant caption bar under the banner, and removed misleading hover lift/zoom from the non-interactive key art frame.
+
+## [3.0.17] - 2026-11-25
+
+### Fixed
+- **UI/UX Contrast, Touch Targets & Accessibility:**
+  - Improved WCAG AA contrast for `onPrimary`, selected `SegmentedButton`, selected `Chip` labels (`AppColors.midnightNavy` on `sunsetMagenta`), inactive bottom navigation items, and input hint/helper text (`lib/core/theme.dart`, `lib/core/widgets.dart`, `lib/app.dart`).
+  - Expanded `_HomeHeader` action button touch targets to `48×48dp` (`lib/features/home/home_page.dart`) and disambiguated the date-range filter icon from the cashflow calendar icon in `TransactionsPage` (`lib/features/transactions/transactions_page.dart`).
+  - Added `Semantics`, `MergeSemantics`, `ExcludeSemantics`, `SemanticsService.announce`, and `MediaQuery.disableAnimationsOf` support across navigation, transaction rows, decorative backdrops, and `SplashPage`.
+- **App Launcher Icon & Brand Logo Update:**
+  - Updated the multiplatform app launcher icon (`assets/images/app_launcher_icon.png`) and the in-app brand logo (`assets/images/logo.png`).
+
+## [3.0.16] - 2026-11-25
+
+### Changed
+- **Unified Typography System (`Outfit` + `Inter` + `JetBrains Mono`):**
+  - Upgraded both the Flutter application (`lib/core/theme.dart`) and the GitHub Pages landing page (`docs/index.html`, `docs/style.css`) from `Space Grotesk` / `IBM Plex Mono` to `Outfit` (editorial display & tabular financial figures), `Inter` (product UI & body), and `JetBrains Mono` (status metadata & telemetry).
+
+## [3.0.15] - 2026-11-25
+
+### Changed
+- **Vice City Sunset Horizon Atmosphere (`docs/style.css`):**
+  - Enriched the landing page background with warm Sunset Magenta, Sunset Orange, and Golden Amber horizon lighting balanced against Electric Cyan coastal reflections, plus warm-tinted horizontal gridlines and sunset-rimmed alternating section bands.
+
+## [3.0.14] - 2026-11-24
+
+### Changed
+- **Landing Page Atmospheric Background & Section Rhythm (`docs/style.css`):**
+  - Replaced the flat `#090D16` canvas with an OLED midnight gradient (`#070B14`), a subtle 48px architectural grid masked radially toward the viewport center, and stronger Sunset Magenta / Electric Cyan atmospheric horizon lighting.
+  - Added full-bleed alternating elevated surface bands with crisp top/bottom hairline borders across `#interactive`, `#architecture`, and `#art-direction` for clear visual hierarchy.
+
+## [3.0.13] - 2026-11-24
+
+### Changed
+- **Landing Page Interactive Phone Mockup Redesign (`docs/`):**
+  - Rebuilt the dual phone hardware mockups in the Interactive Engine section (`docs/index.html`, `docs/style.css`, `docs/script.js`) with an upright, zero-tilt staggered-depth composition so both screens remain 100% legible without clipped text.
+  - Replaced emoji status and navigation icons with crisp inline SVGs, added `tabular-nums` alignment, a 3-column mini-stat strip, two realistic recent activity rows, an SVG area-line trajectory chart, and a 3-bar allocation/telemetry breakdown card to eliminate empty screen voids.
+  - Added GPU-accelerated `scaleX` progress bars and subtle materializing (`opacity` + `translateY` + `blur`) mode-switch transitions respecting `prefers-reduced-motion`.
+
+## [3.0.12] - 2026-11-24
+
+### Changed
+- **Landing Page Favicon Suite Upgrade:**
+  - Upgraded the official GitHub Pages landing page favicon and bookmark icons across `docs/favicon.ico`, `docs/favicon.png`, `docs/apple-touch-icon.png`, and `docs/images/icon.png` using `assets/new_asset/props/prop_05.png`.
+  - Processed with calibrated transparent margins and multi-resolution downsampling (16x16, 32x32, 48x48, 180x180, and 192x192) for sharp, high-contrast display across all desktop browsers and mobile homescreen shortcuts.
+
+## [3.0.11] - 2026-11-24
+
+### Added
+- **New 3D Wendy Companion App Icon & Multiplatform Launcher Suite:**
+  - Upgraded application launcher icons across Android (`mipmap-*`), iOS (`Assets.xcassets`), Web (`web/icons/`), Windows (`app_icon.ico`), and web landing page (`docs/images/logo.png`, `icon.png`, `apple-touch-icon.png`, `favicon.ico`).
+  - Features the high-fidelity 3D Wendy financial companion illustration with tropical sunset city skyline, sunglasses, smartphone, financial growth indicator, gold coins, and 3D glowing neon "Wall o' Pay" wordmark.
+
+### Changed
+- **Web Landing Page Brand Simplification:**
+  - Streamlined both the header navigation bar and the footer on the GitHub Pages website (`docs/index.html`) by removing the adjacent emblem icon, highlighting the custom 3D glowing script wordmark cleanly.
+- **Companion Experience & Onboarding Alignment:**
+  - Enlarged Wendy companion avatars to half-body/bust portraits in `DailyFinancialPulseCard` and Settings Cloud Sync card for clear facial expressions.
+  - Streamlined onboarding guidance flow to exclusively showcase the mascot companion on the initial Welcome screen, relocating auxiliary milestone poses to empty state illustrations across Accounts and Recurring features.
+  - Enhanced Splash Screen with the official glossy neon 3D script wordmark.
+
+## [3.0.10] - 2026-11-24
+
+### Added
+- **Full Vice City Sunset Design Asset Suite Integration (59/59 Assets):**
+  - Systematically integrated all 59 production design assets across 7 distinct categories (expressions, poses, props, chibi stickers, UI illustrations, background, and custom typography).
+  - **Wendy Chibi Avatar Picker:** Added a 12-sticker chibi avatar picker directly in `ProfilePage`, allowing users to select official Wendy stickers as their app-wide profile avatar.
+  - **10-Expression Interactive Advice Carousel:** Upgraded `DailyFinancialPulseCard` with an interactive 10-expression advice sheet and localized financial velocity tips from Wendy.
+  - **3D Financial Props:** Integrated specialized props for 50/30/20 Smart Pools (Needs, Wants, Savings), Bank & Cash account category headers, savings target coins & piggy bank, net worth vitality diamond, calculator badge, receipt attachment tag, and hardware keystore & biometric indicators.
+  - **Workflow Milestone Poses:** Deployed specialized Wendy companion poses for Cash & Allowance onboarding, PDF report export, calculator helper, cloud sync status, debt settlement celebration, destructive erase confirmation dialog, and empty search filters.
+  - **Official Wendy Mascot Showcase:** Added a dedicated mascot companion showcase card in the "About Wall o' Pay" sheet with custom Vice City background and neon script wordmark.
+
+### Changed
+- **Asset Optimization:** Excluded raw unoptimized collage sheets (`packs/` and `character/`), saving over 7.28 MB of APK package bloat while ensuring 100% purposeful utilization of all component assets.
+
+## [3.0.9] - 2026-11-24
+
+### Changed
+- **Official Companion Mascot Renamed to Wendy:**
+  - Formally updated the official name of the financial companion mascot to **Wendy** across the web landing page (hero alt, mockup profile, Key Art badge) and within the mobile app (Daily Financial Pulse advice sheets and localized strings).
+
+## [3.0.8] - 2026-11-24
+
+### Changed
+- **Horizontal Glossy Script Wordmark Upgrade:**
+  - Upgraded landing page brand logotype in navigation and footer to the horizontal glossy neon 3D script wordmark (`logo_wordmark_glossy_neon.png`).
+  - Optimized scaling and bounds to deliver significantly larger, crisper, and more prominent brand legibility across all desktop and mobile viewports.
+
+## [3.0.7] - 2026-11-24
+
+### Changed
+- **Web Brand Wordmark Typography:**
+  - Upgraded the plain text "Wall o' Pay" in the landing page floating header and footer to the custom high-DPI tropical neon script wordmark (`logo_wordmark.png`).
+- **Hero Dashboard Clean Layout:**
+  - Removed the floating `0ms Local SQLite Calibrated` badge overlay beside the Olivia companion mascot for a cleaner and more focused hero visual presentation.
+
+## [3.0.6] - 2026-11-24
+
+### Added
+- **Dynamic Mascot Companion Reactions:**
+  - Integrated dynamic Olivia companion mascot expressions into `DailyFinancialPulseCard` (`expression_01.png` for safe velocity, `expression_03.png` for caution pace, `expression_06.png` for limit approaching).
+  - Tapping the companion avatar opens an interactive localized financial wellness bottom sheet with personalized velocity insights and budget advice.
+- **Goal Celebration Mascot Modal:**
+  - Added celebratory Chibi cheering mascot modal (`chibi_01.png`) when tapping completed savings goals on `GoalsPage`.
+- **Interactive Companion Avatar on Web Mockup:**
+  - Added reactive Olivia Chibi avatars to the interactive cashflow command engine on the landing page (`docs/`), syncing companion expressions dynamically with each mode tab (`pulse`, `pools`, `rapid`, `debt`).
+- **Tropical Neon Wordmark Signature:**
+  - Integrated the custom Vice City Sunset tropical neon wordmark into the "About Wall o' Pay" sheet.
+
+## [3.0.5] - 2026-11-24
+
+### Added
+- **Custom Neon Wordmark & Typography Suite:**
+  - Standardized and bundled custom neon logotypes in `assets/new_asset/custom_text/` (`logo_wordmark_glossy_neon.png` and `logo_wordmark_tropical_neon.png`).
+  - Upgraded core app branding `assets/images/logo_wordmark.png` to the new Vice City Sunset tropical neon logotype, replacing legacy botanical assets.
+  - Registered `assets/new_asset/custom_text/` in `pubspec.yaml`.
+
+## [3.0.4] - 2026-11-24
+
+### Added
+- **Vice City Sunset Key Art Showcase & Social Previews:**
+  - Integrated high-impact Vice City Sunset key art banner into `README.md` and Open Graph/Twitter Social Cards (`docs/images/og_banner.jpg`).
+  - Added responsive frosted-glass Key Art showcase section on the landing page (`docs/`) following `taste-skill` (anti-slop layout), `ui-ux-pro-max` (mobile focal alignment), and `design-motion-principles` (Jakub Krehel tactile hover elevation & ambient glow).
+- **Olivia Mascot & UI State Illustrations Suite:**
+  - Standardized and bundled high-fidelity asset suite under `assets/new_asset/` (`ui/`, `character/`, `sticker/`, `poses/`, `expression/`, `props/`, `background/`).
+  - Integrated `empty_wallet.png`, `empty_budget.png`, `no_data_state.png`, and `weekly_monthly_summary.png` into `resolveEmptyIllustration` across core empty states.
+  - Added `onboarding_welcome.png` greeting mascot illustration on step 0 of onboarding.
+  - Enhanced `_CompletedGoalCard` with celebratory `savings_achieved.png` achievement badge.
+  - Added companion mascot health indicator (`dashboard_greeting.png` and `budget_warning.png`) to `DailyFinancialPulseCard`.
+
+### Changed
+- **Asset Pipeline Optimization & Standardization:**
+  - Renamed all 63 raw asset files to idiomatic `snake_case` without spaces or special characters.
+  - Downscaled oversized images (max 640px for UI/characters, 1280px for background) and applied PNG compression, reducing total bundle size from 31.49 MB to 13.46 MB (~57% savings).
+  - Isolated root master packs into `packs/` archive directory outside the APK asset bundle.
+
+## [3.0.3] - 2026-11-24
+
+### Added
+- **Hero Olivia Companion Mascot:**
+  - Integrated high-resolution cutout illustration of financial companion mascot **Olivia** into the landing page Hero section (`docs/`).
+  - Added Vice City Sunset ambient aura halo (`#FB7185` and `#38BDF8`), gentle floating animations, and interactive hover elevation.
+  - Fully responsive on mobile and tablet with automatic vestibular accessibility under `prefers-reduced-motion`.
+
+## [3.0.2] - 2026-11-24
+
+### Fixed
+- **Landing Page Data Export Badge Collision:**
+  - Resolved class collision where data export chips (`PDF Reports`, `CSV Spreadsheets`, `Encrypted JSON`) mistakenly inherited `.app-version-tag`, causing them to be overwritten by GitHub Release API polling.
+  - Introduced dedicated `.feature-badge-pill` class with high-contrast Vice City Sunset styling.
+  - Implemented SemVer comparison guards in `docs/script.js` preventing release badge regressions when local codebase version is ahead of GitHub published releases.
+
+## [3.0.1] - 2026-11-24
+
+### Changed
+- **Landing Page Redesign & Modernization:**
+  - Overhauled GitHub Pages landing page (`docs/`) utilizing the tripartite frontend engineering stack: `ui-ux-pro-max`, `taste-skill`, and `design-motion-principles`.
+  - Streamlined information architecture from 9 sprawling sections down to 6 high-impact, cohesive sections with disciplined 1-screen desktop viewport rhythm.
+  - Purged legacy botanical tokens and class names, unifying the design system under high-contrast Vice City Sunset tokens with full WCAG AA contrast compliance.
+  - Replaced native unicode emojis with crisp inline SVG vector iconography across all cards, chips, and app frames.
+  - Implemented smooth spatial crossfade transitions across the interactive showcase panels with Jakub Krehel polish and Emil Kowalski restraint.
+  - Enhanced touch targets (minimum 44x44px) and added full `prefers-reduced-motion` vestibular accessibility.
+
 ## [3.0.0] - 2026-11-21
 
 ### Added

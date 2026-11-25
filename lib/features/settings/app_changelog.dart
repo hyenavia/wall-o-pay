@@ -45,10 +45,409 @@ class ReleaseEntry {
 class AppChangelog {
   static const List<ReleaseEntry> releases = [
     ReleaseEntry(
+      version: '3.1.0',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: true,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Vice City Sunset Asset Suite — Integrated Wendy financial companion with 10 interactive expression states, 12 chibi profile avatar stickers, 3D financial props, and custom milestone poses.',
+          textId:
+              'Suite Aset Vice City Sunset — Integrasi maskot pendamping finansial Wendy dengan 10 ekspresi interaktif, 12 stiker avatar chibi profil, properti 3D, dan pose milestone alur kerja.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'New Multiplatform Launcher Suite — High-fidelity 3D Wendy launcher icons across Android, iOS, Web, and Windows with glowing sunset neon wordmark.',
+          textId:
+              'Ikon Peluncur Multiplatform Baru — Ikon aplikasi 3D Wendy berkualitas tinggi untuk Android, iOS, Web, dan Windows dengan wordmark neon sunset menyala.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Unified Typography System — Upgraded app and landing page typography to Outfit (figures), Inter (body), and JetBrains Mono (telemetry).',
+          textId:
+              'Sistem Tipografi Terpadu — Memperbarui tipografi aplikasi dan landing page ke Outfit (angka), Inter (teks), dan JetBrains Mono (telemetri).',
+        ),
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Accessibility & Contrast Polishing — Calibrated WCAG AA contrast, 48x48dp touch targets, screen reader Semantics, and reduced motion adaptations.',
+          textId:
+              'Polesan Aksesibilitas & Kontras — Penyesuaian kontras WCAG AA, target sentuh 48x48dp, Semantics pembaca layar, dan adaptasi reduced motion.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.20',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Landing Page Favicon Update — Replaced the web landing page favicons (docs/favicon.ico, docs/favicon.png, docs/apple-touch-icon.png, docs/images/icon.png) with assets/new_asset/props/prop_11.png.',
+          textId:
+              'Pembaruan Favicon Landing Page — Mengganti favicon dan ikon bookmark situs web (docs/favicon.ico, docs/favicon.png, docs/apple-touch-icon.png, docs/images/icon.png) menggunakan assets/new_asset/props/prop_11.png.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.19',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Key Art Tonal Blending — Added an inset edge vignette, calibrated banner saturation and brightness, and softened the frame with a sunset halo to match the dark OLED landing page.',
+          textId:
+              'Penyelarasan Nada Warna Key Art — Menambahkan vignette tepi halus, kalibrasi saturasi dan kecerahan banner, serta halo senja lembut agar menyatu dengan latar OLED gelap.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.18',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Key Art Showcase Refinement — Balanced headline wrapping, equalized vertical section padding, removed the bottom caption bar, and made the non-interactive banner frame static.',
+          textId:
+              'Penyempurnaan Seksi Key Art — Menyeimbangkan baris judul, menyamakan padding vertikal seksi, menghapus bar caption di bawah banner, dan menonaktifkan efek hover pada frame statis.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.17',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'UI/UX & Accessibility Polish — Fixed WCAG AA contrast on primary buttons, segmented controls, and inactive nav items, expanded header touch targets to 48dp, disambiguated transaction filter icons, and added Semantics/Reduce Motion support.',
+          textId:
+              'Perbaikan UI/UX & Aksesibilitas — Memperbaiki kontras WCAG AA pada tombol utama, kontrol segmen, dan tab non-aktif, memperbesar area sentuh header ke 48dp, membedakan ikon filter tanggal transaksi, serta menambahkan dukungan Semantics & Reduce Motion.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'App Icon & Logo Refresh — Updated the multiplatform app launcher icon and in-app Vice City Sunset wallet logo.',
+          textId:
+              'Pembaruan Ikon & Logo Aplikasi — Memperbarui ikon launcher multiplatform dan logo dompet Vice City Sunset di dalam aplikasi.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.16',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Unified Typography Upgrade — Switched both the Flutter app and landing page to Outfit (headings & currency figures), Inter (UI body), and JetBrains Mono (technical telemetry).',
+          textId:
+              'Pembaruan Tipografi Terpadu — Mengganti font aplikasi Flutter dan landing page ke Outfit (judul & nominal uang), Inter (teks UI), dan JetBrains Mono (telemetri teknis).',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.15',
+      dateEn: 'November 25, 2026',
+      dateId: '25 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Vice City Sunset Horizon Atmosphere — Enriched the landing page background with warm Sunset Magenta, Sunset Orange, and Golden Amber horizon glows, dual-tone architectural gridlines, and sunset-rimmed section bands.',
+          textId:
+              'Atmosfer Horizon Vice City Sunset — Memperkaya latar belakang landing page dengan pendar horizon Sunset Magenta, Sunset Orange, dan Golden Amber, grid arsitektural dua warna, serta pita seksi bernuansa senja.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.14',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Landing Page Atmospheric Background & Section Bands — Added a subtle architectural grid, Sunset/Cyan horizon lighting, and full-bleed alternating section bands to eliminate flat dark canvas monotony.',
+          textId:
+              'Latar Belakang Atmosferik & Pita Seksi Landing Page — Menambahkan grid arsitektural halus, pencahayaan horizon Sunset/Cyan, dan pita seksi bergantian full-bleed untuk kedalaman visual yang lebih tajam.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.13',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Interactive Phone Mockup Redesign — Rebuilt the landing page dual phone mockups with an upright zero-tilt layout, SVG-only status and dock icons, denser real-app cards, and GPU-accelerated mode-switch transitions.',
+          textId:
+              'Perombakan Desain Mockup HP Landing Page — Membangun ulang mockup dual HP dengan tata letak tegak tanpa miring, ikon SVG penuh pada status bar dan dock, kartu aktivitas yang lebih padat, serta transisi pergantian mode berbasis GPU.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.12',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Landing Page Favicon Suite Upgrade — Upgraded the web landing page favicon and bookmark icons across docs/favicon.ico, docs/favicon.png, docs/apple-touch-icon.png, and docs/images/icon.png with the specialized financial receipt prop.',
+          textId:
+              'Pembaruan Favicon Landing Page — Memperbarui favicon dan ikon bookmark situs web di docs/favicon.ico, docs/favicon.png, docs/apple-touch-icon.png, dan docs/images/icon.png menggunakan prop struk finansial khusus.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.11',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'New 3D Wendy Companion App Icon & Multiplatform Launcher Suite — Replaced launcher and brand icons across Android, iOS, Web, Windows, and documentation with the high-fidelity 3D Wendy companion artwork featuring the tropical sunset skyline, financial growth chart indicator, gold coins, and 3D glowing neon wordmark.',
+          textId:
+              'Ikon Aplikasi Wendy 3D & Suite Launcher Multiplatform Baru — Memperbarui ikon launcher dan merek di Android, iOS, Web, Windows, dan dokumentasi dengan ilustrasi 3D pendamping finansial Wendy berlatar sunset tropis, grafik pertumbuhan finansial, koin emas, dan wordmark neon 3D berpendar.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Web Landing Page Brand Simplification — Streamlined navigation bar and footer on GitHub Pages by removing the redundant emblem icon to cleanly feature the 3D script wordmark.',
+          textId:
+              'Penyederhanaan Brand Landing Page Web — Merapikan bilah navigasi dan footer situs web dengan menghapus emblem di samping wordmark agar logo skrip 3D tampil lebih bersih dan fokus.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Companion Avatar & Guidance Polish — Enlarged Wendy companion avatars to half-body portraits in Daily Financial Pulse and Cloud Sync cards for expressive facial cues, streamlined onboarding mascot guidance, and updated Splash screen typography.',
+          textId:
+              'Penyempurnaan Avatar & Panduan Pendamping — Memperbesar avatar Wendy menjadi potret setengah badan pada kartu Daily Financial Pulse dan Sinkronisasi Cloud agar ekspresi wajah lebih jelas, menyederhanakan alur maskot onboarding, dan memperbarui tipografi Splash screen.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.10',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Comprehensive Asset Suite Integration — Systematically integrated all 59 assets from the Vice City Sunset design suite across expressions, poses, props, stickers, and UI states.',
+          textId:
+              'Integrasi Menyeluruh Seluruh Suite Aset — Mengintegrasikan seluruh 59 aset desain Vice City Sunset ke seluruh fitur aplikasi, mencakup ekspresi, pose, prop finansial, stiker chibi, dan visual UI.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Wendy Chibi Avatar Customizer — Added an interactive 12-sticker avatar selection grid in Profile, allowing users to personalize their profile photo with official Wendy Chibi stickers.',
+          textId:
+              'Kustomisasi Avatar Wendy Chibi — Menambahkan grid pemilihan avatar 12 stiker di halaman Profil untuk mempersonalisasi foto profil dengan stiker resmi Wendy Chibi.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Interactive 10-Expression Financial Wellness Carousel — Upgraded Daily Financial Pulse companion advice sheet with 10 interactive velocity states and localized financial guidance.',
+          textId:
+              'Kausel Saran Finansial Interaktif 10 Ekspresi — Memperbarui sheet saran pendamping Daily Financial Pulse dengan 10 status kecepatan belanja dan panduan finansial dwibahasa.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Enhanced Mascot and Props Throughout App Workflows — Integrated specialized mascot poses and 3D props into onboarding milestones, PDF report dialogs, calculator helper, debt settlement celebrations, keystore security, and empty search states.',
+          textId:
+              'Peningkatan Maskot dan Prop di Seluruh Alur Aplikasi — Menghadirkan pose maskot dan prop 3D khusus pada alur onboarding, dialog ekspor PDF, asisten kalkulator, perayaan pelunasan utang, keamanan keystore, dan tampilan pencarian kosong.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.9',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Official Companion Mascot Renamed to Wendy — Formally updated the financial companion mascot identity to Wendy across the mobile application and landing page.',
+          textId:
+              'Perubahan Nama Maskot Sahabat Resmi Menjadi Wendy — Memperbarui identitas nama maskot sahabat finansial resmi menjadi Wendy di aplikasi mobile dan landing page.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.8',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Horizontal Glossy Script Wordmark — Upgraded website brand logotype to the horizontal glossy neon 3D script wordmark for enhanced legibility and prominent brand presence.',
+          textId:
+              'Wordmark Skrip Glossy Horizontal — Memperbarui logotype brand web ke wordmark skrip 3D glossy neon horizontal agar lebih terbaca jelas, tegas, dan proporsional.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.7',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Landing Page Tropical Wordmark & Clean Hero — Integrated custom neon wordmark into website navigation & footer, and streamlined hero mascot presentation.',
+          textId:
+              'Wordmark Tropical & Hero Bersih di Landing Page — Mengintegrasikan wordmark neon kustom ke navigasi & footer web, serta merampingkan tampilan hero maskot.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.6',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Dynamic Mascot Companion Reactions — Integrated Olivia mascot expressions into DailyFinancialPulseCard with financial wellness advice sheets and celebration modals on GoalsPage.',
+          textId:
+              'Reaksi Maskot Companion Dinamis — Mengintegrasikan ekspresi maskot Olivia ke dalam DailyFinancialPulseCard dengan lembar saran kesehatan keuangan interaktif dan modal selebrasi di GoalsPage.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Tropical Neon Wordmark & Web Companion — Integrated tropical neon signature into About Sheet and reactive Chibi companion avatars into the landing page interactive mockup.',
+          textId:
+              'Wordmark Tropical Neon & Web Companion — Mengintegrasikan wordmark tropical neon ke lembar Tentang Aplikasi serta avatar chibi interaktif di mockup landing page.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.5',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Custom Neon Wordmark & Typography Suite — Standardized and integrated custom neon logotypes in assets/new_asset/custom_text/ (Glossy Neon and Tropical Neon) and upgraded core assets/images/logo_wordmark.png to the Vice City Sunset tropical brand typography.',
+          textId:
+              'Suite Wordmark & Tipografi Neon Kustom — Menstandarkan dan mengintegrasikan tipografi logo neon kustom pada assets/new_asset/custom_text/ (Glossy Neon dan Tropical Neon) serta memperbarui aset utama assets/images/logo_wordmark.png dengan tipografi brand tropical Vice City Sunset.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.4',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Vice City Sunset Key Art Showcase & Social Previews — Integrated signature key art banner into README.md, Open Graph social share cards, and a responsive frosted-glass showcase section on the landing page grounded in taste-skill, ui-ux-pro-max, and design-motion-principles.',
+          textId:
+              'Showcase Key Art Vice City Sunset & Social Preview — Menambahkan banner key art signature ke README.md, kartu preview media sosial Open Graph, dan seksi showcase kaca frosted responsif pada landing page berlandaskan standar taste-skill, ui-ux-pro-max, dan design-motion-principles.',
+        ),
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Olivia Mascot & UI State Illustrations Suite — Standardized and integrated high-fidelity asset suite across empty states (empty wallet, empty budget, no data, summary), onboarding welcome illustration, celebratory savings goal achievement badge, and companion daily financial pulse indicator.',
+          textId:
+              'Suite Ilustrasi Maskot Olivia & State UI — Menstandarkan dan mengintegrasikan rangkaian aset beresolusi terkalibrasi ke dalam empty states (dompet kosong, budget kosong, pencarian kosong, ringkasan), ilustrasi pembuka onboarding, lencana pencapaian target tabungan, dan indikator pendamping kesehatan finansial harian.',
+        ),
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Asset Pipeline Optimization & Standardization — Renamed 63 raw asset files to idiomatic snake_case, compressed images saving ~57% storage, and safely isolated master sprite sheets outside the APK bundle.',
+          textId:
+              'Optimasi & Standardisasi Pipeline Aset — Mengubah 63 file aset mentah ke penamaan standar snake_case, mengompresi gambar menghemat ~57% ukuran penyimpanan, dan mengisolasi master sprite sheet di luar bundle APK.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.3',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.added,
+          textEn:
+              'Hero Olivia Companion Mascot — Integrated high-resolution cutout illustration of financial companion mascot Olivia into the landing page Hero section (docs/) with ambient sunset halo glow and responsive floating physics.',
+          textId:
+              'Maskot Sahabat Finansial Olivia di Hero Section — Menambahkan ilustrasi cutout resolusi tinggi maskot Olivia pada halaman utama landing page (docs/) dengan efek pendaran cahaya halo sunset dan fisika animasi mengambang responsif.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.2',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.fixed,
+          textEn:
+              'Landing Page Data Export Badge Collision — Resolved class collision where data export chips mistakenly used .app-version-tag and were overwritten by GitHub Releases API polling, replacing it with .feature-badge-pill and SemVer regression guards.',
+          textId:
+              'Perbaikan Label Format Ekspor Landing Page — Mengatasi bentrok nama class pada badge format ekspor yang sempat tertimpa oleh query API rilis GitHub, menggantinya dengan .feature-badge-pill dan proteksi pembanding SemVer.',
+        ),
+      ],
+    ),
+    ReleaseEntry(
+      version: '3.0.1',
+      dateEn: 'November 24, 2026',
+      dateId: '24 November 2026',
+      isCurrent: false,
+      changes: [
+        ChangeItem(
+          type: ChangeType.changed,
+          textEn:
+              'Landing Page Redesign & Modernization — Comprehensive overhaul of docs/ landing page applying UI/UX Pro Max, Taste-Skill (anti-slop, 1-screen viewport rhythm), and Design Motion Principles (fluid Jakub Krehel transitions, tactile button feedback, and full accessibility).',
+          textId:
+              'Redesign & Modernisasi Landing Page — Perombakan komprehensif landing page docs/ menerapkan standar UI/UX Pro Max, Taste-Skill (anti-slop, ritme 1-screen viewport), dan Design Motion Principles (transisi fluid Jakub Krehel, feedback tombol taktil, serta aksesibilitas penuh).',
+        ),
+      ],
+    ),
+    ReleaseEntry(
       version: '3.0.0',
       dateEn: 'November 21, 2026',
       dateId: '21 November 2026',
-      isCurrent: true,
+      isCurrent: false,
       changes: [
         ChangeItem(
           type: ChangeType.added,
